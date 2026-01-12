@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+    xmlns="https://jakarta.ee/xml/ns/jakartaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                        https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+    version="5.0">
+
+    <display-name>Mobile_warehouse</display-name>
+
+    <!-- ========================= -->
+    <!-- WELCOME FILE -->
+    <!-- ========================= -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>login.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- ========================= -->
+    <!-- ENCODING FILTER (UTF-8) -->
+    <!-- ========================= -->
+    <filter>
+        <filter-name>EncodingFilter</filter-name>
+        <filter-class>controller.EncodingFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>EncodingFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- ========================= -->
+    <!-- ADMIN FILTER -->
+    <!-- ========================= -->
+    <filter>
+        <filter-name>AdminFilter</filter-name>
+        <filter-class>controller.AdminFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>AdminFilter</filter-name>
+        <url-pattern>/admin/*</url-pattern>
+    </filter-mapping>
+
+    <!-- ========================= -->
+    <!-- SERVLET: ADD USER -->
+    <!-- ========================= -->
+    <servlet>
+        <servlet-name>AdminAddUserServlet</servlet-name>
+        <servlet-class>controller.AdminAddUserServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>AdminAddUserServlet</servlet-name>
+        <url-pattern>/admin/user-add</url-pattern>
+    </servlet-mapping>
+
+    <!-- ========================= -->
+    <!-- SESSION CONFIG -->
+    <!-- ========================= -->
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+</web-app>
