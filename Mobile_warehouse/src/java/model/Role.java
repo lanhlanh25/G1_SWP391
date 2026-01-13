@@ -15,8 +15,8 @@ public class Role {
     private String roleName;
     private String description;
     private int isActive;
-    private Timestamp createAt;
-    private Timestamp updateAt;
+    private Timestamp createdAt;
+    private Timestamp updatedAt;
 
     public Role() {
     }
@@ -53,20 +53,20 @@ public class Role {
         this.isActive = isActive;
     }
 
-    public Timestamp getCreateAt() {
-        return createAt;
+    public Timestamp getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreateAt(Timestamp createAt) {
-        this.createAt = createAt;
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public Timestamp getUpdateAt() {
-        return updateAt;
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdateAt(Timestamp updateAt) {
-        this.updateAt = updateAt;
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
     }
     
     public boolean isActive(){

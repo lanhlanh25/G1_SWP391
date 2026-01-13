@@ -78,7 +78,7 @@ public class Permission {
         this.createAt = createAt;
     }
     
-    public boolean isActive(){
-        return isActive == 1;
-    }
+//    public boolean isActive(){
+//        return isActive == 1;
+//    }
 }

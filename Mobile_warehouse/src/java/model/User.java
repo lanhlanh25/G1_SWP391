@@ -123,8 +123,8 @@ public class User {
         this.updateAt = updateAt;
     }
     
-    public boolean isActive(){
-        return status == 1;
-    }
+//    public boolean isActive(){
+//        return status == 1;
+//    }
 }
 
