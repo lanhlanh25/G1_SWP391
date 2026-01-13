@@ -42,7 +42,7 @@ public class UserDBContext {
             }
         } catch (Exception e) {
             System.out.println("UserDAO.getAllUsers ERROR:");
-            e.printStackTrace(); // xem lỗi ở Tomcat console
+            e.printStackTrace();
         }
         return list;
     }
