@@ -20,6 +20,7 @@
         }
     </style>
     <body>
+        <c:set var="ctx" value="${pageContext.request.contextPath}" />
         <table>
             <tr>
                 <th>ID</th>
