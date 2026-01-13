@@ -9,11 +9,11 @@ package model;
  * @author Admin
  */
 public class Role {
-     private int roleId;
+    private int roleId;
     private String roleName;
     private String description;
-    private int status;       // 1 active, 0 inactive
-    private int userCount;    // số user đang dùng role
+    private int status;     // map is_active
+    private int userCount;  // count users
 
     public Role() {}
 
@@ -26,17 +26,14 @@ public class Role {
     }
 
     public int getRoleId() { return roleId; }
-    public void setRoleId(int roleId) { this.roleId = roleId; }
-
     public String getRoleName() { return roleName; }
-    public void setRoleName(String roleName) { this.roleName = roleName; }
-
     public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
     public int getStatus() { return status; }
-    public void setStatus(int status) { this.status = status; }
-
     public int getUserCount() { return userCount; }
+
+    public void setRoleId(int roleId) { this.roleId = roleId; }
+    public void setRoleName(String roleName) { this.roleName = roleName; }
+    public void setDescription(String description) { this.description = description; }
+    public void setStatus(int status) { this.status = status; }
     public void setUserCount(int userCount) { this.userCount = userCount; }
 }

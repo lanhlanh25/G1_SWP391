@@ -73,9 +73,7 @@
                 <td><%= (r.getStatus() == 1 ? "ACTIVE" : "INACTIVE") %></td>
                 <td>
                     <!-- View Permissions (demo link) -->
-                    <a href="<%=request.getContextPath()%>/role_permissions?roleId=<%=r.getRoleId()%>">
-                        View Permissions
-                    </a>
+                    <a href="<%=request.getContextPath()%>/role_permissions?roleId=<%=r.getRoleId()%>">View Permissions</a>
 
                     &nbsp; | &nbsp;
 
