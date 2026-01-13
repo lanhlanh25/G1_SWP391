@@ -6,7 +6,7 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
-
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
@@ -20,7 +20,7 @@
         }
     </style>
     <body>
-        <c:set var="ctx" value="${pageContext.request.contextPath}" />
+        <h2>List user (#7)</h2>
         <table>
             <tr>
                 <th>ID</th>
@@ -56,6 +56,7 @@
                                 </c:choose>
                             </td>
                             <td>
+                                <a href="${ctx}/admin/user/view?id=${u.userId}">View</a>
                                 <a href="${ctx}/admin/user/edit?id=${u.userId}">Edit</a>
                             </td>
                         </tr>
