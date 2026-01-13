@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="jakarta.tags.core"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -53,6 +54,7 @@
           <td>${u.fullName}</td>
           <td>${u.email}</td>
           <td>${u.roleName}</td>
+
           <td>
             <c:choose>
               <c:when test="${u.status == 1}">
@@ -63,6 +65,7 @@
               </c:otherwise>
             </c:choose>
           </td>
+
           <td>
             <c:choose>
               <c:when test="${u.status == 1}">
@@ -76,6 +79,7 @@
                   </button>
                 </form>
               </c:when>
+
               <c:otherwise>
                 <!-- Activate -->
                 <form method="post" action="${pageContext.request.contextPath}/admin/user-toggle" style="margin:0">
@@ -89,6 +93,7 @@
               </c:otherwise>
             </c:choose>
           </td>
+
         </tr>
       </c:forEach>
     </tbody>

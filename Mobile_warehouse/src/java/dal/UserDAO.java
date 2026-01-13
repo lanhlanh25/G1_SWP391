@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import model.User;
+import model.Role;
 
 public class UserDAO extends DBContext {
 
@@ -170,4 +171,90 @@ public class UserDAO extends DBContext {
             return true;
         }
     }
+    
+    // Task #13: View role details (by user_id)
+public User getUserWithRoleDetail(int userId) {
+    String sql = """
+        SELECT u.user_id, u.username, u.full_name, u.email, u.phone, u.status,
+               u.role_id, r.role_name, r.description, r.is_active
+        FROM users u
+        JOIN roles r ON u.role_id = r.role_id
+        WHERE u.user_id = ?
+        LIMIT 1
+    """;
+
+    try (Connection con = getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+
+        ps.setInt(1, userId);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                User u = new User();
+                u.setUserId(rs.getInt("user_id"));
+                u.setUsername(rs.getString("username"));
+                u.setFullName(rs.getString("full_name"));
+                u.setEmail(rs.getString("email"));
+                u.setPhone(rs.getString("phone"));
+                u.setStatus(rs.getInt("status"));
+
+                u.setRoleId(rs.getInt("role_id"));
+                u.setRoleName(rs.getString("role_name"));
+
+                // 2 field phụ để hiển thị role details -> set vào request riêng bằng attribute
+                // (vì User model bạn chưa có description/is_active của role)
+                // => Servlet sẽ đọc bằng rs? Không, DAO trả User thôi.
+                // => Mình sẽ trả về thêm bằng cách setAttribute trong servlet, nên DAO dưới đây trả thêm 2 giá trị qua request? Không được.
+                // => Giải pháp: tạo class nhỏ Role trong servlet OR trả về Object[].
+                // => Cách sạch: tạo DTO RoleDetail. Nhưng để bạn copy nhanh:
+                //    mình sẽ viết DAO trả về User và kèm Role object bằng cách dùng model.Role (bạn đã có).
+                return u;
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
+public model.UserRoleDetail getUserRoleDetailByUserId(int userId) {
+    String sql = """
+        SELECT u.user_id, u.username, u.full_name, u.email, u.phone, IFNULL(u.status,0) AS user_status,
+               u.role_id,
+               r.role_name, r.description, r.is_active
+        FROM users u
+        LEFT JOIN roles r ON u.role_id = r.role_id
+        WHERE u.user_id = ?
+        LIMIT 1
+    """;
+
+    try (Connection con = getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+
+        ps.setInt(1, userId);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                User u = new User();
+                u.setUserId(rs.getInt("user_id"));
+                u.setUsername(rs.getString("username"));
+                u.setFullName(rs.getString("full_name"));
+                u.setEmail(rs.getString("email"));
+                u.setPhone(rs.getString("phone"));
+                u.setStatus(rs.getInt("user_status"));
+                u.setRoleId(rs.getInt("role_id")); // nếu null -> 0
+
+                // role có thể null
+                Role r = new Role();
+                r.setRoleId(rs.getInt("role_id"));
+                r.setRoleName(rs.getString("role_name")); // có thể null
+                r.setDescription(rs.getString("description"));
+                r.setIsActive(rs.getInt("is_active"));
+
+                return new model.UserRoleDetail(u, r);
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return null;
+}
 }
