@@ -4,6 +4,9 @@
  */
 package dal;
 
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -11,11 +14,11 @@ public class DBContext {
 // Đổi tên DB, user, pass cho đúng của bạn
 
     private static final String URL
-            = "jdbc:mysql://localhost:3306/mobile_warehouse"
+            = "jdbc:mysql://localhost:3306/swp_mobile_warehouse"
             + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
 
     private static final String USER = "root";
-    private static final String PASS = "123456";
+    private static final String PASS = "thanh123";
 
     public static Connection getConnection() throws Exception {
         Class.forName("com.mysql.cj.jdbc.Driver");
