@@ -95,4 +95,28 @@ public class RoleDAO {
         }
         return null;
     }
+    public boolean existsRoleName(String roleName) {
+    String sql = "SELECT 1 FROM roles WHERE role_name = ? LIMIT 1";
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setString(1, roleName);
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        }
+    } catch (Exception e) { e.printStackTrace(); }
+    return false;
+}
+
+public boolean createRole(String roleName, String description, int isActive) {
+    String sql = "INSERT INTO roles(role_name, description, is_active) VALUES (?, ?, ?)";
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setString(1, roleName);
+        ps.setString(2, description);
+        ps.setInt(3, isActive);
+        return ps.executeUpdate() > 0;
+    } catch (Exception e) { e.printStackTrace(); }
+    return false;
+}
+
 }

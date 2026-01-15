@@ -14,26 +14,27 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 
-@WebServlet(name = "AdminUserToggleServlet", urlPatterns = {"/admin/users/toggle"})
+@WebServlet("/admin/users/toggle")
 public class AdminUserToggleServlet extends HttpServlet {
+
+    private int toInt(String s, int def) {
+        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        int userId = parseInt(req.getParameter("user_id"), 0);
+        int userId = toInt(req.getParameter("user_id"), -1);
         if (userId <= 0) {
-            resp.sendRedirect(req.getContextPath() + "/users?msg=invalid");
+            resp.sendRedirect(req.getContextPath() + "/admin/users/active-page?msg=invalid");
             return;
         }
 
         UserDAO dao = new UserDAO();
         boolean ok = dao.toggleUserStatus(userId);
 
-        resp.sendRedirect(req.getContextPath() + "/users?msg=" + (ok ? "ok" : "error"));
-    }
-
-    private int parseInt(String s, int def) {
-        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
+        // ✅ QUAY LẠI ACTIVE_USER.JSP sau khi toggle
+        resp.sendRedirect(req.getContextPath() + "/admin/users/active-page?msg=" + (ok ? "ok" : "failed"));
     }
 }

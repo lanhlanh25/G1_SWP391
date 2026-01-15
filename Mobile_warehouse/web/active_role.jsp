@@ -71,26 +71,22 @@
                 <td><%= r.getRoleName() %></td>
                 <td><%= r.getUserCount() %> user(s)</td>
                 <td>
-                    <form method="post" action="<%=request.getContextPath()%>/admin/role/toggle" style="margin:0;">
-                        <input type="hidden" name="roleId" value="<%= r.getRoleId() %>">
-                        <%
-                            if (r.getStatus() == 1) {
-                        %>
-                            <button class="btn-act" type="submit"
-                                    onclick="return confirm('Deactivate role <%=r.getRoleName()%>?');">
-                                Deactive
-                            </button>
-                        <%
-                            } else {
-                        %>
-                            <button class="btn-act" type="submit"
-                                    onclick="return confirm('Activate role <%=r.getRoleName()%>?');">
-                                Active
-                            </button>
-                        <%
-                            }
-                        %>
-                    </form>
+                   <form method="post" action="${pageContext.request.contextPath}/admin/users/toggle" style="margin:0;">
+    <input type="hidden" name="user_id" value="${u.userId}">
+    <c:choose>
+        <c:when test="${u.status == 1}">
+            <button type="submit" onclick="return confirm('Deactivate user ${u.username}?');">
+                Deactive
+            </button>
+        </c:when>
+        <c:otherwise>
+            <button type="submit" onclick="return confirm('Activate user ${u.username}?');">
+                Active
+            </button>
+        </c:otherwise>
+    </c:choose>
+</form>
+
                 </td>
             </tr>
         <%
