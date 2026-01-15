@@ -25,7 +25,7 @@
     <li><a href="<%=ctx%>/home?p=role-perm-view">View Role Permissions</a></li>
     <li><a href="<%=ctx%>/home?p=role-perm-edit">Edit Role Permissions</a></li>
 
-    <li><a href="<%=ctx%>/home?p=profile">My Profile</a></li>
+    <li><a href="<%=ctx%>/profile">My Profile</a></li>
     <li><a href="<%=ctx%>/change_password">Change Password</a></li>
 </ul>
 

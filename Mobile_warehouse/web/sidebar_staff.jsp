@@ -16,7 +16,7 @@
     <li><a href="<%=ctx%>/home?p=outbound">Outbound (GIN)</a></li>
     <li><a href="<%=ctx%>/home?p=stock-count">Stock Count</a></li>
 
-    <li><a href="<%=ctx%>/home?p=profile">My Profile</a></li>
+    <li><a href="<%=ctx%>/profile">My Profile</a></li>
    <li><a href="<%=ctx%>/change_password">Change Password</a></li>
 
 </ul>

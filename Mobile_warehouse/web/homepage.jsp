@@ -70,7 +70,7 @@
 
     <!-- 5) My Profile -->
     <li>
-        <a href="<%=request.getContextPath()%>/home?p=profile">My Profile</a>
+        <a href="<%=request.getContextPath()%>/profile">My Profile</a>
     </li>
 
     <!-- 6) Change Password -->
@@ -87,30 +87,6 @@
     if (p == null || p.isBlank()) p = "dashboard";
     p = p.toLowerCase();
 %>
-
-<h3>Content: <%=p%></h3>
-
-<% if ("dashboard".equals(p)) { %>
-    <p>This is Dashboard (demo).</p>
-
-<% } else if ("profile".equals(p)) { %>
-    <%-- Nếu bạn có view_profile.jsp thì include, không có thì hiển thị đơn giản --%>
-    <table border="1" cellpadding="6" cellspacing="0">
-        <tr><td>User ID</td><td><%=u.getUserId()%></td></tr>
-        <tr><td>Username</td><td><%=u.getUsername()%></td></tr>
-        <tr><td>Full Name</td><td><%=u.getFullName()%></td></tr>
-        <tr><td>Email</td><td><%=u.getEmail()%></td></tr>
-        <tr><td>Phone</td><td><%=u.getPhone()%></td></tr>
-        <tr><td>Role</td><td><%=roleName%></td></tr>
-        <tr><td>Status</td><td><%=u.getStatus()==1?"ACTIVE":"INACTIVE"%></td></tr>
-    </table>
-
-<% } else if ("denied".equals(p)) { %>
-    <p style="color:red;">Access denied!</p>
-
-<% } else { %>
-    <p>Page not found.</p>
-<% } %>
 
 </body>
 </html>

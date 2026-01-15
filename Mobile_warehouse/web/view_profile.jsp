@@ -25,14 +25,28 @@
     }
 %>
 
-<h3>My Profile</h3>
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>My Profile</title>
+    </head>
+    <body>
 
-<table border="1" cellpadding="6" cellspacing="0">
-    <tr><td>User ID</td><td><%= pu.getUserId() %></td></tr>
-    <tr><td>Username</td><td><%= pu.getUsername() %></td></tr>
-    <tr><td>Full Name</td><td><%= pu.getFullName() %></td></tr>
-    <tr><td>Email</td><td><%= pu.getEmail() %></td></tr>
-    <tr><td>Phone</td><td><%= pu.getPhone() %></td></tr>
-    <tr><td>Role</td><td><%= roleName %></td></tr>
-    <tr><td>Status</td><td><%= pu.getStatus() == 1 ? "ACTIVE" : "INACTIVE" %></td></tr>
-</table>
+
+        <a href="javascript:history.back()">Back</a>
+
+        <h3>My Profile</h3>
+
+        <table border="1" cellpadding="6" cellspacing="0">
+            <tr><td>User ID</td><td><%= pu.getUserId() %></td></tr>
+            <tr><td>Username</td><td><%= pu.getUsername() %></td></tr>
+            <tr><td>Full Name</td><td><%= pu.getFullName() %></td></tr>
+            <tr><td>Email</td><td><%= pu.getEmail() %></td></tr>
+            <tr><td>Phone</td><td><%= pu.getPhone() %></td></tr>
+            <tr><td>Role</td><td><%= roleName %></td></tr>
+            <tr><td>Status</td><td><%= pu.getStatus() == 1 ? "ACTIVE" : "INACTIVE" %></td></tr>
+        </table>
+
+    </body>
+</html>

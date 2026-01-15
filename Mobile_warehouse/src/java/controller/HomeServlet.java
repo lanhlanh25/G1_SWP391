@@ -48,13 +48,7 @@ public class HomeServlet extends HttpServlet {
             p = "denied";
         }
 
-        // Nếu vào profile thì lấy fresh từ DB (optional)
-        if ("profile".equals(p)) {
-            User fresh = dao.getById(u.getUserId());
-            if (fresh != null) {
-                request.setAttribute("profileUser", fresh);
-            }
-        }
+        
 
         // sidebar theo role
         String sidebarPage;
@@ -89,20 +83,19 @@ public class HomeServlet extends HttpServlet {
                 return p.equals("user-list") || p.equals("user-add") || p.equals("user-update") || p.equals("user-toggle")
                         || p.equals("role-list") || p.equals("role-update") || p.equals("role-toggle")
                         || p.equals("role-perm-view") || p.equals("role-perm-edit")
-                        || p.equals("profile") || p.equals("change_password");
+                        ||  p.equals("change_password");
 
             case "MANAGER":
                 return p.equals("reports") || p.equals("user-list") || p.equals("user-detail")
-                        || p.equals("profile") || p.equals("change_password");
+                        ||  p.equals("change_password");
 
             case "STAFF":
                 return p.equals("inbound") || p.equals("outbound") || p.equals("stock-count")
-                        || p.equals("profile") || p.equals("change_password");
+                        || p.equals("change_password");
 
             case "SALE":
-            case "SALER":
                 return p.equals("inventory") || p.equals("create-out")
-                        || p.equals("profile") || p.equals("change_password");
+                        ||  p.equals("change_password");
         }
         return false;
     }
