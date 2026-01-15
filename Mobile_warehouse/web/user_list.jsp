@@ -79,7 +79,8 @@
 
             <td>
               <!-- View/Update: bạn có thể trỏ sang servlet update sau này -->
-             <a href="${pageContext.request.contextPath}/admin/user/view?id=${u.userId}">View/Update</a>
+            <a href="${pageContext.request.contextPath}/admin/user/view?id=${u.userId}">View/Update</a>
+
 
 
             </td>

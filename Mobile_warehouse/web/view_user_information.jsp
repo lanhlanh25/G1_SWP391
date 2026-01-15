@@ -28,8 +28,6 @@
 
         .wrap { padding: 30px 60px; }
 
-        .title { font-weight:700; margin:0 0 14px; }
-
         .form-box{
             width: 900px;
             background:#f4f1ea;
@@ -51,7 +49,6 @@
             box-sizing: border-box;
         }
 
-        .input[readonly] { background:#fff; }
         .actions { margin-top: 18px; text-align:center; }
         .btn-update {
             padding:6px 22px;
@@ -59,6 +56,9 @@
             background:#4a86d4;
             font-weight:700;
             cursor:pointer;
+            text-decoration:none;
+            color:#000;
+            display:inline-block;
         }
         .btn-update:hover { opacity:0.9; }
     </style>
@@ -71,58 +71,63 @@
 </div>
 
 <div class="wrap">
-    <h3 class="title">View User Information</h3>
+    <h3>View User Information</h3>
 
-    <%-- Form này chỉ để hiển thị demo. Bạn chưa cần load data, nên để value mẫu/empty. --%>
+    <%-- debug tạm (nếu muốn kiểm tra) --%>
+    <%-- <p style="color:red;">DEBUG user=${user} roleName=${roleName}</p> --%>
+
     <div class="form-box">
 
         <div class="row">
             <div class="col">
                 <div class="label">User ID :</div>
-                <input class="input" type="text" name="user_id" value="" readonly>
+                <input class="input" type="text" name="user_id" value="${user.userId}" readonly>
             </div>
 
             <div class="col">
                 <div class="label">Username :</div>
-                <input class="input" type="text" name="username" value="" readonly>
+                <input class="input" type="text" name="username" value="${user.username}" readonly>
             </div>
         </div>
 
         <div class="row">
             <div class="col">
                 <div class="label">Full Name :</div>
-                <input class="input" type="text" name="full_name" value="" readonly>
+                <input class="input" type="text" name="full_name" value="${user.fullName}" readonly>
             </div>
 
             <div class="col">
                 <div class="label">Phone :</div>
-                <input class="input" type="text" name="phone" value="" readonly>
+                <input class="input" type="text" name="phone" value="${user.phone}" readonly>
             </div>
         </div>
 
         <div class="row">
             <div class="col">
                 <div class="label">Email :</div>
-                <input class="input" type="text" name="email" value="" readonly>
+                <input class="input" type="text" name="email" value="${user.email}" readonly>
             </div>
 
             <div class="col">
                 <div class="label">Role :</div>
-                <input class="input" type="text" name="role" value="" readonly>
+                <input class="input" type="text" name="role" value="${roleName}" readonly>
             </div>
         </div>
 
         <div class="row">
             <div class="col">
                 <div class="label">Status :</div>
-                <input class="input" type="text" name="status" value="" readonly>
+                <input class="input" type="text" name="status"
+                       value="${user.status == 1 ? 'Active' : 'Deactive'}" readonly>
             </div>
         </div>
 
         <div class="actions">
-            <%-- nút Update chưa cần làm gì cả --%>
-           <a class="btn" href="${pageContext.request.contextPath}/admin/user/update?id=${user.userId}">Update</a>
-
+            <%-- nút Update: chuyển sang trang update (nếu bạn đã làm controller) --%>
+            <a class="btn-update"
+               href="${pageContext.request.contextPath}/admin/user/update?id=${user.userId}">
+                Update
+            </a>
         </div>
 
     </div>
