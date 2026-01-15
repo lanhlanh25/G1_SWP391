@@ -39,7 +39,9 @@
     Hello: <b><%=u.getFullName()%></b> |
     Role: <b><%=roleName%></b>
     <%-- Nếu chưa có logout servlet thì comment dòng dưới --%>
-    | <a href="<%=request.getContextPath()%>/logout">Logout</a>
+    | <a href="<%=request.getContextPath()%>/logout"
+         onclick="return confirm('Are you sure you want to log out?');">
+        Logout</a>
 </p>
 
 <hr>
