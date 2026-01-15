@@ -16,15 +16,17 @@ import java.io.IOException;
  *
  * @author Admin
  */
-@WebServlet(name="ActiveUserPageServlet", urlPatterns={"/admin/users/active-page"})
+@WebServlet("/admin/users/active-page")
 public class ActiveUserPageServlet extends HttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         UserDAO dao = new UserDAO();
-        req.setAttribute("users", dao.getAllUsersWithRole(null)); // hoặc getAllUsers() nếu bạn có
+        req.setAttribute("users", dao.getAllUsersWithRole(null));
 
+        // JSP của bạn nằm ở Web Pages root
         req.getRequestDispatcher("/active_user.jsp").forward(req, resp);
     }
 }
