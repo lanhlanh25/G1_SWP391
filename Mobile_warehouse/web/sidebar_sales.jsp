@@ -16,7 +16,7 @@
     <li><a href="<%=ctx%>/home?p=inventory">View Inventory</a></li>
     <li><a href="<%=ctx%>/home?p=create-out">Create Outbound Request</a></li>
 
-    <li><a href="<%=ctx%>/home?p=profile">My Profile</a></li>
+    <li><a href="<%=ctx%>/profile">My Profile</a></li>
     <li><a href="<%=ctx%>/change_password">Change Password</a></li>
 
 </ul>

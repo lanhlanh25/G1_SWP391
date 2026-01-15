@@ -12,35 +12,41 @@
 %>
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>Login</title>
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8">
+        <title>Login</title>
+    </head>
+    <body>
 
-<h2>LOGIN</h2>
+        <h2>LOGIN</h2>
+        <%
+            String msg = request.getParameter("msg");
+        %>
 
-<% if (err != null) { %>
-    <p style="color:red;"><%= err %></p>
-<% } %>
+        <% if (err != null) { %>
+        <p style="color:red;"><%= err %></p>
+        <% } %>
+        <% if (msg != null && !msg.isBlank()) { %>
+        <p style="color:green;"><%= msg %></p>
+        <% } %>
 
-<form method="post" action="<%=ctx%>/login">
-    <p>
-        Username:
-        <input type="text" name="username" value="<%= usernameVal != null ? usernameVal : "" %>" required>
-    </p>
-    <p>
-        Password:
-        <input type="password" name="password" required>
-    </p>
-    <p>
-        <button type="submit">Login</button>
-    </p>
-</form>
+        <form method="post" action="<%=ctx%>/login">
+            <p>
+                Username:
+                <input type="text" name="username" value="<%= usernameVal != null ? usernameVal : "" %>" required>
+            </p>
+            <p>
+                Password:
+                <input type="password" name="password" required>
+            </p>
+            <p>
+                <button type="submit">Login</button>
+            </p>
+        </form>
 
-<p>
-    <a href="<%=ctx%>/forgot-password">Forgot password?</a>
-</p>
+        <p>
+            <a href="<%=ctx%>/forgot-password">Forgot password?</a>
+        </p>
 
-</body>
+    </body>
 </html>
