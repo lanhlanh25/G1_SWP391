@@ -13,7 +13,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.*;
 public class RolePermissionDAO {
-  public Set<Integer> getPermissionIdsByRole(int roleId) {
+
+    // CŨ (giữ nguyên)
+    public Set<Integer> getPermissionIdsByRole(int roleId) {
         Set<Integer> set = new HashSet<>();
         String sql = "SELECT permission_id FROM role_permissions WHERE role_id = ?";
         try (Connection con = DBContext.getConnection();
@@ -28,7 +30,7 @@ public class RolePermissionDAO {
         return set;
     }
 
-    // demo: xóa hết rồi insert lại, có granted_by
+    // CŨ (giữ nguyên)
     public boolean saveRolePermissions(int roleId, List<Integer> permIds, Integer grantedBy) {
         String del = "DELETE FROM role_permissions WHERE role_id = ?";
         String ins = "INSERT INTO role_permissions(role_id, permission_id, granted_by) VALUES (?, ?, ?)";
@@ -60,5 +62,10 @@ public class RolePermissionDAO {
             e.printStackTrace();
         }
         return false;
-    }  
+    }
+
+    // MỚI (thêm): overload 2 tham số cho code của bạn tôi (nếu họ gọi)
+    public boolean saveRolePermissions(int roleId, List<Integer> permIds) {
+        return saveRolePermissions(roleId, permIds, null);
+    }
 }
