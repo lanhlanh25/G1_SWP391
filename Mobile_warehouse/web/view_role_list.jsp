@@ -55,10 +55,12 @@
 
 
 
-    <a href="<%=request.getContextPath()%>/add_role.jsp"
-       style="display:inline-block; padding:6px 14px; border:2px solid #1f4aa8; background:#4a86d4; color:#000; text-decoration:none; font-weight:600; margin-left:8px;">
-        Add Role
-    </a>
+   <a href="<%=request.getContextPath()%>/role_add"
+   style="display:inline-block; padding:6px 14px; border:2px solid #1f4aa8; background:#4a86d4;
+          color:#000; text-decoration:none; font-weight:600; margin-left:8px;">
+    Add Role
+</a>
+
 </div>
 
 <table border="1" cellpadding="8" cellspacing="0" style="min-width:900px;">

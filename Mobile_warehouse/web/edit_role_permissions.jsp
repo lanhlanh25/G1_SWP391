@@ -50,17 +50,25 @@
     List<Permission> allPerms = (List<Permission>) request.getAttribute("allPerms");
     Set<Integer> checked = (Set<Integer>) request.getAttribute("checked");
 
+    if (roleId == null) {
+        try { roleId = Integer.parseInt(request.getParameter("roleId")); }
+        catch (Exception e) { roleId = 0; }
+    }
     if (allPerms == null) allPerms = new ArrayList<>();
     if (checked == null) checked = new HashSet<>();
     if (roleName == null) roleName = "";
 
-    // ✅ msg được gửi qua URL sau khi POST (redirect)
-    String msg = request.getParameter("msg");
+    // ✅ nhận msg theo cả 2 kiểu: forward(setAttribute) hoặc redirect(parameter)
+    String msg = (String) request.getAttribute("msg");
+    if (msg == null || msg.trim().isEmpty()) {
+        msg = request.getParameter("msg");
+    }
     boolean isSuccess = (msg != null && msg.toLowerCase().contains("success"));
 %>
 
 <div class="topbar">
-    <a class="btn" href="<%=request.getContextPath()%>/admin/role-detail?roleId=<%=roleId%>">Back</a>
+    <a class="btn" href="<%=request.getContextPath()%>/role_list">Back</a>
+    <a class="btn" href="<%=request.getContextPath()%>/home">Home</a>
 </div>
 
 <div class="wrap">
@@ -69,8 +77,8 @@
             <%= roleName %> - Permissions
         </div>
 
-        <%-- ✅ Hiện message ngay trên trang update --%>
-        <% if (msg != null && !msg.isBlank()) { %>
+        <%-- ✅ Hiện message sau khi update --%>
+        <% if (msg != null && !msg.trim().isEmpty()) { %>
             <div class="<%= isSuccess ? "msg-success" : "msg-fail" %>">
                 <%= msg %>
             </div>

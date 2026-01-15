@@ -27,6 +27,21 @@ public class RolePermissionsServlet extends HttpServlet {
         return roleName != null && roleName.equalsIgnoreCase("ADMIN");
     }
 
+    // ✅ helper: load data + forward về JSP
+    private void forwardPage(HttpServletRequest req, HttpServletResponse resp, int roleId)
+            throws ServletException, IOException {
+
+        List<Permission> allPerms = permDAO.getAllActive();
+        Set<Integer> checked = rpDAO.getPermissionIdsByRole(roleId);
+
+        req.setAttribute("roleId", roleId);
+        req.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
+        req.setAttribute("allPerms", allPerms);
+        req.setAttribute("checked", checked);
+
+        req.getRequestDispatcher("edit_role_permissions.jsp").forward(req, resp);
+    }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
@@ -39,16 +54,12 @@ public class RolePermissionsServlet extends HttpServlet {
 
         int roleId = Integer.parseInt(req.getParameter("roleId"));
 
-        List<Permission> allPerms = permDAO.getAllActive();           // 17 quyền
-        Set<Integer> checked = rpDAO.getPermissionIdsByRole(roleId);  // tick sẵn
+        // ✅ nếu có msg từ forward (setAttribute) thì giữ lại
+        String msg = (String) req.getAttribute("msg");
+        if (msg == null) msg = req.getParameter("msg");
+        req.setAttribute("msg", msg);
 
-        req.setAttribute("roleId", roleId);
-        req.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
-        req.setAttribute("allPerms", allPerms);
-        req.setAttribute("checked", checked);
-        req.setAttribute("msg", req.getParameter("msg"));
-
-        req.getRequestDispatcher("edit_role_permissions.jsp").forward(req, resp);
+        forwardPage(req, resp, roleId);
     }
 
     @Override
@@ -72,8 +83,10 @@ public class RolePermissionsServlet extends HttpServlet {
 
         boolean ok = rpDAO.saveRolePermissions(roleId, list, adminId);
 
-        resp.sendRedirect(req.getContextPath() + "/role_permissions?roleId=" + roleId
-        + "&msg=" + (ok ? "Update successfully!" : "Update failed!"));
+        // ✅ CÁCH 2: setAttribute + forward lại JSP
+        req.setAttribute("msg", ok ? "Update successfully!" : "Update failed!");
 
+        // forward lại page (load lại checked sau khi save)
+        forwardPage(req, resp, roleId);
     }
 }
