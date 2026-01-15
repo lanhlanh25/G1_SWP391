@@ -1,11 +1,6 @@
-<%-- 
-    Document   : role_detail
-    Created on : Jan 14, 2026, 12:47:45 AM
-    Author     : Admin
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.*"%>
+<%@page import="model.Permission"%>
 <!DOCTYPE html>
 <html>
 <head>
@@ -14,7 +9,6 @@
     <style>
         body { font-family: Arial; background:#f2f2f2; margin:0; }
         .topbar { padding:10px; }
-
         .btn {
             display:inline-block;
             padding:6px 14px;
@@ -26,22 +20,21 @@
             margin-right:8px;
         }
         .btn:hover { opacity:0.9; }
-
         .wrap { padding: 20px 60px; }
         h2 { margin: 0 0 10px; }
-
         .panel {
             width: 900px;
             background: #f4f1ea;
             padding: 18px 22px;
             box-sizing: border-box;
         }
-
         table { border-collapse: collapse; width: 900px; background:#fff; margin-top:10px; }
         th, td { border:1px solid #000; padding:10px; text-align:left; }
         th { text-align:center; font-weight:700; }
         .tick { color: #0aa000; font-weight: 900; font-size: 18px; }
         .right { text-align:right; }
+        .msg { color: green; font-weight: 700; margin-bottom: 10px; }
+        .error { color: red; font-weight: 700; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -52,37 +45,31 @@
 </div>
 
 <div class="wrap">
-
     <%
-        // Lấy role_id từ URL (để demo hiển thị)
-        String roleIdStr = request.getParameter("role_id");
-        if (roleIdStr == null) roleIdStr = "";
-
-        // Demo role name (sau này bạn load từ DB bằng servlet/DAO rồi setAttribute)
+        String error = (String) request.getAttribute("error");
+        String msg = request.getParameter("msg"); // lấy từ redirect
+        Integer roleId = (Integer) request.getAttribute("roleId");
         String roleName = (String) request.getAttribute("roleName");
-        if (roleName == null || roleName.isBlank()) {
-            roleName = "Admin"; // demo
-        }
+        List<Permission> rolePerms = (List<Permission>) request.getAttribute("rolePerms");
 
-        // Demo danh sách permission của role (chỉ những quyền role đang có)
-        // Sau này bạn thay bằng: List<String> perms = (List<String>) request.getAttribute("rolePerms");
-        List<String> perms = (List<String>) request.getAttribute("rolePerms");
-        if (perms == null) {
-            perms = new ArrayList<>();
-            perms.add("Manage Users");
-            perms.add("View User List");
-            perms.add("Add User");
-            perms.add("View Role List");
-            perms.add("Edit Role Permissions");
-        }
+        if (rolePerms == null) rolePerms = new ArrayList<>();
+        if (roleName == null) roleName = "";
     %>
+
+    <% if (error != null) { %>
+        <div class="error"><%= error %></div>
+    <% } %>
+
+    <% if (msg != null && !msg.isBlank()) { %>
+        <div class="msg"><%= msg %></div>
+    <% } %>
 
     <div class="panel">
         <h2><%= roleName %></h2>
         <div style="margin-bottom:6px;"><b>Permissions</b></div>
 
         <div class="right">
-            <button class="btn" type="button">Update</button>
+            <a class="btn" href="<%=request.getContextPath()%>/role_permissions?roleId=<%=roleId%>">Update</a>
         </div>
 
         <table>
@@ -92,18 +79,18 @@
             </tr>
 
             <%
-                if (perms.isEmpty()) {
+                if (rolePerms.isEmpty()) {
             %>
                 <tr>
                     <td colspan="2" style="text-align:center;">This role has no permissions.</td>
                 </tr>
             <%
                 } else {
-                    for (String p : perms) {
+                    for (Permission p : rolePerms) {
             %>
                 <tr>
                     <td style="text-align:center;"><span class="tick">✓</span></td>
-                    <td><%= p %></td>
+                    <td><%= p.getName() %></td>
                 </tr>
             <%
                     }
@@ -115,8 +102,6 @@
             * This table shows only permissions currently assigned to this role (not all system permissions).
         </p>
     </div>
-
 </div>
-
 </body>
 </html>

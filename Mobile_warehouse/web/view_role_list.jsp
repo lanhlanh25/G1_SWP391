@@ -88,11 +88,12 @@
             <td><%= r.getDescription() == null ? "" : r.getDescription() %></td>
             <td><%= r.getUserCount() %></td>
             <td><%= (r.getStatus() == 1 ? "ACTIVE" : "INACTIVE") %></td>
-            <td>
-                <!-- ✅ Actions chỉ còn View Role Detail -->
-               <a href="<%=request.getContextPath()%>/role_detail.jsp?role_id=<%=r.getRoleId()%>">View Role Detail</a>
+          <td>
+    <a href="<%=request.getContextPath()%>/admin/role-detail?roleId=<%=r.getRoleId()%>">
+        View Role Detail
+    </a>
+</td>
 
-            </td>
         </tr>
     <%
             }

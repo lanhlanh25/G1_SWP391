@@ -1,24 +1,17 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
 
-/**
- *
- * @author Admin
- */
 import dal.PermissionDAO;
 import dal.RoleDAO;
 import dal.RolePermissionDAO;
 import dal.UserDAO;
 import model.Permission;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+
 import java.io.IOException;
 import java.util.*;
+
 @WebServlet(name="RolePermissionsServlet", urlPatterns={"/role_permissions"})
 public class RolePermissionsServlet extends HttpServlet {
 
@@ -46,8 +39,8 @@ public class RolePermissionsServlet extends HttpServlet {
 
         int roleId = Integer.parseInt(req.getParameter("roleId"));
 
-        List<Permission> allPerms = permDAO.getAllActive();
-        Set<Integer> checked = rpDAO.getPermissionIdsByRole(roleId);
+        List<Permission> allPerms = permDAO.getAllActive();           // 17 quyền
+        Set<Integer> checked = rpDAO.getPermissionIdsByRole(roleId);  // tick sẵn
 
         req.setAttribute("roleId", roleId);
         req.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
@@ -70,15 +63,17 @@ public class RolePermissionsServlet extends HttpServlet {
 
         int adminId = Integer.parseInt(session.getAttribute("userId").toString());
         int roleId = Integer.parseInt(req.getParameter("roleId"));
-        String[] permIds = req.getParameterValues("permId");
 
+        String[] permIds = req.getParameterValues("permId");
         List<Integer> list = new ArrayList<>();
         if (permIds != null) {
             for (String s : permIds) list.add(Integer.parseInt(s));
         }
 
         boolean ok = rpDAO.saveRolePermissions(roleId, list, adminId);
-        resp.sendRedirect(req.getContextPath() + "/role_permissions?roleId=" + roleId +
-                "&msg=" + (ok ? "Saved successfully!" : "Save failed!"));
+
+        resp.sendRedirect(req.getContextPath() + "/role_permissions?roleId=" + roleId
+        + "&msg=" + (ok ? "Update successfully!" : "Update failed!"));
+
     }
 }
