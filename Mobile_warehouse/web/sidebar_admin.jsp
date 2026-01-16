@@ -20,7 +20,7 @@
 
     <%--<li><a href="<%=ctx%>/role_list">Role List</a></li>--%>
     <li><a href="<%=ctx%>/home?p=role-list">Role List</a></li>
-    <li><a href="<%=ctx%>/home?p=role-update">Update Role</a></li>
+    <%--<li><a href="<%=ctx%>/home?p=role-update">Update Role</a></li>--%>
     <li><a href="<%=ctx%>/home?p=role-toggle">Active/Deactive Role</a></li>
 
     <li><a href="<%=ctx%>/home?p=role-perm-view">View Role Permissions</a></li>

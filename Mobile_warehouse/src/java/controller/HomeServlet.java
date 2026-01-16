@@ -8,6 +8,7 @@ package controller;
  *
  * @author Admin
  */
+import dal.PermissionDAO;
 import dal.RoleDAO;
 import dal.RolePermissionDAO;
 import dal.UserDAO;
@@ -323,7 +324,7 @@ public class HomeServlet extends HttpServlet {
                     case "role-list":
                         return "view_role_list.jsp";
                     case "role-update":
-                        return "update_user_information.jsp";//update_role_information.jsp
+                        return "edit_role_permissions.jsp";//update_role_information.jsp
                     case "role-toggle":
                         return "active_role.jsp";
                     case "role-perm-view"://Cai nay thay bao trung
