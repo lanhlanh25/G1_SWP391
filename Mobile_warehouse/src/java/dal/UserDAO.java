@@ -48,7 +48,7 @@ public class UserDAO {
     }
 
     // ====== CŨ: get role name ======
-    public String getRoleNameByUserId(int userId) {
+    public static String getRoleNameByUserId(int userId) {
         String sql = "SELECT r.role_name "
                 + "FROM users u JOIN roles r ON u.role_id = r.role_id "
                 + "WHERE u.user_id = ?";
@@ -159,7 +159,7 @@ public class UserDAO {
         return null;
     }
 
-    public List<UserRoleDetail> getAllUsersWithRole(String q) {
+    public static List<UserRoleDetail> getAllUsersWithRole(String q) {
         List<UserRoleDetail> list = new ArrayList<>();
 
         String sql

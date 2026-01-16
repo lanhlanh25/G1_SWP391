@@ -16,12 +16,39 @@ public class Permission {
     private String description;
     private int isActive;
 
+    public Permission() {
+    }
+    
     public Permission(int permissionId, String code, String name, String module, String description, int isActive) {
         this.permissionId = permissionId;
         this.code = code;
         this.name = name;
         this.module = module;
         this.description = description;
+        this.isActive = isActive;
+    }
+
+    public void setPermissionId(int permissionId) {
+        this.permissionId = permissionId;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setModule(String module) {
+        this.module = module;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setIsActive(int isActive) {
         this.isActive = isActive;
     }
 
