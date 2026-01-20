@@ -11,7 +11,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 
 @WebServlet("/verify-otp")
-public class VerifyOtpServlet extends HttpServlet {
+public class VerifyOtp extends HttpServlet {
 
     private final UserDAO dao = new UserDAO();
 
@@ -49,7 +49,7 @@ public class VerifyOtpServlet extends HttpServlet {
         }
 
         session.setAttribute("fp_verified", true);
-        session.setAttribute("fp_otp", otp); // để mark used sau khi reset pass
+        session.setAttribute("fp_otp", otp); 
         resp.sendRedirect(req.getContextPath() + "/reset-password");
     }
 }

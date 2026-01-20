@@ -14,7 +14,7 @@ import java.io.IOException;
  * @author Admin
  */
 @WebServlet(name="RoleToggleServlet", urlPatterns={"/role_toggle"})
-public class RoleToggleServlet extends HttpServlet {
+public class RoleToggle2 extends HttpServlet {
 
     private final RoleDAO roleDAO = new RoleDAO();
 
@@ -28,7 +28,7 @@ public class RoleToggleServlet extends HttpServlet {
             roleDAO.toggleRoleStatus(roleId);
         }
 
-        // quay về list (giữ đơn giản)
+      
         response.sendRedirect(request.getContextPath() + "/role_list");
     }
 }

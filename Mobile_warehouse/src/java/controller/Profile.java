@@ -11,7 +11,7 @@ import java.io.IOException;
 import model.User;
 
 @WebServlet("/profile")
-public class ProfileServlet extends HttpServlet {
+public class Profile extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -25,7 +25,7 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
-        // bạn đang dùng request attribute "profileUser" trong view_profile.jsp
+       
         request.setAttribute("profileUser", u);
 
         

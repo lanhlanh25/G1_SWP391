@@ -15,7 +15,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 
 @WebServlet("/admin/users/toggle")
-public class AdminUserToggleServlet extends HttpServlet {
+public class AdminUserToggle extends HttpServlet {
 
     private int toInt(String s, int def) {
         try { return Integer.parseInt(s); } catch (Exception e) { return def; }
@@ -34,7 +34,7 @@ public class AdminUserToggleServlet extends HttpServlet {
         UserDAO dao = new UserDAO();
         boolean ok = dao.toggleUserStatus(userId);
 
-        // ✅ QUAY LẠI ACTIVE_USER.JSP sau khi toggle
+        
         resp.sendRedirect(req.getContextPath() + "/admin/users/active-page?msg=" + (ok ? "ok" : "failed"));
     }
 }

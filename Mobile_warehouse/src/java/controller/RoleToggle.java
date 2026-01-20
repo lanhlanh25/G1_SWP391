@@ -15,7 +15,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 
 @WebServlet("/admin/role/toggle")
-public class RoleToggleController extends HttpServlet {
+public class RoleToggle extends HttpServlet {
 
     private int toInt(String s, int def) {
         try { return Integer.parseInt(s); } catch (Exception e) { return def; }
@@ -34,7 +34,7 @@ public class RoleToggleController extends HttpServlet {
         RoleDAO dao = new RoleDAO();
         dao.toggleRoleStatus(roleId);
 
-        // quay lại trang active_role để thấy thay đổi ngay
+       
         resp.sendRedirect(req.getContextPath() + "/admin/role/active-page");
     }
 }

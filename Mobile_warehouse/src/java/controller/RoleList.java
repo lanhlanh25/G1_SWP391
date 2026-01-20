@@ -16,7 +16,7 @@ import java.util.List;
  * @author Admin
  */
 @WebServlet(name="RoleListServlet", urlPatterns={"/role_list"})
-public class RoleListServlet extends HttpServlet {
+public class RoleList extends HttpServlet {
 
     private final RoleDAO roleDAO = new RoleDAO();
 
@@ -27,16 +27,16 @@ public class RoleListServlet extends HttpServlet {
         String q = request.getParameter("q");
         String statusStr = request.getParameter("status");
 
-        Integer status = null; // null = All
+        Integer status = null; 
         if (statusStr != null && !statusStr.isEmpty()) {
-            // statusStr có thể là "1" hoặc "0"
+            
             status = Integer.parseInt(statusStr);
         }
 
         List<Role> roles = roleDAO.searchRoles(q, status);
 
         request.setAttribute("q", q);
-        request.setAttribute("status", statusStr); // giữ lại dropdown
+        request.setAttribute("status", statusStr); 
         request.setAttribute("roles", roles);
 
         request.getRequestDispatcher("view_role_list.jsp").forward(request, response);

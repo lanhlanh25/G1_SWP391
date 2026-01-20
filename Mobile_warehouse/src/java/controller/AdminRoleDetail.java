@@ -16,7 +16,7 @@ import java.util.Set;
 import model.Permission;
 
 @WebServlet(name = "AdminRoleDetailServlet", urlPatterns = {"/admin/role-detail"})
-public class AdminRoleDetailServlet extends HttpServlet {
+public class AdminRoleDetail extends HttpServlet {
 
     private final PermissionDAO permDAO = new PermissionDAO();
     private final RoleDAO roleDAO = new RoleDAO();
@@ -49,7 +49,7 @@ public class AdminRoleDetailServlet extends HttpServlet {
 
         String roleName = roleDAO.getRoleNameById(roleId);
 
-        // chỉ lấy quyền đã được tick (đã gán cho role)
+       
         Set<Integer> checkedIds = rpDAO.getPermissionIdsByRole(roleId);
         List<Permission> allPerms = permDAO.getAllActive();
 
@@ -62,7 +62,7 @@ public class AdminRoleDetailServlet extends HttpServlet {
 
         req.setAttribute("roleId", roleId);
         req.setAttribute("roleName", roleName);
-        req.setAttribute("rolePerms", assigned); // chỉ các quyền đã tick
+        req.setAttribute("rolePerms", assigned); 
         req.getRequestDispatcher("/role_detail.jsp").forward(req, resp);
     }
 

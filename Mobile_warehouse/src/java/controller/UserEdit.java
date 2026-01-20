@@ -16,15 +16,11 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import model.User;
 
-@WebServlet("/admin/user/update")
-public class UserUpdateController extends HttpServlet {
+@WebServlet("/admin/user/edit")
+public class UserEdit extends HttpServlet {
 
     private int toInt(String s, int def) {
         try { return Integer.parseInt(s); } catch (Exception e) { return def; }
-    }
-
-    private String n(String s) {
-        return s == null ? "" : s.trim();
     }
 
     @Override
@@ -44,38 +40,21 @@ public class UserUpdateController extends HttpServlet {
             return;
         }
 
+  
         RoleDAO rdao = new RoleDAO();
-        req.setAttribute("user", u);
-        req.setAttribute("roles", rdao.searchRoles(null, null)); // load dropdown role
+        String roleName = rdao.getRoleNameById(u.getRoleId());
 
-        req.getRequestDispatcher("/update_user_information.jsp").forward(req, resp);
+        req.setAttribute("user", u);
+        req.setAttribute("roleName", roleName == null ? "" : roleName);
+
+       
+        req.getRequestDispatcher("/view_user_information.jsp").forward(req, resp);
     }
 
+   
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
-        int userId = toInt(req.getParameter("user_id"), -1);
-        int roleId  = toInt(req.getParameter("role_id"), -1);
-
-        String fullName = n(req.getParameter("full_name"));
-        String email    = n(req.getParameter("email"));
-        String phone    = n(req.getParameter("phone"));
-
-        // status luôn active
-        int status = 1;
-
-        if (userId <= 0 || roleId <= 0 || fullName.isEmpty()) {
-            req.setAttribute("error", "Invalid input!");
-            doGet(req, resp);
-            return;
-        }
-
-        UserDAO dao = new UserDAO();
-
-        // ⚠️ Bạn cần thêm method này trong UserDAO (mình ghi bên dưới)
-        boolean ok = dao.updateUserInfo(userId, fullName, email, phone, roleId, status);
-
-        resp.sendRedirect(req.getContextPath() + "/admin/users?msg=" + (ok ? "updated" : "failed"));
+        resp.sendRedirect(req.getContextPath() + "/admin/users");
     }
 }

@@ -11,7 +11,7 @@ import java.util.Properties;
 
 public class EmailUtil {
 
-    // TODO: điền Gmail gửi + App Password
+
     private static final String SMTP_USER = "minhduchoang2410@gmail.com";
     private static final String SMTP_APP_PASSWORD = "zjmm itck wdiu qiuj"; // 16 chars
 
@@ -31,7 +31,7 @@ public class EmailUtil {
             });
 
             Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(SMTP_USER)); // đơn giản cho khỏi lỗi encoding
+            msg.setFrom(new InternetAddress(SMTP_USER)); 
             msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
             msg.setSubject("Your OTP Code (WMS)");
             msg.setText(

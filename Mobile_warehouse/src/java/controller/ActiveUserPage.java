@@ -4,28 +4,29 @@
  */
 package controller;
 
+import dal.UserDAO;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 /**
  *
  * @author Admin
  */
-import dal.UserDAO;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
-import java.io.IOException;
-
-@WebServlet(name = "AdminUserListServlet", urlPatterns = {"/admin/users"})
-public class AdminUserListServlet extends HttpServlet {
+@WebServlet("/admin/users/active-page")
+public class ActiveUserPage extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String q = req.getParameter("q"); // search username/full_name (optional)
-
         UserDAO dao = new UserDAO();
-        req.setAttribute("users", dao.getAllUsersWithRole(q));
+        req.setAttribute("users", dao.getAllUsersWithRole(null));
 
-        req.getRequestDispatcher("/user_list.jsp").forward(req, resp);
+       
+        req.getRequestDispatcher("/active_user.jsp").forward(req, resp);
     }
 }

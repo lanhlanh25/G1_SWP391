@@ -17,7 +17,7 @@ import java.io.IOException;
  * @author ADMIN
  */
 @WebServlet("/logout")
-public class LogoutServlet extends HttpServlet {
+public class Logout extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -28,7 +28,7 @@ public class LogoutServlet extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
         if (session != null) {
-            session.invalidate(); // xoá authUser + mọi thứ trong session
+            session.invalidate(); 
         }
 
         resp.sendRedirect(req.getContextPath() + "/login");

@@ -25,7 +25,7 @@ import model.User;
 import model.UserRoleDetail;
 
 @WebServlet(name = "HomeServlet", urlPatterns = {"/home"})
-public class HomeServlet extends HttpServlet {
+public class Home extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -90,24 +90,24 @@ public class HomeServlet extends HttpServlet {
             return;
         }
 
-        // p mặc định
+ 
         String p = request.getParameter("p");
         if (p == null || p.isBlank()) {
             p = "dashboard";
         }
 
-        // 1) Lấy roleName: ưu tiên session (đỡ query DB mỗi lần bấm menu)
+      
         String role = (String) request.getSession().getAttribute("roleName");
         if (role == null || role.isBlank()) {
             role = UserDAO.getRoleNameByUserId(u.getUserId());
             if (role == null) {
-                role = "STAFF"; // fallback an toàn
+                role = "STAFF"; 
             }
             request.getSession().setAttribute("roleName", role);
         }
         role = role.toUpperCase();
 
-        // 2) Sidebar theo role
+    
         String sidebarPage;
         switch (role) {
             case "ADMIN":
@@ -124,7 +124,7 @@ public class HomeServlet extends HttpServlet {
                 break;
         }
 
-        // 3) Content theo role + p
+  
         String contentPage = resolveContent(role, p);
         if (contentPage == null) {
             response.sendError(403, "Forbidden");
@@ -218,24 +218,24 @@ public class HomeServlet extends HttpServlet {
         UserDAO userDAO = new UserDAO();
         RoleDAO roleDAO = new RoleDAO();
         RolePermissionDAO rpDAO = new RolePermissionDAO();
-        // PermissionDAO permDAO = new PermissionDAO(); // nếu bạn có
+       
 
         switch (p) {
 
-            // ===== USERS =====
+           
             case "user-list":
             case "user-toggle": {
                 String q = request.getParameter("q");
-                // getAllUsersWithRole là instance method -> gọi qua object
+              
                 List<UserRoleDetail> users = userDAO.getAllUsersWithRole(q);
                 request.setAttribute("users", users);
                 request.setAttribute("q", q);
                 break;
             }
 
-            // ===== USER: UPDATE (DETAIL) =====
+           
             case "user-update": {
-                String idRaw = request.getParameter("id"); // bạn truyền ?id=1
+                String idRaw = request.getParameter("id"); 
                 if (idRaw == null || idRaw.isBlank()) {
                     response.sendRedirect(request.getContextPath() + "/home?p=user-list&msg=Please select a user first");
                     return;
@@ -243,22 +243,21 @@ public class HomeServlet extends HttpServlet {
 
                 int userId = Integer.parseInt(idRaw);
 
-                // 1) user detail
+            
                 User user = userDAO.getById(userId);
                 if (user == null) {
                     response.sendRedirect(request.getContextPath() + "/home?p=user-list&msg=User not found");
                     return;
                 }
 
-                // 2) roles for dropdown
-                // Bạn chưa có hàm getAllRoles() => tận dụng searchRoles(null, null) để lấy toàn bộ
+                
                 List<Role> roles = roleDAO.searchRoles(null, null);
 
                 request.setAttribute("user", user);
                 request.setAttribute("roles", roles);
                 break;
             }
-            // ===== ROLES LIST (để không bị nhảy sang /role_list) =====
+            
             case "role-list":
             case "role-toggle": {
                 String keyword = request.getParameter("q");
@@ -266,18 +265,18 @@ public class HomeServlet extends HttpServlet {
 
                 Integer status = null;
                 if (st != null && !st.isBlank()) {
-                    status = Integer.parseInt(st); // 1/0
+                    status = Integer.parseInt(st); 
                 }
 
                 List<Role> roles = roleDAO.searchRoles(keyword, status);
 
                 request.setAttribute("roles", roles);
                 request.setAttribute("q", keyword);
-                request.setAttribute("status", st); // JSP bạn đang dùng request.getAttribute("status")
+                request.setAttribute("status", st); 
                 break;
             }
 
-            // ===== ROLE PERMISSION VIEW =====
+        
             case "role-perm-view": {
                 String ridRaw = request.getParameter("roleId");
                 if (ridRaw == null || ridRaw.isBlank()) {
@@ -290,19 +289,16 @@ public class HomeServlet extends HttpServlet {
                 request.setAttribute("roleId", roleId);
                 request.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
 
-                // 1) Lấy permissionId theo role
+              
                 Set<Integer> permIds = rpDAO.getPermissionIdsByRole(roleId);
 
-                // 2) TODO: đổi thành list Permission để JSP in ra tên
-                // - Cách đúng: có PermissionDAO.getPermissionsByIds(permIds)
-                // - Tạm thời nếu bạn CHƯA có PermissionDAO: set rolePerms = empty -> sẽ hiện "no permissions"
-                request.setAttribute("rolePerms", new ArrayList<Permission>()); // thay bằng list thật khi có PermissionDAO
+                request.setAttribute("rolePerms", new ArrayList<Permission>()); 
 
                 break;
             }
 
             default:
-                // các trang khác chưa cần data
+               
                 break;
         }
     }
@@ -314,7 +310,7 @@ public class HomeServlet extends HttpServlet {
                     case "dashboard":
                         return "admin_dashboard.jsp";
                     case "user-list":
-                        return "user_list.jsp";      // ví dụ đúng file bạn đang có
+                        return "user_list.jsp";      
                     case "user-add":
                         return "user_add.jsp";
                     case "user-update":
@@ -324,13 +320,13 @@ public class HomeServlet extends HttpServlet {
                     case "role-list":
                         return "view_role_list.jsp";
                     case "role-update":
-                        return "edit_role_permissions.jsp";//update_role_information.jsp
+                        return "edit_role_permissions.jsp";
                     case "role-toggle":
                         return "active_role.jsp";
-                    case "role-perm-view"://Cai nay thay bao trung
+                    case "role-perm-view":
                         return "role_detail.jsp";
                     case "role-perm-edit":
-                        return "update_user_information.jsp";//update_role_information.jsp
+                        return "update_user_information.jsp";
                     case "my-profile":
                         return "view_profile.jsp";
                     case "change-password":
@@ -342,9 +338,9 @@ public class HomeServlet extends HttpServlet {
             case "MANAGER":
                 switch (p) {
                     case "dashboard":
-                        return "manager_dashboard.jsp"; // hoặc manager_home.jsp (dashboard bạn thiết kế)
+                        return "manager_dashboard.jsp"; 
                     case "reports":
-                        return "reports.jsp";             // nếu bạn đang có content.jsp / reports page thì đổi tên tại đây
+                        return "reports.jsp";             
                     case "user-list":
                         return "user_list.jsp";
                     case "user-detail":

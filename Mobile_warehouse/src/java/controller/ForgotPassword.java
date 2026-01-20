@@ -14,7 +14,7 @@ import model.User;
 import util.EmailUtil;
 
 @WebServlet("/forgot-password")
-public class ForgotPasswordServlet extends HttpServlet {
+public class ForgotPassword extends HttpServlet {
 
     private final UserDAO dao = new UserDAO();
     private static final int OTP_EXPIRE_MIN = 5;
@@ -68,19 +68,19 @@ public class ForgotPasswordServlet extends HttpServlet {
             return;
         }
 
-        // Lưu state vào session để qua bước verify
+       
         HttpSession session = req.getSession(true);
         session.setAttribute("fp_userId", u.getUserId());
         session.setAttribute("fp_email", email);
         session.removeAttribute("fp_verified");
-        session.removeAttribute("fp_otp"); // clear old
+        session.removeAttribute("fp_otp"); 
 
         resp.sendRedirect(req.getContextPath() + "/verify-otp");
     }
 
     private String generateOtp6() {
         SecureRandom r = new SecureRandom();
-        int n = r.nextInt(900000) + 100000; // 100000-999999
+        int n = r.nextInt(900000) + 100000;
         return String.valueOf(n);
     }
 }

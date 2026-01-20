@@ -15,7 +15,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 
 @WebServlet("/role_add")
-public class RoleAddController extends HttpServlet {
+public class RoleAdd extends HttpServlet {
 
     private String n(String s){ return s == null ? "" : s.trim(); }
 
@@ -32,9 +32,9 @@ public class RoleAddController extends HttpServlet {
         String roleName = n(req.getParameter("role_name"));
         String desc = n(req.getParameter("description"));
 
-        // defaults theo yêu cầu
+        
         int userCount = 1;
-        int isActive = 0; // Deactive
+        int isActive = 0; 
 
         if (roleName.isEmpty()) {
             req.setAttribute("error", "Role Name is required.");
@@ -46,7 +46,7 @@ public class RoleAddController extends HttpServlet {
 
         RoleDAO dao = new RoleDAO();
 
-        // (optional) check trùng tên role
+        
         if (dao.existsRoleName(roleName)) {
             req.setAttribute("error", "Role name already exists!");
             req.setAttribute("v_role_name", roleName);
@@ -65,7 +65,7 @@ public class RoleAddController extends HttpServlet {
             return;
         }
 
-        // tạo xong về role list
+      
         resp.sendRedirect(req.getContextPath() + "/role_list?msg=created");
     }
 }

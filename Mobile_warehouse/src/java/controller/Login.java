@@ -16,7 +16,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 
 @WebServlet(name="LoginServlet", urlPatterns={"/login"})
-public class LoginServlet extends HttpServlet {
+public class Login extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -51,13 +51,13 @@ public class LoginServlet extends HttpServlet {
             return;
         }
 
-        // IMPORTANT: set session để các servlet khác dùng (ChangePassword, RolePermissions...)
+      
         HttpSession session = request.getSession(true);
         session.setAttribute("authUser", u);
         session.setAttribute("userId", u.getUserId());
         session.setAttribute("roleId", u.getRoleId());
 
-        // HomeServlet của bạn bạn dùng roleName => ta lưu thêm roleName vào session
+       
         String roleName = dao.getRoleNameByUserId(u.getUserId());
         session.setAttribute("roleName", roleName);
 
