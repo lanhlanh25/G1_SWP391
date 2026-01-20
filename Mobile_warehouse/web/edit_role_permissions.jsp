@@ -58,7 +58,7 @@
     if (checked == null) checked = new HashSet<>();
     if (roleName == null) roleName = "";
 
-    // ✅ nhận msg theo cả 2 kiểu: forward(setAttribute) hoặc redirect(parameter)
+   
     String msg = (String) request.getAttribute("msg");
     if (msg == null || msg.trim().isEmpty()) {
         msg = request.getParameter("msg");
@@ -77,7 +77,7 @@
             <%= roleName %> - Permissions
         </div>
 
-        <%-- ✅ Hiện message sau khi update --%>
+        
         <% if (msg != null && !msg.trim().isEmpty()) { %>
             <div class="<%= isSuccess ? "msg-success" : "msg-fail" %>">
                 <%= msg %>

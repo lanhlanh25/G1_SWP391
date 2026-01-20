@@ -19,7 +19,7 @@
     <h1>Change Password</h1>
     <h4>Update your password to keep your account secure</h4>
 
-    <%-- HIỂN THỊ THÔNG BÁO --%>
+    
     <% if (request.getAttribute("error") != null) { %>
         <p style="color:red;"><%= request.getAttribute("error") %></p>
     <% } %>

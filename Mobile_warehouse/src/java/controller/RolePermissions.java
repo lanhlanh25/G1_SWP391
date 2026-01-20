@@ -13,7 +13,7 @@ import java.io.IOException;
 import java.util.*;
 
 @WebServlet(name="RolePermissionsServlet", urlPatterns={"/role_permissions"})
-public class RolePermissionsServlet extends HttpServlet {
+public class RolePermissions extends HttpServlet {
 
     private final PermissionDAO permDAO = new PermissionDAO();
     private final RoleDAO roleDAO = new RoleDAO();
@@ -27,7 +27,7 @@ public class RolePermissionsServlet extends HttpServlet {
         return roleName != null && roleName.equalsIgnoreCase("ADMIN");
     }
 
-    // ✅ helper: load data + forward về JSP
+
     private void forwardPage(HttpServletRequest req, HttpServletResponse resp, int roleId)
             throws ServletException, IOException {
 
@@ -54,7 +54,7 @@ public class RolePermissionsServlet extends HttpServlet {
 
         int roleId = Integer.parseInt(req.getParameter("roleId"));
 
-        // ✅ nếu có msg từ forward (setAttribute) thì giữ lại
+        
         String msg = (String) req.getAttribute("msg");
         if (msg == null) msg = req.getParameter("msg");
         req.setAttribute("msg", msg);
@@ -83,10 +83,10 @@ public class RolePermissionsServlet extends HttpServlet {
 
         boolean ok = rpDAO.saveRolePermissions(roleId, list, adminId);
 
-        // ✅ CÁCH 2: setAttribute + forward lại JSP
+       
         req.setAttribute("msg", ok ? "Update successfully!" : "Update failed!");
 
-        // forward lại page (load lại checked sau khi save)
+        
         forwardPage(req, resp, roleId);
     }
 }

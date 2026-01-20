@@ -17,7 +17,7 @@ import java.io.IOException;
 import model.User;
 
 @WebServlet("/admin/user/view")
-public class UserViewController extends HttpServlet {
+public class UserView extends HttpServlet {
 
     private int toInt(String s, int def) {
         try { return Integer.parseInt(s); } catch (Exception e) { return def; }
@@ -46,7 +46,7 @@ public class UserViewController extends HttpServlet {
         req.setAttribute("user", u);
         req.setAttribute("roleName", roleName == null ? "" : roleName);
 
-        // JSP nằm ở Web Pages root
+        
         req.getRequestDispatcher("/view_user_information.jsp").forward(req, resp);
     }
 }

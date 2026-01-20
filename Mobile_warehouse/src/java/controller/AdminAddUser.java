@@ -18,7 +18,7 @@ import model.User;
 import util.PasswordUtil;
 
 @WebServlet(name = "AdminAddUserServlet", urlPatterns = {"/admin/user-add"})
-public class AdminAddUserServlet extends HttpServlet {
+public class AdminAddUser extends HttpServlet {
 
     private String n(String s){ return s == null ? "" : s.trim(); }
 
@@ -27,7 +27,7 @@ public class AdminAddUserServlet extends HttpServlet {
             throws ServletException, IOException {
 
         RoleDAO roleDAO = new RoleDAO();
-        req.setAttribute("roles", roleDAO.searchRoles(null, 1)); // role active
+        req.setAttribute("roles", roleDAO.searchRoles(null, 1)); 
 
         req.getRequestDispatcher("/user_add.jsp").forward(req, resp);
     }
@@ -51,7 +51,7 @@ public class AdminAddUserServlet extends HttpServlet {
 
         UserDAO dao = new UserDAO();
 
-        // check username exists
+ 
         if (dao.getUserByUsername(username) != null) {
             req.setAttribute("error", "Username already exists!");
             doGet(req, resp);

@@ -17,7 +17,7 @@ import model.User;
 @WebFilter(filterName = "AdminFilter", urlPatterns = {"/admin/*"})
 public class AdminFilter implements Filter {
 
-    // DEV: để true thì vào admin không cần login (chỉ để test)
+ 
     private static final boolean DEV_BYPASS_LOGIN = false;
 
     @Override
@@ -40,14 +40,14 @@ public class AdminFilter implements Filter {
             return;
         }
 
-        // Ưu tiên roleName trong session (LoginServlet nên set)
+      
         String roleName = (String) session.getAttribute("roleName");
         boolean isAdmin = false;
 
         if (roleName != null && roleName.equalsIgnoreCase("ADMIN")) {
             isAdmin = true;
         } else {
-            // fallback: admin roleId = 1 (đổi nếu DB bạn khác)
+          
             isAdmin = (u.getRoleId() == 1);
         }
 

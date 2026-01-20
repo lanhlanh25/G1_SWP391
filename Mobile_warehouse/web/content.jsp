@@ -33,7 +33,7 @@
 <h3>CONTENT</h3>
 <p>Role: <b><%=role%></b> | Page: <b><%=p%></b></p>
 
-<%-- ===== COMMON PAGES ===== --%>
+
 <% if ("dashboard".equals(p)) { %>
     <p>Dashboard (chung)</p>
 
@@ -48,7 +48,7 @@
 <% } else if ("denied".equals(p)) { %>
     <p style="color:red;">Access Denied!</p>
 
-<%-- ===== ADMIN PAGES ===== --%>
+
 <% } else if ("ADMIN".equals(role) && "role-list".equals(p)) { %>
     <p>
         <a href="<%=ctx%>/role_list">Open Role List</a>

@@ -12,8 +12,8 @@ public class Role {
     private int roleId;
     private String roleName;
     private String description;
-    private int status;     // map is_active
-    private int userCount;  // count users
+    private int status;   
+    private int userCount;  
 
     public Role() {}
 

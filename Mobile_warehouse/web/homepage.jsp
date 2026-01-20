@@ -35,16 +35,16 @@
 
     String ctx = request.getContextPath();
 
-    // HomeServlet đã set
+  
     String sidebarPage = (String) request.getAttribute("sidebarPage");
     String contentPage = (String) request.getAttribute("contentPage");
     String currentPage = (String) request.getAttribute("currentPage");
 
-    // hiển thị roleName (đã cache session hoặc do LoginServlet set)
+   
     String roleName = (String) session.getAttribute("roleName");
     if (roleName == null) roleName = "";
 
-    // fallback an toàn nếu thiếu attribute
+
     if (sidebarPage == null || sidebarPage.isBlank()) sidebarPage = "sidebar_staff.jsp";
     if (contentPage == null || contentPage.isBlank()) contentPage = "content.jsp";
     if (currentPage == null) currentPage = "dashboard";

@@ -12,7 +12,7 @@ import java.io.IOException;
 import util.PasswordUtil;
 
 @WebServlet("/reset-password")
-public class ResetPasswordServlet extends HttpServlet {
+public class ResetPassword extends HttpServlet {
 
     private final UserDAO dao = new UserDAO();
 
@@ -56,7 +56,7 @@ public class ResetPasswordServlet extends HttpServlet {
             return;
         }
 
-        // dùng y hệt rule bạn đang dùng ở ChangePassword
+  
         if (!newPass.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")) {
             req.setAttribute("err", "Password must be >=8 and contain uppercase, lowercase and number.");
             req.getRequestDispatcher("reset_password.jsp").forward(req, resp);
@@ -70,18 +70,18 @@ public class ResetPasswordServlet extends HttpServlet {
             return;
         }
 
-        // mark OTP used
+ 
         if (otp != null) {
             dao.markOtpUsedLatest(userId, otp);
         }
 
-        // clear session flow
+        
         session.removeAttribute("fp_userId");
         session.removeAttribute("fp_email");
         session.removeAttribute("fp_verified");
         session.removeAttribute("fp_otp");
 
-        // redirect về login + message
+      
         resp.sendRedirect(req.getContextPath() + "/login?msg=Password+reset+successfully.+Please+login+again.");
     }
 

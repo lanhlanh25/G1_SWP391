@@ -23,8 +23,7 @@
     <%--<li><a href="<%=ctx%>/home?p=role-update">Update Role</a></li>--%>
     <li><a href="<%=ctx%>/home?p=role-toggle">Active/Deactive Role</a></li>
 
-    <li><a href="<%=ctx%>/home?p=role-perm-view">View Role Permissions</a></li>
-    <li><a href="<%=ctx%>/home?p=role-perm-edit">Edit Role Permissions</a></li>
+
 
     <li><a href="${pageContext.request.contextPath}/home?p=my-profile">My Profile</a></li>
     <li><a href="${pageContext.request.contextPath}/home?p=change-password">Change Password</a></li>

@@ -14,7 +14,7 @@ public class RolePermission {
     private int roleId;
     private int permissionId;
 
-    // optional fields (nếu DB bạn có)
+ 
     private Integer grantedBy;
     private Timestamp grantedAt;
 
