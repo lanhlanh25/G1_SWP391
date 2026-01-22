@@ -113,10 +113,10 @@
 
                             <td>
                                 <!-- View/Update: bạn có thể trỏ sang servlet update sau này -->
-                                <%--<a href="${pageContext.request.contextPath}/admin/user/view?id=${u.userId}">View/Update</a>--%>
-                                <a class="link" href="${pageContext.request.contextPath}/home?p=user-update&id=${u.userId}">
+                                <a class="link" href="${pageContext.request.contextPath}/admin/user/view?id=${u.userId}">
                                     View/Update
                                 </a>
+
 
 
 

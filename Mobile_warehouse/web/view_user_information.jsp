@@ -66,7 +66,8 @@
 <body>
 
 <div class="topbar">
-    <a class="btn" href="<%=request.getContextPath()%>/admin/users">Back</a>
+    <a class="btn" href="<%=request.getContextPath()%>/home?p=user-list">Back</a>
+
     <a class="btn" href="<%=request.getContextPath()%>/home">Home</a>
 </div>
 
