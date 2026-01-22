@@ -1,0 +1,92 @@
+package controller;
+
+import dal.PermissionDAO;
+import dal.RoleDAO;
+import dal.RolePermissionDAO;
+import dal.UserDAO;
+import model.Permission;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
+
+import java.io.IOException;
+import java.util.*;
+
+@WebServlet(name="RolePermissionsServlet", urlPatterns={"/role_permissions"})
+public class RolePermissions extends HttpServlet {
+
+    private final PermissionDAO permDAO = new PermissionDAO();
+    private final RoleDAO roleDAO = new RoleDAO();
+    private final RolePermissionDAO rpDAO = new RolePermissionDAO();
+    private final UserDAO userDAO = new UserDAO();
+
+    private boolean isAdmin(HttpSession session) {
+        if (session == null || session.getAttribute("userId") == null) return false;
+        int userId = Integer.parseInt(session.getAttribute("userId").toString());
+        String roleName = userDAO.getRoleNameByUserId(userId);
+        return roleName != null && roleName.equalsIgnoreCase("ADMIN");
+    }
+
+
+    private void forwardPage(HttpServletRequest req, HttpServletResponse resp, int roleId)
+            throws ServletException, IOException {
+
+        List<Permission> allPerms = permDAO.getAllActive();
+        Set<Integer> checked = rpDAO.getPermissionIdsByRole(roleId);
+
+        req.setAttribute("roleId", roleId);
+        req.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
+        req.setAttribute("allPerms", allPerms);
+        req.setAttribute("checked", checked);
+
+        req.getRequestDispatcher("edit_role_permissions.jsp").forward(req, resp);
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        HttpSession session = req.getSession(false);
+        if (!isAdmin(session)) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+
+        int roleId = Integer.parseInt(req.getParameter("roleId"));
+
+        
+        String msg = (String) req.getAttribute("msg");
+        if (msg == null) msg = req.getParameter("msg");
+        req.setAttribute("msg", msg);
+
+        forwardPage(req, resp, roleId);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+
+        HttpSession session = req.getSession(false);
+        if (!isAdmin(session)) {
+            resp.sendRedirect(req.getContextPath() + "/login");
+            return;
+        }
+
+        int adminId = Integer.parseInt(session.getAttribute("userId").toString());
+        int roleId = Integer.parseInt(req.getParameter("roleId"));
+
+        String[] permIds = req.getParameterValues("permId");
+        List<Integer> list = new ArrayList<>();
+        if (permIds != null) {
+            for (String s : permIds) list.add(Integer.parseInt(s));
+        }
+
+        boolean ok = rpDAO.saveRolePermissions(roleId, list, adminId);
+
+       
+        req.setAttribute("msg", ok ? "Update successfully!" : "Update failed!");
+
+        
+        forwardPage(req, resp, roleId);
+    }
+}

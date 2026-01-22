@@ -18,7 +18,7 @@ import java.util.List;
 
 public class PermissionDAO {
 
-    // CŨ (giữ nguyên)
+  
     public List<Permission> getAllActive() {
         List<Permission> list = new ArrayList<>();
         String sql = "SELECT permission_id, code, name, module, description, is_active " +
@@ -43,7 +43,7 @@ public class PermissionDAO {
         return list;
     }
 
-    // MỚI (thêm): lấy tất cả (active + inactive) nếu code khác cần
+  
     public List<Permission> getAll() {
         List<Permission> list = new ArrayList<>();
         String sql = "SELECT permission_id, code, name, module, description, is_active " +

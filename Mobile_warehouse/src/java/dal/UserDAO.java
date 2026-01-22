@@ -19,7 +19,7 @@ import util.PasswordUtil;
 
 public class UserDAO {
 
-    // ====== CŨ: ChangePassword ======
+   
     public String getPasswordHashByUserId(int userId) {
         String sql = "SELECT password_hash FROM users WHERE user_id = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -47,7 +47,7 @@ public class UserDAO {
         return false;
     }
 
-    // ====== CŨ: get role name ======
+    
     public static String getRoleNameByUserId(int userId) {
         String sql = "SELECT r.role_name "
                 + "FROM users u JOIN roles r ON u.role_id = r.role_id "
@@ -65,7 +65,7 @@ public class UserDAO {
         return null;
     }
 
-    // ====== CŨ: get user by username ======
+
     public User getUserByUsername(String username) {
         String sql = "SELECT user_id, username, password_hash, full_name, email, phone, role_id, status "
                 + "FROM users WHERE username = ?";
@@ -91,7 +91,7 @@ public class UserDAO {
         return null;
     }
 
-    // ====== MỚI: get user by id (HomeServlet dùng cho profile) ======
+  
     public User getById(int userId) {
         String sql = "SELECT user_id, username, password_hash, full_name, email, phone, role_id, status "
                 + "FROM users WHERE user_id = ?";
@@ -117,33 +117,32 @@ public class UserDAO {
         return null;
     }
 
-    // ====== MỚI: login(username, password) (LoginServlet dùng) ======
+    
     public User login(String username, String password) {
         User u = getUserByUsername(username);
         if (u == null) {
             return null;
         }
 
-        // status=0 => inactive
+        
         if (u.getStatus() == 0) {
             return null;
         }
 
-        // verify hashed password (PasswordUtil của bạn)
+    
         if (!PasswordUtil.verifyPassword(password, u.getPasswordHash())) {
             return null;
         }
 
         return u;
     }
-// MỚI: check admin nhanh
+
 
     public boolean isAdmin(int userId) {
         String role = getRoleNameByUserId(userId);
         return role != null && role.equalsIgnoreCase("ADMIN");
     }
 
-// MỚI: lấy role_id theo user_id (nếu code khác cần)
     public Integer getRoleIdByUserId(int userId) {
         String sql = "SELECT role_id FROM users WHERE user_id = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -270,7 +269,7 @@ public class UserDAO {
         }
         return false;
     }
-// ===== FORGOT PASSWORD =====
+
 
     public User getUserByEmail(String email) {
         String sql = "SELECT user_id, username, password_hash, full_name, email, phone, role_id, status "
@@ -302,7 +301,7 @@ public class UserDAO {
                 + "VALUES(?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE))";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, userId);
-            ps.setString(2, otp);      // đơn giản: lưu OTP plain (sau nâng cấp có thể hash)
+            ps.setString(2, otp);     
             ps.setInt(3, minutes);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
