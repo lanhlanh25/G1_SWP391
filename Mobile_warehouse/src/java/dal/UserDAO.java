@@ -19,7 +19,6 @@ import util.PasswordUtil;
 
 public class UserDAO {
 
-   
     public String getPasswordHashByUserId(int userId) {
         String sql = "SELECT password_hash FROM users WHERE user_id = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -47,7 +46,6 @@ public class UserDAO {
         return false;
     }
 
-    
     public static String getRoleNameByUserId(int userId) {
         String sql = "SELECT r.role_name "
                 + "FROM users u JOIN roles r ON u.role_id = r.role_id "
@@ -64,7 +62,6 @@ public class UserDAO {
         }
         return null;
     }
-
 
     public User getUserByUsername(String username) {
         String sql = "SELECT user_id, username, password_hash, full_name, email, phone, role_id, status "
@@ -91,7 +88,6 @@ public class UserDAO {
         return null;
     }
 
-  
     public User getById(int userId) {
         String sql = "SELECT user_id, username, password_hash, full_name, email, phone, role_id, status "
                 + "FROM users WHERE user_id = ?";
@@ -117,26 +113,22 @@ public class UserDAO {
         return null;
     }
 
-    
     public User login(String username, String password) {
         User u = getUserByUsername(username);
         if (u == null) {
             return null;
         }
 
-        
         if (u.getStatus() == 0) {
             return null;
         }
 
-    
         if (!PasswordUtil.verifyPassword(password, u.getPasswordHash())) {
             return null;
         }
 
         return u;
     }
-
 
     public boolean isAdmin(int userId) {
         String role = getRoleNameByUserId(userId);
@@ -270,7 +262,6 @@ public class UserDAO {
         return false;
     }
 
-
     public User getUserByEmail(String email) {
         String sql = "SELECT user_id, username, password_hash, full_name, email, phone, role_id, status "
                 + "FROM users WHERE email = ?";
@@ -301,7 +292,7 @@ public class UserDAO {
                 + "VALUES(?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE))";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, userId);
-            ps.setString(2, otp);     
+            ps.setString(2, otp);
             ps.setInt(3, minutes);
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
@@ -339,4 +330,128 @@ public class UserDAO {
         }
     }
 
+// 1) user tạo request
+    public boolean createResetRequest(int userId, String email) {
+        String sql = "INSERT INTO password_reset_requests(user_id, email, status) VALUES(?, ?, 'PENDING')";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            ps.setString(2, email);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+// 2) admin list pending
+    public List<model.ResetRequest> getPendingResetRequests() {
+        List<model.ResetRequest> list = new ArrayList<>();
+        String sql
+                = "SELECT r.request_id, r.user_id, r.email, r.status, r.reason, r.created_at, "
+                + "       u.username, u.full_name "
+                + "FROM password_reset_requests r "
+                + "JOIN users u ON u.user_id = r.user_id "
+                + "WHERE r.status = 'PENDING' "
+                + "ORDER BY r.created_at DESC";
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                model.ResetRequest rr = new model.ResetRequest();
+                rr.setRequestId(rs.getLong("request_id"));
+                rr.setUserId(rs.getInt("user_id"));
+                rr.setEmail(rs.getString("email"));
+                rr.setStatus(rs.getString("status"));
+                rr.setReason(rs.getString("reason"));
+                rr.setCreatedAt(rs.getTimestamp("created_at"));
+                rr.setUsername(rs.getString("username"));
+                rr.setFullName(rs.getString("full_name"));
+                list.add(rr);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+// 3) lấy info email + userId theo requestId (để action servlet dùng)
+    public model.ResetRequest getResetRequestById(long requestId) {
+        String sql
+                = "SELECT r.request_id, r.user_id, r.email, r.status, r.reason, r.created_at, "
+                + "       u.username, u.full_name "
+                + "FROM password_reset_requests r "
+                + "JOIN users u ON u.user_id = r.user_id "
+                + "WHERE r.request_id = ?";
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, requestId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    model.ResetRequest rr = new model.ResetRequest();
+                    rr.setRequestId(rs.getLong("request_id"));
+                    rr.setUserId(rs.getInt("user_id"));
+                    rr.setEmail(rs.getString("email"));
+                    rr.setStatus(rs.getString("status"));
+                    rr.setReason(rs.getString("reason"));
+                    rr.setCreatedAt(rs.getTimestamp("created_at"));
+                    rr.setUsername(rs.getString("username"));
+                    rr.setFullName(rs.getString("full_name"));
+                    return rr;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+// 4) approve/reject (chỉ xử lý nếu đang PENDING)
+    public boolean decideResetRequest(long requestId, String status, String reason, int adminId) {
+        // status chỉ nên là APPROVED hoặc REJECTED
+        String sql
+                = "UPDATE password_reset_requests "
+                + "SET status=?, reason=?, decided_by=?, decided_at=NOW() "
+                + "WHERE request_id=? AND status='PENDING'";
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setString(2, reason);
+            ps.setInt(3, adminId);
+            ps.setLong(4, requestId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+// kiểm tra user có request PENDING chưa
+
+    public boolean hasPendingResetRequest(int userId) {
+        String sql = "SELECT 1 FROM password_reset_requests WHERE user_id=? AND status='PENDING' LIMIT 1";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+// nếu muốn lấy request pending gần nhất để hiện thông báo
+    public Long getLatestPendingRequestId(int userId) {
+        String sql = "SELECT request_id FROM password_reset_requests WHERE user_id=? AND status='PENDING' ORDER BY created_at DESC LIMIT 1";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
