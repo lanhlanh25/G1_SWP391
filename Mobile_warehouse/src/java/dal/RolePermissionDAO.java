@@ -16,7 +16,6 @@ import model.Permission;
 
 public class RolePermissionDAO {
 
-    // CŨ (giữ nguyên)
     public Set<Integer> getPermissionIdsByRole(int roleId) {
         Set<Integer> set = new HashSet<>();
         String sql = "SELECT permission_id FROM role_permissions WHERE role_id = ?";
@@ -70,7 +69,6 @@ public class RolePermissionDAO {
         return false;
     }
 
-    // MỚI (thêm): overload 2 tham số cho code của bạn tôi (nếu họ gọi)
     public boolean saveRolePermissions(int roleId, List<Integer> permIds) {
         return saveRolePermissions(roleId, permIds, null);
     }
@@ -93,8 +91,6 @@ public class RolePermissionDAO {
                 while (rs.next()) {
                     Permission p = new Permission();
 
-                    // ⚠️ chỉnh theo đúng field/setter trong model Permission của bạn
-                    // Ví dụ phổ biến:
                     p.setPermissionId(rs.getInt("permission_id"));
                     p.setName(rs.getString("name"));
 

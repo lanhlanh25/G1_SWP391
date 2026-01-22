@@ -34,7 +34,7 @@ public class RoleDAO {
             params.add("%" + keyword.trim() + "%");
         }
 
-        // status: null => All, 1 => Active, 0 => Inactive
+      
         if (status != null) {
             sql.append("AND r.is_active = ? ");
             params.add(status);

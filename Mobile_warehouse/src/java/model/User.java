@@ -19,7 +19,7 @@ public class User {
     private String email;
     private String phone;
     private int roleId;
-    private int status; // 1 active, 0 inactive
+    private int status; 
     private Timestamp lastLoginAt;
     private Timestamp createdAt;
     private Timestamp updatedAt;

@@ -14,11 +14,11 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
 public class PasswordUtil {
-     private static final int SALT_LENGTH = 16;      // 16 bytes
-    private static final int ITERATIONS = 65536;    // số vòng lặp
-    private static final int KEY_LENGTH = 256;      // bits
+     private static final int SALT_LENGTH = 16;    
+    private static final int ITERATIONS = 65536;   
+    private static final int KEY_LENGTH = 256;     
 
-    // Hash password -> trả về "salt:hash" (Base64)
+
     public static String hashPassword(String password) {
         try {
             byte[] salt = new byte[SALT_LENGTH];
@@ -35,14 +35,12 @@ public class PasswordUtil {
         }
     }
 
-    // Verify password với storedHash
-    // - Nếu storedHash có dạng "salt:hash" => verify PBKDF2
-    // - Nếu không có ":" => coi như plain text (để compatible lúc dev)
+
     public static boolean verifyPassword(String inputPassword, String storedHash) {
         try {
             if (storedHash == null) return false;
 
-            // Compatible plain text
+           
             if (!storedHash.contains(":")) {
                 return inputPassword.equals(storedHash);
             }
@@ -67,7 +65,7 @@ public class PasswordUtil {
         return skf.generateSecret(spec).getEncoded();
     }
 
-    // So sánh constant-time để tránh timing attack
+    
     private static boolean constantTimeEquals(byte[] a, byte[] b) {
         if (a == null || b == null) return false;
         if (a.length != b.length) return false;
