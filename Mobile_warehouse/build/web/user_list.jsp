@@ -74,7 +74,28 @@
         <div class="topbar">
             <a class="btn" href="<%=request.getContextPath()%>/home">Back</a>
         </div>
+        <form action="<%=request.getContextPath()%>/admin/users" method="get">
+            Search User:
+            <input type="text" name="q"
+                   value="<%= request.getAttribute("q") != null ? request.getAttribute("q") : "" %>"
+                   placeholder="e.g. duc, email, username...">
 
+            Status:
+            <select name="status">
+                <%
+                    String status = (String) request.getAttribute("status");
+                %>
+                <option value="" <%= (status == null || status.isEmpty()) ? "selected" : "" %>>All</option>
+                <option value="1" <%= "1".equals(status) ? "selected" : "" %>>Active</option>
+                <option value="0" <%= "0".equals(status) ? "selected" : "" %>>Inactive</option>
+            </select>
+
+            <button type="submit">Filter</button>
+        </form>
+
+
+
+        <br>
         <div class="wrap">
             <div class="actions">
                 <!-- nút Active (lọc status=1) -->
@@ -113,10 +134,10 @@
 
                             <td>
                                 <!-- View/Update: bạn có thể trỏ sang servlet update sau này -->
-                                <%--<a href="${pageContext.request.contextPath}/admin/user/view?id=${u.userId}">View/Update</a>--%>
-                                <a class="link" href="${pageContext.request.contextPath}/home?p=user-update&id=${u.userId}">
+                                <a class="link" href="${pageContext.request.contextPath}/admin/user/view?id=${u.userId}">
                                     View/Update
                                 </a>
+
 
 
 

@@ -16,13 +16,13 @@
 
     <li><a href="<%=ctx%>/home?p=user-list">User List</a></li>
     <li><a href="<%=ctx%>/home?p=user-add">Add User</a></li>
-    <li><a href="<%=ctx%>/home?p=user-update">Update User</a></li>
-    <li><a href="<%=ctx%>/home?p=user-toggle">Active/Deactive User</a></li>
+    
+    
 
     <%--<li><a href="<%=ctx%>/role_list">Role List</a></li>--%>
     <li><a href="<%=ctx%>/home?p=role-list">Role List</a></li>
     <%--<li><a href="<%=ctx%>/home?p=role-update">Update Role</a></li>--%>
-    <li><a href="<%=ctx%>/home?p=role-toggle">Active/Deactive Role</a></li>
+   
 
 
 
