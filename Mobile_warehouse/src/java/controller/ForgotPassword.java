@@ -40,17 +40,18 @@ public class ForgotPassword extends HttpServlet {
        
 
         User u = dao.getUserByEmail(email);
+        if (u == null) {
+            req.setAttribute("err", "Email not found. Please try again.");
+            req.getRequestDispatcher("forgot_password.jsp").forward(req, resp);
+            return;
+        }
         if (dao.hasPendingResetRequest(u.getUserId())) {
             req.setAttribute("err", "You already sent a reset request and it is still pending. Please wait for admin response.");
             req.getRequestDispatcher("forgot_password.jsp").forward(req, resp);
             return;
         }
 
-        if (u == null) {
-            req.setAttribute("err", "Email not found. Please try again.");
-            req.getRequestDispatcher("forgot_password.jsp").forward(req, resp);
-            return;
-        }
+        
 
         if (u.getStatus() == 0) {
             req.setAttribute("err", "This account is inactive.");
