@@ -12,6 +12,7 @@
 <h3>ADMIN MENU</h3>
 <ul>
     <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
+    <li><a href="<%=ctx%>/admin/reset-requests">Password Reset Requests</a></li>
 
     <li><a href="<%=ctx%>/home?p=user-list">User List</a></li>
     <li><a href="<%=ctx%>/home?p=user-add">Add User</a></li>

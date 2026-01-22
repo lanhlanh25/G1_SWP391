@@ -20,11 +20,32 @@ public class ResetPassword extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        HttpSession session = req.getSession(false);
-        if (!isVerified(session)) {
+        String uidRaw = req.getParameter("uid");
+        String token = req.getParameter("token");
+
+        if (uidRaw == null || uidRaw.isBlank() || token == null || token.isBlank()) {
             resp.sendRedirect(req.getContextPath() + "/forgot-password");
             return;
         }
+
+        int userId;
+        try {
+            userId = Integer.parseInt(uidRaw);
+        } catch (NumberFormatException e) {
+            resp.sendRedirect(req.getContextPath() + "/forgot-password");
+            return;
+        }
+
+        // ✅ Verify token in DB (NOT session)
+        if (!dao.verifyOtpLatest(userId, token)) { // bạn đang reuse password_resets -> ok
+            resp.sendRedirect(req.getContextPath() + "/forgot-password");
+            return;
+        }
+
+        // để JSP dùng hidden input
+        req.setAttribute("uid", userId);
+        req.setAttribute("token", token);
+
         req.getRequestDispatcher("reset_password.jsp").forward(req, resp);
     }
 
@@ -32,33 +53,46 @@ public class ResetPassword extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        HttpSession session = req.getSession(false);
-        if (!isVerified(session)) {
+        String uidRaw = req.getParameter("uid");
+        String token = req.getParameter("token");
+
+        int userId;
+        try {
+            userId = Integer.parseInt(uidRaw);
+        } catch (Exception e) {
             resp.sendRedirect(req.getContextPath() + "/forgot-password");
             return;
         }
 
-        int userId = (Integer) session.getAttribute("fp_userId");
-        String otp = (String) session.getAttribute("fp_otp");
+        // ✅ Verify again for safety
+        if (token == null || token.isBlank() || !dao.verifyOtpLatest(userId, token)) {
+            resp.sendRedirect(req.getContextPath() + "/forgot-password");
+            return;
+        }
 
         String newPass = req.getParameter("new_password");
         String confirm = req.getParameter("confirm_password");
 
         if (isBlank(newPass) || isBlank(confirm)) {
             req.setAttribute("err", "Please fill in all fields.");
+            req.setAttribute("uid", userId);
+            req.setAttribute("token", token);
             req.getRequestDispatcher("reset_password.jsp").forward(req, resp);
             return;
         }
 
         if (!newPass.equals(confirm)) {
             req.setAttribute("err", "Confirm password does not match.");
+            req.setAttribute("uid", userId);
+            req.setAttribute("token", token);
             req.getRequestDispatcher("reset_password.jsp").forward(req, resp);
             return;
         }
 
-  
         if (!newPass.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}$")) {
             req.setAttribute("err", "Password must be >=8 and contain uppercase, lowercase and number.");
+            req.setAttribute("uid", userId);
+            req.setAttribute("token", token);
             req.getRequestDispatcher("reset_password.jsp").forward(req, resp);
             return;
         }
@@ -66,35 +100,20 @@ public class ResetPassword extends HttpServlet {
         boolean ok = dao.updatePasswordHash(userId, PasswordUtil.hashPassword(newPass));
         if (!ok) {
             req.setAttribute("err", "Reset password failed. Please try again.");
+            req.setAttribute("uid", userId);
+            req.setAttribute("token", token);
             req.getRequestDispatcher("reset_password.jsp").forward(req, resp);
             return;
         }
 
- 
-        if (otp != null) {
-            dao.markOtpUsedLatest(userId, otp);
-        }
+        // ✅ mark token used (token chính là token lưu trong password_resets.token_hash)
+        dao.markOtpUsedLatest(userId, token);
 
-        
-        session.removeAttribute("fp_userId");
-        session.removeAttribute("fp_email");
-        session.removeAttribute("fp_verified");
-        session.removeAttribute("fp_otp");
-
-      
         resp.sendRedirect(req.getContextPath() + "/login?msg=Password+reset+successfully.+Please+login+again.");
-    }
-
-    private boolean isVerified(HttpSession session) {
-        if (session == null) {
-            return false;
-        }
-        Boolean v = (Boolean) session.getAttribute("fp_verified");
-        Integer uid = (Integer) session.getAttribute("fp_userId");
-        return v != null && v && uid != null;
     }
 
     private boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
     }
+
 }
