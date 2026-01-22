@@ -226,10 +226,11 @@ public class Home extends HttpServlet {
             case "user-list":
             case "user-toggle": {
                 String q = request.getParameter("q");
-              
-                List<UserRoleDetail> users = userDAO.getAllUsersWithRole(q);
+                String st = request.getParameter("status");
+                List<UserRoleDetail> users = userDAO.getAllUsersWithRole(q, st);
                 request.setAttribute("users", users);
                 request.setAttribute("q", q);
+                request.setAttribute("status", st);
                 break;
             }
 

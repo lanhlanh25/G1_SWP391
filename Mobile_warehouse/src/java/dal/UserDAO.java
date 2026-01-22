@@ -150,21 +150,33 @@ public class UserDAO {
         return null;
     }
 
-    public static List<UserRoleDetail> getAllUsersWithRole(String q) {
+    public static List<UserRoleDetail> getAllUsersWithRole(String q, String statusFilter) {
         List<UserRoleDetail> list = new ArrayList<>();
 
         String sql
                 = "SELECT u.user_id, u.username, u.full_name, u.status, u.role_id, r.role_name "
                 + "FROM users u JOIN roles r ON u.role_id = r.role_id "
                 + "WHERE (? IS NULL OR ? = '' OR u.username LIKE ? OR u.full_name LIKE ?) "
+                + "  AND (? IS NULL OR ? = '' OR u.status = ?) "
                 + "ORDER BY u.user_id ASC";
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
+            // ---- filter q ----
+            String qTrim = (q == null) ? "" : q.trim();
             ps.setString(1, q);
             ps.setString(2, q);
-            ps.setString(3, "%" + (q == null ? "" : q.trim()) + "%");
-            ps.setString(4, "%" + (q == null ? "" : q.trim()) + "%");
+            ps.setString(3, "%" + qTrim + "%");
+            ps.setString(4, "%" + qTrim + "%");
+
+            // ---- filter status ----
+            ps.setString(5, statusFilter);
+            ps.setString(6, statusFilter);
+            if (statusFilter == null || statusFilter.isBlank()) {
+                ps.setInt(7, 0); // value bất kỳ, vì điều kiện OR sẽ bỏ qua
+            } else {
+                ps.setInt(7, Integer.parseInt(statusFilter)); // 1 hoặc 0
+            }
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -176,7 +188,6 @@ public class UserDAO {
                             rs.getString("full_name"),
                             rs.getInt("status")
                     ));
-
                 }
             }
         } catch (Exception e) {
@@ -184,6 +195,10 @@ public class UserDAO {
         }
 
         return list;
+    }
+
+    public List<UserRoleDetail> getAllUsersWithRole(String q) {
+        return getAllUsersWithRole(q, null);
     }
 
     public boolean toggleUserStatus(int userId) {

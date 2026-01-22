@@ -21,10 +21,13 @@ public class AdminUserList extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        String q = req.getParameter("q"); 
+        String q = req.getParameter("q");
+        String status = req.getParameter("status"); // "", "1", "0"
 
-        UserDAO dao = new UserDAO();
-        req.setAttribute("users", dao.getAllUsersWithRole(q));
+        req.setAttribute("q", q);
+        req.setAttribute("status", status);
+
+        req.setAttribute("users", UserDAO.getAllUsersWithRole(q, status));
 
         req.getRequestDispatcher("/user_list.jsp").forward(req, resp);
     }
