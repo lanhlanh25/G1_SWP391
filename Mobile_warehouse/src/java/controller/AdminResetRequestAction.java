@@ -82,7 +82,7 @@ public class AdminResetRequestAction extends HttpServlet {
 
             dao.decideResetRequest(requestId, "APPROVED", null, adminId);
 
-            // Build link chuẩn hơn (không dùng replace URL)
+            
             String link = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
                     + req.getContextPath()
                     + "/reset-password?uid=" + rr.getUserId()
