@@ -1,17 +1,52 @@
 <%-- 
     Document   : login.jsp
-    Created on : Jan 13, 2026, 1:32:18 AM
-    Author     : dothi
+    Created on : Jan 13, 2026, 2:56:12 PM
+    Author     : Admin
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%
+    String ctx = request.getContextPath();
+    String err = (String) request.getAttribute("err");
+    String usernameVal = (String) request.getAttribute("usernameVal");
+%>
 <!DOCTYPE html>
 <html>
     <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <meta charset="UTF-8">
+        <title>Login</title>
     </head>
     <body>
-        <h1>Hello World!</h1>
+
+        <h2>LOGIN</h2>
+        <%
+            String msg = request.getParameter("msg");
+        %>
+
+        <% if (err != null) { %>
+        <p style="color:red;"><%= err %></p>
+        <% } %>
+        <% if (msg != null && !msg.isBlank()) { %>
+        <p style="color:green;"><%= msg %></p>
+        <% } %>
+
+        <form method="post" action="<%=ctx%>/login">
+            <p>
+                Username:
+                <input type="text" name="username" value="<%= usernameVal != null ? usernameVal : "" %>" required>
+            </p>
+            <p>
+                Password:
+                <input type="password" name="password" required>
+            </p>
+            <p>
+                <button type="submit">Login</button>
+            </p>
+        </form>
+
+        <p>
+            <a href="<%=ctx%>/forgot-password">Forgot password?</a>
+        </p>
+
     </body>
 </html>

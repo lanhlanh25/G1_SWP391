@@ -1,42 +1,58 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package controller;
 
-import dal.UserDAO;
+/**
+ *
+ * @author Admin
+ */
 import jakarta.servlet.*;
+import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import model.User;
 
+@WebFilter(filterName = "AdminFilter", urlPatterns = {"/admin/*"})
 public class AdminFilter implements Filter {
 
-    // ✅ DEV MODE: để true thì cho vào admin mà không cần login (chỉ để test)
-    private static final boolean DEV_BYPASS_LOGIN = true;
+ 
+    private static final boolean DEV_BYPASS_LOGIN = false;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
 
-        HttpServletRequest req = (HttpServletRequest) request;
-        HttpServletResponse resp = (HttpServletResponse) response;
-
-        HttpSession session = req.getSession(false);
-        User u = (session != null) ? (User) session.getAttribute("user") : null;
-
-        // ✅ Nếu chưa login mà đang dev => cho qua luôn để test add-user
-        if (u == null && DEV_BYPASS_LOGIN) {
+        if (DEV_BYPASS_LOGIN) {
             chain.doFilter(request, response);
             return;
         }
 
-        // ❌ Không login và không dev => đá về login
+        HttpServletRequest req = (HttpServletRequest) request;
+        HttpServletResponse resp = (HttpServletResponse) response;
+
+        HttpSession session = req.getSession(false);
+        User u = (session == null) ? null : (User) session.getAttribute("authUser");
+
         if (u == null) {
-            resp.sendRedirect(req.getContextPath() + "/login.jsp");
+            resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
 
-        // ✅ Có login => check ADMIN thật sự
-        UserDAO dao = new UserDAO();
-        if (!dao.isAdmin(u.getUserId())) {
-            resp.sendError(403, "Forbidden - Admin only");
+      
+        String roleName = (String) session.getAttribute("roleName");
+        boolean isAdmin = false;
+
+        if (roleName != null && roleName.equalsIgnoreCase("ADMIN")) {
+            isAdmin = true;
+        } else {
+          
+            isAdmin = (u.getRoleId() == 1);
+        }
+
+        if (!isAdmin) {
+            resp.sendRedirect(req.getContextPath() + "/home?p=denied");
             return;
         }
 
