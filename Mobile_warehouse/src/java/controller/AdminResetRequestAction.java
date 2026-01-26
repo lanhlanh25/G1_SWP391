@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import model.ResetRequest;
 import util.EmailUtil;
+import util.PasswordUtil;
 
 /**
  *
@@ -23,7 +24,7 @@ import util.EmailUtil;
 public class AdminResetRequestAction extends HttpServlet {
 
     private final UserDAO dao = new UserDAO();
-    private static final int LINK_EXPIRE_MIN = 30;
+    
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -45,7 +46,7 @@ public class AdminResetRequestAction extends HttpServlet {
 
         long requestId = Long.parseLong(ridRaw);
 
-        // Lấy request theo id
+        // take request follow id
         ResetRequest rr = dao.getResetRequestById(requestId);
         if (rr == null) {
             resp.sendRedirect(req.getContextPath() + "/admin/reset-requests");
@@ -75,28 +76,26 @@ public class AdminResetRequestAction extends HttpServlet {
             );
 
         } else { // APPROVE
-            String token = EmailUtil.randomToken32();
+            // 1) Generate new password (8 chars)
+            String newPassword = EmailUtil.randomPassword8();
 
-            // reuse password_resets để lưu token link
-            dao.createOtp(rr.getUserId(), token, LINK_EXPIRE_MIN);
+            // 2) Hash and update users.password_hash
+            String newHash = PasswordUtil.hashPassword(newPassword);
+            boolean ok = dao.updatePasswordHash(rr.getUserId(), newHash);
 
-            dao.decideResetRequest(requestId, "APPROVED", null, adminId);
+            if (ok) {
+                // 3) Mark request approved
+                dao.decideResetRequest(requestId, "APPROVED", null, adminId);
 
-            
-            String link = req.getScheme() + "://" + req.getServerName() + ":" + req.getServerPort()
-                    + req.getContextPath()
-                    + "/reset-password?uid=" + rr.getUserId()
-                    + "&token=" + token;
+                // 4) Send generated password to user
+                EmailUtil.sendApprovePasswordToUser(rr.getEmail(), rr.getFullName(), newPassword);
 
-            EmailUtil.sendText(
-                    rr.getEmail(),
-                    "Reset your password",
-                    "Hello " + rr.getFullName() + ",\n\n"
-                    + "Your request was approved.\n"
-                    + "Click this link to reset password (expires in " + LINK_EXPIRE_MIN + " minutes):\n"
-                    + link + "\n\n"
-                    + "If you did not request this, please ignore this email."
-            );
+            } else {
+                // nếu update fail thì có thể reject luôn hoặc giữ pending
+                dao.decideResetRequest(requestId, "REJECTED", "System error: cannot reset password now.", adminId);
+                EmailUtil.sendRejectToUser(rr.getEmail(), rr.getFullName(),
+                        "System error: cannot reset password now. Please request again later.");
+            }
         }
 
         resp.sendRedirect(req.getContextPath() + "/admin/reset-requests");

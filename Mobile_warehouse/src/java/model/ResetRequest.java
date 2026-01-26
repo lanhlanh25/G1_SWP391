@@ -21,7 +21,7 @@ public class ResetRequest {
     private Timestamp decidedAt;
     private Integer decidedBy;
 
-    // thêm info để hiển thị cho admin
+    
     private String username;
     private String fullName;
 
