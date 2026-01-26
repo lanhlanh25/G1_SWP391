@@ -19,7 +19,9 @@
 </head>
 <body>
 <h2>Forgot Password</h2>
-
+<p>
+    Enter your registered email. If your request is approved by Admin, a new 8-character password will be sent to your email.
+</p>
 <% if (err != null) { %>
 <p style="color:red;"><%=err%></p>
 <% } %>

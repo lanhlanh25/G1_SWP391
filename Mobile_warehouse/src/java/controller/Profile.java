@@ -4,6 +4,7 @@
  */
 package controller;
 
+import dal.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -25,12 +26,20 @@ public class Profile extends HttpServlet {
             return;
         }
 
-       
-        request.setAttribute("profileUser", u);
+        UserDAO dao = new UserDAO();
+        User fresh = dao.getById(u.getUserId());
+
+        // update session luôn cho đồng bộ
+        if (fresh != null) {
+            session.setAttribute("authUser", fresh);
+            request.setAttribute("profileUser", fresh);
+        } else {
+            request.setAttribute("profileUser", u);
+        }
 
         
         request.getRequestDispatcher("/view_profile.jsp")
-               .forward(request, response);
+                .forward(request, response);
     }
 
     @Override
