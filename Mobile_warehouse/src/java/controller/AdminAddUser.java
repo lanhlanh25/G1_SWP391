@@ -46,7 +46,7 @@ public class AdminAddUser extends HttpServlet {
         int roleId = parseInt(req.getParameter("role_id"), 0);
 
         if (username.isEmpty() || password.isEmpty() || fullName.isEmpty() || roleId <= 0) {
-            req.setAttribute("error", "Please fill required fields (username, password, full name, role).");
+            req.setAttribute("error", "Cannot be left blank.");
             doGet(req, resp);
             return;
         }
