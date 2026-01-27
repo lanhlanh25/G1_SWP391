@@ -44,7 +44,7 @@
 
         <td>
             <form method="post" action="<%=ctx%>/admin/reset-requests/action"
-                  onsubmit="return confirm('Approve this request?');">
+                  onsubmit="return confirm('Approve this request and send a generated password to user?');">
                 <input type="hidden" name="requestId" value="<%= r.getRequestId() %>">
                 <input type="hidden" name="action" value="APPROVE">
                 <button type="submit">Approve</button>

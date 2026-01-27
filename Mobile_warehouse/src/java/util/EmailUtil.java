@@ -50,16 +50,6 @@ public class EmailUtil {
         }
     }
 
-//    // giữ lại OTP nếu bạn vẫn dùng
-//    public static boolean sendOtp(String toEmail, String otp, int minutes) {
-//        String subject = "Your OTP Code (WMS)";
-//        String content =
-//                "Your OTP code is: " + otp + "\n\n"
-//              + "This code will expire in " + minutes + " minutes.\n"
-//              + "If you did not request this, please ignore this email.";
-//        return sendText(toEmail, subject, content);
-//    }
-    // gửi mail cho admin khi có request
     public static boolean notifyAdminNewResetRequest(String adminEmail, String userEmail, String userName) {
         String subject = "[WMS] New password reset request";
         String content
@@ -81,26 +71,27 @@ public class EmailUtil {
         return sendText(userEmail, subject, content);
     }
 
-    // gửi mail cho user khi admin approve (kèm link reset)
-    public static boolean sendApproveLinkToUser(String userEmail, String userName, String resetLink, int minutes) {
-        String subject = "[WMS] Password reset approved";
-        String content
-                = "Hello " + userName + ",\n\n"
-                + "Your password reset request has been approved.\n"
-                + "Click the link below to set a new password:\n"
-                + resetLink + "\n\n"
-                + "This link will expire in " + minutes + " minutes.\n"
-                + "If you did not request this, please ignore this email.";
-        return sendText(userEmail, subject, content);
-    }
-
-    public static String randomToken32() {
+    // Generate random password length 8
+    public static String randomPassword8() {
         SecureRandom r = new SecureRandom();
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 32; i++) {
+        for (int i = 0; i < 8; i++) {
             sb.append(chars.charAt(r.nextInt(chars.length())));
         }
         return sb.toString();
     }
+
+// Send approved email with generated password
+    public static boolean sendApprovePasswordToUser(String userEmail, String userName, String newPassword) {
+        String subject = "[WMS] Password reset approved - Your new password";
+        String content
+                = "Hello " + userName + ",\n\n"
+                + "Your password reset request has been approved.\n"
+                + "Your new password is: " + newPassword + "\n\n"
+                + "Please login using this password and change it immediately in Change Password.\n"
+                + "If you did not request this, please contact administrator.";
+        return sendText(userEmail, subject, content);
+    }
+
 }

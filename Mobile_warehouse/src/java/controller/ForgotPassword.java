@@ -32,7 +32,7 @@ public class ForgotPassword extends HttpServlet {
         req.setAttribute("emailVal", email);
 
         if (email.isBlank() ) {
-            req.setAttribute("err", "Please enter and confirm your email.");
+            req.setAttribute("err", "Please enter your email.");
             req.getRequestDispatcher("forgot_password.jsp").forward(req, resp);
             return;
         }

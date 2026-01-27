@@ -64,7 +64,7 @@ public class UserDAO {
     }
 
     public User getUserByUsername(String username) {
-        String sql = "SELECT user_id, username, password_hash, full_name, email, phone, role_id, status "
+        String sql = "SELECT user_id, username, password_hash, full_name, email, phone, avatar, address, role_id, status "
                 + "FROM users WHERE username = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, username);
@@ -78,7 +78,9 @@ public class UserDAO {
                             rs.getString("email"),
                             rs.getString("phone"),
                             rs.getInt("role_id"),
-                            rs.getInt("status")
+                            rs.getInt("status"),
+                            rs.getString("avatar"),
+                            rs.getString("address")
                     );
                 }
             }
@@ -89,7 +91,7 @@ public class UserDAO {
     }
 
     public User getById(int userId) {
-        String sql = "SELECT user_id, username, password_hash, full_name, email, phone, role_id, status "
+        String sql = "SELECT user_id, username, password_hash, full_name, email, phone, avatar, address, role_id, status "
                 + "FROM users WHERE user_id = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, userId);
@@ -103,7 +105,9 @@ public class UserDAO {
                             rs.getString("email"),
                             rs.getString("phone"),
                             rs.getInt("role_id"),
-                            rs.getInt("status")
+                            rs.getInt("status"),
+                            rs.getString("avatar"),
+                            rs.getString("address")
                     );
                 }
             }
@@ -213,8 +217,8 @@ public class UserDAO {
     }
 
     public boolean createUser(User u) {
-        String sql = "INSERT INTO users(username, password_hash, full_name, email, phone, role_id, status) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users(username, password_hash, full_name, email, phone, avatar, address, role_id, status) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -223,8 +227,10 @@ public class UserDAO {
             ps.setString(3, u.getFullName());
             ps.setString(4, u.getEmail());
             ps.setString(5, u.getPhone());
-            ps.setInt(6, u.getRoleId());
-            ps.setInt(7, u.getStatus());
+            ps.setString(6, u.getAvatar());
+            ps.setString(7, u.getAddress());
+            ps.setInt(8, u.getRoleId());
+            ps.setInt(9, u.getStatus());
 
             return ps.executeUpdate() > 0;
 
@@ -261,15 +267,23 @@ public class UserDAO {
         return null;
     }
 
-    public boolean updateUserInfo(int userId, String fullName, String email, String phone, int roleId, int status) {
-        String sql = "UPDATE users SET full_name=?, email=?, phone=?, role_id=?, status=? WHERE user_id=?";
+    public boolean updateUserInfo(int userId, String fullName, String email, String phone,
+            int roleId, int status, String avatar, String address) {
+        String sql = "UPDATE users "
+                + "SET full_name=?, email=?, phone=?, avatar=?, address=?, role_id=?, status=? "
+                + "WHERE user_id=?";
+
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setString(1, fullName);
             ps.setString(2, email);
             ps.setString(3, phone);
-            ps.setInt(4, roleId);
-            ps.setInt(5, status);
-            ps.setInt(6, userId);
+            ps.setString(4, avatar);
+            ps.setString(5, address);
+            ps.setInt(6, roleId);
+            ps.setInt(7, status);
+            ps.setInt(8, userId);
+
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();
@@ -278,7 +292,7 @@ public class UserDAO {
     }
 
     public User getUserByEmail(String email) {
-        String sql = "SELECT user_id, username, password_hash, full_name, email, phone, role_id, status "
+        String sql = "SELECT user_id, username, password_hash, full_name, email, phone, avatar, address, role_id, status "
                 + "FROM users WHERE email = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, email);
@@ -292,7 +306,9 @@ public class UserDAO {
                             rs.getString("email"),
                             rs.getString("phone"),
                             rs.getInt("role_id"),
-                            rs.getInt("status")
+                            rs.getInt("status"),
+                            rs.getString("avatar"),
+                            rs.getString("address")
                     );
                 }
             }
@@ -300,49 +316,6 @@ public class UserDAO {
             e.printStackTrace();
         }
         return null;
-    }
-
-    public boolean createOtp(int userId, String otp, int minutes) {
-        String sql = "INSERT INTO password_resets(user_id, token_hash, expires_at) "
-                + "VALUES(?, ?, DATE_ADD(NOW(), INTERVAL ? MINUTE))";
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, userId);
-            ps.setString(2, otp);
-            ps.setInt(3, minutes);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean verifyOtpLatest(int userId, String otp) {
-        String sql = "SELECT reset_id FROM password_resets "
-                + "WHERE user_id=? AND token_hash=? AND used_at IS NULL AND expires_at > NOW() "
-                + "ORDER BY reset_id DESC LIMIT 1";
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, userId);
-            ps.setString(2, otp);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public void markOtpUsedLatest(int userId, String otp) {
-        String sql = "UPDATE password_resets SET used_at=NOW() "
-                + "WHERE user_id=? AND token_hash=? AND used_at IS NULL "
-                + "ORDER BY reset_id DESC LIMIT 1";
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, userId);
-            ps.setString(2, otp);
-            ps.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
 // 1) user tạo request
@@ -469,4 +442,17 @@ public class UserDAO {
         }
         return null;
     }
+
+    public boolean updateAvatarPath(int userId, String avatarPath) {
+        String sql = "UPDATE users SET avatar=? WHERE user_id=?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, avatarPath);
+            ps.setInt(2, userId);
+            return ps.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

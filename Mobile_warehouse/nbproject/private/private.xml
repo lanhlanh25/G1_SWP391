@@ -3,8 +3,34 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/UserUpdate.java</file>
             <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/web/admin_dashboard.jsp</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/ForgotPassword.java</file>
             <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/dal/DBContext.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/Logout.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/dal/RoleDAO.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/web/reset_password.jsp</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/AdminUserList.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/web/view_profile.jsp</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/model/ResetRequest.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/Profile.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/model/UserRoleDetail.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/web/sidebar_admin.jsp</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/web/update_user_information.jsp</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/util/EmailUtil.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/UserView.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/web/admin_reset_requests.jsp</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/AdminResetRequests.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/Home.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/Login.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/util/TokenUtil.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/model/User.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/web/user_list.jsp</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/web/forgot_password.jsp</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/AdminResetRequestAction.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/dal/UserDAO.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/dal/PermissionDAO.java</file>
+            <file>file:/G:/FPT/Semeter_5/2_SWP391/Moblie_WMS/G1_SWP391/Mobile_warehouse/src/java/controller/ResetPassword.java</file>
         </group>
     </open-files>
 </project-private>
