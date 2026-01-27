@@ -74,7 +74,9 @@
         <div class="topbar">
             <a class="btn" href="<%=request.getContextPath()%>/home">Back</a>
         </div>
-        <form action="<%=request.getContextPath()%>/admin/users" method="get">
+        <form action="<%=request.getContextPath()%>/home" method="get">
+            <input type="hidden" name="p" value="user-list"/>
+            <input type="hidden" name="page" value="1"/>
             Search User:
             <input type="text" name="q"
                    value="<%= request.getAttribute("q") != null ? request.getAttribute("q") : "" %>"
@@ -153,6 +155,45 @@
                     </c:forEach>
                 </tbody>
             </table>
+            <%
+                Integer pageObj = (Integer) request.getAttribute("page");
+                Integer totalPagesObj = (Integer) request.getAttribute("totalPages");
+
+                int curPage = (pageObj == null) ? 1 : pageObj;
+                int totalPages = (totalPagesObj == null) ? 1 : totalPagesObj;
+
+                String q = (String) request.getAttribute("q");
+                String st = (String) request.getAttribute("status");
+
+                String base = request.getContextPath() + "/home?p=user-list"
+                        + (q != null && !q.isEmpty() ? "&q=" + java.net.URLEncoder.encode(q, "UTF-8") : "")
+                        + (st != null && !st.isEmpty() ? "&status=" + st : "");
+            %>
+
+            <div class="pager">
+                <% if (curPage > 1) { %>
+                <a class="btn" href="<%= base %>&page=<%= (curPage - 1) %>">Prev</a>
+                <% } else { %>
+                <span class="page-current">Prev</span>
+                <% } %>
+
+                <% for (int i = 1; i <= totalPages; i++) { %>
+                <% if (i == curPage) { %>
+                <span class="page-current"><%= i %></span>
+                <% } else { %>
+                <a class="btn" href="<%= base %>&page=<%= i %>"><%= i %></a>
+                <% } %>
+                <% } %>
+
+                <% if (curPage < totalPages) { %>
+                <a class="btn" href="<%= base %>&page=<%= (curPage + 1) %>">Next</a>
+                <% } else { %>
+                <span class="page-current">Next</span>
+                <% } %>
+            </div>
+
+
+
         </div>
 
     </body>

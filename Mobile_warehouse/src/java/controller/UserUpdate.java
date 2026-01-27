@@ -20,7 +20,11 @@ import model.User;
 public class UserUpdate extends HttpServlet {
 
     private int toInt(String s, int def) {
-        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return def;
+        }
     }
 
     private String n(String s) {
@@ -56,13 +60,12 @@ public class UserUpdate extends HttpServlet {
             throws ServletException, IOException {
 
         int userId = toInt(req.getParameter("user_id"), -1);
-        int roleId  = toInt(req.getParameter("role_id"), -1);
+        int roleId = toInt(req.getParameter("role_id"), -1);
 
         String fullName = n(req.getParameter("full_name"));
-        String email    = n(req.getParameter("email"));
-        String phone    = n(req.getParameter("phone"));
+        String email = n(req.getParameter("email"));
+        String phone = n(req.getParameter("phone"));
 
-        
         int status = 1;
 
         if (userId <= 0 || roleId <= 0 || fullName.isEmpty()) {
@@ -70,10 +73,16 @@ public class UserUpdate extends HttpServlet {
             doGet(req, resp);
             return;
         }
+        
+        //10 digits and start 0
+        if (phone.isEmpty() || !phone.matches("^0\\d{9}$")) {
+            req.setAttribute("error", "Phone must be 10 digits and start with 0 (e.g. 0912345678).");
+            doGet(req, resp); // doGet sẽ load lại user + roles để render lại form
+            return;
+        }
 
         UserDAO dao = new UserDAO();
 
-        
         boolean ok = dao.updateUserInfo(userId, fullName, email, phone, roleId, status);
 
         resp.sendRedirect(req.getContextPath() + "/admin/users?msg=" + (ok ? "updated" : "failed"));
