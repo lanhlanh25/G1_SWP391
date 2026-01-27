@@ -27,7 +27,11 @@ import model.User;
 public class UserUpdate extends HttpServlet {
 
     private int toInt(String s, int def) {
-        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return def;
+        }
     }
     private String n(String s) { return s == null ? "" : s.trim(); }
 
@@ -63,14 +67,25 @@ public class UserUpdate extends HttpServlet {
         int roleId = toInt(req.getParameter("role_id"), -1);
 
         String fullName = n(req.getParameter("full_name"));
+
         String email    = n(req.getParameter("email"));
         String phone    = n(req.getParameter("phone"));
         String address  = n(req.getParameter("address"));
         int status      = toInt(req.getParameter("status"), 1);
 
+
+
+
         if (userId <= 0 || roleId <= 0 || fullName.isEmpty()) {
             req.setAttribute("error", "Invalid input! (Full Name and Role are required)");
             doGet(req, resp);
+            return;
+        }
+        
+        //10 digits and start 0
+        if (phone.isEmpty() || !phone.matches("^0\\d{9}$")) {
+            req.setAttribute("error", "Phone must be 10 digits and start with 0 (e.g. 0912345678).");
+            doGet(req, resp); // doGet sẽ load lại user + roles để render lại form
             return;
         }
 
@@ -84,6 +99,7 @@ public class UserUpdate extends HttpServlet {
             }
         }
 
+
         UserDAO dao = new UserDAO();
         boolean ok = dao.updateUserInfo(userId, fullName, email, phone, roleId, status, avatarPath, address);
 
@@ -95,6 +111,7 @@ public class UserUpdate extends HttpServlet {
                 session.setAttribute("authUser", dao.getById(userId));
             }
         }
+
 
         resp.sendRedirect(req.getContextPath() + "/admin/users?msg=" + (ok ? "updated" : "failed"));
     }

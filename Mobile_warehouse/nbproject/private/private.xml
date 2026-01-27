@@ -3,6 +3,7 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+<<<<<<< HEAD
             <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/dal/RolePermissionDAO.java</file>
             <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/dal/UserDAO.java</file>
             <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/view_inventory.jsp</file>
@@ -35,6 +36,13 @@
             <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/dal/PermissionDAO.java</file>
             <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/conduct_inventory_count.jsp</file>
             <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/role_detail.jsp</file>
+=======
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/web/update_user_information.jsp</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/web/user_list.jsp</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/controller/UserUpdate.java</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/controller/AdminUserList.java</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/controller/UserEdit.java</file>
+>>>>>>> c5f38bb0872c73511feaa9f6f22143afbc53b5a1
         </group>
     </open-files>
 </project-private>
