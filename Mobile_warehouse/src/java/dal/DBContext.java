@@ -24,4 +24,13 @@ public class DBContext {
         Class.forName("com.mysql.cj.jdbc.Driver");
         return DriverManager.getConnection(URL, USER, PASS);
     }
+        public static void main(String[] args) {
+        try (Connection con = DBContext.getConnection()) {
+            System.out.println("CONNECTED OK");
+            System.out.println("DB = " + con.getCatalog());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }
