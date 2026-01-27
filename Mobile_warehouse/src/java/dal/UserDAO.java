@@ -154,6 +154,101 @@ public class UserDAO {
         return null;
     }
 
+    public int countUsersWithRole(String q, String statusFilter) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) "
+                + "FROM users u JOIN roles r ON u.role_id = r.role_id "
+                + "WHERE 1=1 "
+        );
+
+        List<Object> params = new ArrayList<>();
+
+        if (q != null && !q.trim().isEmpty()) {
+            sql.append(" AND (u.username LIKE ? OR u.full_name LIKE ?)");
+            String like = "%" + q.trim() + "%";
+            params.add(like);
+            params.add(like);
+        }
+
+        if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+            sql.append(" AND u.status = ?");
+            params.add(Integer.parseInt(statusFilter.trim())); // 1 hoặc 0
+        }
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<UserRoleDetail> getAllUsersWithRole(String q, String statusFilter, int page, int pageSize) {
+        List<UserRoleDetail> list = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT u.user_id, u.username, u.full_name, u.status, u.role_id, r.role_name "
+                + "FROM users u JOIN roles r ON u.role_id = r.role_id "
+                + "WHERE 1=1 "
+        );
+
+        List<Object> params = new ArrayList<>();
+
+        if (q != null && !q.trim().isEmpty()) {
+            sql.append(" AND (u.username LIKE ? OR u.full_name LIKE ?)");
+            String like = "%" + q.trim() + "%";
+            params.add(like);
+            params.add(like);
+        }
+
+        if (statusFilter != null && !statusFilter.trim().isEmpty()) {
+            sql.append(" AND u.status = ?");
+            params.add(Integer.parseInt(statusFilter.trim()));
+        }
+
+        sql.append(" ORDER BY u.user_id ASC LIMIT ? OFFSET ?");
+
+        int offset = (page - 1) * pageSize;
+        params.add(pageSize);
+        params.add(offset);
+
+        System.out.println("[DAO] SQL=" + sql);
+        System.out.println("[DAO] params=" + params);
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new UserRoleDetail(
+                            rs.getInt("user_id"),
+                            rs.getString("username"),
+                            rs.getInt("role_id"),
+                            rs.getString("role_name"),
+                            rs.getString("full_name"),
+                            rs.getInt("status")
+                    ));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
     public static List<UserRoleDetail> getAllUsersWithRole(String q, String statusFilter) {
         List<UserRoleDetail> list = new ArrayList<>();
 
