@@ -14,7 +14,8 @@
 <h3>SALE MENU</h3>
 <ul>
     <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
-   <li><a href="<%=ctx%>/view_inventory.jsp">View Inventory</a></li>
+  
+<li><a href="${pageContext.request.contextPath}/inventory">Inventory Management</a></li>
 
     <li><a href="<%=ctx%>/home?p=create-out">Create Outbound Request</a></li>
 
