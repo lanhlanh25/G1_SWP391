@@ -92,12 +92,12 @@
         <div class="layout">
             <!-- Sidebar do HomeServlet chọn theo role -->
             <div class="side">
-                <jsp:include page="<%= sidebarPage %>" />
+                <jsp:include page="${sidebarPage}" />
             </div>
 
             <!-- Content do HomeServlet chọn theo role + p -->
             <div class="main">
-                <jsp:include page="<%= contentPage %>" />
+                <jsp:include page="${contentPage}" />
             </div>
         </div>
     </body>

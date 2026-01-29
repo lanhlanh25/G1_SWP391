@@ -19,7 +19,7 @@ import model.User;
         maxFileSize = 5 * 1024 * 1024,
         maxRequestSize = 6 * 1024 * 1024
 )
-public class UploadAvatarServlet extends HttpServlet {
+public class UploadAvatar extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)

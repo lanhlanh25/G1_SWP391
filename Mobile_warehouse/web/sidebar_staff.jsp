@@ -17,8 +17,8 @@
    
     <li><a href="<%=ctx%>/view_inventory.jsp">View Inventory</a></li>
     <li><a href="<%=ctx%>/conduct_inventory_count.jsp">Conduct Inventory Count</a></li>
-    <li><a href="<%=ctx%>/home?p=view_supplier">View Supplier List</a></li>
 
+    <li><a href="<%=ctx%>/home?p=brand-list">Brand Management</a></li>
     <li><a href="<%=ctx%>/profile">My Profile</a></li>
     <li><a href="<%=ctx%>/change_password">Change Password</a></li>
 </ul>
