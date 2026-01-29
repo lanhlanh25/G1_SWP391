@@ -49,9 +49,7 @@
       <input type="text" name="q" value="${q}" placeholder="Product name, SKU,..."
              style="width:240px; height:28px; padding:0 8px;"/>
 
-      <select disabled style="height:30px; margin-left:12px; width:140px;">
-        <option>All Categories</option>
-      </select>
+     
 
       <select name="brandId" style="height:30px; margin-left:12px; width:120px;">
         <option value="">All Brands</option>
