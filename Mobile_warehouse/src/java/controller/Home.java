@@ -86,7 +86,7 @@ public class Home extends HttpServlet {
         request.getRequestDispatcher("homepage.jsp").forward(request, response);
     }
 
-    private void prepareData(String p, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    private void prepareData(String p, HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
         UserDAO userDAO = new UserDAO();
         RoleDAO roleDAO = new RoleDAO();
@@ -97,40 +97,8 @@ public class Home extends HttpServlet {
             case "user-list":
             case "user-toggle": {
                 String q = request.getParameter("q");
-                String st = request.getParameter("status");
-                // page
-                int page = 1;
-                try {
-                    page = Integer.parseInt(request.getParameter("page"));
-                    if (page < 1) {
-                        page = 1;
-                    }
-                } catch (Exception e) {
-                    page = 1;
-                }
-
-                int pageSize = 2; // bạn muốn 5/10/20 tuỳ bạn
-
-                int totalItems = userDAO.countUsersWithRole(q, st);
-                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages == 0) {
-                    totalPages = 1;
-                }
-                if (page > totalPages) {
-                    page = totalPages;
-                }
-
-                List<UserRoleDetail> users = userDAO.getAllUsersWithRole(q, st, page, pageSize);
-
-                request.setAttribute("users", users);
-                request.setAttribute("q", q);
-                request.setAttribute("status", st);
-
-                request.setAttribute("page", page);
-                request.setAttribute("pageSize", pageSize);
-                request.setAttribute("totalItems", totalItems);
-                request.setAttribute("totalPages", totalPages);
-
+                UserDAO dao = new UserDAO();
+                request.setAttribute("users", dao.getAllUsersWithRole(q));
                 break;
             }
 
@@ -190,6 +158,11 @@ public class Home extends HttpServlet {
 
                 request.setAttribute("rolePerms", new ArrayList<Permission>());
 
+                break;
+            }
+            case "user-add": {
+                RoleDAO role = new RoleDAO();
+                request.setAttribute("roles", roleDAO.searchRoles(null, 1));
                 break;
             }
 
