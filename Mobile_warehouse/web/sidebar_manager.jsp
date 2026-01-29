@@ -13,10 +13,11 @@
     <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
     <li><a href="<%=ctx%>/home?p=reports">Weekly Reports</a></li>
 
+   
 
-    <li><a href="<%=ctx%>/view_inventory.jsp">View Inventory</a></li>
 
-    <li><a href="<%=ctx%>/conduct_inventory_count.jsp">Conduct Inventory Count</a></li>
+<li><a href="${pageContext.request.contextPath}/inventory">Inventory Management</a></li>
+ <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
 
 
     <li style="list-style:none;">
