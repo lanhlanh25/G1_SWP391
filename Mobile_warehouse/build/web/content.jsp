@@ -25,7 +25,7 @@
     }
     role = role.toUpperCase();
 
-    String p = (String) request.getAttribute("page");
+    String p = (String) request.getAttribute("currentPage");
     if (p == null) p = "dashboard";
     String ctx = request.getContextPath();
 %>
