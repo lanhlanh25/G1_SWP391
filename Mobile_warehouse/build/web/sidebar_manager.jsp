@@ -19,6 +19,9 @@
 <li><a href="${pageContext.request.contextPath}/inventory">Inventory Management</a></li>
  <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
 
+<li><a href="${pageContext.request.contextPath}/inventory">Inventory Management</a></li>
+ <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
+
 
     <li style="list-style:none;">
         <details open>

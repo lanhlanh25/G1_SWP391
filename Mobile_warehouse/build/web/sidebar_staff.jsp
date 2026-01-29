@@ -20,6 +20,8 @@
 
     <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
 
+    <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
+
     <li><a href="<%=ctx%>/home?p=brand-list">Brand Management</a></li>
     <li><a href="<%=ctx%>/profile">My Profile</a></li>
     <li><a href="<%=ctx%>/change_password">Change Password</a></li>
