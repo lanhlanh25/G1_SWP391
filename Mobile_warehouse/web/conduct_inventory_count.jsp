@@ -3,7 +3,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
 
 <style>
   .wrap{ padding:10px; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif; }
@@ -20,7 +20,6 @@
   .st-missing{ color:#d00000; font-weight:800; }
   .diff-input{ width:70px; padding:3px 6px; }
 
-  /* Pagination kiểu ảnh */
   .paging { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; }
   .pg {
     display:inline-block; padding:6px 16px;
@@ -36,7 +35,6 @@
 <div class="wrap">
 
   <div class="topbar">
-    <!-- ✅ Back về HOME -->
     <a class="btn" href="${pageContext.request.contextPath}/home">Back</a>
     <h3 class="title">Conduct Inventory Count</h3>
   </div>
@@ -48,8 +46,6 @@
     <form method="get" action="${pageContext.request.contextPath}/inventory-count" style="margin-top:8px;">
       <input type="text" name="q" value="${q}" placeholder="Product name, SKU,..."
              style="width:240px; height:28px; padding:0 8px;"/>
-
-     
 
       <select name="brandId" style="height:30px; margin-left:12px; width:120px;">
         <option value="">All Brands</option>
@@ -99,14 +95,27 @@
               <td>${r.color}</td>
               <td style="text-align:center;">${r.ramGb} GB</td>
               <td style="text-align:center;">${r.storageGb} GB</td>
-              <td style="text-align:center;">${r.systemQty}</td>
 
+              <!-- system qty -->
               <td style="text-align:center;">
-                <input type="hidden" name="skuId" value="${r.skuId}"/>
-                <input class="diff-input" type="number" name="countedQty" min="0" value="${r.countedQty}"/>
+                ${r.systemQty}
               </td>
 
+              <!-- counted qty input -->
               <td style="text-align:center;">
+                <!-- IMPORTANT: make arrays by using same name for multiple rows -->
+                <input type="hidden" name="skuId" value="${r.skuId}"/>
+
+                <input class="diff-input js-counted"
+                       type="number"
+                       name="countedQty"
+                       min="0"
+                       value="${r.countedQty}"
+                       data-system="${r.systemQty}" />
+              </td>
+
+              <!-- status cell (server-side + JS will update realtime) -->
+              <td style="text-align:center;" class="js-status">
                 <c:choose>
                   <c:when test="${r.countedQty == r.systemQty}">
                     <span class="st-enough">enough</span>
@@ -135,7 +144,7 @@
       </table>
     </form>
 
-    <!-- ===== Pagination kiểu ảnh (an toàn: trang hiện tại là span) ===== -->
+    <!-- ===== Pagination window ===== -->
     <c:choose>
       <c:when test="${totalPages <= 3}">
         <c:set var="startPage" value="1"/>
@@ -205,3 +214,28 @@
 
   </div>
 </div>
+
+<script>
+  function updateStatusForInput(inputEl){
+    const systemQty = parseInt(inputEl.dataset.system || "0", 10);
+    const countedQty = parseInt(inputEl.value || "0", 10);
+
+    const tr = inputEl.closest("tr");
+    if(!tr) return;
+
+    const statusCell = tr.querySelector(".js-status");
+    if(!statusCell) return;
+
+    if(countedQty !== systemQty){
+      statusCell.innerHTML = '<span class="st-missing">missing</span>';
+    }else{
+      statusCell.innerHTML = '<span class="st-enough">enough</span>';
+    }
+  }
+
+  document.querySelectorAll(".js-counted").forEach(inp => {
+    inp.addEventListener("input", () => updateStatusForInput(inp));
+    // init
+    updateStatusForInput(inp);
+  });
+</script>

@@ -8,13 +8,31 @@ package model;
  *
  * @author Admin
  */
+
 public class ImeiRow {
     private String imei;
-    private String status; // ACTIVE / INACTIVE
+    private String status;
 
-    public String getImei() { return imei; }
-    public void setImei(String imei) { this.imei = imei; }
+    public ImeiRow() {}
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public ImeiRow(String imei, String status) {
+        this.imei = imei;
+        this.status = status;
+    }
+
+    public String getImei() {
+        return imei;
+    }
+
+    public void setImei(String imei) {
+        this.imei = imei;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

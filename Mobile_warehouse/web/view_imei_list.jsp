@@ -1,21 +1,20 @@
 <%-- 
     Document   : view_imei_list
 --%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
 
 <style>
   .wrap{ padding:10px; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif; }
   .topbar{ display:flex; gap:10px; align-items:center; }
-  .btn{ padding:6px 14px; border:1px solid #333; background:#eee; text-decoration:none; color:#000; display:inline-block; }
+  .btn{ padding:6px 14px; border:1px solid #333; background:#eee; text-decoration:none; color:#000; display:inline-block; border-radius:6px; }
   .title{ margin:0 0 0 10px; font-weight:700; }
 
   .cards{ margin-top:10px; display:flex; gap:12px; flex-wrap:wrap; }
-  .card{ width:120px; height:55px; background:#3a7bd5; border:2px solid #1d4f91; padding:6px 8px; font-size:12px; }
+  .card{ width:120px; height:55px; background:#3a7bd5; border:2px solid #1d4f91; padding:6px 8px; font-size:12px; color:#fff; border-radius:8px; }
   .card .v{ font-weight:800; font-size:14px; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-  .box{ margin-top:10px; border:2px solid #3b5db7; background:#fff; padding:10px; }
+  .box{ margin-top:10px; border:2px solid #3b5db7; background:#fff; padding:10px; border-radius:10px; }
   table{ width:100%; border-collapse:collapse; margin-top:10px; }
   th,td{ border:1px solid #333; padding:6px; font-size:12px; }
   th{ background:#ddd; }
@@ -23,16 +22,16 @@
   .st-active{ color:#0a8a0a; font-weight:700; }
   .st-inactive{ color:#d00000; font-weight:700; }
 
-  .paging { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; }
+  .paging { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap; }
   .pg {
     display:inline-block; padding:6px 16px;
     border:2px solid #1d4f91; background:#eee; color:#000;
-    text-decoration:none; font-weight:600;
+    text-decoration:none; font-weight:600; border-radius:8px;
   }
   .pg.active { background:#3a7bd5; color:#000; }
   .pg.disabled { pointer-events:none; opacity:0.5; }
 
-  .pagerbar{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:10px; }
+  .pagerbar{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:10px; flex-wrap:wrap; }
 </style>
 
 <div class="wrap">
@@ -40,7 +39,7 @@
   <div class="topbar">
     <a class="btn" href="${pageContext.request.contextPath}/inventory-count">Back</a>
     <a class="btn" href="${pageContext.request.contextPath}/home">Home</a>
-    <h3 class="title">View Imei List</h3>
+    <h3 class="title">View IMEI List</h3>
   </div>
 
   <div class="cards">
@@ -53,12 +52,14 @@
   </div>
 
   <div class="box">
-    <b>Search Imei</b>
+    <b>Search IMEI</b>
 
     <form method="get" action="${pageContext.request.contextPath}/imei-list" style="margin-top:8px;">
       <input type="hidden" name="skuId" value="${skuId}"/>
+      <input type="hidden" name="page" value="1"/>
+      <input type="hidden" name="pageSize" value="${pageSize}"/>
 
-      <input type="text" name="q" value="${q}" placeholder="Imei,...."
+      <input type="text" name="q" value="${q}" placeholder="IMEI..."
              style="width:240px; height:28px; padding:0 8px;"/>
 
       <select name="status" style="height:30px; margin-left:14px;">
@@ -69,15 +70,12 @@
 
       <button class="btn" type="submit" style="margin-left:12px;">Search</button>
       <a class="btn" href="${pageContext.request.contextPath}/imei-list?skuId=${skuId}">Reset</a>
-
-      <input type="hidden" name="page" value="1"/>
-      <input type="hidden" name="pageSize" value="${pageSize}"/>
     </form>
 
     <table>
       <thead>
         <tr>
-          <th style="width:60%;">Imei</th>
+          <th style="width:60%;">IMEI</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -102,6 +100,7 @@
       </tbody>
     </table>
 
+    <!-- paging window -->
     <c:choose>
       <c:when test="${totalPages <= 3}">
         <c:set var="startPage" value="1"/>
@@ -122,7 +121,7 @@
     </c:choose>
 
     <div class="pagerbar">
-      <div>Page ${pageNumber}</div>
+      <div>Page ${pageNumber} / ${totalPages}</div>
 
       <div class="paging">
         <c:url var="prevUrl" value="/imei-list">

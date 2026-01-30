@@ -99,6 +99,13 @@
         border:1px solid #e18a8a;
         border-radius:8px;
     }
+    .msg-success{
+        margin:10px 0;
+        padding:10px;
+        background:#e6ffea;
+        border:1px solid #7bd389;
+        border-radius:8px;
+    }
     ul{
         margin:6px 0 0 18px;
     }
@@ -122,65 +129,80 @@
             <b>Effect:</b> Supplier cannot be selected for new import receipts. Transaction history remains available.
         </div>
 
-        <c:if test="${not empty msg}">
-            <div class="msg-error">${msg}</div>
-        </c:if>
-
-        <c:if test="${not empty errors}">
+        <!-- If supplier is missing -->
+        <c:if test="${empty s}">
             <div class="msg-error">
-                <b>Please fix the following:</b>
-                <ul>
-                    <c:forEach var="e" items="${errors}">
-                        <li>${e}</li>
-                    </c:forEach>
-                </ul>
+                Supplier data is missing. Please go back to supplier list and select a supplier again.
+            </div>
+            <div class="actions">
+                <a class="btn" href="${pageContext.request.contextPath}/home?p=view_supplier">Back to list</a>
             </div>
         </c:if>
 
-        <div class="grid">
-            <label>Supplier</label>
-            <div class="val">
-                <b>${s.supplierName}</b> <span style="color:#777;">(#${s.supplierId})</span>
-            </div>
+        <!-- Normal flow -->
+        <c:if test="${not empty s}">
 
-            <label>Current status</label>
-            <div class="val">
-                <c:choose>
-                    <c:when test="${s.isActive == 1}">
-                        <span class="pill pill-active">Active</span>
-                    </c:when>
-                    <c:otherwise>
-                        <span class="pill pill-inactive">Inactive</span>
-                    </c:otherwise>
-                </c:choose>
-            </div>
+            <c:if test="${not empty msg}">
+                <div class="msg-error">${msg}</div>
+            </c:if>
 
-            <label>Transactions</label>
-            <div class="val">
-                Import receipts: <b>${requestScope.importTx}</b>
-            </div>
-        </div>
-
-        <form method="post" action="${pageContext.request.contextPath}/supplier-inactive" style="margin-top:16px;">
-            <input type="hidden" name="supplierId" value="${s.supplierId}"/>
+            <c:if test="${not empty errors}">
+                <div class="msg-error">
+                    <b>Please fix the following:</b>
+                    <ul>
+                        <c:forEach var="e" items="${errors}">
+                            <li>${e}</li>
+                        </c:forEach>
+                    </ul>
+                </div>
+            </c:if>
 
             <div class="grid">
-                <label>Reasons</label>
+                <label>Supplier</label>
                 <div class="val">
-                    <textarea name="reason" placeholder="Explain why this supplier is being set to inactive...">${reason}</textarea>
+                    <b>${s.supplierName}</b> <span style="color:#777;">(#${s.supplierId})</span>
                 </div>
 
-                <label>Type Inactive to confirm</label>
+                <label>Current status</label>
                 <div class="val">
-                    <input name="confirmText" placeholder="Inactive"/>
+                    <c:choose>
+                        <c:when test="${s.isActive == 1}">
+                            <span class="pill pill-active">Active</span>
+                        </c:when>
+                        <c:otherwise>
+                            <span class="pill pill-inactive">Inactive</span>
+                        </c:otherwise>
+                    </c:choose>
+                </div>
+
+                <label>Transactions</label>
+                <div class="val">
+                    Import receipts: <b>${requestScope.importTx}</b>
                 </div>
             </div>
 
-            <div class="actions">
-                <a class="btn" href="${pageContext.request.contextPath}/home?p=supplier_detail&id=${s.supplierId}">Cancel</a>
-                <button type="submit" class="btn btn-danger">Confirm Inactive</button>
-            </div>
-        </form>
+            <form method="post" action="${pageContext.request.contextPath}/supplier-inactive" style="margin-top:16px;">
+                <input type="hidden" name="supplierId" value="${s.supplierId}"/>
+
+                <div class="grid">
+                    <label>Reasons</label>
+                    <div class="val">
+                        <textarea name="reason" placeholder="Explain why this supplier is being set to inactive...">${reason}</textarea>
+                    </div>
+
+                    <label>Type Inactive to confirm</label>
+                    <div class="val">
+                        <input name="confirmText" placeholder="Inactive"/>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <a class="btn" href="${pageContext.request.contextPath}/home?p=supplier_detail&id=${s.supplierId}">Cancel</a>
+                    <button type="submit" class="btn btn-danger">Confirm Inactive</button>
+                </div>
+            </form>
+
+        </c:if>
 
     </div>
 </div>

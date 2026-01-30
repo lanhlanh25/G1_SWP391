@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
 
-/**
- *
- * @author Admin
- */
 import dal.UserDAO;
 import dal.ViewImeiDAO;
 import jakarta.servlet.ServletException;
@@ -29,12 +21,12 @@ public class View_List_Imei extends HttpServlet {
             return;
         }
 
-        // Role: thường STAFF/MANAGER dùng inventory count, SALE có thể view được
+        // resolve role
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
             model.User u = (model.User) session.getAttribute("authUser");
             role = UserDAO.getRoleNameByUserId(u.getUserId());
-            if (role == null) role = "STAFF";
+            if (role == null || role.isBlank()) role = "STAFF";
             session.setAttribute("roleName", role);
         }
         role = role.toUpperCase();
@@ -44,9 +36,15 @@ public class View_List_Imei extends HttpServlet {
             return;
         }
 
-        // Required param
-        String skuIdRaw = request.getParameter("skuId");
-        if (skuIdRaw == null || skuIdRaw.isBlank()) {
+        // IMPORTANT: fix wrong param name from URL (you had skudl in screenshot)
+        String skuIdRaw = firstNonBlank(
+                request.getParameter("skuId"),
+                request.getParameter("skudl"),   // typo fallback
+                request.getParameter("skuID"),
+                request.getParameter("sku")
+        );
+
+        if (skuIdRaw == null) {
             response.sendRedirect(request.getContextPath() + "/inventory-count?err=Missing skuId");
             return;
         }
@@ -59,9 +57,8 @@ public class View_List_Imei extends HttpServlet {
             return;
         }
 
-        // Filters
-        String q = request.getParameter("q");            // imei search
-        String status = request.getParameter("status");  // ACTIVE/INACTIVE or "" (all)
+        String q = request.getParameter("q");
+        String status = request.getParameter("status");
 
         int page = parseInt(request.getParameter("page"), 1);
         int pageSize = parseInt(request.getParameter("pageSize"), 10);
@@ -70,40 +67,46 @@ public class View_List_Imei extends HttpServlet {
 
         ViewImeiDAO dao = new ViewImeiDAO();
 
-        ViewImeiDAO.SkuHeader header = dao.getSkuHeader(skuId);
-        if (header == null) {
-            response.sendRedirect(request.getContextPath() + "/inventory-count?err=SKU not found");
-            return;
+        try {
+            ViewImeiDAO.SkuHeader header = dao.getSkuHeader(skuId);
+            if (header == null) {
+                response.sendRedirect(request.getContextPath() + "/inventory-count?err=SKU not found");
+                return;
+            }
+
+            int totalItems = dao.countImeis(skuId, q, status);
+            int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page > totalPages) page = totalPages;
+
+            request.setAttribute("skuId", skuId);
+            request.setAttribute("skuCode", header.skuCode);
+            request.setAttribute("productCode", header.productCode);
+            request.setAttribute("productModel", header.productName);
+            request.setAttribute("color", header.color);
+            request.setAttribute("ramGb", header.ramGb);
+            request.setAttribute("storageGb", header.storageGb);
+
+            request.setAttribute("q", q);
+            request.setAttribute("status", status);
+
+            request.setAttribute("imeiRows", dao.listImeis(skuId, q, status, page, pageSize));
+
+            request.setAttribute("pageNumber", page);
+            request.setAttribute("pageSize", pageSize);
+            request.setAttribute("totalPages", totalPages);
+
+            // Render inside homepage layout
+            request.setAttribute("sidebarPage", resolveSidebar(role));
+            request.setAttribute("contentPage", "view_imei_list.jsp");
+            request.setAttribute("currentPage", "imei-list");
+
+            request.getRequestDispatcher("homepage.jsp").forward(request, response);
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            response.sendRedirect(request.getContextPath() + "/inventory-count?err=IMEI list error");
         }
-
-        int totalItems = dao.countImeis(skuId, q, status);
-        int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-        if (totalPages < 1) totalPages = 1;
-        if (page > totalPages) page = totalPages;
-
-        request.setAttribute("skuId", skuId);
-        request.setAttribute("skuCode", header.skuCode);
-        request.setAttribute("productCode", header.productCode);
-        request.setAttribute("productModel", header.productName);
-        request.setAttribute("color", header.color);
-        request.setAttribute("ramGb", header.ramGb);
-        request.setAttribute("storageGb", header.storageGb);
-
-        request.setAttribute("q", q);
-        request.setAttribute("status", status);
-
-        request.setAttribute("imeiRows", dao.listImeis(skuId, q, status, page, pageSize));
-
-        request.setAttribute("pageNumber", page);
-        request.setAttribute("pageSize", pageSize);
-        request.setAttribute("totalPages", totalPages);
-
-        // Render inside homepage layout
-        request.setAttribute("sidebarPage", resolveSidebar(role));
-        request.setAttribute("contentPage", "view_imei_list.jsp");
-        request.setAttribute("currentPage", "imei-list");
-
-        request.getRequestDispatcher("homepage.jsp").forward(request, response);
     }
 
     private int parseInt(String raw, int def) {
@@ -122,5 +125,13 @@ public class View_List_Imei extends HttpServlet {
             case "SALE": return "sidebar_sales.jsp";
             default: return "sidebar_staff.jsp";
         }
+    }
+
+    private String firstNonBlank(String... arr) {
+        if (arr == null) return null;
+        for (String s : arr) {
+            if (s != null && !s.isBlank()) return s;
+        }
+        return null;
     }
 }

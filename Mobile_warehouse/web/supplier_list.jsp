@@ -1,5 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="c" uri="jakarta.tags.core"%>
+<%@taglib prefix="fn" uri="jakarta.tags.functions"%>
 
 <style>
     .wrap{
@@ -31,6 +32,7 @@
         color:#000;
         border-radius:8px;
         display:inline-block;
+        cursor:pointer;
     }
     .bar{
         margin-top:12px;
@@ -79,6 +81,7 @@
     .actions{
         display:flex;
         gap:10px;
+        flex-wrap:wrap;
     }
     .pill{
         display:inline-block;
@@ -120,6 +123,7 @@
         border-radius:6px;
         text-decoration:none;
         color:#000;
+        display:inline-block;
     }
     .pagebtn.current{
         background:#ddd;
@@ -127,14 +131,23 @@
     }
 </style>
 
+<c:set var="isManager"
+       value="${not empty sessionScope.roleName && fn:toUpperCase(sessionScope.roleName) == 'MANAGER'}" />
+
 <div class="wrap">
     <div class="top">
         <div>
             <h2 class="title">Supplier List</h2>
             <div class="sub">Search, filter, and view suppliers. Manager can manage suppliers; Staff view-only.</div>
+
+            <c:if test="${not empty param.msg}">
+                <div class="muted" style="margin-top:6px;">
+                    ${param.msg}
+                </div>
+            </c:if>
         </div>
 
-        <c:if test="${sessionScope.roleName != null && sessionScope.roleName.toUpperCase() == 'MANAGER'}">
+        <c:if test="${isManager}">
             <a class="btn" href="${pageContext.request.contextPath}/home?p=add_supplier">Add new supplier</a>
         </c:if>
     </div>
@@ -224,10 +237,16 @@
                     <td>${s.totalTransactions}</td>
                     <td>
                         <div class="actions">
-                            <a class="btn" href="${pageContext.request.contextPath}/home?p=supplier_detail&id=${s.supplierId}">View</a>
+                            <a class="btn"
+                               href="${pageContext.request.contextPath}/home?p=supplier_detail&id=${s.supplierId}">
+                                View
+                            </a>
 
-                            <c:if test="${sessionScope.roleName != null && sessionScope.roleName.toUpperCase() == 'MANAGER'}">
-                                <a class="btn" href="${pageContext.request.contextPath}/home?p=update_supplier&id=${s.supplierId}">Update</a>
+                            <c:if test="${isManager}">
+                                <a class="btn"
+                                   href="${pageContext.request.contextPath}/home?p=update_supplier&id=${s.supplierId}">
+                                    Update
+                                </a>
 
                                 <c:choose>
                                     <c:when test="${s.isActive == 1}">
@@ -245,7 +264,6 @@
                                         </form>
                                     </c:otherwise>
                                 </c:choose>
-
                             </c:if>
                         </div>
                     </td>
@@ -254,22 +272,39 @@
         </tbody>
     </table>
 
+    <!-- footer + paging safe -->
+    <c:set var="safeTotal" value="${empty totalItems ? 0 : totalItems}" />
+    <c:set var="safePage" value="${empty page ? 1 : page}" />
+    <c:set var="safePageSize" value="${empty pageSize ? 5 : pageSize}" />
+    <c:set var="safeTotalPages" value="${empty totalPages ? 1 : totalPages}" />
+
+    <c:set var="startRow" value="${safeTotal == 0 ? 0 : (safePage - 1) * safePageSize + 1}" />
+    <c:set var="endRow" value="${safeTotal == 0 ? 0 : (safePage * safePageSize > safeTotal ? safeTotal : safePage * safePageSize)}" />
+
     <div class="footer">
         <div class="muted">
-            Showing ${(page-1)*pageSize+1} - ${page*pageSize > totalItems ? totalItems : page*pageSize} of ${totalItems} suppliers
+            Showing ${startRow} - ${endRow} of ${safeTotal} suppliers
         </div>
 
         <div class="pager">
             <c:set var="base"
                    value="${pageContext.request.contextPath}/home?p=view_supplier&q=${q}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&page=" />
 
-            <a class="pagebtn" href="${base}${page-1}" style="${page==1?'pointer-events:none;opacity:.5;':''}">Prev</a>
+            <a class="pagebtn"
+               href="${base}${safePage-1}"
+               style="${safePage==1?'pointer-events:none;opacity:.5;':''}">
+                Prev
+            </a>
 
-            <c:forEach var="i" begin="1" end="${totalPages}">
-                <a class="pagebtn ${i==page?'current':''}" href="${base}${i}">${i}</a>
+            <c:forEach var="i" begin="1" end="${safeTotalPages}">
+                <a class="pagebtn ${i==safePage?'current':''}" href="${base}${i}">${i}</a>
             </c:forEach>
 
-            <a class="pagebtn" href="${base}${page+1}" style="${page==totalPages?'pointer-events:none;opacity:.5;':''}">Next</a>
+            <a class="pagebtn"
+               href="${base}${safePage+1}"
+               style="${safePage==safeTotalPages?'pointer-events:none;opacity:.5;':''}">
+                Next
+            </a>
         </div>
     </div>
 </div>
