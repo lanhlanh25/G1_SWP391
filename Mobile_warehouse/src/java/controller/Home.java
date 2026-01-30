@@ -11,6 +11,7 @@ package controller;
 import dal.PermissionDAO;
 import dal.RoleDAO;
 import dal.RolePermissionDAO;
+import dal.SupplierDAO;
 import dal.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -21,8 +22,12 @@ import java.util.List;
 import java.util.Set;
 import model.Permission;
 import model.Role;
+import model.SupplierListItem;
 import model.User;
 import model.UserRoleDetail;
+import java.sql.SQLException;
+import model.Supplier;
+import model.SupplierDetailDTO;
 
 @WebServlet(name = "HomeServlet", urlPatterns = {"/home"})
 public class Home extends HttpServlet {
@@ -193,6 +198,186 @@ public class Home extends HttpServlet {
                 break;
             }
 
+            case "view_supplier": {
+                SupplierDAO supplierDAO = new SupplierDAO();
+
+                String q = request.getParameter("q");
+                String status = request.getParameter("status");
+                String sortBy = request.getParameter("sortBy");
+                String sortOrder = request.getParameter("sortOrder");
+
+                if (sortBy == null || sortBy.isBlank()) {
+                    sortBy = "newest";
+                }
+                if (sortOrder == null || sortOrder.isBlank()) {
+                    sortOrder = "DESC";
+                }
+
+                int page = 1;
+                try {
+                    page = Integer.parseInt(request.getParameter("page"));
+                    if (page < 1) {
+                        page = 1;
+                    }
+                } catch (Exception e) {
+                    page = 1;
+                }
+
+                int pageSize = 5;
+
+                try {
+                    int totalItems = supplierDAO.countSuppliers(q, status);
+                    int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+                    if (totalPages == 0) {
+                        totalPages = 1;
+                    }
+                    if (page > totalPages) {
+                        page = totalPages;
+                    }
+
+                    List<SupplierListItem> suppliers
+                            = supplierDAO.searchSuppliers(q, status, sortBy, sortOrder, page, pageSize);
+
+                    request.setAttribute("suppliers", suppliers);
+                    request.setAttribute("q", q);
+                    request.setAttribute("status", status);
+                    request.setAttribute("sortBy", sortBy);
+                    request.setAttribute("sortOrder", sortOrder);
+
+                    request.setAttribute("page", page);
+                    request.setAttribute("pageSize", pageSize);
+                    request.setAttribute("totalItems", totalItems);
+                    request.setAttribute("totalPages", totalPages);
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+
+                    // fallback để UI không crash
+                    request.setAttribute("suppliers", java.util.Collections.emptyList());
+                    request.setAttribute("q", q);
+                    request.setAttribute("status", status);
+                    request.setAttribute("sortBy", sortBy);
+                    request.setAttribute("sortOrder", sortOrder);
+
+                    request.setAttribute("page", 1);
+                    request.setAttribute("pageSize", pageSize);
+                    request.setAttribute("totalItems", 0);
+                    request.setAttribute("totalPages", 1);
+
+                    request.setAttribute("msg", "Database error while loading supplier list.");
+                }
+
+                break;
+            }
+            case "supplier_detail": {
+                String idRaw = request.getParameter("id");
+                if (idRaw == null || idRaw.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Please select a supplier");
+                    return;
+                }
+
+                long supplierId;
+                try {
+                    supplierId = Long.parseLong(idRaw);
+                } catch (Exception e) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Invalid supplier id");
+                    return;
+                }
+
+                SupplierDAO supplierDAO = new SupplierDAO();
+                try {
+                    SupplierDetailDTO dto = supplierDAO.getSupplierDetail(supplierId);
+                    if (dto == null) {
+                        response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Supplier not found");
+                        return;
+                    }
+                    request.setAttribute("supplierDetail", dto);
+                } catch (java.sql.SQLException ex) {
+                    ex.printStackTrace();
+                    request.setAttribute("msg", "Database error while loading supplier detail.");
+                }
+
+                break;
+            }
+            case "update_supplier": {
+                // Role check: only MANAGER
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !"MANAGER".equalsIgnoreCase(roleName)) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                String idRaw = request.getParameter("id");
+                if (idRaw == null || idRaw.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Please choose a supplier to update");
+                    return;
+                }
+
+                long supplierId;
+                try {
+                    supplierId = Long.parseLong(idRaw);
+                } catch (Exception e) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Invalid supplier id");
+                    return;
+                }
+
+                SupplierDAO supplierDAO = new SupplierDAO();
+                try {
+                    Supplier s = supplierDAO.getById(supplierId);
+                    if (s == null) {
+                        response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Supplier not found");
+                        return;
+                    }
+                    request.setAttribute("supplier", s);
+                } catch (java.sql.SQLException ex) {
+                    ex.printStackTrace();
+                    request.setAttribute("msg", "Database error while loading supplier.");
+                }
+
+                break;
+            }
+            case "supplier_inactive": {
+                // Role check: only MANAGER
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !"MANAGER".equalsIgnoreCase(roleName)) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                String idRaw = request.getParameter("id");
+                if (idRaw == null || idRaw.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Please choose a supplier to inactive");
+                    return;
+                }
+
+                long supplierId;
+                try {
+                    supplierId = Long.parseLong(idRaw);
+                } catch (Exception e) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Invalid supplier id");
+                    return;
+                }
+
+                SupplierDAO supplierDAO = new SupplierDAO();
+                try {
+                    Supplier s = supplierDAO.getById(supplierId);
+                    if (s == null) {
+                        response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Supplier not found");
+                        return;
+                    }
+
+                    int importTx = supplierDAO.countImportReceiptsBySupplier(supplierId);
+
+                    request.setAttribute("supplier", s);
+                    request.setAttribute("importTx", importTx);
+
+                } catch (java.sql.SQLException ex) {
+                    ex.printStackTrace();
+                    request.setAttribute("msg", "Database error while loading inactive page.");
+                }
+                break;
+            }
+
             default:
 
                 break;
@@ -241,6 +426,20 @@ public class Home extends HttpServlet {
                         return "user_list.jsp";
                     case "user-detail":
                         return "view_user_information.jsp";
+                    case "add_supplier":
+                        return "add_supplier.jsp";
+                    case "view_supplier":
+                        return "supplier_list.jsp";
+                    case "supplier_detail":
+                        return "supplier_detail.jsp";
+                    case "update_supplier":
+                        return "update_supplier.jsp";
+                    case "supplier_inactive":
+                        return "inactive_supplier.jsp";
+                    case "view_history":
+                        return "view_user_information.jsp";
+                    case "rate_supplier":
+                        return "view_user_information.jsp";
                     case "profile":
                         return "view_profile.jsp";
                     case "change-password":
@@ -253,6 +452,8 @@ public class Home extends HttpServlet {
                 switch (p) {
                     case "dashboard":
                         return "sales_dashboard.jsp";
+                    case "view_supplier":
+                        return "supplier_list.jsp";
                     case "profile":
                         return "view_profile.jsp";
                     case "change-password":
@@ -267,6 +468,10 @@ public class Home extends HttpServlet {
                         return "staff_dashboard.jsp";
                     case "profile":
                         return "view_profile.jsp";
+                    case "view_supplier":
+                        return "supplier_list.jsp";
+                    case "supplier_detail":
+                        return "supplier_detail.jsp";
                     case "change-password":
                         return "change_password.jsp";
                     default:

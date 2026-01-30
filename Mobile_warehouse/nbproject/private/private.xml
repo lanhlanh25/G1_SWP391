@@ -3,46 +3,16 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-<<<<<<< HEAD
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/dal/RolePermissionDAO.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/dal/UserDAO.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/view_inventory.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/change_password.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/user_add.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/model/Permission.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/index.html</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/active_role.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/sidebar_manager.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/sidebar_sales.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/dal/RoleDAO.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/model/User.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/model/UserRoleDetail.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/view_user_information.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/content.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/edit_role_permissions.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/homepage.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/sidebar_admin.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/active_user.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/controller/AdminFilter.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/model/Role.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/util/PasswordUtil.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/controller/EncodingFilter.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/dal/DBContext.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/user_list.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/controller/ChangePassword.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/model/RolePermission.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/sidebar_staff.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/login.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/src/java/dal/PermissionDAO.java</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/conduct_inventory_count.jsp</file>
-            <file>file:/C:/swp391/G1_SWP391/Mobile_warehouse/web/role_detail.jsp</file>
-=======
-            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/web/update_user_information.jsp</file>
-            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/web/user_list.jsp</file>
-            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/controller/UserUpdate.java</file>
-            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/controller/AdminUserList.java</file>
-            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/controller/UserEdit.java</file>
->>>>>>> c5f38bb0872c73511feaa9f6f22143afbc53b5a1
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/controller/AddSupplierServlet.java</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/web/homepage.jsp</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/web/sidebar_staff.jsp</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/controller/Home.java</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/dal/SupplierDAO.java</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/web/add_supplier.jsp</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/web/supplier_list.jsp</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/model/SupplierListItem.java</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/web/sidebar_manager.jsp</file>
+            <file>file:/D:/code_dao/SWP/G1_SWP391/Mobile_warehouse/src/java/model/Supplier.java</file>
         </group>
     </open-files>
 </project-private>
