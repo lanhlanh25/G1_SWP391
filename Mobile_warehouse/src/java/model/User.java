@@ -2,16 +2,14 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-
 package model;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import java.sql.Timestamp;
 
-
-
 public class User {
+
     private int userId;
     private String username;
     private String passwordHash;
@@ -19,15 +17,18 @@ public class User {
     private String email;
     private String phone;
     private int roleId;
-    private int status; // 1 active, 0 inactive
+    private int status;
     private Timestamp lastLoginAt;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private String avatar;
+    private String address;
 
-    public User() {}
+    public User() {
+    }
 
     public User(int userId, String username, String passwordHash, String fullName,
-                String email, String phone, int roleId, int status) {
+            String email, String phone, int roleId, int status) {
         this.userId = userId;
         this.username = username;
         this.passwordHash = passwordHash;
@@ -38,36 +39,121 @@ public class User {
         this.status = status;
     }
 
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public User(int userId, String username, String passwordHash, String fullName,
+            String email, String phone, int roleId, int status, String avatar, String address) {
+        this.userId = userId;
+        this.username = username;
+        this.passwordHash = passwordHash;
+        this.fullName = fullName;
+        this.email = email;
+        this.phone = phone;
+        this.roleId = roleId;
+        this.status = status;
+        this.avatar = avatar;
+        this.address = address;
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getAvatar() {
+        return avatar;
+    }
 
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
 
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public String getAddress() {
+        return address;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public int getUserId() {
+        return userId;
+    }
 
-    public int getRoleId() { return roleId; }
-    public void setRoleId(int roleId) { this.roleId = roleId; }
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
 
-    public int getStatus() { return status; }
-    public void setStatus(int status) { this.status = status; }
+    public String getUsername() {
+        return username;
+    }
 
-    public Timestamp getLastLoginAt() { return lastLoginAt; }
-    public void setLastLoginAt(Timestamp lastLoginAt) { this.lastLoginAt = lastLoginAt; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public String getPasswordHash() {
+        return passwordHash;
+    }
 
-    public Timestamp getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Timestamp updatedAt) { this.updatedAt = updatedAt; }
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public int getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(int roleId) {
+        this.roleId = roleId;
+    }
+
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public Timestamp getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(Timestamp lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Timestamp getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Timestamp updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

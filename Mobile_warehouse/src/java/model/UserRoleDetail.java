@@ -15,12 +15,11 @@ public class UserRoleDetail {
     private String roleName;
     private String fullName;
 
-    // NEW: user status (1 active, 0 inactive)
     private int status;
 
     public UserRoleDetail() {}
 
-    // NEW constructor có status
+
     public UserRoleDetail(int userId, String username, int roleId, String roleName, String fullName, int status) {
         this.userId = userId;
         this.username = username;
@@ -30,7 +29,7 @@ public class UserRoleDetail {
         this.status = status;
     }
 
-    // (Optional) giữ constructor cũ để code cũ không lỗi
+   
     public UserRoleDetail(int userId, String username, int roleId, String roleName, String fullName) {
         this(userId, username, roleId, roleName, fullName, 1);
     }
@@ -50,7 +49,7 @@ public class UserRoleDetail {
     public String getFullName() { return fullName; }
     public void setFullName(String fullName) { this.fullName = fullName; }
 
-    // NEW getter/setter
+   
     public int getStatus() { return status; }
     public void setStatus(int status) { this.status = status; }
 }
