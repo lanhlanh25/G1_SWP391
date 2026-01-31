@@ -3,8 +3,8 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="jakarta.tags.core"%>
-
+<%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <style>
   .wrap{ padding:10px; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif; }
   .topbar{ display:flex; gap:10px; align-items:center; }

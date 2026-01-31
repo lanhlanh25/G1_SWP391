@@ -56,7 +56,7 @@ public class RoleDAO {
                             rs.getInt("role_id"),
                             rs.getString("role_name"),
                             rs.getString("description"),
-                            rs.getInt("is_active"),     // map is_active -> status
+                            rs.getInt("is_active"),     
                             rs.getInt("user_count")
                     ));
                 }

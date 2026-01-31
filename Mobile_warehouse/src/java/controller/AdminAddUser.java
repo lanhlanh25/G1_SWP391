@@ -27,8 +27,17 @@ import util.PasswordUtil;
 )
 public class AdminAddUser extends HttpServlet {
 
-    private String n(String s) { return s == null ? "" : s.trim(); }
-    private int parseInt(String s, int def) { try { return Integer.parseInt(s); } catch (Exception e) { return def; } }
+    private String n(String s) {
+        return s == null ? "" : s.trim();
+    }
+
+    private int parseInt(String s, int def) {
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return def;
+        }
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -50,7 +59,6 @@ public class AdminAddUser extends HttpServlet {
         String address = n(req.getParameter("address"));
         int roleId = parseInt(req.getParameter("role_id"), 0);
 
-        // giữ lại value khi lỗi
         req.setAttribute("v_username", username);
         req.setAttribute("v_full_name", fullName);
         req.setAttribute("v_email", email);
@@ -59,24 +67,30 @@ public class AdminAddUser extends HttpServlet {
         req.setAttribute("v_role_id", roleId);
 
         if (username.isEmpty() || password.isEmpty() || fullName.isEmpty() || roleId <= 0) {
-            req.setAttribute("error", "Please fill required fields (username, password, full name, role).");
+            req.setAttribute("error", "Required!!");
             doGet(req, resp);
             return;
         }
 
         UserDAO dao = new UserDAO();
         if (dao.getUserByUsername(username) != null) {
-            req.setAttribute("error", "Username already exists!");
+            req.setAttribute("errorU", "Username already exists!");
+            doGet(req, resp);
+            return;
+        }
+        if (dao.getUserByEmail(email) != null) {
+            req.setAttribute("errorE", "Email already exists!");
             doGet(req, resp);
             return;
         }
 
-        // avatar upload (optional)
-        String avatarPath = ""; // empty => UI fallback default
+        String avatarPath = "";
         Part filePart = req.getPart("avatarFile");
         if (filePart != null && filePart.getSize() > 0) {
             String saved = saveAvatarToUploads(req, filePart, username);
-            if (saved != null) avatarPath = saved;
+            if (saved != null) {
+                avatarPath = saved;
+            }
         }
 
         User u = new User();
@@ -104,7 +118,9 @@ public class AdminAddUser extends HttpServlet {
         String submitted = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
         String ext = "";
         int dot = submitted.lastIndexOf('.');
-        if (dot >= 0) ext = submitted.substring(dot).toLowerCase();
+        if (dot >= 0) {
+            ext = submitted.substring(dot).toLowerCase();
+        }
 
         if (!(ext.equals(".png") || ext.equals(".jpg") || ext.equals(".jpeg") || ext.equals(".webp"))) {
             return null;
@@ -115,7 +131,9 @@ public class AdminAddUser extends HttpServlet {
 
         String uploadDir = req.getServletContext().getRealPath("/uploads/avatars");
         File dir = new File(uploadDir);
-        if (!dir.exists()) dir.mkdirs();
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
 
         File saved = new File(dir, fileName);
         try (InputStream in = filePart.getInputStream(); FileOutputStream out = new FileOutputStream(saved)) {

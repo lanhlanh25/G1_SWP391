@@ -1,4 +1,3 @@
-<%-- Document: sidebar_manager --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
     String ctx = request.getContextPath();
@@ -28,7 +27,16 @@
             <ul style="margin-top:6px;">
                 <li><a href="<%=ctx%>/home?p=add_supplier">Add New Supplier</a></li>
                 <li><a href="<%=ctx%>/home?p=view_supplier">View Supplier List</a></li>
-                <%-- Update/Inactive phải làm ở List/Detail vì cần id --%>
+            </ul>
+        </details>
+    </li>
+
+    <li style="list-style:none;">
+        <details open>
+            <summary style="cursor:pointer;">Product Management</summary>
+            <ul style="margin-top:6px;">
+                <li><a href="<%=ctx%>/home?p=product-add">Add Product</a></li>
+                <li><a href="<%=ctx%>/home?p=product-list">List Product</a></li>
             </ul>
         </details>
     </li>

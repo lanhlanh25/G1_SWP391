@@ -41,6 +41,18 @@ public class BrandDAO {
             }
         }
     }
+    public List<Brand> listActiveForDropdown() throws SQLException, Exception {
+    String sql = "SELECT * FROM brands WHERE is_active = 1 ORDER BY brand_name ASC";
+    try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (ResultSet rs = ps.executeQuery()) {
+            List<Brand> list = new ArrayList<>();
+            while (rs.next()) {
+                list.add(map(rs));
+            }
+            return list;
+        }
+    }
+}
 
     public long insert(Brand b) throws SQLException, Exception {
         String sql = "INSERT INTO brands (brand_name, description, is_active, created_by) "

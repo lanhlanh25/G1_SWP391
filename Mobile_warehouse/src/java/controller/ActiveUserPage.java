@@ -23,10 +23,11 @@ public class ActiveUserPage extends HttpServlet {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        UserDAO dao = new UserDAO();
-        req.setAttribute("users", dao.getAllUsersWithRole(null));
+        String q = req.getParameter("q");
 
-       
+        UserDAO dao = new UserDAO();
+        req.setAttribute("users", dao.getAllUsersWithRole(q));
+
         req.getRequestDispatcher("/active_user.jsp").forward(req, resp);
     }
 }
