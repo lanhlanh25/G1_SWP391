@@ -51,7 +51,7 @@ public class SupplierDAO {
                 ps.setNull(7, Types.BIGINT);
             } else {
                 ps.setLong(6, s.getCreatedBy());
-                ps.setLong(7, s.getCreatedBy()); // updated_by = created_by
+                ps.setLong(7, s.getCreatedBy()); 
             }
 
             ps.executeUpdate();
@@ -116,7 +116,7 @@ public class SupplierDAO {
                 + "FROM suppliers s "
                 + "LEFT JOIN ( "
                 + "   SELECT supplier_id, AVG(score) AS avg_rating "
-                + // <-- nếu cột bạn là rating thì đổi rating_value -> rating
+                + 
                 "   FROM supplier_ratings "
                 + "   GROUP BY supplier_id "
                 + ") r ON r.supplier_id = s.supplier_id "
@@ -146,7 +146,7 @@ public class SupplierDAO {
             }
         }
 
-        // Sorting
+      
         String order = "DESC".equalsIgnoreCase(sortOrder) ? "DESC" : "ASC";
         String sortCol;
         if ("name".equalsIgnoreCase(sortBy)) {
@@ -156,9 +156,9 @@ public class SupplierDAO {
         } else if ("transactions".equalsIgnoreCase(sortBy)) {
             sortCol = "total_txn";
         } else {
-            sortCol = "s.created_at"; // newest default
+            sortCol = "s.created_at";
         }
-        // NULL rating: cho xuống cuối khi sort DESC (tùy bạn)
+       
         if ("rating".equalsIgnoreCase(sortBy)) {
             sql.append(" ORDER BY (r.avg_rating IS NULL) ASC, ").append(sortCol).append(" ").append(order);
         } else {
@@ -216,7 +216,7 @@ public class SupplierDAO {
                 + "     FROM import_receipts ir "
                 + "    WHERE ir.supplier_id = s.supplier_id) AS last_transaction, "
                 + "  (SELECT COALESCE(SUM(l.qty),0) "
-                + // ✅ FIX: qty
+                + 
                 "     FROM import_receipt_lines l "
                 + "     JOIN import_receipts ir2 ON ir2.import_id = l.import_id "
                 + "    WHERE ir2.supplier_id = s.supplier_id) AS total_qty_imported "

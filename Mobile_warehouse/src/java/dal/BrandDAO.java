@@ -108,7 +108,7 @@ public class BrandDAO {
         }
     }
 
-    // list with paging + filter + sort
+   
     public List<Brand> list(String q, String status, String sortBy, String sortOrder, int page, int pageSize) throws SQLException, Exception {
         String sortCol = switch (sortBy == null ? "" : sortBy) {
             case "name" ->

@@ -22,12 +22,12 @@
     String roleName = (String) session.getAttribute("roleName");
     if (roleName == null) roleName = "";
 
-    // defaults
+   
     if (sidebarPage == null || sidebarPage.isBlank()) sidebarPage = "sidebar_staff.jsp";
     if (contentPage == null || contentPage.isBlank()) contentPage = "content.jsp";
     if (currentPage == null || currentPage.isBlank()) currentPage = "dashboard";
 
-    // ✅ FIX: remove leading slash to avoid absolute include "/xxx.jsp"
+    
     if (sidebarPage.startsWith("/")) sidebarPage = sidebarPage.substring(1);
     if (contentPage.startsWith("/")) contentPage = contentPage.substring(1);
 %>
@@ -106,12 +106,11 @@
     </div>
 
     <div class="layout">
-        <!-- Sidebar do HomeServlet chọn theo role -->
+     
         <div class="side">
             <jsp:include page="<%= sidebarPage %>" />
         </div>
 
-        <!-- Content do HomeServlet chọn theo role + p -->
         <div class="main">
             <jsp:include page="<%= contentPage %>" />
         </div>

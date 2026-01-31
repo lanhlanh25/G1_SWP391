@@ -22,14 +22,14 @@ public class InactiveSupplierServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        // 1) Auth
+        
         User u = (User) session.getAttribute("authUser");
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // 2) Role check
+    
         String role = (String) session.getAttribute("roleName");
         if (role == null) {
             role = "STAFF";
@@ -39,7 +39,7 @@ public class InactiveSupplierServlet extends HttpServlet {
             return;
         }
 
-        // 3) Read inputs
+       
         String idRaw = trim(request.getParameter("supplierId"));
         String reason = trim(request.getParameter("reason"));
         String confirmText = trim(request.getParameter("confirmText"));
@@ -54,7 +54,7 @@ public class InactiveSupplierServlet extends HttpServlet {
 
         List<String> errors = new ArrayList<>();
 
-        // 4) Validate confirm text
+        
         if (confirmText == null || !confirmText.equalsIgnoreCase("Inactive")) {
             errors.add("You must type exactly 'Inactive' to confirm.");
         }
@@ -77,13 +77,13 @@ public class InactiveSupplierServlet extends HttpServlet {
                 return;
             }
 
-            // already inactive -> just go detail
+            
             if (s.getIsActive() == 0) {
                 response.sendRedirect(request.getContextPath() + "/home?p=supplier_detail&id=" + supplierId + "&inactive=1");
                 return;
             }
 
-            boolean ok = dao.setActive(supplierId, 0, (long) u.getUserId()); // set inactive
+            boolean ok = dao.setActive(supplierId, 0, (long) u.getUserId());
             if (!ok) {
                 errors.add("Inactive failed. Supplier may not exist.");
                 session.setAttribute("flashErrors", errors);
@@ -92,7 +92,7 @@ public class InactiveSupplierServlet extends HttpServlet {
                 return;
             }
 
-            // success -> redirect detail
+            
             response.sendRedirect(request.getContextPath() + "/home?p=supplier_detail&id=" + supplierId + "&inactive=1");
 
         } catch (SQLException ex) {

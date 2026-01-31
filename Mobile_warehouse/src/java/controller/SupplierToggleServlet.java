@@ -22,14 +22,14 @@ public class SupplierToggleServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        // 1) Auth
+        
         User u = (User) session.getAttribute("authUser");
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // 2) Role check (only MANAGER)
+        
         String role = (String) session.getAttribute("roleName");
         if (role == null) {
             role = "STAFF";
@@ -39,7 +39,7 @@ public class SupplierToggleServlet extends HttpServlet {
             return;
         }
 
-        // 3) Read supplierId
+        
         String idRaw = request.getParameter("supplierId");
         long supplierId;
         try {
@@ -59,9 +59,9 @@ public class SupplierToggleServlet extends HttpServlet {
                 return;
             }
 
-            // Only reactivate here (inactive -> active)
+           
             if (s.getIsActive() == 1) {
-                // already active, go back
+                
                 response.sendRedirect(request.getContextPath() + "/home?p=supplier_detail&id=" + supplierId);
                 return;
             }

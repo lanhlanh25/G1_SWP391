@@ -72,10 +72,10 @@ public class ViewImeiDAO {
             params.add("%" + q.trim() + "%");
         }
 
-        // ✅ DB của bạn dùng unit_status ENUM('INACTIVE','ACTIVE')
+        
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND pu.unit_status = ? ");
-            params.add(status.trim().toUpperCase()); // ACTIVE/INACTIVE
+            params.add(status.trim().toUpperCase()); 
         }
 
         try (Connection con = getConn();
@@ -113,7 +113,7 @@ public class ViewImeiDAO {
 
         if (status != null && !status.trim().isEmpty()) {
             sql.append(" AND pu.unit_status = ? ");
-            params.add(status.trim().toUpperCase()); // ACTIVE/INACTIVE
+            params.add(status.trim().toUpperCase()); 
         }
 
         sql.append(" ORDER BY pu.imei LIMIT ? OFFSET ? ");
@@ -129,7 +129,7 @@ public class ViewImeiDAO {
                 while (rs.next()) {
                     ImeiRow r = new ImeiRow();
                     r.setImei(rs.getString("imei"));
-                    r.setStatus(rs.getString("unit_status")); // ACTIVE/INACTIVE
+                    r.setStatus(rs.getString("unit_status")); 
                     list.add(r);
                 }
             }

@@ -24,28 +24,32 @@
 <h1>Role List</h1>
 <h4>Manage roles and permissions</h4>
 
-<form action="<%=request.getContextPath()%>/role_list" method="get">
+<form action="<%=request.getContextPath()%>/home" method="get">
+    <input type="hidden" name="p" value="role-list"/>
+
     Search Role Name:
     <input type="text" name="q"
-           value="<%= request.getAttribute("q") != null ? request.getAttribute("q") : "" %>"
+           value="<%= request.getParameter("q") != null ? request.getParameter("q") : "" %>"
            placeholder="e.g. ADMIN">
 
     Status:
+    <%
+        String statusParam = request.getParameter("status");
+        if (statusParam == null) statusParam = "";
+    %>
     <select name="status">
-        <%
-            String status = (String) request.getAttribute("status");
-        %>
-        <option value="" <%= (status == null || status.isEmpty()) ? "selected" : "" %>>All</option>
-        <option value="1" <%= "1".equals(status) ? "selected" : "" %>>Active</option>
-        <option value="0" <%= "0".equals(status) ? "selected" : "" %>>Inactive</option>
+        <option value=""  <%= statusParam.isEmpty() ? "selected" : "" %>>All</option>
+        <option value="1" <%= "1".equals(statusParam) ? "selected" : "" %>>Active</option>
+        <option value="0" <%= "0".equals(statusParam) ? "selected" : "" %>>Inactive</option>
     </select>
 
     <button type="submit">Filter</button>
 </form>
 
+
 <br>
 
-<!-- ✅ Nút Active + Add Role ở trên table -->
+
 <div style="width:900px; text-align:right; margin-bottom:8px;">
     <a href="<%=request.getContextPath()%>/admin/role/active-page"
    style="display:inline-block; padding:6px 14px; border:2px solid #1f4aa8; background:#4a86d4;

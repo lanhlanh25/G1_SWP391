@@ -100,7 +100,7 @@
           action="<%=request.getContextPath()%>/admin/user/update"
           enctype="multipart/form-data">
 
-        <!-- giữ avatar cũ nếu không upload -->
+        
         <input type="hidden" name="current_avatar" value="${user.avatar}"/>
 
         <table>
@@ -180,7 +180,7 @@
 
 
 <script>
-  // preview ảnh khi chọn file
+  
   const input = document.querySelector('input[name="avatarFile"]');
   const img = document.getElementById('avatarPreview');
   if (input) {

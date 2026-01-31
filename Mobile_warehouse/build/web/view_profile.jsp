@@ -51,7 +51,7 @@
                 padding: 24px;
             }
 
-            /* Top bar like your screenshot */
+            
             .topbar {
                 display:flex;
                 align-items:center;
@@ -81,7 +81,7 @@
                 margin: 0;
             }
 
-            /* Layout */
+            
             .grid {
                 display:grid;
                 grid-template-columns: 320px 1fr;
@@ -141,7 +141,7 @@
                 border:1px solid #f5c2c7;
             }
 
-            /* Responsive */
+            
             @media (max-width: 900px) {
                 .grid {
                     grid-template-columns: 1fr;
@@ -161,7 +161,7 @@
             </div>
 
             <div class="grid">
-                <!-- Left: avatar card -->
+                
                 <div class="card">
                     <div class="avatarWrap">
                         <img class="avatar" src="<%=request.getContextPath()%>/<%=avatar%>?v=<%=v%>" alt="avatar">
@@ -169,7 +169,7 @@
                     </div>
                 </div>
 
-                <!-- Right: info card -->
+                
                 <div class="card">
                     <table>
                         <tr><td>User ID</td><td><%= pu.getUserId() %></td></tr>

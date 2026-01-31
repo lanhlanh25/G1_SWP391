@@ -13,7 +13,7 @@ import java.util.Properties;
 public class EmailUtil {
 
     private static final String SMTP_USER = "minhduchoang2410@gmail.com";
-    private static final String SMTP_APP_PASSWORD = "zjmm itck wdiu qiuj"; // 16 chars
+    private static final String SMTP_APP_PASSWORD = "zjmm itck wdiu qiuj"; 
 
     private static Session newSession() {
         Properties props = new Properties();
@@ -32,7 +32,7 @@ public class EmailUtil {
         });
     }
 
-    // generic send
+  
     public static boolean sendText(String toEmail, String subject, String content) {
         try {
             Session session = newSession();
@@ -45,7 +45,7 @@ public class EmailUtil {
             Transport.send(msg);
             return true;
         } catch (Exception e) {
-            e.printStackTrace(); // xem ở server log
+            e.printStackTrace(); 
             return false;
         }
     }
@@ -60,7 +60,7 @@ public class EmailUtil {
         return sendText(adminEmail, subject, content);
     }
 
-    // gửi mail cho user khi admin reject
+   
     public static boolean sendRejectToUser(String userEmail, String userName, String reason) {
         String subject = "[WMS] Password reset request rejected";
         String content
@@ -71,7 +71,7 @@ public class EmailUtil {
         return sendText(userEmail, subject, content);
     }
 
-    // Generate random password length 8
+    
     public static String randomPassword8() {
         SecureRandom r = new SecureRandom();
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -82,7 +82,7 @@ public class EmailUtil {
         return sb.toString();
     }
 
-// Send approved email with generated password
+
     public static boolean sendApprovePasswordToUser(String userEmail, String userName, String newPassword) {
         String subject = "[WMS] Password reset approved - Your new password";
         String content

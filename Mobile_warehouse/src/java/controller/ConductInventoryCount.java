@@ -34,7 +34,7 @@ public class ConductInventoryCount extends HttpServlet {
         }
 
         String role = getRole(session).toUpperCase();
-        // ✅ chỉ STAFF + MANAGER được thao tác inventory count
+        
         if (!"STAFF".equals(role) && !"MANAGER".equals(role)) {
             response.sendError(403, "Forbidden");
             return;
@@ -126,7 +126,7 @@ public class ConductInventoryCount extends HttpServlet {
         }
     }
 
-    // ===== helpers =====
+ 
     private String getRole(HttpSession session) {
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {

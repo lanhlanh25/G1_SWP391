@@ -36,7 +36,7 @@ public class AdminResetRequestAction extends HttpServlet {
         }
 
         String ridRaw = req.getParameter("requestId");
-        String action = req.getParameter("action"); // APPROVE / REJECT
+        String action = req.getParameter("action"); 
         String reason = req.getParameter("reason");
 
         if (ridRaw == null || ridRaw.isBlank() || action == null || action.isBlank()) {
@@ -46,7 +46,7 @@ public class AdminResetRequestAction extends HttpServlet {
 
         long requestId = Long.parseLong(ridRaw);
 
-        // take request follow id
+        
         ResetRequest rr = dao.getResetRequestById(requestId);
         if (rr == null) {
             resp.sendRedirect(req.getContextPath() + "/admin/reset-requests");
@@ -75,23 +75,23 @@ public class AdminResetRequestAction extends HttpServlet {
                     + "If you believe this is a mistake, please contact administrator."
             );
 
-        } else { // APPROVE
-            // 1) Generate new password (8 chars)
+        } else { 
+           
             String newPassword = EmailUtil.randomPassword8();
 
-            // 2) Hash and update users.password_hash
+         
             String newHash = PasswordUtil.hashPassword(newPassword);
             boolean ok = dao.updatePasswordHash(rr.getUserId(), newHash);
 
             if (ok) {
-                // 3) Mark request approved
+                
                 dao.decideResetRequest(requestId, "APPROVED", null, adminId);
 
-                // 4) Send generated password to user
+                
                 EmailUtil.sendApprovePasswordToUser(rr.getEmail(), rr.getFullName(), newPassword);
 
             } else {
-                // nếu update fail thì có thể reject luôn hoặc giữ pending
+               
                 dao.decideResetRequest(requestId, "REJECTED", "System error: cannot reset password now.", adminId);
                 EmailUtil.sendRejectToUser(rr.getEmail(), rr.getFullName(),
                         "System error: cannot reset password now. Please request again later.");

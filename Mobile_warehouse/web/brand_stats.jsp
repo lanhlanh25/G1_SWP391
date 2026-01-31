@@ -160,7 +160,7 @@
         <div class="btn-row">
             
 
-            <!-- Export: thường chỉ MANAGER thấy (bạn có thể mở cho STAFF nếu muốn) -->
+        
             <c:if test="${roleName == 'MANAGER'}">
                 <a class="btn"
                    href="${ctx}/manager/brand-stats-export?q=${fn:escapeXml(q)}&status=${status}&brandId=${brandId}&sortBy=${sortBy}&sortOrder=${sortOrder}&range=${range}">
@@ -178,7 +178,7 @@
         <div class="msg-err">${param.err}</div>
     </c:if>
 
-    <!-- Cards -->
+   
     <div class="cards">
         <div class="card">
             <div class="label">Total Brands</div>
@@ -198,7 +198,7 @@
         </div>
     </div>
 
-    <!-- Filter + Sort form -->
+    
     <form method="get" action="${ctx}/home">
         <input type="hidden" name="p" value="brand-stats"/>
 
@@ -234,7 +234,7 @@
 
             </div>
 
-            <!-- (4) Brand combobox -->
+          
             <div class="field">
                 <label>Brand</label>
                 <select name="brandId">
@@ -248,7 +248,7 @@
                 </select>
             </div>
 
-            <!-- (5) Brand Status -->
+          
             <div class="field">
                 <label>Brand Status</label>
                 <select name="status">
@@ -258,7 +258,7 @@
                 </select>
             </div>
 
-            <!-- Search -->
+           
             <div class="field">
                 <label>Search</label>
                 <input type="text" name="q" value="${q}" placeholder="brand name"/>
@@ -266,7 +266,7 @@
         </div>
 
         <div class="sort-row">
-            <!-- (6) Sort By -->
+            
             <div class="field">
                 <label>Sort By</label>
                 <select name="sortBy">
@@ -278,7 +278,7 @@
 
             </div>
 
-            <!-- (7) Order -->
+           
             <div class="field">
                 <label>Order</label>
                 <select name="sortOrder">
@@ -287,15 +287,15 @@
                 </select>
             </div>
 
-            <!-- (8) Apply -->
+            
             <button class="btn" type="submit">Apply</button>
 
-            <!-- Reset (giữ đúng như ảnh) -->
+            
             <a class="btn" href="${ctx}/home?p=brand-stats">Reset</a>
         </div>
     </form>
 
-    <!-- Table (11) -->
+    
     <table>
         <tr>
             <th style="width:60px;">#</th>
@@ -321,7 +321,7 @@
                 <td>${r.lowStockProducts}</td>
                 <td>${r.importedUnits}</td>
                 <td>
-                    <!-- (10) View Details -->
+                   
                     <a class="btn" style="padding:4px 10px;"
                        href="${ctx}/home?p=brand-stats-detail&brandId=${r.brandId}">
                         View Details
@@ -337,7 +337,7 @@
         </c:if>
     </table>
 
-    <!-- (12) Paging -->
+    
     <div class="paging">
         <c:choose>
             <c:when test="${page <= 1}">

@@ -103,8 +103,7 @@
         <div class="wrap">
             <h3>View User Information</h3>
 
-            <%-- debug tạm (nếu muốn kiểm tra) --%>
-            <%-- <p style="color:red;">DEBUG user=${user} roleName=${roleName}</p> --%>
+          
 
             <div class="form-box">
                 <div class="row">

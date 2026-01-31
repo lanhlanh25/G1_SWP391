@@ -22,7 +22,7 @@ public class AdminUserList extends HttpServlet {
             throws ServletException, IOException {
 
         String q = req.getParameter("q");
-        String status = req.getParameter("status"); // "", "1", "0"
+        String status = req.getParameter("status"); 
 
         req.setAttribute("q", q);
         req.setAttribute("status", status);
