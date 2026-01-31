@@ -36,7 +36,7 @@ public class InventoryDAO {
         return list;
     }
 
-    // Cards: totalProducts, totalQty, lowStockItems, outOfStockItems
+   
     public Map<String, Integer> getSummary(String q, String brandId) {
         Map<String, Integer> m = new HashMap<>();
         m.put("totalProducts", 0);
@@ -57,7 +57,7 @@ public class InventoryDAO {
             params.add(Long.parseLong(brandId.trim()));
         }
 
-        // totalProducts + totalQty
+       
         String sql1 =
                 "SELECT COUNT(DISTINCT p.product_id) AS total_products, " +
                 "       COALESCE(SUM(ib.qty_on_hand),0) AS total_qty " +
@@ -67,7 +67,7 @@ public class InventoryDAO {
                 "LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id " +
                 where;
 
-        // low/out items count by product (model)
+       
         String sql2 =
                 "SELECT " +
                 "  SUM(CASE WHEN t.total_qty = 0 THEN 1 ELSE 0 END) AS out_items, " +

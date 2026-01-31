@@ -21,7 +21,6 @@ public class View_List_Imei extends HttpServlet {
             return;
         }
 
-        // resolve role
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
             model.User u = (model.User) session.getAttribute("authUser");
@@ -36,10 +35,10 @@ public class View_List_Imei extends HttpServlet {
             return;
         }
 
-        // IMPORTANT: fix wrong param name from URL (you had skudl in screenshot)
+      
         String skuIdRaw = firstNonBlank(
                 request.getParameter("skuId"),
-                request.getParameter("skudl"),   // typo fallback
+                request.getParameter("skudl"),   
                 request.getParameter("skuID"),
                 request.getParameter("sku")
         );
@@ -96,7 +95,7 @@ public class View_List_Imei extends HttpServlet {
             request.setAttribute("pageSize", pageSize);
             request.setAttribute("totalPages", totalPages);
 
-            // Render inside homepage layout
+           
             request.setAttribute("sidebarPage", resolveSidebar(role));
             request.setAttribute("contentPage", "view_imei_list.jsp");
             request.setAttribute("currentPage", "imei-list");

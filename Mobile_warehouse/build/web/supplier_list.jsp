@@ -272,7 +272,7 @@
         </tbody>
     </table>
 
-    <!-- footer + paging safe -->
+    
     <c:set var="safeTotal" value="${empty totalItems ? 0 : totalItems}" />
     <c:set var="safePage" value="${empty page ? 1 : page}" />
     <c:set var="safePageSize" value="${empty pageSize ? 5 : pageSize}" />

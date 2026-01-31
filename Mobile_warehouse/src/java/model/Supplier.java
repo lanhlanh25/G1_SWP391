@@ -8,8 +8,8 @@ public class Supplier {
     private String supplierName;
     private String phone;
     private String email;
-    private String address;     // map vào address trong DB
-    private int isActive;       // 1 active, 0 inactive
+    private String address;     
+    private int isActive;      
 
     private Long createdBy;
     private Date createdAt;
@@ -84,7 +84,7 @@ public class Supplier {
         this.createdAt = createdAt;
     }
 
-    // ✅ added getters/setters
+   
     public Long getUpdatedBy() {
         return updatedBy;
     }

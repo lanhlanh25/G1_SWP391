@@ -163,7 +163,7 @@
     </c:if>
 
     <div class="grid">
-        <!-- Left: Supplier Information -->
+        
         <div class="card">
             <h3>Supplier Information</h3>
             <div class="form">
@@ -194,7 +194,7 @@
             </div>
         </div>
 
-        <!-- Right: Summary -->
+       
         <div class="card">
             <h3>Summary</h3>
             <div class="summary">

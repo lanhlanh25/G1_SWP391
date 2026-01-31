@@ -25,7 +25,7 @@ public class UploadAvatar extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
 
-        // take login user
+       
         HttpSession session = req.getSession(false);
         User auth = (session == null) ? null : (User) session.getAttribute("authUser");
         if (auth == null) {
@@ -39,7 +39,7 @@ public class UploadAvatar extends HttpServlet {
             return;
         }
 
-        // validate extension nhanh 
+        
         String submitted = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
         String ext = "";
         int dot = submitted.lastIndexOf('.');
@@ -50,10 +50,10 @@ public class UploadAvatar extends HttpServlet {
             return;
         }
 
-        // rename file
+     
         String fileName = "u_" + auth.getUserId() + "_" + System.currentTimeMillis() + ext;
 
-        // save in web/uploads/avatars
+       
         String uploadDir = getServletContext().getRealPath("/uploads/avatars");
         File dir = new File(uploadDir);
         if (!dir.exists()) dir.mkdirs();
@@ -65,7 +65,7 @@ public class UploadAvatar extends HttpServlet {
             in.transferTo(out);
         }
 
-        // path store in DB (relative path)
+      
         String dbPath = "uploads/avatars/" + fileName;
 
         UserDAO dao = new UserDAO();
@@ -77,7 +77,7 @@ public class UploadAvatar extends HttpServlet {
             return;
         }
 
-        // update session để khỏi phải logout/login
+       
         auth.setAvatar(dbPath);
         session.setAttribute("authUser", auth);
 

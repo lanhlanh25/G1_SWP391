@@ -16,8 +16,8 @@ public class SkuInventoryRow {
     private int ramGb;
     private int storageGb;
     private int qty;
-    private String stockStatus;   // OK | LOW | OUT
-    private String lastUpdated;   // yyyy-MM-dd
+    private String stockStatus;   
+    private String lastUpdated;   
 
     public long getSkuId() { return skuId; }
     public void setSkuId(long skuId) { this.skuId = skuId; }

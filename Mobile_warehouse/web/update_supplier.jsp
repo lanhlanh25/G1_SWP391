@@ -76,7 +76,7 @@
 
 <c:set var="s" value="${requestScope.supplier}" />
 
-<!-- flash errors + inputs -->
+
 <c:set var="errors" value="${sessionScope.flashErrors}" />
 <c:remove var="flashErrors" scope="session"/>
 
@@ -92,7 +92,7 @@
 <c:set var="address" value="${sessionScope.flashAddress}" />
 <c:remove var="flashAddress" scope="session"/>
 
-<!-- fallback: if no flash, use supplier -->
+
 <c:if test="${empty supplierName}">
     <c:set var="supplierName" value="${s.supplierName}" />
 </c:if>

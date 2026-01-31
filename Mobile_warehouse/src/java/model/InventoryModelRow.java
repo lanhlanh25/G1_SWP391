@@ -13,8 +13,8 @@ public class InventoryModelRow {
     private String productName;
     private String brandName;
     private int totalQty;
-    private String status;       // OK | LOW | OUT
-    private String lastUpdated;  // yyyy-MM-dd
+    private String status;       
+    private String lastUpdated;  
 
     public InventoryModelRow() {}
 

@@ -24,14 +24,14 @@ public class ViewInventory extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // 1) Require login
+  
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("authUser") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // 2) Role check (UC06: Warehouse Staff, Manager, Sale)
+      
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
             model.User u = (model.User) session.getAttribute("authUser");
@@ -46,26 +46,25 @@ public class ViewInventory extends HttpServlet {
             return;
         }
 
-        // 3) Read filters from JSP
+    
         String q = request.getParameter("q");
         String brandId = request.getParameter("brandId");
-        String stockStatus = request.getParameter("stockStatus"); // OK | LOW | OUT | "" (all)
-
+        String stockStatus = request.getParameter("stockStatus"); 
         int page = parseInt(request.getParameter("page"), 1);
         int pageSize = parseInt(request.getParameter("pageSize"), 10);
         if (page < 1) page = 1;
         if (pageSize <= 0) pageSize = 10;
 
-        // 4) Load data
+      
         InventoryDAO dao = new InventoryDAO();
 
         request.setAttribute("brands", dao.getActiveBrands());
 
         Map<String, Integer> sum = dao.getSummary(q, brandId);
-        request.setAttribute("totalProducts", sum.getOrDefault("totalProducts", 0)); // card 1
-        request.setAttribute("totalQty", sum.getOrDefault("totalQty", 0));           // card 2
-        request.setAttribute("lowStockItems", sum.getOrDefault("lowStockItems", 0)); // card 3
-        request.setAttribute("outOfStockItems", sum.getOrDefault("outOfStockItems", 0)); // card 4
+        request.setAttribute("totalProducts", sum.getOrDefault("totalProducts", 0)); 
+        request.setAttribute("totalQty", sum.getOrDefault("totalQty", 0));           
+        request.setAttribute("lowStockItems", sum.getOrDefault("lowStockItems", 0)); 
+        request.setAttribute("outOfStockItems", sum.getOrDefault("outOfStockItems", 0)); 
 
         int totalItems = dao.countModels(q, brandId, stockStatus);
         int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
@@ -75,7 +74,7 @@ public class ViewInventory extends HttpServlet {
         request.setAttribute("inventoryModels",
                 dao.listModels(q, brandId, stockStatus, page, pageSize));
 
-        // keep filter values for UI
+       
         request.setAttribute("q", q);
         request.setAttribute("brandId", brandId);
         request.setAttribute("stockStatus", stockStatus);
@@ -85,7 +84,7 @@ public class ViewInventory extends HttpServlet {
         request.setAttribute("totalItems", totalItems);
         request.setAttribute("totalPages", totalPages);
 
-        // 5) If you use homepage.jsp layout:
+        
         request.setAttribute("sidebarPage", resolveSidebar(role));
         request.setAttribute("contentPage", "view_inventory.jsp");
         request.setAttribute("currentPage", "inventory");

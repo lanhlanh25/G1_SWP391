@@ -22,14 +22,14 @@ public class UpdateSupplierServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        // 1) Auth
+        
         User u = (User) session.getAttribute("authUser");
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // 2) Role check (only MANAGER)
+       
         String role = (String) session.getAttribute("roleName");
         if (role == null) {
             role = "STAFF";
@@ -39,7 +39,7 @@ public class UpdateSupplierServlet extends HttpServlet {
             return;
         }
 
-        // 3) Read inputs (NO STATUS)
+        
         String idRaw = trim(request.getParameter("supplierId"));
         String supplierName = trim(request.getParameter("supplierName"));
         String phone = trim(request.getParameter("phone"));
@@ -54,7 +54,7 @@ public class UpdateSupplierServlet extends HttpServlet {
             return;
         }
 
-        // 4) Validate
+        
         List<String> errors = new ArrayList<>();
 
         if (supplierName == null || supplierName.isBlank()) {
@@ -79,7 +79,7 @@ public class UpdateSupplierServlet extends HttpServlet {
 
         SupplierDAO dao = new SupplierDAO();
 
-        // 5) If validate fail -> flash + redirect back GET form
+       
         if (!errors.isEmpty()) {
             putFlash(session, errors, supplierName, phone, email, address);
             response.sendRedirect(request.getContextPath() + "/home?p=update_supplier&id=" + supplierId);
@@ -87,14 +87,14 @@ public class UpdateSupplierServlet extends HttpServlet {
         }
 
         try {
-            // 6) Load existing
+           
             Supplier existing = dao.getById(supplierId);
             if (existing == null) {
                 response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Supplier not found");
                 return;
             }
 
-            // 7) Duplicate check (exclude current supplier)
+           
             if (dao.existsByNameOrEmailExceptId(supplierId, supplierName, email)) {
                 errors.add("Supplier Name or Email already exists.");
                 putFlash(session, errors, supplierName, phone, email, address);
@@ -102,7 +102,7 @@ public class UpdateSupplierServlet extends HttpServlet {
                 return;
             }
 
-            // 8) Update info (KEEP STATUS)
+            
             Supplier s = new Supplier();
             s.setSupplierId(supplierId);
             s.setSupplierName(supplierName);
@@ -110,7 +110,7 @@ public class UpdateSupplierServlet extends HttpServlet {
             s.setEmail(email);
             s.setAddress(address);
 
-            // keep current status (readonly on this screen)
+            
             s.setIsActive(existing.getIsActive());
 
             s.setUpdatedBy((long) u.getUserId());
@@ -123,7 +123,7 @@ public class UpdateSupplierServlet extends HttpServlet {
                 return;
             }
 
-            // success -> redirect detail
+            
             response.sendRedirect(request.getContextPath()
                     + "/home?p=supplier_detail&id=" + supplierId + "&updated=1");
 
@@ -144,7 +144,7 @@ public class UpdateSupplierServlet extends HttpServlet {
         session.setAttribute("flashPhone", phone);
         session.setAttribute("flashEmail", email);
         session.setAttribute("flashAddress", address);
-        // NOTE: NO flashStatus anymore
+       
     }
 
     private String trim(String s) {

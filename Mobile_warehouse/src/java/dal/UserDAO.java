@@ -172,7 +172,7 @@ public class UserDAO {
 
         if (statusFilter != null && !statusFilter.trim().isEmpty()) {
             sql.append(" AND u.status = ?");
-            params.add(Integer.parseInt(statusFilter.trim())); // 1 hoặc 0
+            params.add(Integer.parseInt(statusFilter.trim()));
         }
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
@@ -261,20 +261,20 @@ public class UserDAO {
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
-            // ---- filter q ----
+           
             String qTrim = (q == null) ? "" : q.trim();
             ps.setString(1, q);
             ps.setString(2, q);
             ps.setString(3, "%" + qTrim + "%");
             ps.setString(4, "%" + qTrim + "%");
 
-            // ---- filter status ----
+            
             ps.setString(5, statusFilter);
             ps.setString(6, statusFilter);
             if (statusFilter == null || statusFilter.isBlank()) {
-                ps.setInt(7, 0); // value bất kỳ, vì điều kiện OR sẽ bỏ qua
+                ps.setInt(7, 0); 
             } else {
-                ps.setInt(7, Integer.parseInt(statusFilter)); // 1 hoặc 0
+                ps.setInt(7, Integer.parseInt(statusFilter)); 
             }
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -352,7 +352,7 @@ public class UserDAO {
                             rs.getInt("role_id"),
                             rs.getString("role_name"),
                             rs.getString("full_name"),
-                            rs.getInt("status") // ✅ thêm status
+                            rs.getInt("status") 
                     );
                 }
             }
@@ -413,7 +413,7 @@ public class UserDAO {
         return null;
     }
 
-// 1) user tạo request
+
     public boolean createResetRequest(int userId, String email) {
         String sql = "INSERT INTO password_reset_requests(user_id, email, status) VALUES(?, ?, 'PENDING')";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -426,7 +426,7 @@ public class UserDAO {
         return false;
     }
 
-// 2) admin list pending
+
     public List<model.ResetRequest> getPendingResetRequests() {
         List<model.ResetRequest> list = new ArrayList<>();
         String sql
@@ -457,7 +457,7 @@ public class UserDAO {
         return list;
     }
 
-// 3) lấy info email + userId theo requestId (để action servlet dùng)
+
     public model.ResetRequest getResetRequestById(long requestId) {
         String sql
                 = "SELECT r.request_id, r.user_id, r.email, r.status, r.reason, r.created_at, "
@@ -488,9 +488,9 @@ public class UserDAO {
         return null;
     }
 
-// 4) approve/reject (chỉ xử lý nếu đang PENDING)
+
     public boolean decideResetRequest(long requestId, String status, String reason, int adminId) {
-        // status chỉ nên là APPROVED hoặc REJECTED
+        
         String sql
                 = "UPDATE password_reset_requests "
                 + "SET status=?, reason=?, decided_by=?, decided_at=NOW() "
@@ -507,7 +507,7 @@ public class UserDAO {
         }
         return false;
     }
-// kiểm tra user có request PENDING chưa
+
 
     public boolean hasPendingResetRequest(int userId) {
         String sql = "SELECT 1 FROM password_reset_requests WHERE user_id=? AND status='PENDING' LIMIT 1";
@@ -522,7 +522,7 @@ public class UserDAO {
         return false;
     }
 
-// nếu muốn lấy request pending gần nhất để hiện thông báo
+
     public Long getLatestPendingRequestId(int userId) {
         String sql = "SELECT request_id FROM password_reset_requests WHERE user_id=? AND status='PENDING' ORDER BY created_at DESC LIMIT 1";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {

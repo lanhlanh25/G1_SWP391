@@ -29,7 +29,7 @@ public class Profile extends HttpServlet {
         UserDAO dao = new UserDAO();
         User fresh = dao.getById(u.getUserId());
 
-        // update session luôn cho đồng bộ
+      
         if (fresh != null) {
             session.setAttribute("authUser", fresh);
             request.setAttribute("profileUser", fresh);

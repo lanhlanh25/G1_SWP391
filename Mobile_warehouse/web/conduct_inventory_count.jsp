@@ -42,7 +42,7 @@
   <div class="box">
     <b>Search Criteria</b>
 
-    <!-- SEARCH (GET) -->
+    
     <form method="get" action="${pageContext.request.contextPath}/inventory-count" style="margin-top:8px;">
       <input type="text" name="q" value="${q}" placeholder="Product name, SKU,..."
              style="width:240px; height:28px; padding:0 8px;"/>
@@ -61,7 +61,7 @@
       <input type="hidden" name="pageSize" value="${pageSize}"/>
     </form>
 
-    <!-- SAVE (POST) -->
+    
     <form method="post" action="${pageContext.request.contextPath}/inventory-count" style="margin-top:8px;">
       <input type="hidden" name="q" value="${q}"/>
       <input type="hidden" name="brandId" value="${brandId}"/>
@@ -96,14 +96,14 @@
               <td style="text-align:center;">${r.ramGb} GB</td>
               <td style="text-align:center;">${r.storageGb} GB</td>
 
-              <!-- system qty -->
+              
               <td style="text-align:center;">
                 ${r.systemQty}
               </td>
 
-              <!-- counted qty input -->
+            
               <td style="text-align:center;">
-                <!-- IMPORTANT: make arrays by using same name for multiple rows -->
+               
                 <input type="hidden" name="skuId" value="${r.skuId}"/>
 
                 <input class="diff-input js-counted"
@@ -114,7 +114,7 @@
                        data-system="${r.systemQty}" />
               </td>
 
-              <!-- status cell (server-side + JS will update realtime) -->
+              
               <td style="text-align:center;" class="js-status">
                 <c:choose>
                   <c:when test="${r.countedQty == r.systemQty}">
@@ -144,7 +144,7 @@
       </table>
     </form>
 
-    <!-- ===== Pagination window ===== -->
+
     <c:choose>
       <c:when test="${totalPages <= 3}">
         <c:set var="startPage" value="1"/>
@@ -235,7 +235,7 @@
 
   document.querySelectorAll(".js-counted").forEach(inp => {
     inp.addEventListener("input", () => updateStatusForInput(inp));
-    // init
+  
     updateStatusForInput(inp);
   });
 </script>

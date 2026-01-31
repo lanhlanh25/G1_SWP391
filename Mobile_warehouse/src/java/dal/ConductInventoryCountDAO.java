@@ -113,7 +113,7 @@ public class ConductInventoryCountDAO {
                     r.setStorageGb(rs.getInt("storage_gb"));
                     int sys = rs.getInt("system_qty");
                     r.setSystemQty(sys);
-                    r.setCountedQty(sys); // default = system qty
+                    r.setCountedQty(sys);
                     list.add(r);
                 }
             }
@@ -124,7 +124,6 @@ public class ConductInventoryCountDAO {
         return list;
     }
 
-    // save counted qty -> update inventory_balance
     public boolean saveCountedQty(Map<Long, Integer> skuToCountedQty) {
         String sql =
                 "INSERT INTO inventory_balance (sku_id, qty_on_hand, updated_at) " +

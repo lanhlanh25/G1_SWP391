@@ -32,7 +32,6 @@ public class RolePermissionDAO {
         return set;
     }
 
-    // CŨ (giữ nguyên)
     public boolean saveRolePermissions(int roleId, List<Integer> permIds, Integer grantedBy) {
         String del = "DELETE FROM role_permissions WHERE role_id = ?";
         String ins = "INSERT INTO role_permissions(role_id, permission_id, granted_by) VALUES (?, ?, ?)";

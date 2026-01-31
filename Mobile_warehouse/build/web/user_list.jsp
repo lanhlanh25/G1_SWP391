@@ -70,7 +70,7 @@
     </head>
     <body>
 
-        <!-- Back button -->
+        
         <div class="topbar">
             <a class="btn" href="<%=request.getContextPath()%>/home">Back</a>
         </div>
@@ -100,7 +100,7 @@
         <br>
         <div class="wrap">
             <div class="actions">
-                <!-- nút Active (lọc status=1) -->
+               
                 <%--<a class="btn" href="${pageContext.request.contextPath}/admin/users/active-page">Active/Deactive</a>
                 
                 <!-- nút Add User -->
@@ -135,7 +135,7 @@
                             <td>${u.username}</td>
 
                             <td>
-                                <!-- View/Update: bạn có thể trỏ sang servlet update sau này -->
+                                
                                 <a class="link" href="${pageContext.request.contextPath}/admin/user/view?id=${u.userId}">
                                     View/Update
                                 </a>

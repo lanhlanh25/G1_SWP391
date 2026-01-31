@@ -11,10 +11,10 @@ public class SupplierDetailDTO {
     private String address;
     private int isActive;
 
-    private Double avgRating;          // null nếu chưa có
-    private int totalImportReceipts;   // count
-    private Timestamp lastTransaction; // null nếu chưa có
-    private long totalQtyImported;     // sum qty
+    private Double avgRating;         
+    private int totalImportReceipts;   
+    private Timestamp lastTransaction; 
+    private long totalQtyImported;     
 
     public long getSupplierId() {
         return supplierId;

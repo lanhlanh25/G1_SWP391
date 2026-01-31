@@ -30,7 +30,7 @@ public class BrandStatsDAO {
                 return "imported_units";
 
             default:
-                return "total_stock_units"; // stock
+                return "total_stock_units"; 
         }
     }
 
@@ -41,7 +41,7 @@ public class BrandStatsDAO {
         return "DESC";
     }
 
-    // count brand rows for paging
+ 
     public int countBrands(String q, String brandStatus, Long brandId, Date fromDate, Date toDate) throws Exception {
         StringBuilder sql = new StringBuilder("""
         SELECT COUNT(*)
@@ -67,7 +67,7 @@ public class BrandStatsDAO {
             }
         }
 
-        // RANGE FILTER: chỉ count brand có import trong range
+       
         if (fromDate != null || toDate != null) {
             sql.append("""
             AND EXISTS (
@@ -102,7 +102,7 @@ public class BrandStatsDAO {
         }
     }
 
-    // summary cards
+   
     public BrandStatsSummary getSummary(String q, String brandStatus, Long brandId,
             int lowThreshold, Date fromDate, Date toDate) throws Exception {
         StringBuilder sql = new StringBuilder();
@@ -184,7 +184,7 @@ public class BrandStatsDAO {
         }
     }
 
-    // list brand stats rows (paging + sort)
+   
     public List<BrandStatsRow> listBrandStats(String q, String brandStatus, Long brandId,
         String sortBy, String sortOrder,
         int page, int pageSize, int lowThreshold, Date fromDate, Date toDate) throws Exception {
@@ -238,10 +238,10 @@ public class BrandStatsDAO {
               AND ir.receipt_date IS NOT NULL
     """);
 
-    // 1) param for lowThreshold (belongs to prod subquery)
+   
     params.add(lowThreshold);
 
-    // 2) range filter for imported_units (belongs inside imp subquery)
+    
     if (fromDate != null) {
         sql.append(" AND DATE(ir.receipt_date) >= ? ");
         params.add(fromDate);
@@ -258,7 +258,7 @@ public class BrandStatsDAO {
         WHERE 1=1
     """);
 
-    // 3) UI filters (brand name, brandId, status)
+   
     if (q != null && !q.trim().isEmpty()) {
         sql.append(" AND b.brand_name LIKE ? ");
         params.add("%" + q.trim() + "%");
@@ -277,8 +277,7 @@ public class BrandStatsDAO {
         }
     }
 
-    // 4) IMPORTANT: range filter to REMOVE brands that have no import in range
-    // (Only apply when user chooses range != all)
+  
     if (fromDate != null || toDate != null) {
         sql.append("""
             AND EXISTS (
@@ -304,14 +303,14 @@ public class BrandStatsDAO {
         sql.append(") ");
     }
 
-    // 5) sort + paging
+  
     sql.append(" ORDER BY ").append(orderBy(sortBy)).append(" ").append(orderDir(sortOrder))
        .append(", b.brand_id ASC ");
     sql.append(" LIMIT ? OFFSET ? ");
     params.add(pageSize);
     params.add(offset);
 
-    // Execute
+   
     List<BrandStatsRow> list = new ArrayList<>();
     try (Connection con = DBContext.getConnection();
          PreparedStatement ps = con.prepareStatement(sql.toString())) {

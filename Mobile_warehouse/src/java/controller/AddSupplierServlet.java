@@ -22,14 +22,14 @@ public class AddSupplierServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        // 1) Auth check
+     
         User u = (User) session.getAttribute("authUser");
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        // 2) Role check (only MANAGER)
+      
         String role = (String) session.getAttribute("roleName");
         if (role == null) {
             role = "STAFF";
@@ -39,16 +39,16 @@ public class AddSupplierServlet extends HttpServlet {
             return;
         }
 
-        // 3) Read + trim inputs
+        
         String supplierName = trim(request.getParameter("supplierName"));
         String phone = trim(request.getParameter("phone"));
         String email = trim(request.getParameter("email"));
         String address = trim(request.getParameter("address"));
-        String status = trim(request.getParameter("status")); // active/inactive
+        String status = trim(request.getParameter("status"));
 
         int isActive = "inactive".equalsIgnoreCase(status) ? 0 : 1;
 
-        // 4) Validate
+     
         List<String> errors = new ArrayList<>();
 
         if (supplierName == null || supplierName.isBlank()) {
@@ -71,18 +71,18 @@ public class AddSupplierServlet extends HttpServlet {
             }
         }
 
-        // 5) If validate fail -> flash + redirect GET
+       
         if (!errors.isEmpty()) {
             putFlash(session, errors, supplierName, phone, email, address, isActive);
             response.sendRedirect(request.getContextPath() + "/home?p=add_supplier");
             return;
         }
 
-        // 6) DAO checks + insert
+       
         SupplierDAO dao = new SupplierDAO();
 
         try {
-            // Check duplicate for nicer message
+           
             if (dao.existsByNameOrEmail(supplierName, email)) {
                 errors.add("Supplier Name or Email already exists.");
                 putFlash(session, errors, supplierName, phone, email, address, isActive);
@@ -100,7 +100,7 @@ public class AddSupplierServlet extends HttpServlet {
 
             dao.insert(s);
 
-            // success -> redirect with param
+            
             response.sendRedirect(request.getContextPath() + "/home?p=add_supplier&success=1");
         } catch (SQLException ex) {
             ex.printStackTrace();

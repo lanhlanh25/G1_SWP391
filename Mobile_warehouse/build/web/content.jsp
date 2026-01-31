@@ -13,7 +13,7 @@
         return;
     }
 
-    // Lấy roleName từ session, fallback map roleId
+    
     String role = (String) session.getAttribute("roleName");
     if (role == null || role.isBlank()) {
         int rid = u.getRoleId();

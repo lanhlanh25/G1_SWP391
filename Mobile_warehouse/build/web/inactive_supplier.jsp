@@ -113,7 +113,7 @@
 
 <c:set var="s" value="${requestScope.supplier}" />
 
-<!-- flash -->
+
 <c:set var="errors" value="${sessionScope.flashErrors}" />
 <c:remove var="flashErrors" scope="session"/>
 
@@ -129,7 +129,7 @@
             <b>Effect:</b> Supplier cannot be selected for new import receipts. Transaction history remains available.
         </div>
 
-        <!-- If supplier is missing -->
+       
         <c:if test="${empty s}">
             <div class="msg-error">
                 Supplier data is missing. Please go back to supplier list and select a supplier again.
@@ -139,7 +139,7 @@
             </div>
         </c:if>
 
-        <!-- Normal flow -->
+     
         <c:if test="${not empty s}">
 
             <c:if test="${not empty msg}">

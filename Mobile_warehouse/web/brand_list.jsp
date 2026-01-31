@@ -92,10 +92,10 @@
     </c:forEach>
 </table>
 
-<!-- paging -->
+
 <div style="margin-top:12px; display:flex; gap:12px; justify-content:center; align-items:center;">
 
-    <!-- Prev -->
+
     <c:choose>
         <c:when test="${page <= 1}">
             <span style="color:#999;">&laquo; Prev</span>
@@ -107,7 +107,7 @@
         </c:otherwise>
     </c:choose>
 
-    <!-- Page numbers -->
+    
     <c:forEach begin="1" end="${totalPages}" var="i">
         <c:choose>
             <c:when test="${i == page}">
@@ -122,7 +122,7 @@
         </c:choose>
     </c:forEach>
 
-    <!-- Next -->
+    
     <c:choose>
         <c:when test="${page >= totalPages}">
             <span style="color:#999;">Next &raquo;</span>

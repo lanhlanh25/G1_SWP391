@@ -13,7 +13,7 @@ public class ProductStatsRow {
     private String productCode;
     private String productName;
     private int totalStockUnits;
-    private String stockStatus; // OUT / LOW / OK
+    private String stockStatus; 
 
     public long getProductId() {
         return productId;

@@ -15,7 +15,7 @@ public class ResetRequest {
     private long requestId;
     private int userId;
     private String email;
-    private String status; //PENDING / APPROVED / REJECTED
+    private String status; 
     private String reason;
     private Timestamp createdAt;
     private Timestamp decidedAt;

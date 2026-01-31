@@ -82,20 +82,20 @@ public class UserUpdate extends HttpServlet {
             return;
         }
         
-        //10 digits and start 0
+      
         if (phone.isEmpty() || !phone.matches("^0\\d{9}$")) {
             req.setAttribute("error", "Phone must be 10 digits and start with 0 (e.g. 0912345678).");
-            doGet(req, resp); // doGet sẽ load lại user + roles để render lại form
+            doGet(req, resp); 
             return;
         }
 
-        // --- handle avatar upload ---
-        String avatarPath = n(req.getParameter("current_avatar")); // giữ avatar cũ
+      
+        String avatarPath = n(req.getParameter("current_avatar")); 
         Part filePart = req.getPart("avatarFile");
         if (filePart != null && filePart.getSize() > 0) {
             String savedPath = saveAvatarToUploads(req, filePart, userId);
             if (savedPath != null) {
-                avatarPath = savedPath; // replace
+                avatarPath = savedPath;
             }
         }
 
@@ -103,7 +103,7 @@ public class UserUpdate extends HttpServlet {
         UserDAO dao = new UserDAO();
         boolean ok = dao.updateUserInfo(userId, fullName, email, phone, roleId, status, avatarPath, address);
 
-        // refresh session authUser nếu update đúng user đang login
+        
         HttpSession session = req.getSession(false);
         if (session != null) {
             User auth = (User) session.getAttribute("authUser");
@@ -137,7 +137,7 @@ public class UserUpdate extends HttpServlet {
             in.transferTo(out);
         }
 
-        // DB lưu relative path
+        
         return "uploads/avatars/" + fileName;
     }
 }

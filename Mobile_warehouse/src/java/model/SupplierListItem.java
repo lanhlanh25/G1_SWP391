@@ -9,8 +9,8 @@ public class SupplierListItem {
     private String phone;
     private String email;
     private int isActive;
-    private Double avgRating;          // có thể null
-    private int totalTransactions;     // mặc định 0
+    private Double avgRating;         
+    private int totalTransactions;   
     private Date createdAt;
 
     public long getSupplierId() {
