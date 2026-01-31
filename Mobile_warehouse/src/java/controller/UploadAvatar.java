@@ -19,13 +19,13 @@ import model.User;
         maxFileSize = 5 * 1024 * 1024,
         maxRequestSize = 6 * 1024 * 1024
 )
-public class UploadAvatarServlet extends HttpServlet {
+public class UploadAvatar extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws IOException, ServletException {
 
-        // lấy user đang login
+        // take login user
         HttpSession session = req.getSession(false);
         User auth = (session == null) ? null : (User) session.getAttribute("authUser");
         if (auth == null) {
@@ -39,7 +39,7 @@ public class UploadAvatarServlet extends HttpServlet {
             return;
         }
 
-        // validate extension nhanh (tối thiểu)
+        // validate extension nhanh 
         String submitted = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
         String ext = "";
         int dot = submitted.lastIndexOf('.');
@@ -53,7 +53,7 @@ public class UploadAvatarServlet extends HttpServlet {
         // rename file
         String fileName = "u_" + auth.getUserId() + "_" + System.currentTimeMillis() + ext;
 
-        // lưu vào web/uploads/avatars
+        // save in web/uploads/avatars
         String uploadDir = getServletContext().getRealPath("/uploads/avatars");
         File dir = new File(uploadDir);
         if (!dir.exists()) dir.mkdirs();
@@ -65,7 +65,7 @@ public class UploadAvatarServlet extends HttpServlet {
             in.transferTo(out);
         }
 
-        // path lưu DB (relative path)
+        // path store in DB (relative path)
         String dbPath = "uploads/avatars/" + fileName;
 
         UserDAO dao = new UserDAO();

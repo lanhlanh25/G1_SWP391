@@ -1,325 +1,241 @@
 <%-- 
     Document   : conduct_inventory_count
-    Created on : Jan 27, 2026
-    Author     : Admin
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8" />
-    <title>Conduct Inventory Count</title>
+<%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<style>
+  .wrap{ padding:10px; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif; }
+  .topbar{ display:flex; gap:10px; align-items:center; }
+  .btn{ padding:6px 14px; border:1px solid #333; background:#eee; text-decoration:none; color:#000; display:inline-block; cursor:pointer; }
+  .title{ margin:0 0 0 10px; font-weight:800; }
 
-    <style>
-        :root{
-            --border:#1d4f8b;
-            --gray:#d9d9d9;
-        }
-        body{
-            margin:0;
-            font-family: Arial, Helvetica, sans-serif;
-            background:#ffffff;
-            color:#111;
-        }
-        .page{
-            padding:14px 18px 22px;
-        }
+  .box{ margin-top:10px; border:2px solid #3b5db7; background:#fff; padding:10px; }
+  table{ width:100%; border-collapse:collapse; margin-top:10px; }
+  th,td{ border:1px solid #333; padding:6px; font-size:12px; }
+  th{ background:#ddd; }
 
-        
-        .topbar{
-            display:flex;
-            align-items:center;
-            gap:14px;
-            margin-bottom:10px;
-        }
-        .btn-back{
-            border:1px solid #333;
-            background:#d9d9d9;
-            padding:6px 14px;
-            border-radius:2px;
-            cursor:pointer;
-            font-weight:600;
-            text-decoration:none;
-            color:#000;
-            display:inline-block;
-        }
-        .title{
-            font-size:18px;
-            font-weight:700;
-        }
+  .st-enough{ color:#0a8a0a; font-weight:800; }
+  .st-missing{ color:#d00000; font-weight:800; }
+  .diff-input{ width:70px; padding:3px 6px; }
 
-       
-        .panel{
-            border:2px solid var(--border);
-            padding:12px;
-            margin:12px 0 16px;
-        }
-        .panel-title{
-            font-weight:700;
-            margin-bottom:10px;
-        }
-        .search-row{
-            display:grid;
-            grid-template-columns: 320px 180px 160px 90px 90px 90px;
-            gap:12px;
-            align-items:center;
-        }
-        .search-row input[type="text"], .search-row select{
-            height:34px;
-            border:1px solid #999;
-            padding:0 10px;
-            outline:none;
-            background:#fff;
-        }
-        .btn{
-            height:34px;
-            border:1px solid #333;
-            background:#d9d9d9;
-            cursor:pointer;
-            font-weight:700;
-        }
+  .paging { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; }
+  .pg {
+    display:inline-block; padding:6px 16px;
+    border:2px solid #1d4f91; background:#eee; color:#000;
+    text-decoration:none; font-weight:600;
+  }
+  .pg.active { background:#3a7bd5; color:#000; }
+  .pg.disabled { pointer-events:none; opacity:0.5; }
 
-        
-        .table-wrap{
-            border:2px solid var(--border);
-        }
-        table{
-            width:100%;
-            border-collapse:collapse;
-            table-layout:fixed;
-        }
-        thead th{
-            background:var(--gray);
-            border-bottom:2px solid var(--border);
-            border-right:2px solid var(--border);
-            padding:10px 8px;
-            text-align:center;
-            font-weight:800;
-        }
-        thead th:last-child{ border-right:none; }
+  .pagerbar{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:10px; }
+</style>
 
-        tbody td{
-            border-top:2px solid var(--border);
-            border-right:2px solid var(--border);
-            padding:10px 8px;
-            height:42px;
-            vertical-align:middle;
-            background:#fff;
-            overflow:hidden;
-            text-overflow:ellipsis;
-            white-space:nowrap;
-        }
-        tbody td:last-child{ border-right:none; }
+<div class="wrap">
 
-        .c-sku{ width:120px; text-align:center; }
-        .c-name{ width:240px; }
-        .c-color{ width:110px; text-align:center; }
-        .c-ram{ width:90px; text-align:center; }
-        .c-storage{ width:110px; text-align:center; }
-        .c-sys{ width:120px; text-align:center; }
-        .c-counted{ width:120px; text-align:center; }
-        .c-diff{ width:120px; text-align:center; }
-        .c-status{ width:120px; text-align:center; }
-        .c-action{ width:130px; text-align:center; }
+  <div class="topbar">
+    <a class="btn" href="${pageContext.request.contextPath}/home">Back</a>
+    <h3 class="title">Conduct Inventory Count</h3>
+  </div>
 
-        .counted-input{
-            width:70px;
-            height:28px;
-            border:1px solid #999;
-            padding:0 8px;
-            text-align:center;
-            outline:none;
-            background:#fff;
-        }
+  <div class="box">
+    <b>Search Criteria</b>
 
-        .imei-link{
-            color:#0b55d6;
-            text-decoration:underline;
-            font-weight:700;
-        }
+    <!-- SEARCH (GET) -->
+    <form method="get" action="${pageContext.request.contextPath}/inventory-count" style="margin-top:8px;">
+      <input type="text" name="q" value="${q}" placeholder="Product name, SKU,..."
+             style="width:240px; height:28px; padding:0 8px;"/>
 
-        
-        .pager{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            padding:12px;
-            border-top:2px solid var(--border);
-            background:#fff;
-        }
-        .pager-left{ font-weight:700; }
-        .pager-mid{
-            display:flex;
-            align-items:center;
-            gap:10px;
-        }
-        .pager-mid .nav{
-            width:34px;
-            height:30px;
-            border:2px solid var(--border);
-            background:#d9d9d9;
-            cursor:pointer;
-            font-weight:900;
-        }
-        .pager-mid .page{
-            padding:6px 12px;
-            border:1px solid #bbb;
-            background:#fff;
-        }
-        .pager-right{
-            display:flex;
-            align-items:center;
-            gap:10px;
-            font-weight:700;
-        }
-        .rows-select{
-            height:30px;
-            border:1px solid #999;
-            background:#fff;
-        }
-    </style>
-</head>
+      <select name="brandId" style="height:30px; margin-left:12px; width:120px;">
+        <option value="">All Brands</option>
+        <c:forEach var="b" items="${brands}">
+          <option value="${b.id}" ${b.id == brandId ? "selected" : ""}>${b.name}</option>
+        </c:forEach>
+      </select>
 
-<body>
-<div class="page">
+      <button class="btn" type="submit" style="margin-left:12px;">Search</button>
+      <a class="btn" href="${pageContext.request.contextPath}/inventory-count">Reset</a>
 
-    <div class="topbar">
-        <a class="btn-back" href="${pageContext.request.contextPath}/home?p=dashboard">Back</a>
-        <div class="title">Conduct Inventory Count</div>
-    </div>
+      <input type="hidden" name="page" value="1"/>
+      <input type="hidden" name="pageSize" value="${pageSize}"/>
+    </form>
 
-    <div class="panel">
-        <div class="panel-title">Search Criteria</div>
+    <!-- SAVE (POST) -->
+    <form method="post" action="${pageContext.request.contextPath}/inventory-count" style="margin-top:8px;">
+      <input type="hidden" name="q" value="${q}"/>
+      <input type="hidden" name="brandId" value="${brandId}"/>
+      <input type="hidden" name="page" value="${pageNumber}"/>
+      <input type="hidden" name="pageSize" value="${pageSize}"/>
 
-        <!-- UI only (chưa có DB/Servlet thì để #) -->
-        <form method="get" action="#">
-            <div class="search-row">
-                <input type="text" name="q" placeholder="Product name, SKU,..." />
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="btn" type="submit">Save</button>
+      </div>
 
-                <select name="categoryId">
-                    <option value="">All Categories</option>
-                </select>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:160px;">SKU</th>
+            <th>Product Name</th>
+            <th style="width:120px;">Color</th>
+            <th style="width:80px;">RAM</th>
+            <th style="width:95px;">Storage</th>
+            <th style="width:95px;">System Qty</th>
+            <th style="width:100px;">Difference</th>
+            <th style="width:90px;">Status</th>
+            <th style="width:110px;">Action</th>
+          </tr>
+        </thead>
 
-                <select name="brandId">
-                    <option value="">All Brands</option>
-                </select>
-
-                <button type="button" class="btn">Search</button>
-                <button type="reset" class="btn">Reset</button>
-                <button type="button" class="btn">Save</button>
-            </div>
-        </form>
-    </div>
-
-    <div class="table-wrap">
-        <table>
-            <thead>
+        <tbody>
+          <c:forEach var="r" items="${rows}">
             <tr>
-                <th class="c-sku">SKU</th>
-                <th class="c-name">Product Name</th>
-                <th class="c-color">Color</th>
-                <th class="c-ram">RAM</th>
-                <th class="c-storage">Storage</th>
-                <th class="c-sys">System Qty</th>
-                <th class="c-counted">Counted Qty</th>
-                <th class="c-diff">Difference</th>
-                <th class="c-status">Status</th>
-                <th class="c-action">Action</th>
+              <td>${r.skuCode}</td>
+              <td>${r.productName}</td>
+              <td>${r.color}</td>
+              <td style="text-align:center;">${r.ramGb} GB</td>
+              <td style="text-align:center;">${r.storageGb} GB</td>
+
+              <!-- system qty -->
+              <td style="text-align:center;">
+                ${r.systemQty}
+              </td>
+
+              <!-- counted qty input -->
+              <td style="text-align:center;">
+                <!-- IMPORTANT: make arrays by using same name for multiple rows -->
+                <input type="hidden" name="skuId" value="${r.skuId}"/>
+
+                <input class="diff-input js-counted"
+                       type="number"
+                       name="countedQty"
+                       min="0"
+                       value="${r.countedQty}"
+                       data-system="${r.systemQty}" />
+              </td>
+
+              <!-- status cell (server-side + JS will update realtime) -->
+              <td style="text-align:center;" class="js-status">
+                <c:choose>
+                  <c:when test="${r.countedQty == r.systemQty}">
+                    <span class="st-enough">enough</span>
+                  </c:when>
+                  <c:otherwise>
+                    <span class="st-missing">missing</span>
+                  </c:otherwise>
+                </c:choose>
+              </td>
+
+              <td style="text-align:center;">
+                <c:url var="imeiUrl" value="/imei-list">
+                  <c:param name="skuId" value="${r.skuId}"/>
+                  <c:param name="page" value="1"/>
+                  <c:param name="pageSize" value="10"/>
+                </c:url>
+                <a href="${imeiUrl}" style="color:#0b39b8; text-decoration:underline;">View List IMEI</a>
+              </td>
             </tr>
-            </thead>
+          </c:forEach>
 
-            
-            <tbody>
-                <tr>
-                    <td>&nbsp;</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td style="text-align:center;"><input class="counted-input" disabled /></td>
-                    <td></td>
-                    <td></td>
-                    <td style="text-align:center;"><span class="imei-link" style="visibility:hidden;">View List Imei</span></td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
-                    <td style="text-align:center;"><input class="counted-input" disabled /></td>
-                    <td></td><td></td>
-                    <td style="text-align:center;"><span class="imei-link" style="visibility:hidden;">View List Imei</span></td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
-                    <td style="text-align:center;"><input class="counted-input" disabled /></td>
-                    <td></td><td></td>
-                    <td style="text-align:center;"><span class="imei-link" style="visibility:hidden;">View List Imei</span></td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
-                    <td style="text-align:center;"><input class="counted-input" disabled /></td>
-                    <td></td><td></td>
-                    <td style="text-align:center;"><span class="imei-link" style="visibility:hidden;">View List Imei</span></td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
-                    <td style="text-align:center;"><input class="counted-input" disabled /></td>
-                    <td></td><td></td>
-                    <td style="text-align:center;"><span class="imei-link" style="visibility:hidden;">View List Imei</span></td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
-                    <td style="text-align:center;"><input class="counted-input" disabled /></td>
-                    <td></td><td></td>
-                    <td style="text-align:center;"><span class="imei-link" style="visibility:hidden;">View List Imei</span></td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
-                    <td style="text-align:center;"><input class="counted-input" disabled /></td>
-                    <td></td><td></td>
-                    <td style="text-align:center;"><span class="imei-link" style="visibility:hidden;">View List Imei</span></td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
-                    <td style="text-align:center;"><input class="counted-input" disabled /></td>
-                    <td></td><td></td>
-                    <td style="text-align:center;"><span class="imei-link" style="visibility:hidden;">View List Imei</span></td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
-                    <td style="text-align:center;"><input class="counted-input" disabled /></td>
-                    <td></td><td></td>
-                    <td style="text-align:center;"><span class="imei-link" style="visibility:hidden;">View List Imei</span></td>
-                </tr>
-                <tr>
-                    <td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td>
-                    <td style="text-align:center;"><input class="counted-input" disabled /></td>
-                    <td></td><td></td>
-                    <td style="text-align:center;"><span class="imei-link" style="visibility:hidden;">View List Imei</span></td>
-                </tr>
-            </tbody>
-        </table>
+          <c:if test="${empty rows}">
+            <tr><td colspan="9" style="text-align:center;">No data</td></tr>
+          </c:if>
+        </tbody>
+      </table>
+    </form>
 
-        <div class="pager">
-            <div class="pager-left">Page 1</div>
+    <!-- ===== Pagination window ===== -->
+    <c:choose>
+      <c:when test="${totalPages <= 3}">
+        <c:set var="startPage" value="1"/>
+        <c:set var="endPage" value="${totalPages}"/>
+      </c:when>
+      <c:when test="${pageNumber <= 1}">
+        <c:set var="startPage" value="1"/>
+        <c:set var="endPage" value="3"/>
+      </c:when>
+      <c:when test="${pageNumber >= totalPages}">
+        <c:set var="startPage" value="${totalPages-2}"/>
+        <c:set var="endPage" value="${totalPages}"/>
+      </c:when>
+      <c:otherwise>
+        <c:set var="startPage" value="${pageNumber-1}"/>
+        <c:set var="endPage" value="${pageNumber+1}"/>
+      </c:otherwise>
+    </c:choose>
 
-            <div class="pager-mid">
-                <button class="nav" type="button">&lt;</button>
-                <span class="page">1</span>
-                <button class="nav" type="button">&gt;</button>
-            </div>
+    <div class="pagerbar">
+      <div>Page ${pageNumber}</div>
 
-            <div class="pager-right">
-                Show
-                <select class="rows-select">
-                    <option selected>10 Row</option>
-                    <option>20 Row</option>
-                    <option>50 Row</option>
-                </select>
-            </div>
-        </div>
+      <div class="paging">
+        <c:url var="prevUrl" value="/inventory-count">
+          <c:param name="q" value="${q}"/>
+          <c:param name="brandId" value="${brandId}"/>
+          <c:param name="pageSize" value="${pageSize}"/>
+          <c:param name="page" value="${pageNumber-1}"/>
+        </c:url>
+        <a class="pg ${pageNumber<=1 ? 'disabled' : ''}" href="${prevUrl}">Prev</a>
+
+        <c:forEach var="i" begin="${startPage}" end="${endPage}">
+          <c:choose>
+            <c:when test="${i == pageNumber}">
+              <span class="pg active">${i}</span>
+            </c:when>
+            <c:otherwise>
+              <c:url var="pageUrl" value="/inventory-count">
+                <c:param name="q" value="${q}"/>
+                <c:param name="brandId" value="${brandId}"/>
+                <c:param name="pageSize" value="${pageSize}"/>
+                <c:param name="page" value="${i}"/>
+              </c:url>
+              <a class="pg" href="${pageUrl}">${i}</a>
+            </c:otherwise>
+          </c:choose>
+        </c:forEach>
+
+        <c:url var="nextUrl" value="/inventory-count">
+          <c:param name="q" value="${q}"/>
+          <c:param name="brandId" value="${brandId}"/>
+          <c:param name="pageSize" value="${pageSize}"/>
+          <c:param name="page" value="${pageNumber+1}"/>
+        </c:url>
+        <a class="pg ${pageNumber>=totalPages ? 'disabled' : ''}" href="${nextUrl}">Next</a>
+      </div>
+
+      <div>
+        Show
+        <select onchange="location.href='${pageContext.request.contextPath}/inventory-count?q=${q}&brandId=${brandId}&page=1&pageSize='+this.value;">
+          <option value="10" ${pageSize==10 ? "selected" : ""}>10</option>
+          <option value="20" ${pageSize==20 ? "selected" : ""}>20</option>
+        </select>
+        Row
+      </div>
     </div>
 
+  </div>
 </div>
-</body>
-</html>
+
+<script>
+  function updateStatusForInput(inputEl){
+    const systemQty = parseInt(inputEl.dataset.system || "0", 10);
+    const countedQty = parseInt(inputEl.value || "0", 10);
+
+    const tr = inputEl.closest("tr");
+    if(!tr) return;
+
+    const statusCell = tr.querySelector(".js-status");
+    if(!statusCell) return;
+
+    if(countedQty !== systemQty){
+      statusCell.innerHTML = '<span class="st-missing">missing</span>';
+    }else{
+      statusCell.innerHTML = '<span class="st-enough">enough</span>';
+    }
+  }
+
+  document.querySelectorAll(".js-counted").forEach(inp => {
+    inp.addEventListener("input", () => updateStatusForInput(inp));
+    // init
+    updateStatusForInput(inp);
+  });
+</script>
