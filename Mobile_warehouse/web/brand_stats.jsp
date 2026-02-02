@@ -33,6 +33,7 @@
         text-decoration:none;
         color:#111;
         border-radius:3px;
+        cursor:pointer;
     }
     .btn:hover{
         background:#eee;
@@ -42,6 +43,7 @@
         gap:10px;
         align-items:center;
     }
+
     .cards{
         display:flex;
         gap:18px;
@@ -65,6 +67,7 @@
         font-size:18px;
         font-weight:700;
     }
+
     .filters{
         display:grid;
         grid-template-columns: 1fr 1fr 1fr;
@@ -84,6 +87,7 @@
         border:1px solid #aaa;
         border-radius:3px;
     }
+
     .sort-row{
         display:grid;
         grid-template-columns: 2fr 1fr auto auto;
@@ -91,6 +95,7 @@
         align-items:end;
         margin:10px 0 14px;
     }
+
     table{
         width:100%;
         border-collapse:collapse;
@@ -103,16 +108,46 @@
     th{
         background:#f1f1f1;
     }
+
     .muted{
         color:#666;
         font-size:12px;
     }
+    .msg-ok{
+        color:green;
+        margin:8px 0;
+    }
+    .msg-err{
+        color:red;
+        margin:8px 0;
+    }
+
+    .badge{
+        padding:2px 8px;
+        border:1px solid #999;
+        border-radius:10px;
+        font-size:12px;
+        display:inline-block;
+    }
+    .badge-active{
+        border-color:#2e7d32;
+        color:#2e7d32;
+        font-weight:600;
+    }
+    .badge-inactive{
+        border-color:#d32f2f;
+        color:#d32f2f;
+        font-weight:600;
+    }
+
+
     .paging{
         margin-top:12px;
         display:flex;
         gap:10px;
         justify-content:center;
         align-items:center;
+        flex-wrap:wrap;
     }
     .paging a{
         padding:4px 10px;
@@ -124,49 +159,31 @@
         padding:4px 10px;
         border:1px solid #333;
     }
-    .msg-ok{
-        color:green;
-        margin:8px 0;
-    }
-    .msg-err{
-        color:red;
-        margin:8px 0;
-    }
-    .badge{
-        padding:2px 8px;
-        border:1px solid #999;
-        border-radius:10px;
-        font-size:12px;
-        display:inline-block;
-    }
-    .badge-active{
-        border-color:#2e7d32;
-        color:#2e7d32;
-    }
-    .badge-inactive{
-        border-color:#777;
-        color:#777;
-    }
-    .row-inactive{
-        opacity:0.55;
-        font-style:italic;
-    }
 </style>
+
+<%-- 
+    Build commonly reused URLs using c:url + c:param
+    This avoids broken links when q contains spaces/special characters.
+--%>
+
+<%-- Export URL (Manager only) --%>
+<c:url var="exportUrl" value="/manager/brand-stats-export">
+    <c:param name="q" value="${q}" />
+    <c:param name="status" value="${status}" />
+    <c:param name="brandId" value="${brandId}" />
+    <c:param name="sortBy" value="${sortBy}" />
+    <c:param name="sortOrder" value="${sortOrder}" />
+    <c:param name="range" value="${range}" />
+</c:url>
 
 <div class="page-wrap">
     <div class="topbar">
         <div class="title">View Product Statistics By Brand</div>
 
         <div class="btn-row">
-            
-
-        
+            <%-- Export button is visible only to MANAGER (adjust as you wish) --%>
             <c:if test="${roleName == 'MANAGER'}">
-                <a class="btn"
-                   href="${ctx}/manager/brand-stats-export?q=${fn:escapeXml(q)}&status=${status}&brandId=${brandId}&sortBy=${sortBy}&sortOrder=${sortOrder}&range=${range}">
-                    Export
-                </a>
-
+                <a class="btn" href="${exportUrl}">Export</a>
             </c:if>
         </div>
     </div>
@@ -178,7 +195,7 @@
         <div class="msg-err">${param.err}</div>
     </c:if>
 
-   
+    <%-- Summary cards --%>
     <div class="cards">
         <div class="card">
             <div class="label">Total Brands</div>
@@ -198,49 +215,37 @@
         </div>
     </div>
 
-    
+    <%-- Filter + Sort form --%>
     <form method="get" action="${ctx}/home">
         <input type="hidden" name="p" value="brand-stats"/>
 
         <div class="filters">
-            <!-- (3) Data Range -->
+            <%-- Data Range --%>
             <div class="field">
                 <label>Data Range</label>
                 <select name="range">
-                    <option value="all"
-                            ${empty range || range=='all' ? 'selected' : ''}>
-                        AllTime
-                    </option>
+                    <option value="all" ${empty range || range=='all' ? 'selected' : ''}>All Time</option>
                     <option value="today" ${range=='today' ? 'selected' : ''}>Today</option>
+                    <option value="last7" ${range=='last7' ? 'selected' : ''}>Last 7 Days</option>
 
-                    <option value="last7"
-                            ${range=='last7' ? 'selected' : ''}>
-                        Last 7 Days
-                    </option>
+                    <!-- Rolling windows -->
+                    <option value="last30" ${range=='last30' ? 'selected' : ''}>Past 30 Days</option>
+                    <option value="last90" ${range=='last90' ? 'selected' : ''}>Past 90 Days (Quarter)</option>
 
-                    <option value="last30"
-                            ${range=='last30' ? 'selected' : ''}>
-                        Last 30 Days
-                    </option>
-
-                    <option value="month"
-                            ${range=='month' ? 'selected' : ''}>
-                        This Month
-                    </option>
+                    <!-- Calendar periods -->
+                    <option value="month" ${range=='month' ? 'selected' : ''}>This Month</option>
                     <option value="lastMonth" ${range=='lastMonth' ? 'selected' : ''}>Last Month</option>
-
                 </select>
-
-
             </div>
 
-          
+            <%-- Brand dropdown --%>
             <div class="field">
                 <label>Brand</label>
-                <select name="brandId">
+                <select name="brandId" id="brandIdSelect">
                     <option value="" ${empty brandId ? 'selected' : ''}>All</option>
                     <c:forEach items="${allBrands}" var="b">
-                        <option value="${b.brandId}" ${brandId != null && brandId == b.brandId ? 'selected' : ''}>
+                        <%-- Compare as string to avoid type mismatch (brandId is often a String param) --%>
+                        <option value="${b.brandId}" ${not empty brandId && brandId == (b.brandId) ? 'selected' : ''}>
                             ${b.brandName}
                         </option>
 
@@ -248,7 +253,7 @@
                 </select>
             </div>
 
-          
+            <%-- Brand Status --%>
             <div class="field">
                 <label>Brand Status</label>
                 <select name="status">
@@ -258,15 +263,15 @@
                 </select>
             </div>
 
-           
+            <%-- Search --%>
             <div class="field">
                 <label>Search</label>
-                <input type="text" name="q" value="${q}" placeholder="brand name"/>
+                <input type="text" name="q" id="searchInput" value="${q}" placeholder="brand name"/>
             </div>
         </div>
 
         <div class="sort-row">
-            
+            <%-- Sort By --%>
             <div class="field">
                 <label>Sort By</label>
                 <select name="sortBy">
@@ -278,24 +283,86 @@
 
             </div>
 
-           
+            <%-- Order --%>
             <div class="field">
                 <label>Order</label>
                 <select name="sortOrder">
-                    <option value="DESC" ${empty sortOrder || sortOrder=='DESC' ? 'selected' : ''}>DESC</option>
-                    <option value="ASC" ${sortOrder=='ASC' ? 'selected' : ''}>ASC</option>
+                    <option value="ASC" ${sortOrder=='ASC'?'selected':''}>Ascending (A→Z / Low→High)</option>
+                    <option value="DESC" ${sortOrder=='DESC'?'selected':''}>Descending (Z→A / High→Low)</option>
+
                 </select>
             </div>
 
-            
+
+
+            <%-- Apply --%>
             <button class="btn" type="submit">Apply</button>
 
-            
+            <%-- Reset --%>
             <a class="btn" href="${ctx}/home?p=brand-stats">Reset</a>
         </div>
     </form>
 
-    
+    <%-- Show current filters so users know what they are viewing --%>
+    <c:set var="rangeLabel"
+           value="${range=='today' ? 'Today'
+                    : range=='last7' ? 'Last 7 Days'
+                    : range=='last30' ? 'Past 30 Days'
+                    : range=='last90' ? 'Past 90 Days (Quarter)'
+                    : range=='month' ? 'This Month'
+                    : range=='lastMonth' ? 'Last Month'
+                    : 'All Time'}" />
+
+
+    <c:set var="statusLabel"
+           value="${status=='active' ? 'Active'
+                    : status=='inactive' ? 'Inactive'
+                    : 'All'}" />
+
+    <c:set var="sortLabel"
+           value="${sortBy=='products' ? 'Total Products'
+                    : sortBy=='low' ? 'Low Stock Count'
+                    : sortBy=='import' ? 'Imported Units'
+                    : 'Total Stock'}" />
+
+    <c:set var="orderLabel" value="${empty sortOrder ? 'DESC' : sortOrder}" />
+
+    <c:set var="brandNameLabel" value="All" />
+
+    <c:if test="${not empty brandId}">
+        <c:set var="brandIdNum" value="${brandId}" />
+        <c:forEach items="${allBrands}" var="bb">
+            <c:if test="${bb.brandId == brandIdNum}">
+                <c:set var="brandNameLabel" value="${bb.brandName}" />
+            </c:if>
+        </c:forEach>
+    </c:if>
+
+
+    <div class="muted" style="margin:6px 0 10px;">
+        Applied:
+        Range =
+        <b>
+            <c:choose>
+                <c:when test="${empty range || range=='all'}">All Time</c:when>
+                <c:when test="${range=='today'}">Today</c:when>
+                <c:when test="${range=='last7'}">Last 7 Days</c:when>
+                <c:when test="${range=='last30'}">Past 30 Days</c:when>
+                <c:when test="${range=='last90'}">Past 90 Days (Quarter)</c:when>
+                <c:when test="${range=='month'}">This Month</c:when>
+                <c:when test="${range=='lastMonth'}">Last Month</c:when>
+                <c:otherwise>All Time</c:otherwise>
+            </c:choose>
+        </b>
+        •
+        Brand = <b>${brandNameLabel}</b> •
+        Status = <b>${statusLabel}</b> •
+        Search = <b>${empty q ? '-' : q}</b> •
+        Sort = <b>${sortLabel}</b> <b>${orderLabel}</b>
+    </div>
+
+
+    <%-- Result table --%>
     <table>
         <tr>
             <th style="width:60px;">#</th>
@@ -308,7 +375,7 @@
         </tr>
 
         <c:forEach items="${rows}" var="r" varStatus="st">
-            <tr class="${r.active ? '' : 'row-inactive'}">
+            <tr>
                 <td>${(page - 1) * pageSize + st.index + 1}</td>
                 <td>
                     ${r.brandName}
@@ -321,11 +388,22 @@
                 <td>${r.lowStockProducts}</td>
                 <td>${r.importedUnits}</td>
                 <td>
-                   
-                    <a class="btn" style="padding:4px 10px;"
-                       href="${ctx}/home?p=brand-stats-detail&brandId=${r.brandId}">
-                        View Details
-                    </a>
+                    <%-- View Details URL (keep current filters for better navigation/back behavior) --%>
+                    <c:url var="detailUrl" value="/home">
+                        <c:param name="p" value="brand-stats-detail"/>
+                        <c:param name="brandId" value="${r.brandId}"/>
+
+                        <%-- Keep current list state (optional but recommended) --%>
+                        <c:param name="q" value="${q}"/>
+                        <c:param name="status" value="${status}"/>
+                        <c:param name="brandId" value="${brandId}"/>
+                        <c:param name="sortBy" value="${sortBy}"/>
+                        <c:param name="sortOrder" value="${sortOrder}"/>
+                        <c:param name="range" value="${range}"/>
+                        <c:param name="page" value="${page}"/>
+                    </c:url>
+
+                    <a class="btn" style="padding:4px 10px;" href="${detailUrl}">View Details</a>
                 </td>
             </tr>
         </c:forEach>
@@ -337,35 +415,97 @@
         </c:if>
     </table>
 
-    
+    <%-- Paging (URLs are encoded safely with c:url) --%>
     <div class="paging">
+        <%-- Prev --%>
         <c:choose>
             <c:when test="${page <= 1}">
                 <span style="color:#999;">&laquo; Prev</span>
             </c:when>
             <c:otherwise>
-                <a href="${ctx}/home?p=brand-stats&page=${page-1}&q=${q}&status=${status}&brandId=${brandId}&sortBy=${sortBy}&sortOrder=${sortOrder}&range=${range}">&laquo;&laquo;</a>
+                <c:url var="prevUrl" value="/home">
+                    <c:param name="p" value="brand-stats"/>
+                    <c:param name="page" value="${page-1}"/>
+                    <c:param name="q" value="${q}"/>
+                    <c:param name="status" value="${status}"/>
+                    <c:param name="brandId" value="${brandId}"/>
+                    <c:param name="sortBy" value="${sortBy}"/>
+                    <c:param name="sortOrder" value="${sortOrder}"/>
+                    <c:param name="range" value="${range}"/>
+                </c:url>
+                <a href="${prevUrl}">&laquo; Prev</a>
             </c:otherwise>
         </c:choose>
 
+        <%-- Page numbers --%>
         <c:forEach begin="1" end="${totalPages}" var="i">
             <c:choose>
                 <c:when test="${i == page}">
                     <b>${i}</b>
                 </c:when>
                 <c:otherwise>
-                    <a href="${ctx}/home?p=brand-stats&page=${i}&q=${q}&status=${status}&brandId=${brandId}&sortBy=${sortBy}&sortOrder=${sortOrder}&range=${range}">${i}</a>
+                    <c:url var="pageUrl" value="/home">
+                        <c:param name="p" value="brand-stats"/>
+                        <c:param name="page" value="${i}"/>
+                        <c:param name="q" value="${q}"/>
+                        <c:param name="status" value="${status}"/>
+                        <c:param name="brandId" value="${brandId}"/>
+                        <c:param name="sortBy" value="${sortBy}"/>
+                        <c:param name="sortOrder" value="${sortOrder}"/>
+                        <c:param name="range" value="${range}"/>
+                    </c:url>
+                    <a href="${pageUrl}">${i}</a>
                 </c:otherwise>
             </c:choose>
         </c:forEach>
 
+        <%-- Next --%>
         <c:choose>
             <c:when test="${page >= totalPages}">
                 <span style="color:#999;">Next &raquo;</span>
             </c:when>
             <c:otherwise>
-                <a href="${ctx}/home?p=brand-stats&page=${page+1}&q=${q}&status=${status}&brandId=${brandId}&sortBy=${sortBy}&sortOrder=${sortOrder}&range=${range}">&raquo;&raquo;</a>
+                <c:url var="nextUrl" value="/home">
+                    <c:param name="p" value="brand-stats"/>
+                    <c:param name="page" value="${page+1}"/>
+                    <c:param name="q" value="${q}"/>
+                    <c:param name="status" value="${status}"/>
+                    <c:param name="brandId" value="${brandId}"/>
+                    <c:param name="sortBy" value="${sortBy}"/>
+                    <c:param name="sortOrder" value="${sortOrder}"/>
+                    <c:param name="range" value="${range}"/>
+                </c:url>
+                <a href="${nextUrl}">Next &raquo;</a>
             </c:otherwise>
         </c:choose>
     </div>
 </div>
+
+<script>
+    // Disable Search when a specific Brand is selected to reduce duplicated filtering.
+    // (UI-only behavior; backend logic remains unchanged.)
+    function syncBrandSearch() {
+        const brandSel = document.getElementById('brandIdSelect');
+        const searchInp = document.getElementById('searchInput');
+        if (!brandSel || !searchInp)
+            return;
+
+        const hasBrand = brandSel.value && brandSel.value.trim() !== "";
+        searchInp.disabled = hasBrand;
+
+        if (hasBrand) {
+            // Clear search to avoid confusing combined filters
+            searchInp.value = "";
+            searchInp.placeholder = "Disabled when Brand selected";
+        } else {
+            searchInp.placeholder = "brand name";
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", syncBrandSearch);
+    document.addEventListener("change", function (e) {
+        if (e.target && e.target.id === "brandIdSelect") {
+            syncBrandSearch();
+        }
+    });
+</script>

@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import model.Brand;
 import model.User;
 
@@ -19,7 +21,26 @@ import model.User;
  * @author ADMIN
  */
 @WebServlet(name="BrandUpdate", urlPatterns={"/manager/brand-update"})
-public class BrandUpdate extends HttpServlet{
+public class BrandUpdate extends HttpServlet {
+
+    private String enc(String s) {
+        if (s == null) return "";
+        return URLEncoder.encode(s, StandardCharsets.UTF_8);
+    }
+
+    private String listState(HttpServletRequest req) {
+        String q = req.getParameter("q");
+        String status = req.getParameter("status");
+        String sortBy = req.getParameter("sortBy");
+        String sortOrder = req.getParameter("sortOrder");
+        String page = req.getParameter("page");
+
+        return "&q=" + enc(q)
+                + "&status=" + enc(status)
+                + "&sortBy=" + enc(sortBy)
+                + "&sortOrder=" + enc(sortOrder)
+                + "&page=" + enc(page);
+    }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -34,14 +55,36 @@ public class BrandUpdate extends HttpServlet{
         String desc = req.getParameter("description");
         String activeRaw = req.getParameter("isActive");
 
+        if (desc != null) desc = desc.trim();
+
         if (idRaw == null || idRaw.isBlank()) {
-            resp.sendRedirect(req.getContextPath() + "/home?p=brand-list&err=Missing brand id");
+            resp.sendRedirect(req.getContextPath()
+                    + "/home?p=brand-list&err=" + enc("Missing brand id")
+                    + listState(req));
             return;
         }
         long id = Long.parseLong(idRaw);
 
+        // validate
         if (name == null || name.trim().isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/home?p=brand-update&id=" + id + "&err=Brand name is required");
+            resp.sendRedirect(req.getContextPath()
+                    + "/home?p=brand-update&id=" + id
+                    + "&err=" + enc("Brand name is required")
+                    + "&brandName=" + enc(name)
+                    + "&description=" + enc(desc)
+                    + "&isActive=" + enc(activeRaw)
+                    + listState(req));
+            return;
+        }
+
+        if (desc != null && desc.length() > 255) {
+            resp.sendRedirect(req.getContextPath()
+                    + "/home?p=brand-update&id=" + id
+                    + "&err=" + enc("Description must be <= 255 characters")
+                    + "&brandName=" + enc(name)
+                    + "&description=" + enc(desc)
+                    + "&isActive=" + enc(activeRaw)
+                    + listState(req));
             return;
         }
 
@@ -49,13 +92,21 @@ public class BrandUpdate extends HttpServlet{
             BrandDAO dao = new BrandDAO();
 
             if (dao.existsByName(name, id)) {
-                resp.sendRedirect(req.getContextPath() + "/home?p=brand-update&id=" + id + "&err=Brand name already exists");
+                resp.sendRedirect(req.getContextPath()
+                        + "/home?p=brand-update&id=" + id
+                        + "&err=" + enc("Brand name already exists")
+                        + "&brandName=" + enc(name)
+                        + "&description=" + enc(desc)
+                        + "&isActive=" + enc(activeRaw)
+                        + listState(req));
                 return;
             }
 
             Brand b = dao.findById(id);
             if (b == null) {
-                resp.sendRedirect(req.getContextPath() + "/home?p=brand-list&err=Brand not found");
+                resp.sendRedirect(req.getContextPath()
+                        + "/home?p=brand-list&err=" + enc("Brand not found")
+                        + listState(req));
                 return;
             }
 
@@ -64,11 +115,21 @@ public class BrandUpdate extends HttpServlet{
             b.setActive("1".equals(activeRaw));
 
             dao.update(b);
-            
-            resp.sendRedirect(req.getContextPath() + "/home?p=brand-list&msg=Updated successfully");
+
+            resp.sendRedirect(req.getContextPath()
+                    + "/home?p=brand-list&msg=" + enc("Updated successfully")
+                    + listState(req));
+
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect(req.getContextPath() + "/home?p=brand-lis&err=Server error");
+            // FIX typo: brand-lis -> brand-list
+            resp.sendRedirect(req.getContextPath()
+                    + "/home?p=brand-update&id=" + id
+                    + "&err=" + enc("Server error")
+                    + "&brandName=" + enc(name)
+                    + "&description=" + enc(desc)
+                    + "&isActive=" + enc(activeRaw)
+                    + listState(req));
         }
     }
 }
