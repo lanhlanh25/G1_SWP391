@@ -10,6 +10,7 @@ import java.util.List;
 import model.Supplier;
 import model.SupplierDetailDTO;
 import model.SupplierListItem;
+import model.SupplierReceiptHistoryItem;
 
 /**
  *
@@ -51,7 +52,7 @@ public class SupplierDAO {
                 ps.setNull(7, Types.BIGINT);
             } else {
                 ps.setLong(6, s.getCreatedBy());
-                ps.setLong(7, s.getCreatedBy()); 
+                ps.setLong(7, s.getCreatedBy());
             }
 
             ps.executeUpdate();
@@ -116,8 +117,7 @@ public class SupplierDAO {
                 + "FROM suppliers s "
                 + "LEFT JOIN ( "
                 + "   SELECT supplier_id, AVG(score) AS avg_rating "
-                + 
-                "   FROM supplier_ratings "
+                + "   FROM supplier_ratings "
                 + "   GROUP BY supplier_id "
                 + ") r ON r.supplier_id = s.supplier_id "
                 + "LEFT JOIN ( "
@@ -146,7 +146,6 @@ public class SupplierDAO {
             }
         }
 
-      
         String order = "DESC".equalsIgnoreCase(sortOrder) ? "DESC" : "ASC";
         String sortCol;
         if ("name".equalsIgnoreCase(sortBy)) {
@@ -158,7 +157,7 @@ public class SupplierDAO {
         } else {
             sortCol = "s.created_at";
         }
-       
+
         if ("rating".equalsIgnoreCase(sortBy)) {
             sql.append(" ORDER BY (r.avg_rating IS NULL) ASC, ").append(sortCol).append(" ").append(order);
         } else {
@@ -216,8 +215,7 @@ public class SupplierDAO {
                 + "     FROM import_receipts ir "
                 + "    WHERE ir.supplier_id = s.supplier_id) AS last_transaction, "
                 + "  (SELECT COALESCE(SUM(l.qty),0) "
-                + 
-                "     FROM import_receipt_lines l "
+                + "     FROM import_receipt_lines l "
                 + "     JOIN import_receipts ir2 ON ir2.import_id = l.import_id "
                 + "    WHERE ir2.supplier_id = s.supplier_id) AS total_qty_imported "
                 + "FROM suppliers s "
@@ -373,4 +371,124 @@ public class SupplierDAO {
         }
     }
 
+    public int countImportReceiptsHistory(long supplierId, String q, Date from, Date to, String status) throws SQLException {
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) "
+                + "FROM import_receipts ir "
+                + "WHERE ir.supplier_id = ? "
+        );
+
+        List<Object> params = new ArrayList<>();
+        params.add(supplierId);
+
+        if (q != null && !q.trim().isEmpty()) {
+            sql.append(" AND ir.import_code LIKE ? ");
+            params.add("%" + q.trim() + "%");
+        }
+
+        if (from != null) {
+            sql.append(" AND ir.receipt_date >= ? ");
+            params.add(from);
+        }
+
+        if (to != null) {
+            sql.append(" AND ir.receipt_date <= ? ");
+            params.add(to);
+        }
+
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND ir.status = ? ");
+            params.add(status.trim());
+        }
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        } catch (Exception e) {
+            throw new SQLException("Count import receipts history failed", e);
+        }
+    }
+
+    public List<SupplierReceiptHistoryItem> searchImportReceiptsHistory(
+            long supplierId,
+            String q, Date from, Date to, String status,
+            int page, int pageSize
+    ) throws SQLException {
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT ir.import_id, ir.import_code, ir.receipt_date, ir.status, ir.note, "
+                + "       COALESCE(u.full_name, u.username, CONCAT('User#', ir.created_by)) AS created_by_name, "
+                + "       COALESCE(x.total_units, 0) AS total_units "
+                + "FROM import_receipts ir "
+                + "LEFT JOIN users u ON u.user_id = ir.created_by "
+                + "LEFT JOIN ( "
+                + "    SELECT l.import_id, SUM(l.qty) AS total_units "
+                + "    FROM import_receipt_lines l "
+                + "    GROUP BY l.import_id "
+                + ") x ON x.import_id = ir.import_id "
+                + "WHERE ir.supplier_id = ? "
+        );
+
+        List<Object> params = new ArrayList<>();
+        params.add(supplierId);
+
+        if (q != null && !q.trim().isEmpty()) {
+            sql.append(" AND ir.import_code LIKE ? ");
+            params.add("%" + q.trim() + "%");
+        }
+
+        if (from != null) {
+            sql.append(" AND ir.receipt_date >= ? ");
+            params.add(from);
+        }
+
+        if (to != null) {
+            sql.append(" AND ir.receipt_date <= ? ");
+            params.add(to);
+        }
+
+        if (status != null && !status.isBlank()) {
+            sql.append(" AND ir.status = ? ");
+            params.add(status.trim());
+        }
+
+        sql.append(" ORDER BY ir.receipt_date DESC, ir.import_id DESC ");
+        sql.append(" LIMIT ? OFFSET ? ");
+        int offset = (page - 1) * pageSize;
+        params.add(pageSize);
+        params.add(offset);
+
+        List<SupplierReceiptHistoryItem> list = new ArrayList<>();
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    SupplierReceiptHistoryItem it = new SupplierReceiptHistoryItem();
+                    it.setImportId(rs.getLong("import_id"));
+                    it.setImportCode(rs.getString("import_code"));
+                    it.setReceiptDate(rs.getTimestamp("receipt_date"));
+                    it.setStatus(rs.getString("status"));
+                    it.setNote(rs.getString("note"));
+                    it.setCreatedByName(rs.getString("created_by_name"));
+                    it.setTotalUnits(rs.getLong("total_units"));
+                    list.add(it);
+                }
+            }
+            return list;
+
+        } catch (Exception e) {
+            throw new SQLException("Search import receipts history failed", e);
+        }
+    }
 }

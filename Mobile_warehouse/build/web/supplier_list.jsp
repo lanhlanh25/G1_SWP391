@@ -174,7 +174,6 @@
             <select name="sortBy">
                 <option value="newest" ${sortBy == 'newest' ? 'selected' : ''}>Newest</option>
                 <option value="name" ${sortBy == 'name' ? 'selected' : ''}>Name</option>
-                <option value="rating" ${sortBy == 'rating' ? 'selected' : ''}>Rating</option>
                 <option value="transactions" ${sortBy == 'transactions' ? 'selected' : ''}>Most Transaction</option>
             </select>
         </div>
@@ -196,7 +195,7 @@
                 <th style="width:28%;">Supplier</th>
                 <th style="width:22%;">Contact</th>
                 <th style="width:12%;">Status</th>
-                <th style="width:12%;">Rating</th>
+
                 <th style="width:12%;">Transactions</th>
                 <th style="width:14%;">Action</th>
             </tr>
@@ -226,14 +225,7 @@
                             </c:otherwise>
                         </c:choose>
                     </td>
-                    <td>
-                        <c:choose>
-                            <c:when test="${s.avgRating != null}">
-                                ${s.avgRating}
-                            </c:when>
-                            <c:otherwise>-</c:otherwise>
-                        </c:choose>
-                    </td>
+
                     <td>${s.totalTransactions}</td>
                     <td>
                         <div class="actions">
@@ -254,6 +246,8 @@
                                            href="${pageContext.request.contextPath}/home?p=supplier_inactive&id=${s.supplierId}">
                                             Inactive
                                         </a>
+
+
                                     </c:when>
                                     <c:otherwise>
                                         <form method="post"
@@ -272,7 +266,7 @@
         </tbody>
     </table>
 
-    
+
     <c:set var="safeTotal" value="${empty totalItems ? 0 : totalItems}" />
     <c:set var="safePage" value="${empty page ? 1 : page}" />
     <c:set var="safePageSize" value="${empty pageSize ? 5 : pageSize}" />

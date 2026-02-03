@@ -22,14 +22,14 @@ public class InactiveSupplierServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        
+        // 1) Auth
         User u = (User) session.getAttribute("authUser");
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-    
+        // 2) Role (MANAGER only)
         String role = (String) session.getAttribute("roleName");
         if (role == null) {
             role = "STAFF";
@@ -39,36 +39,17 @@ public class InactiveSupplierServlet extends HttpServlet {
             return;
         }
 
-       
-        String idRaw = trim(request.getParameter("supplierId"));
-        String reason = trim(request.getParameter("reason"));
-        String confirmText = trim(request.getParameter("confirmText"));
-
+        // 3) Read supplierId
         long supplierId;
         try {
-            supplierId = Long.parseLong(idRaw);
+            supplierId = Long.parseLong(request.getParameter("supplierId"));
         } catch (Exception e) {
             response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Invalid supplier id");
             return;
         }
 
-        List<String> errors = new ArrayList<>();
-
-        
-        if (confirmText == null || !confirmText.equalsIgnoreCase("Inactive")) {
-            errors.add("You must type exactly 'Inactive' to confirm.");
-        }
-
-        // (optional) reason required? -> bạn muốn bắt buộc thì mở dòng dưới
-        // if (reason == null || reason.isBlank()) errors.add("Reason is required.");
-        if (!errors.isEmpty()) {
-            session.setAttribute("flashErrors", errors);
-            session.setAttribute("flashReason", reason);
-            response.sendRedirect(request.getContextPath() + "/home?p=supplier_inactive&id=" + supplierId);
-            return;
-        }
-
         SupplierDAO dao = new SupplierDAO();
+        List<String> errors = new ArrayList<>();
 
         try {
             Supplier s = dao.getById(supplierId);
@@ -77,34 +58,32 @@ public class InactiveSupplierServlet extends HttpServlet {
                 return;
             }
 
-            
+            // already inactive -> back to detail
             if (s.getIsActive() == 0) {
-                response.sendRedirect(request.getContextPath() + "/home?p=supplier_detail&id=" + supplierId + "&inactive=1");
+                response.sendRedirect(request.getContextPath()
+                        + "/home?p=supplier_detail&id=" + supplierId);
                 return;
             }
 
             boolean ok = dao.setActive(supplierId, 0, (long) u.getUserId());
             if (!ok) {
-                errors.add("Inactive failed. Supplier may not exist.");
+                errors.add("Inactive failed.");
                 session.setAttribute("flashErrors", errors);
-                session.setAttribute("flashReason", reason);
-                response.sendRedirect(request.getContextPath() + "/home?p=supplier_inactive&id=" + supplierId);
+                response.sendRedirect(request.getContextPath()
+                        + "/home?p=supplier_detail&id=" + supplierId);
                 return;
             }
 
-            
-            response.sendRedirect(request.getContextPath() + "/home?p=supplier_detail&id=" + supplierId + "&inactive=1");
+            // success
+            response.sendRedirect(request.getContextPath()
+                    + "/home?p=supplier_detail&id=" + supplierId + "&inactive=1");
 
         } catch (SQLException ex) {
             ex.printStackTrace();
             errors.add("Database error: cannot inactive supplier.");
             session.setAttribute("flashErrors", errors);
-            session.setAttribute("flashReason", reason);
-            response.sendRedirect(request.getContextPath() + "/home?p=supplier_inactive&id=" + supplierId);
+            response.sendRedirect(request.getContextPath()
+                    + "/home?p=supplier_detail&id=" + supplierId);
         }
-    }
-
-    private String trim(String s) {
-        return (s == null) ? null : s.trim();
     }
 }

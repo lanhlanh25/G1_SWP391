@@ -127,21 +127,23 @@
         <div class="btn-group">
             <a class="btn" href="${pageContext.request.contextPath}/home?p=view_supplier">Back to list</a>
             <a class="btn" href="${pageContext.request.contextPath}/home?p=view_history&supplierId=${d.supplierId}">History</a>
-            <a class="btn" href="${pageContext.request.contextPath}/home?p=rate_supplier&supplierId=${d.supplierId}">Rate</a>
 
             <c:if test="${sessionScope.roleName != null && sessionScope.roleName.toUpperCase() == 'MANAGER'}">
                 <a class="btn" href="${pageContext.request.contextPath}/home?p=update_supplier&id=${d.supplierId}">Update</a>
 
                 <c:choose>
-                    
+
                     <c:when test="${d.isActive == 1}">
                         <a class="btn"
                            href="${pageContext.request.contextPath}/home?p=supplier_inactive&id=${d.supplierId}">
                             Inactive
                         </a>
+
+
+
                     </c:when>
 
-                    
+
                     <c:otherwise>
                         <form method="post"
                               action="${pageContext.request.contextPath}/supplier-toggle"
@@ -163,7 +165,7 @@
     </c:if>
 
     <div class="grid">
-        
+
         <div class="card">
             <h3>Supplier Information</h3>
             <div class="form">
@@ -194,20 +196,10 @@
             </div>
         </div>
 
-       
+
         <div class="card">
             <h3>Summary</h3>
             <div class="summary">
-                <div class="box">
-                    <div class="k">Avg rating</div>
-                    <div class="v">
-                        <c:choose>
-                            <c:when test="${d.avgRating != null}">${d.avgRating}</c:when>
-                            <c:otherwise>-</c:otherwise>
-                        </c:choose>
-                    </div>
-                </div>
-
                 <div class="box">
                     <div class="k">Total import receipts</div>
                     <div class="v">${d.totalImportReceipts}</div>
