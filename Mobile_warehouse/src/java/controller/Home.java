@@ -68,6 +68,10 @@ public class Home extends HttpServlet {
             return;
         }
 
+        if (response.isCommitted()) {
+            return;
+        }
+
         request.setAttribute("sidebarPage", sidebarPage);
         request.setAttribute("contentPage", contentPage);
         request.setAttribute("currentPage", p);
@@ -341,32 +345,50 @@ public class Home extends HttpServlet {
 
                 LocalDate today = LocalDate.now();
                 switch (range) {
-                    case "last7":
-                        fromDate = Date.valueOf(today.minusDays(6));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "last30":
-                        fromDate = Date.valueOf(today.minusDays(29));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "month":
-                        fromDate = Date.valueOf(today.withDayOfMonth(1));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "today":
+                    case "today": {
                         fromDate = Date.valueOf(today);
                         toDate = Date.valueOf(today);
                         break;
-                    case "lastMonth":
+                    }
+
+                    case "last7": { // rolling 7 days (today + 6 previous days)
+                        fromDate = Date.valueOf(today.minusDays(6));
+                        toDate = Date.valueOf(today);
+                        break;
+                    }
+
+                    case "last30": { // rolling 30 days
+                        fromDate = Date.valueOf(today.minusDays(29));
+                        toDate = Date.valueOf(today);
+                        break;
+                    }
+
+                    case "last90": { // rolling 90 days (Quarter)
+                        fromDate = Date.valueOf(today.minusDays(89));
+                        toDate = Date.valueOf(today);
+                        break;
+                    }
+
+                    case "month": { // This month (calendar)
+                        fromDate = Date.valueOf(today.withDayOfMonth(1));
+                        toDate = Date.valueOf(today);
+                        break;
+                    }
+
+                    case "lastMonth": { // Previous calendar month
                         LocalDate firstDayLastMonth = today.minusMonths(1).withDayOfMonth(1);
                         LocalDate lastDayLastMonth = today.withDayOfMonth(1).minusDays(1);
                         fromDate = Date.valueOf(firstDayLastMonth);
                         toDate = Date.valueOf(lastDayLastMonth);
                         break;
-                    default:
+                    }
+
+                    default: { // all
                         fromDate = null;
                         toDate = null;
+                        range = "all";
                         break;
+                    }
                 }
 
                 Long brandId = null;
