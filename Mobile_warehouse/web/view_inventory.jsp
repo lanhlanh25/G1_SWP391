@@ -265,7 +265,7 @@
                
                 <c:url var="detailUrl" value="/inventory-details">
                   <c:param name="productCode" value="${it.productCode}"/>
-                  <!-- giữ filter + page/pageSize của list (để detail có thể back đúng ngữ cảnh nếu bạn dùng) -->
+                  
                   <c:param name="q" value="${q}"/>
                   <c:param name="brandId" value="${brandId}"/>
                   <c:param name="stockStatus" value="${stockStatus}"/>
