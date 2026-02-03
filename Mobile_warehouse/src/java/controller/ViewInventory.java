@@ -90,7 +90,7 @@ public class ViewInventory extends HttpServlet {
         request.setAttribute("currentPage", "inventory");
         request.getRequestDispatcher("homepage.jsp").forward(request, response);
 
-        // Nếu bạn muốn view_inventory.jsp chạy độc lập (không qua homepage.jsp) thì dùng:
+       
         // request.getRequestDispatcher("view_inventory.jsp").forward(request, response);
     }
 
