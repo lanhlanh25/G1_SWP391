@@ -15,6 +15,14 @@ import java.sql.Statement;
 
 public class ProductSkuDAO {
 
+    public void inactivateSkusByProduct(int productId) throws Exception {
+        String sql = "UPDATE product_skus SET status = 'INACTIVE' WHERE product_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ps.executeUpdate();
+        }
+    }
+
     public void insert(long productId, String skuCode, String color, int ramGb, int storageGb, String status) throws Exception {
         String st = "INACTIVE".equalsIgnoreCase(status) ? "INACTIVE" : "ACTIVE";
         String sql = "INSERT INTO product_skus (product_id, sku_code, color, ram_gb, storage_gb, status) VALUES (?, ?, ?, ?, ?, ?)";

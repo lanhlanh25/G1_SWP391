@@ -15,6 +15,18 @@ import model.Product;
 
 public class ProductCRUDDAO {
 
+    public void inactivateProduct(int productId) throws Exception {
+        String sql = "UPDATE products SET status = 'INACTIVE' WHERE product_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ps.executeUpdate();
+        }
+    }
+
+    public String getBlockReasonForInactivate(int productId) throws Exception {
+        return null;
+    }
+
     public boolean existsByCode(String code) throws Exception {
         String sql = "SELECT 1 FROM products WHERE product_code = ? LIMIT 1";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -51,6 +63,19 @@ public class ProductCRUDDAO {
         return null;
     }
 
+    public int countSkuByProduct(int productId) throws Exception {
+        String sql = "SELECT COUNT(*) c FROM product_skus WHERE product_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("c");
+                }
+            }
+        }
+        return 0;
+    }
+
     public void updateProductByManager(int id, String productName, String model, String description, String status) throws Exception {
         String sql = "UPDATE products SET product_name = ?, model = ?, description = ?, status = ? WHERE product_id = ?";
 
@@ -62,6 +87,32 @@ public class ProductCRUDDAO {
             ps.setInt(5, id);
             ps.executeUpdate();
         }
+    }
+
+    public int sumInventoryByProduct(int productId) throws Exception {
+        String sql = "SELECT COALESCE(SUM(quantity),0) s FROM product_skus WHERE product_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("s");
+                }
+            }
+        }
+        return 0;
+    }
+
+    public String getCreatedAtText(int productId) throws Exception {
+        String sql = "SELECT DATE_FORMAT(created_at, '%Y-%m-%d %H:%i') v FROM products WHERE product_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("v");
+                }
+            }
+        }
+        return "";
     }
 
     public void insert(Product p) throws Exception {
@@ -78,4 +129,12 @@ public class ProductCRUDDAO {
             ps.executeUpdate();
         }
     }
+    public void inactivateSkusByProduct(int productId) throws Exception {
+    String sql = "UPDATE product_skus SET status = 'INACTIVE' WHERE product_id = ?";
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setInt(1, productId);
+        ps.executeUpdate();
+    }
+}
 }

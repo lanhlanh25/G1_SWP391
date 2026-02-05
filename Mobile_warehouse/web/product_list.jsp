@@ -236,8 +236,7 @@
                                 Update
                             </a>
 
-                            <a href="${pageContext.request.contextPath}/home?p=product-delete&id=${x.productId}"
-                               onclick="return confirm('Are you sure you want to delete this product?');">
+                            <a href="${pageContext.request.contextPath}/manager/product/delete?id=${x.productId}">
                                 Delete
                             </a>
                         </td>
