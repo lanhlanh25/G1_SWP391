@@ -18,7 +18,7 @@ public class DBContext {
             + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
 
     private static final String USER = "root";
-    private static final String PASS = "thanh123";
+    private static final String PASS = "123456";
 
     public static Connection getConnection() throws Exception {
         Class.forName("com.mysql.cj.jdbc.Driver");

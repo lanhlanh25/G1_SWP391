@@ -8,7 +8,9 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <style>
-    * { box-sizing: border-box; }
+    * {
+        box-sizing: border-box;
+    }
 
     .wrap {
         width: 100%;
@@ -114,8 +116,16 @@
         font-weight: 800;
     }
 
-    .action a { margin: 0 10px; }
-
+    .action {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: center;
+    }
+    .action a {
+        text-decoration: underline;
+        font-weight: 600;
+    }
     .paging {
         margin-top: 12px;
         display: flex;
@@ -134,19 +144,36 @@
         text-decoration: none;
     }
 
-    .page-btns .active { background: #999; }
+    .page-btns .active {
+        background: #999;
+    }
 
     @media (max-width: 768px) {
-        .wrap { max-width: 100%; padding: 14px; }
-        .title { font-size: 30px; }
-        .filters select { flex: 1 1 180px; }
-        table { min-width: 760px; }
+        .wrap {
+            max-width: 100%;
+            padding: 14px;
+        }
+        .title {
+            font-size: 30px;
+        }
+        .filters select {
+            flex: 1 1 180px;
+        }
+        table {
+            min-width: 760px;
+        }
     }
 
     @media (max-width: 480px) {
-        .title { font-size: 26px; }
-        .searchBox { flex: 1 1 100%; }
-        .searchBox button { padding: 0 12px; }
+        .title {
+            font-size: 26px;
+        }
+        .searchBox {
+            flex: 1 1 100%;
+        }
+        .searchBox button {
+            padding: 0 12px;
+        }
     }
 </style>
 <div class="wrap">
@@ -201,8 +228,17 @@
                         <td>${x.status}</td>
                         <td><fmt:formatDate value="${x.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
                         <td class="action">
-                            <a href="${pageContext.request.contextPath}/home?p=product-detail&id=${x.productId}">View</a>
-                            <a href="${pageContext.request.contextPath}/home?p=product-delete&id=${x.productId}">Delete</a>
+                            <a href="${pageContext.request.contextPath}/home?p=product-detail&id=${x.productId}">
+                                View
+                            </a>
+
+                            <a href="${pageContext.request.contextPath}/manager/product/update?id=${x.productId}">
+                                Update
+                            </a>
+
+                            <a href="${pageContext.request.contextPath}/manager/product/delete?id=${x.productId}">
+                                Delete
+                            </a>
                         </td>
                     </tr>
                 </c:forEach>
