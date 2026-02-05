@@ -119,10 +119,7 @@
 
     </div>
 
-    <div class="muted" style="margin-bottom:8px;">
-        Range affects: Imported Units, Exported Units
-    </div>
-
+    
     <%-- Summary cards --%>
     <div class="cards">
         <div class="card">
@@ -156,13 +153,15 @@
         <input type="hidden" name="p" value="brand-stats-detail"/>
         <input type="hidden" name="brandId" value="${param.brandId}"/>
 
-        <%-- keep list state --%>
-        <input type="hidden" name="q" value="${q}"/>
-        <input type="hidden" name="status" value="${status}"/>
-        <input type="hidden" name="sortBy" value="${sortBy}"/>
-        <input type="hidden" name="sortOrder" value="${sortOrder}"/>
-        <input type="hidden" name="range" value="${range}"/>
-        <input type="hidden" name="page" value="${page}"/>
+        <!-- keep list state (IMPORTANT: use list* param names) -->
+<input type="hidden" name="listQ" value="${param.listQ}"/>
+<input type="hidden" name="listStatus" value="${param.listStatus}"/>
+<input type="hidden" name="listBrandId" value="${param.listBrandId}"/>
+<input type="hidden" name="listSortBy" value="${param.listSortBy}"/>
+<input type="hidden" name="listSortOrder" value="${param.listSortOrder}"/>
+<input type="hidden" name="listRange" value="${param.listRange}"/>
+<input type="hidden" name="listPage" value="${empty param.listPage ? 1 : param.listPage}"/>
+
 
         <div class="filterRow">
             <div class="field">

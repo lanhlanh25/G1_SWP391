@@ -515,6 +515,7 @@ public class Home extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/home?p=brand-stats&err=Brand not found");
                     return;
                 }
+                BrandStatsSummary detailSummary = statsDAO.getBrandDetailSummary(brandId, lowThreshold, fromDate, toDate);
 
                 List<ProductStatsRow> products = statsDAO.listBrandDetail(
                         brandId, lowThreshold, fromDate, toDate, dSortBy, dSortOrder
@@ -524,6 +525,8 @@ public class Home extends HttpServlet {
                 request.setAttribute("products", products);
                 request.setAttribute("dSortBy", dSortBy);
                 request.setAttribute("dSortOrder", dSortOrder);
+                request.setAttribute("detailSummary", detailSummary);
+                request.setAttribute("range", range);
 
                 break;
             }
