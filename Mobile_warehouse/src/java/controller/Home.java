@@ -37,7 +37,14 @@ public class Home extends HttpServlet {
         if (p == null || p.isBlank()) {
             p = "dashboard";
         }
-
+        if ("sku-add".equals(p)) {
+            ProductDAO dao = new ProductDAO();
+            try {
+                request.setAttribute("products", dao.getAll());
+            } catch (Exception ex) {
+                Logger.getLogger(Home.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
             role = UserDAO.getRoleNameByUserId(u.getUserId());
@@ -793,7 +800,8 @@ public class Home extends HttpServlet {
                         return "user_list.jsp";
                     case "user-detail":
                         return "view_user_information.jsp";
-
+                    case "sku-add":
+                        return "add_sku.jsp";
                     case "brand-list":
                         return "brand_list.jsp";
                     case "brand-add":
