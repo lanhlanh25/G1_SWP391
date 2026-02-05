@@ -124,6 +124,76 @@
       </table>
     </form>
 
+
+    <c:choose>
+      <c:when test="${totalPages <= 3}">
+        <c:set var="startPage" value="1"/>
+        <c:set var="endPage" value="${totalPages}"/>
+      </c:when>
+      <c:when test="${pageNumber <= 1}">
+        <c:set var="startPage" value="1"/>
+        <c:set var="endPage" value="3"/>
+      </c:when>
+      <c:when test="${pageNumber >= totalPages}">
+        <c:set var="startPage" value="${totalPages-2}"/>
+        <c:set var="endPage" value="${totalPages}"/>
+      </c:when>
+      <c:otherwise>
+        <c:set var="startPage" value="${pageNumber-1}"/>
+        <c:set var="endPage" value="${pageNumber+1}"/>
+      </c:otherwise>
+    </c:choose>
+
+    <div class="pagerbar">
+      <div>Page ${pageNumber}</div>
+
+      <div class="paging">
+        <c:url var="prevUrl" value="/inventory-count">
+          <c:param name="q" value="${q}"/>
+          <c:param name="brandId" value="${brandId}"/>
+          <c:param name="pageSize" value="${pageSize}"/>
+          <c:param name="page" value="${pageNumber-1}"/>
+        </c:url>
+        <a class="pg ${pageNumber<=1 ? 'disabled' : ''}" href="${prevUrl}">Prev</a>
+
+        <c:forEach var="i" begin="${startPage}" end="${endPage}">
+          <c:choose>
+            <c:when test="${i == pageNumber}">
+              <span class="pg active">${i}</span>
+            </c:when>
+            <c:otherwise>
+              <c:url var="pageUrl" value="/inventory-count">
+                <c:param name="q" value="${q}"/>
+                <c:param name="brandId" value="${brandId}"/>
+                <c:param name="pageSize" value="${pageSize}"/>
+                <c:param name="page" value="${i}"/>
+              </c:url>
+              <a class="pg" href="${pageUrl}">${i}</a>
+            </c:otherwise>
+          </c:choose>
+        </c:forEach>
+
+        <c:url var="nextUrl" value="/inventory-count">
+          <c:param name="q" value="${q}"/>
+          <c:param name="brandId" value="${brandId}"/>
+          <c:param name="pageSize" value="${pageSize}"/>
+          <c:param name="page" value="${pageNumber+1}"/>
+        </c:url>
+        <a class="pg ${pageNumber>=totalPages ? 'disabled' : ''}" href="${nextUrl}">Next</a>
+      </div>
+
+      <div>
+        Show
+        <select onchange="location.href='${pageContext.request.contextPath}/inventory-count?q=${q}&brandId=${brandId}&page=1&pageSize='+this.value;">
+          <option value="10" ${pageSize==10 ? "selected" : ""}>10</option>
+          <option value="20" ${pageSize==20 ? "selected" : ""}>20</option>
+        </select>
+        Row
+      </div>
+    </div>
+
+
+
     <script>
       function updateStatusForInput(inputEl) {
         const systemQty = parseInt(inputEl.dataset.system || "0", 10);
