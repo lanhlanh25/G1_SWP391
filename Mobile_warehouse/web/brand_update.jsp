@@ -56,15 +56,15 @@
     </div>
     <br/>
 
-    
-    <c:set var="currentActive"
-           value="${not empty param.isActive ? param.isActive : (brand.active ? '1' : '0')}" />
 
-    Status:
-    <select name="isActive">
-        <option value="1" ${currentActive == '1' ? 'selected' : ''}>Active</option>
-        <option value="0" ${currentActive == '0' ? 'selected' : ''}>Inactive</option>
-    </select>
+    <%-- Status is controlled by Disable action only. Do not allow editing here. --%>
+    <p><b>Status:</b>
+        <c:choose>
+            <c:when test="${brand.active}">Active</c:when>
+            <c:otherwise>Inactive</c:otherwise>
+        </c:choose>
+    </p>
+
 
 
     <br/><br/>

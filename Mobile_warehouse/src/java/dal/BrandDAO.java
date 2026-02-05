@@ -41,18 +41,19 @@ public class BrandDAO {
             }
         }
     }
+
     public List<Brand> listActiveForDropdown() throws SQLException, Exception {
-    String sql = "SELECT * FROM brands WHERE is_active = 1 ORDER BY brand_name ASC";
-    try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-        try (ResultSet rs = ps.executeQuery()) {
-            List<Brand> list = new ArrayList<>();
-            while (rs.next()) {
-                list.add(map(rs));
+        String sql = "SELECT * FROM brands WHERE is_active = 1 ORDER BY brand_name ASC";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                List<Brand> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(map(rs));
+                }
+                return list;
             }
-            return list;
         }
     }
-}
 
     public long insert(Brand b) throws SQLException, Exception {
         String sql = "INSERT INTO brands (brand_name, description, is_active, created_by) "
@@ -100,6 +101,28 @@ public class BrandDAO {
         }
     }
 
+    public void setActive(long id, boolean active) throws SQLException, Exception {
+        String sql = "UPDATE brands SET is_active = ? WHERE brand_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, active ? 1 : 0);
+            ps.setLong(2, id);
+            ps.executeUpdate();
+        }
+    }
+
+    public boolean isActive(long id) throws SQLException, Exception {
+        String sql = "SELECT is_active FROM brands WHERE brand_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) == 1;
+                }
+            }
+        }
+        return false;
+    }
+
     public void disable(long id) throws SQLException, Exception {
         String sql = "UPDATE brands SET is_active = 0 WHERE brand_id = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -108,7 +131,6 @@ public class BrandDAO {
         }
     }
 
-   
     public List<Brand> list(String q, String status, String sortBy, String sortOrder, int page, int pageSize) throws SQLException, Exception {
         String sortCol = switch (sortBy == null ? "" : sortBy) {
             case "name" ->
