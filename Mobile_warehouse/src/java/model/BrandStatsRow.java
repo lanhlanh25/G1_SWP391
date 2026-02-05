@@ -9,15 +9,24 @@ package model;
  * @author ADMIN
  */
 public class BrandStatsRow {
+
     private long brandId;
     private String brandName;
     private int totalProducts;
     private int totalStockUnits;
     private int lowStockProducts;
     private int importedUnits;
+    private int exportedUnits;
 
+    private boolean active;
 
-     private boolean active;
+    public int getExportedUnits() {
+        return exportedUnits;
+    }
+
+    public void setExportedUnits(int exportedUnits) {
+        this.exportedUnits = exportedUnits;
+    }
 
     public boolean isActive() {
         return active;
@@ -34,6 +43,7 @@ public class BrandStatsRow {
     public void setActive(boolean active) {
         this.active = active;
     }
+
     public long getBrandId() {
         return brandId;
     }
@@ -73,5 +83,5 @@ public class BrandStatsRow {
     public void setLowStockProducts(int lowStockProducts) {
         this.lowStockProducts = lowStockProducts;
     }
-    
+
 }

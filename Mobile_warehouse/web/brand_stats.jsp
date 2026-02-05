@@ -45,10 +45,12 @@
     }
 
     .cards{
-        display:flex;
+        display:grid;
+        grid-template-columns: repeat(3, 1fr);
         gap:18px;
         margin:14px 0 16px;
     }
+
     .card{
         flex:1;
         border:1px solid #333;
@@ -110,9 +112,10 @@
     }
 
     .muted{
-        color:#666;
         font-size:12px;
+        color:#777;
     }
+
     .msg-ok{
         color:green;
         margin:8px 0;
@@ -213,6 +216,15 @@
             <div class="label">Low Stock Products</div>
             <div class="value">${summary.lowStockProducts}</div>
         </div>
+        <div class="card">
+            <div class="label">Imported Units (Range)</div>
+            <div class="value">${summary.importedUnitsInRange}</div>
+        </div>
+        <div class="card">
+            <div class="label">Exported Units (Range)</div>
+            <div class="value">${summary.exportedUnitsInRange}</div>
+        </div>
+
     </div>
 
     <%-- Filter + Sort form --%>
@@ -236,6 +248,10 @@
                     <option value="month" ${range=='month' ? 'selected' : ''}>This Month</option>
                     <option value="lastMonth" ${range=='lastMonth' ? 'selected' : ''}>Last Month</option>
                 </select>
+                <div class="muted" style="margin-top:4px;">
+                    Range affects: Imported Units, Exported Units
+                </div>
+
             </div>
 
             <%-- Brand dropdown --%>
@@ -267,6 +283,8 @@
             <div class="field">
                 <label>Search</label>
                 <input type="text" name="q" id="searchInput" value="${q}" placeholder="brand name"/>
+                <input type="hidden" name="q" id="qHidden" value="${q}" />
+
             </div>
         </div>
 
@@ -275,10 +293,12 @@
             <div class="field">
                 <label>Sort By</label>
                 <select name="sortBy">
-                    <option value="stock" ${empty sortBy || sortBy=='stock' ? 'selected' : ''}>Total Stock</option>
+                    <option value="stock"   ${sortBy=='stock' ? 'selected' : ''}>Total Stock</option>
                     <option value="products" ${sortBy=='products' ? 'selected' : ''}>Total Product</option>
-                    <option value="low" ${sortBy=='low' ? 'selected' : ''}>Low Stock Count</option>
-                    <option value="import" ${sortBy=='import' ? 'selected' : ''}>Imported Units</option>
+                    <option value="low"     ${sortBy=='low' ? 'selected' : ''}>Low Stock</option>
+                    <option value="import"  ${sortBy=='import' ? 'selected' : ''}>Imported Units</option>
+                    <option value="export"  ${sortBy=='export' ? 'selected' : ''}>Exported Units</option>
+                    <option value="name"    ${sortBy=='name' ? 'selected' : ''}>Brand Name</option>
                 </select>
 
             </div>
@@ -287,9 +307,8 @@
             <div class="field">
                 <label>Order</label>
                 <select name="sortOrder">
-                    <option value="ASC" ${sortOrder=='ASC'?'selected':''}>Ascending (A→Z / Low→High)</option>
-                    <option value="DESC" ${sortOrder=='DESC'?'selected':''}>Descending (Z→A / High→Low)</option>
-
+                    <option value="DESC" ${sortOrder=='DESC' ? 'selected' : ''}>Descending (Z→A / High→Low)</option>
+                    <option value="ASC"  ${sortOrder=='ASC' ? 'selected' : ''}>Ascending (A→Z / Low→High)</option>
                 </select>
             </div>
 
@@ -320,10 +339,13 @@
                     : 'All'}" />
 
     <c:set var="sortLabel"
-           value="${sortBy=='products' ? 'Total Products'
+           value="${sortBy=='name' ? 'Brand Name'
+                    : sortBy=='products' ? 'Total Products'
                     : sortBy=='low' ? 'Low Stock Count'
                     : sortBy=='import' ? 'Imported Units'
+                    : sortBy=='export' ? 'Exported Units'
                     : 'Total Stock'}" />
+
 
     <c:set var="orderLabel" value="${empty sortOrder ? 'DESC' : sortOrder}" />
 
@@ -371,6 +393,8 @@
             <th style="width:120px;">Total Stock</th>
             <th style="width:140px;">Low Stock Count</th>
             <th style="width:140px;">Imported Units</th>
+            <th style="width:140px;">Exported Units</th>
+
             <th style="width:120px;">Action</th>
         </tr>
 
@@ -386,31 +410,34 @@
                 <td>${r.totalProducts}</td>
                 <td>${r.totalStockUnits}</td>
                 <td>${r.lowStockProducts}</td>
+
                 <td>${r.importedUnits}</td>
+                <td>${r.exportedUnits}</td>
+
                 <td>
                     <%-- View Details URL (keep current filters for better navigation/back behavior) --%>
                     <c:url var="detailUrl" value="/home">
                         <c:param name="p" value="brand-stats-detail"/>
                         <c:param name="brandId" value="${r.brandId}"/>
 
-                        <%-- Keep current list state (optional but recommended) --%>
-                        <c:param name="q" value="${q}"/>
-                        <c:param name="status" value="${status}"/>
-                        <c:param name="brandId" value="${brandId}"/>
-                        <c:param name="sortBy" value="${sortBy}"/>
-                        <c:param name="sortOrder" value="${sortOrder}"/>
-                        <c:param name="range" value="${range}"/>
-                        <c:param name="page" value="${page}"/>
+                        <!-- mang theo STATE của list để back -->
+                        <c:param name="listQ" value="${q}"/>
+                        <c:param name="listStatus" value="${status}"/>
+                        <c:param name="listBrandId" value="${brandId}"/>
+                        <c:param name="listSortBy" value="${sortBy}"/>
+                        <c:param name="listSortOrder" value="${sortOrder}"/>
+                        <c:param name="listRange" value="${range}"/>
+                        <c:param name="listPage" value="${page}"/>
                     </c:url>
-
                     <a class="btn" style="padding:4px 10px;" href="${detailUrl}">View Details</a>
+
                 </td>
             </tr>
         </c:forEach>
 
         <c:if test="${empty rows}">
             <tr>
-                <td colspan="7" style="text-align:center; color:#666;">No data</td>
+                <td colspan="8" style="text-align:center; color:#666;">No data</td>
             </tr>
         </c:if>
     </table>
@@ -481,31 +508,39 @@
     </div>
 </div>
 
+
 <script>
-    // Disable Search when a specific Brand is selected to reduce duplicated filtering.
-    // (UI-only behavior; backend logic remains unchanged.)
     function syncBrandSearch() {
         const brandSel = document.getElementById('brandIdSelect');
         const searchInp = document.getElementById('searchInput');
-        if (!brandSel || !searchInp)
+        const qHidden = document.getElementById('qHidden');
+        if (!brandSel || !searchInp || !qHidden)
             return;
 
         const hasBrand = brandSel.value && brandSel.value.trim() !== "";
-        searchInp.disabled = hasBrand;
+
+        // luôn giữ hidden bằng value hiện tại
+        qHidden.value = searchInp.value;
 
         if (hasBrand) {
-            // Clear search to avoid confusing combined filters
-            searchInp.value = "";
+            searchInp.disabled = true;
             searchInp.placeholder = "Disabled when Brand selected";
         } else {
+            searchInp.disabled = false;
             searchInp.placeholder = "brand name";
         }
     }
 
     document.addEventListener("DOMContentLoaded", syncBrandSearch);
+    document.addEventListener("input", function (e) {
+        if (e.target && e.target.id === "searchInput")
+            syncBrandSearch();
+    });
     document.addEventListener("change", function (e) {
         if (e.target && e.target.id === "brandIdSelect") {
             syncBrandSearch();
         }
     });
 </script>
+
+
