@@ -13,16 +13,24 @@ public class BrandStatsSummary {
     private int totalProducts;
     private int totalStockUnits;
     private int lowStockProducts;
-    private int importedUnits;
+    private int importedUnitsInRange;
+private int exportedUnitsInRange;
 
-    public int getImportedUnits() {
-        return importedUnits;
+    public int getImportedUnitsInRange() {
+        return importedUnitsInRange;
     }
 
-    public void setImportedUnits(int importedUnits) {
-        this.importedUnits = importedUnits;
+    public void setImportedUnitsInRange(int importedUnitsInRange) {
+        this.importedUnitsInRange = importedUnitsInRange;
     }
 
+    public int getExportedUnitsInRange() {
+        return exportedUnitsInRange;
+    }
+
+    public void setExportedUnitsInRange(int exportedUnitsInRange) {
+        this.exportedUnitsInRange = exportedUnitsInRange;
+    }
 
     public int getTotalBrands() {
         return totalBrands;

@@ -16,7 +16,7 @@
   String pageParam = request.getParameter("page");
 %>
 
-<h2>Create New Brand</h2>
+<h2>Add New Brand</h2>
 
 <% if (request.getParameter("err") != null) { %>
   <p style="color:red;"><%=request.getParameter("err")%></p>
