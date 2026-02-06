@@ -16,7 +16,8 @@ import java.util.List;
 import model.Product;
 import model.ProductListItem;
 import model.ProductSimple;
-
+import model.IdName;
+import model.ProductLite;
 public class ProductDAO {
 
     public int count(String q, Long brandId, String status) throws Exception {
@@ -194,5 +195,30 @@ public class ProductDAO {
         }
         return null;
     }
+public List<ProductLite> listActive() throws Exception {
+    List<ProductLite> list = new ArrayList<>();
+
+    // tuỳ schema: nếu products cũng dùng status
+    String sql = "SELECT product_id, product_code "
+               + "FROM products "
+               + "WHERE status = 'ACTIVE' "
+               + "ORDER BY product_code";
+
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+            ProductLite p = new ProductLite();
+            p.setProductId(rs.getLong("product_id"));
+            p.setProductCode(rs.getString("product_code"));
+            list.add(p);
+        }
+    }
+    return list;
+}
+
+
+
 
 }

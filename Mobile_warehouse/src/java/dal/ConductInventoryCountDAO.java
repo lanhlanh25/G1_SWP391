@@ -11,23 +11,28 @@ package dal;
 import model.IdName;
 import model.InventoryCountRow;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
-
 public class ConductInventoryCountDAO {
 
     private Connection getConn() throws Exception {
         return DBContext.getConnection();
     }
 
+    // Dropdown "All Brands"
     public List<IdName> getActiveBrands() {
         List<IdName> list = new ArrayList<>();
         String sql = "SELECT brand_id, brand_name FROM brands WHERE is_active = 1 ORDER BY brand_name";
         try (Connection con = getConn();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
-                list.add(new IdName(String.valueOf(rs.getLong("brand_id")), rs.getString("brand_name")));
+                // IdName constructor nhận long
+                list.add(new IdName(rs.getLong("brand_id"), rs.getString("brand_name")));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -42,11 +47,13 @@ public class ConductInventoryCountDAO {
         if (q != null && !q.trim().isEmpty()) {
             where.append(" AND (p.product_name LIKE ? OR s.sku_code LIKE ? OR p.product_code LIKE ?) ");
             String like = "%" + q.trim() + "%";
-            params.add(like); params.add(like); params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
         }
         if (brandId != null && !brandId.trim().isEmpty()) {
             where.append(" AND p.brand_id = ? ");
-            params.add(Long.parseLong(brandId.trim()));
+            params.add(parseLongSafe(brandId));
         }
 
         String sql =
@@ -57,6 +64,7 @@ public class ConductInventoryCountDAO {
 
         try (Connection con = getConn();
              PreparedStatement ps = con.prepareStatement(sql)) {
+
             bind(ps, params);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return rs.getInt(1);
@@ -77,11 +85,13 @@ public class ConductInventoryCountDAO {
         if (q != null && !q.trim().isEmpty()) {
             where.append(" AND (p.product_name LIKE ? OR s.sku_code LIKE ? OR p.product_code LIKE ?) ");
             String like = "%" + q.trim() + "%";
-            params.add(like); params.add(like); params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
         }
         if (brandId != null && !brandId.trim().isEmpty()) {
             where.append(" AND p.brand_id = ? ");
-            params.add(Long.parseLong(brandId.trim()));
+            params.add(parseLongSafe(brandId));
         }
 
         String sql =
@@ -111,9 +121,12 @@ public class ConductInventoryCountDAO {
                     r.setColor(rs.getString("color"));
                     r.setRamGb(rs.getInt("ram_gb"));
                     r.setStorageGb(rs.getInt("storage_gb"));
+
                     int sys = rs.getInt("system_qty");
                     r.setSystemQty(sys);
-                    r.setCountedQty(sys);
+                    r.setCountedQty(sys); // default counted = system
+
+                    // ❌ KHÔNG gọi r.setDifference(...) vì model bạn không có
                     list.add(r);
                 }
             }
@@ -151,7 +164,7 @@ public class ConductInventoryCountDAO {
         }
     }
 
-    private int bind(PreparedStatement ps, List<Object> params) throws SQLException {
+    private int bind(PreparedStatement ps, List<Object> params) throws Exception {
         int idx = 1;
         for (Object o : params) {
             if (o instanceof String) ps.setString(idx++, (String) o);
@@ -159,5 +172,10 @@ public class ConductInventoryCountDAO {
             else ps.setObject(idx++, o);
         }
         return idx;
+    }
+
+    private long parseLongSafe(String s) {
+        try { return Long.parseLong(s.trim()); }
+        catch (Exception e) { return -1; }
     }
 }
