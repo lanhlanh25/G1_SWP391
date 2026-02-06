@@ -346,6 +346,13 @@ public class Home extends HttpServlet {
                 if (range == null || range.isBlank()) {
                     range = "all";
                 }
+                // default
+                if (sortBy == null || sortBy.isBlank()) {
+                    sortBy = "stock";
+                }
+                if (sortOrder == null || sortOrder.isBlank()) {
+                    sortOrder = "DESC";
+                }
 
                 Date fromDate = null;
                 Date toDate = null;
@@ -444,6 +451,7 @@ public class Home extends HttpServlet {
 
             case "brand-stats-detail": {
                 BrandStatsDAO statsDAO = new BrandStatsDAO();
+
                 String brandIdRaw = request.getParameter("brandId");
                 if (brandIdRaw == null || brandIdRaw.isBlank()) {
                     response.sendRedirect(request.getContextPath() + "/home?p=brand-stats&err=Missing brandId");
@@ -453,16 +461,73 @@ public class Home extends HttpServlet {
 
                 int lowThreshold = 5;
 
+                // sort of detail
+                String dSortBy = request.getParameter("dSortBy");
+                String dSortOrder = request.getParameter("dSortOrder");
+                if (dSortBy == null || dSortBy.isBlank()) {
+                    dSortBy = "stock";
+                }
+                if (dSortOrder == null || dSortOrder.isBlank()) {
+                    dSortOrder = "DESC";
+                }
+
+                // range: lấy từ listRange (vì bạn pass listRange khi click View Details)
+                String range = request.getParameter("listRange");
+                if (range == null || range.isBlank()) {
+                    range = "all";
+                }
+
+                Date fromDate = null, toDate = null;
+                LocalDate today = LocalDate.now();
+                switch (range) {
+                    case "today":
+                        fromDate = Date.valueOf(today);
+                        toDate = Date.valueOf(today);
+                        break;
+                    case "last7":
+                        fromDate = Date.valueOf(today.minusDays(6));
+                        toDate = Date.valueOf(today);
+                        break;
+                    case "last30":
+                        fromDate = Date.valueOf(today.minusDays(29));
+                        toDate = Date.valueOf(today);
+                        break;
+                    case "last90":
+                        fromDate = Date.valueOf(today.minusDays(89));
+                        toDate = Date.valueOf(today);
+                        break;
+                    case "month":
+                        fromDate = Date.valueOf(today.withDayOfMonth(1));
+                        toDate = Date.valueOf(today);
+                        break;
+                    case "lastMonth":
+                        LocalDate first = today.minusMonths(1).withDayOfMonth(1);
+                        LocalDate last = today.withDayOfMonth(1).minusDays(1);
+                        fromDate = Date.valueOf(first);
+                        toDate = Date.valueOf(last);
+                        break;
+                    default:
+                        break; // all
+                }
+
                 Brand b = brandDAO.findById(brandId);
                 if (b == null) {
                     response.sendRedirect(request.getContextPath() + "/home?p=brand-stats&err=Brand not found");
                     return;
                 }
+                BrandStatsSummary detailSummary = statsDAO.getBrandDetailSummary(brandId, lowThreshold, fromDate, toDate);
 
-                List<ProductStatsRow> products = statsDAO.listBrandDetail(brandId, lowThreshold);
+                List<ProductStatsRow> products = statsDAO.listBrandDetail(
+                        brandId, lowThreshold, fromDate, toDate, dSortBy, dSortOrder
+                );
 
                 request.setAttribute("brand", b);
                 request.setAttribute("products", products);
+                request.setAttribute("dSortBy", dSortBy);
+                request.setAttribute("dSortOrder", dSortOrder);
+                request.setAttribute("detailSummary", detailSummary);
+                request.setAttribute("range", range);
+
                 break;
             }
 

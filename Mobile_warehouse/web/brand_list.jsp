@@ -81,22 +81,31 @@
     }
 
     .badge{
-        padding:2px 8px;
-        border:1px solid #999;
-        border-radius:10px;
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:4px 10px;
+        border-radius:999px;     /* pill */
         font-size:12px;
-        display:inline-block;
+        font-weight:700;
+        border:1px solid transparent;
+        line-height:1;
     }
+
+    /* pill ACTIVE */
     .badge-active{
-        border-color:#2e7d32;
-        color:#2e7d32;
-        font-weight:600;
+        color:#1b5e20;
+        background:#e8f5e9;
+        border-color:#c8e6c9;
     }
+
+    /* pill INACTIVE */
     .badge-inactive{
-        border-color:#d32f2f;
-        color:#d32f2f;
-        font-weight:600;
+        color:#8e0000;
+        background:#ffebee;
+        border-color:#ffcdd2;
     }
+
 
 
     /* Description cell */
@@ -114,6 +123,22 @@
         border:none;
         padding:0;
         font:inherit;
+    }
+
+    /* Small button like "View" */
+    .mini-btn{
+        display:inline-block;
+        padding:2px 8px;
+        border:1px solid #888;
+        background:#e9e9e9;
+        color:#111;
+        border-radius:4px;
+        cursor:pointer;
+        font:inherit;
+        line-height:1.2;
+    }
+    .mini-btn:hover{
+        background:#dcdcdc;
     }
 
     /* Modal */
@@ -175,16 +200,38 @@
 </style>
 
 <script>
+    let _disableFormId = null;
 
-    function openDescModal(title, fullText) {
-        document.getElementById('descModalTitle').textContent = 'Description - ' + title;
-        document.getElementById('descModalBody').textContent = fullText || '';
-        document.getElementById('descModalBackdrop').style.display = 'block';
+    function openDisableModal(formId, brandName, brandDesc, toValue) {
+        _disableFormId = formId;
+
+        document.getElementById('disableBrandName').textContent = brandName || '';
+        document.getElementById('disableBrandDesc').textContent = brandDesc || '';
+
+
+        // NEW: đổi tiêu đề + text nút theo hành động
+        const isToInactive = (toValue === '0'); // to=0 nghĩa là set Inactive
+        document.getElementById('disableActionText').textContent = isToInactive ? 'Inactive' : 'Active';
+        document.getElementById('disableModalTitle').textContent = isToInactive ? 'Set Inactive' : 'Set Active';
+        document.getElementById('disableConfirmBtn').textContent = isToInactive ? 'Confirm Inactive' : 'Confirm Active';
+
+        document.getElementById('disableModalBackdrop').style.display = 'block';
     }
-    function closeDescModal() {
-        document.getElementById('descModalBackdrop').style.display = 'none';
+
+    function closeDisableModal() {
+        document.getElementById('disableModalBackdrop').style.display = 'none';
+        _disableFormId = null;
+    }
+
+    function submitDisableForm() {
+        if (!_disableFormId)
+            return;
+        const f = document.getElementById(_disableFormId);
+        if (f)
+            f.submit();
     }
 </script>
+
 
 <div class="page-wrap">
     <div class="topbar">
@@ -216,6 +263,38 @@
             <button class="close" type="button" onclick="closeDescModal()">Close</button>
             <h3 id="descModalTitle">Description</h3>
             <pre id="descModalBody"></pre>
+        </div>
+    </div>
+
+    <!-- Disable Confirm Modal (NEW) -->
+    <div id="disableModalBackdrop" class="modal-backdrop" onclick="closeDisableModal()">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3 id="disableModalTitle">Disable Brand</h3>
+
+            <div style="margin:8px 0; color:#333;">
+                Are you sure you want to set this brand to <b><span id="disableActionText">Inactive</span></b>?
+
+            </div>
+
+            <div style="margin:8px 0;">
+                <b>Name:</b> <span id="disableBrandName"></span>
+            </div>
+
+            <div style="margin:8px 0;">
+                <b>Description:</b>
+                <pre id="disableBrandDesc" style="margin-top:6px;"></pre>
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
+                <button id="disableConfirmBtn" type="button" class="btn"
+                        style="border-color:#d32f2f;background:#ffecec;"
+                        onclick="submitDisableForm()">
+                    Confirm Disable
+                </button>
+
+                <button type="button" class="btn" onclick="closeDisableModal()">Cancel</button>
+
+            </div>
         </div>
     </div>
 
@@ -346,28 +425,35 @@
                         </c:url>
                         <a href="${updateUrl}">Update</a>
 
-                        <c:if test="${b.active}">
-                            |
-                            <form method="post"
-                                  action="${ctx}/manager/brand-disable"
-                                  style="display:inline;"
-                                  onsubmit="return confirm('Confirm disable brand: ${fn:escapeXml(b.brandName)}?');">
+                        |
+                        <form id="disableForm_${b.brandId}" method="post"
+                              action="${ctx}/manager/brand-disable"
+                              style="display:inline;">
 
-                                <input type="hidden" name="id" value="${b.brandId}"/>
+                            <input type="hidden" name="id" value="${b.brandId}"/>
 
-                                <!-- Keep list state -->
-                                <input type="hidden" name="q" value="${q}"/>
-                                <input type="hidden" name="status" value="${status}"/>
-                                <input type="hidden" name="sortBy" value="${sortBy}"/>
-                                <input type="hidden" name="sortOrder" value="${sortOrder}"/>
-                                <input type="hidden" name="page" value="${page}"/>
+                            <!-- NEW: to = 0 nếu đang Active (disable), to = 1 nếu đang Inactive (enable) -->
+                            <input type="hidden" name="to" value="${b.active ? '0' : '1'}"/>
 
-                                <button type="submit"
-                                        style="border:none;background:none;color:#06c;cursor:pointer;padding:0;text-decoration:underline;">
-                                    Disable
-                                </button>
-                            </form>
-                        </c:if>
+                            <!-- Keep list state -->
+                            <input type="hidden" name="q" value="${q}"/>
+                            <input type="hidden" name="status" value="${status}"/>
+                            <input type="hidden" name="sortBy" value="${sortBy}"/>
+                            <input type="hidden" name="sortOrder" value="${sortOrder}"/>
+                            <input type="hidden" name="page" value="${page}"/>
+
+                            <button type="button" class="mini-btn"
+                                    data-name="${fn:escapeXml(b.brandName)}"
+                                    data-desc="${fn:escapeXml(b.description)}"
+                                    data-to="${b.active ? '0' : '1'}"
+                                    onclick="openDisableModal('disableForm_${b.brandId}', this.dataset.name, this.dataset.desc, this.dataset.to)">
+                                ${b.active ? 'Inactive' : 'Active'}
+
+                            </button>
+                        </form>
+
+
+
                     </c:if>
                 </td>
             </tr>

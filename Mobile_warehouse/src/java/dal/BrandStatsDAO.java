@@ -6,10 +6,10 @@ package dal;
 
 import java.sql.*;
 import java.util.*;
+import java.sql.Date;
 import model.BrandStatsRow;
 import model.BrandStatsSummary;
 import model.ProductStatsRow;
-import java.sql.Date;
 
 /**
  *
@@ -17,96 +17,98 @@ import java.sql.Date;
  */
 public class BrandStatsDAO {
 
+// =========================
+// Sorting helpers (FIXED)
+// =========================
     private String orderBy(String sortBy) {
         if (sortBy == null) {
-            return "total_stock_units";
+            sortBy = "stock";
         }
         switch (sortBy) {
+            case "name":
+                return "b.brand_name";
             case "products":
-                return "total_products";
+                return "COALESCE(prod.total_products,0)";
             case "low":
-                return "low_stock_products";
+                return "COALESCE(prod.low_stock_products,0)";
             case "import":
-                return "imported_units";
-
+                return "COALESCE(imp.imported_units,0)";
+            case "export":
+                return "COALESCE(exp.exported_units,0)";
+            case "stock":
             default:
-                return "total_stock_units"; 
+                return "COALESCE(prod.total_stock_units,0)";
         }
     }
 
     private String orderDir(String sortOrder) {
-        if ("ASC".equalsIgnoreCase(sortOrder)) {
-            return "ASC";
-        }
-        return "DESC";
+        return "ASC".equalsIgnoreCase(sortOrder) ? "ASC" : "DESC";
     }
 
- 
-    public int countBrands(String q, String brandStatus, Long brandId, Date fromDate, Date toDate) throws Exception {
-        StringBuilder sql = new StringBuilder("""
-        SELECT COUNT(*)
-        FROM brands b
-        WHERE 1=1
-    """);
+    private void bindParams(PreparedStatement ps, List<Object> params) throws SQLException {
+        for (int i = 0; i < params.size(); i++) {
+            ps.setObject(i + 1, params.get(i));
+        }
+    }
 
-        List<Object> params = new ArrayList<>();
-
+    // Brand filters for queries that have alias "b" (brands b)
+    private void appendBrandFiltersOnBrandsAliasB(StringBuilder sql, List<Object> params,
+            String q, String brandStatus, Long brandId) {
         if (q != null && !q.trim().isEmpty()) {
             sql.append(" AND b.brand_name LIKE ? ");
             params.add("%" + q.trim() + "%");
         }
+
         if (brandId != null) {
             sql.append(" AND b.brand_id = ? ");
             params.add(brandId);
         }
+
         if (brandStatus != null && !brandStatus.isBlank()) {
             if ("active".equalsIgnoreCase(brandStatus)) {
-                sql.append(" AND b.is_active=1 ");
+                sql.append(" AND b.is_active = 1 ");
             } else if ("inactive".equalsIgnoreCase(brandStatus)) {
-                sql.append(" AND b.is_active=0 ");
+                sql.append(" AND b.is_active = 0 ");
             }
-        }
-
-       
-        if (fromDate != null || toDate != null) {
-            sql.append("""
-            AND EXISTS (
-                SELECT 1
-                FROM import_receipts ir
-                JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
-                JOIN product_skus s ON s.sku_id = irl.sku_id
-                JOIN products p ON p.product_id = s.product_id
-                WHERE ir.status='CONFIRMED'
-                  AND ir.receipt_date IS NOT NULL
-                  AND p.brand_id = b.brand_id
-        """);
-            if (fromDate != null) {
-                sql.append(" AND DATE(ir.receipt_date) >= ? ");
-                params.add(fromDate);
-            }
-            if (toDate != null) {
-                sql.append(" AND DATE(ir.receipt_date) <= ? ");
-                params.add(toDate);
-            }
-            sql.append(") ");
-        }
-
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
-
-            for (int i = 0; i < params.size(); i++) {
-                ps.setObject(i + 1, params.get(i));
-            }
-
-            ResultSet rs = ps.executeQuery();
-            return rs.next() ? rs.getInt(1) : 0;
         }
     }
 
-   
+    // =========================
+    // 1) Count brands (for pagination)
+    // Mode A: range does NOT affect count
+    // =========================
+    public int countBrands(String q, String brandStatus, Long brandId, Date fromDate, Date toDate) throws Exception {
+        StringBuilder sql = new StringBuilder("""
+            SELECT COUNT(*)
+            FROM brands b
+            WHERE 1=1
+        """);
+
+        List<Object> params = new ArrayList<>();
+        appendBrandFiltersOnBrandsAliasB(sql, params, q, brandStatus, brandId);
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            bindParams(ps, params);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+    // =========================
+    // 2) Summary cards:
+    // - all-time summary: affected by brand filters (q/status/brandId)
+    // - range movement: affected by SAME filters + from/to (more consistent)
+    // =========================
     public BrandStatsSummary getSummary(String q, String brandStatus, Long brandId,
             int lowThreshold, Date fromDate, Date toDate) throws Exception {
-        StringBuilder sql = new StringBuilder();
-        sql.append("""
+
+        BrandStatsSummary sum = new BrandStatsSummary();
+
+        // ---- Part A: all-time summary (affected by brand filters) ----
+        StringBuilder sql = new StringBuilder("""
             SELECT
               COUNT(DISTINCT b.brand_id) AS total_brands,
               COUNT(DISTINCT p.product_id) AS total_products,
@@ -128,253 +130,621 @@ public class BrandStatsDAO {
 
         List<Object> params = new ArrayList<>();
         params.add(lowThreshold);
+        appendBrandFiltersOnBrandsAliasB(sql, params, q, brandStatus, brandId);
 
-        if (q != null && !q.trim().isEmpty()) {
-            sql.append(" AND b.brand_name LIKE ? ");
-            params.add("%" + q.trim() + "%");
-        }
-        if (brandId != null) {
-            sql.append(" AND b.brand_id = ? ");
-            params.add(brandId);
-        }
-        if (brandStatus != null && !brandStatus.isBlank()) {
-            if ("active".equalsIgnoreCase(brandStatus)) {
-                sql.append(" AND b.is_active=1 ");
-            } else if ("inactive".equalsIgnoreCase(brandStatus)) {
-                sql.append(" AND b.is_active=0 ");
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            bindParams(ps, params);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    sum.setTotalBrands(rs.getInt("total_brands"));
+                    sum.setTotalProducts(rs.getInt("total_products"));
+                    sum.setTotalStockUnits(rs.getInt("total_stock_units"));
+                    sum.setLowStockProducts(rs.getInt("low_stock_products"));
+                }
             }
         }
-        if (fromDate != null || toDate != null) {
-            sql.append("""
-        AND EXISTS (
-            SELECT 1
+
+        // ---- Part B: range movement (affected by SAME filters) ----
+        sum.setImportedUnitsInRange(sumImportedInRange(q, brandStatus, brandId, fromDate, toDate));
+        sum.setExportedUnitsInRange(sumExportedInRange(q, brandStatus, brandId, fromDate, toDate));
+
+        return sum;
+    }
+
+    private int sumImportedInRange(String q, String brandStatus, Long brandId,
+            Date fromDate, Date toDate) throws Exception {
+        StringBuilder sql = new StringBuilder("""
+            SELECT COALESCE(SUM(irl.qty),0) AS total_import
             FROM import_receipts ir
             JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
-            JOIN product_skus s3 ON s3.sku_id = irl.sku_id
-            JOIN products p3 ON p3.product_id = s3.product_id
+            JOIN product_skus s ON s.sku_id = irl.sku_id
+            JOIN products p ON p.product_id = s.product_id
+            JOIN brands b ON b.brand_id = p.brand_id
             WHERE ir.status='CONFIRMED'
               AND ir.receipt_date IS NOT NULL
-              AND p3.brand_id = b.brand_id
         """);
-            if (fromDate != null) {
-                sql.append(" AND DATE(ir.receipt_date) >= ? ");
-                params.add(fromDate);
+
+        List<Object> params = new ArrayList<>();
+        appendBrandFiltersOnBrandsAliasB(sql, params, q, brandStatus, brandId);
+
+        if (fromDate != null) {
+            sql.append(" AND DATE(ir.receipt_date) >= ? ");
+            params.add(fromDate);
+        }
+        if (toDate != null) {
+            sql.append(" AND DATE(ir.receipt_date) <= ? ");
+            params.add(toDate);
+        }
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            bindParams(ps, params);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
             }
-            if (toDate != null) {
-                sql.append(" AND DATE(ir.receipt_date) <= ? ");
-                params.add(toDate);
+        }
+    }
+
+    private int sumExportedInRange(String q, String brandStatus, Long brandId,
+            Date fromDate, Date toDate) throws Exception {
+        StringBuilder sql = new StringBuilder("""
+            SELECT COALESCE(SUM(exl.qty),0) AS total_export
+            FROM export_receipts ex
+            JOIN export_receipt_lines exl ON exl.export_id = ex.export_id
+            JOIN product_skus s ON s.sku_id = exl.sku_id
+            JOIN products p ON p.product_id = s.product_id
+            JOIN brands b ON b.brand_id = p.brand_id
+            WHERE ex.status='CONFIRMED'
+              AND ex.export_date IS NOT NULL
+        """);
+
+        List<Object> params = new ArrayList<>();
+        appendBrandFiltersOnBrandsAliasB(sql, params, q, brandStatus, brandId);
+
+        if (fromDate != null) {
+            sql.append(" AND DATE(ex.export_date) >= ? ");
+            params.add(fromDate);
+        }
+        if (toDate != null) {
+            sql.append(" AND DATE(ex.export_date) <= ? ");
+            params.add(toDate);
+        }
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            bindParams(ps, params);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
             }
-            sql.append(") ");
+        }
+    }
+
+    // =========================
+    // 3) List Brand Stats (table)
+    // Mode A:
+    // - prod stats: all-time
+    // - import/export units: affected by range
+    // - NO EXISTS movement filter
+    // =========================
+    public List<BrandStatsRow> listBrandStats(String q, String brandStatus, Long brandId,
+            String sortBy, String sortOrder,
+            int page, int pageSize, int lowThreshold,
+            Date fromDate, Date toDate) throws Exception {
+
+        int offset = (page - 1) * pageSize;
+
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        sql.append("""
+            SELECT
+              b.brand_id,
+              b.brand_name,
+              b.is_active,
+              COALESCE(prod.total_products, 0)     AS total_products,
+              COALESCE(prod.total_stock_units, 0)  AS total_stock_units,
+              COALESCE(prod.low_stock_products, 0) AS low_stock_products,
+              COALESCE(imp.imported_units, 0)      AS imported_units,
+              COALESCE(exp.exported_units, 0)      AS exported_units
+            FROM brands b
+
+            -- ====== product/stock stats per brand (all-time) ======
+            LEFT JOIN (
+                SELECT
+                  p.brand_id,
+                  COUNT(DISTINCT p.product_id) AS total_products,
+                  COALESCE(SUM(ib.qty_on_hand),0) AS total_stock_units,
+                  COUNT(DISTINCT CASE WHEN COALESCE(prod_qty.product_qty,0) <= ? THEN p.product_id END) AS low_stock_products
+                FROM products p
+                LEFT JOIN product_skus s ON s.product_id = p.product_id
+                LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
+                LEFT JOIN (
+                    SELECT p2.product_id, COALESCE(SUM(ib2.qty_on_hand),0) AS product_qty
+                    FROM products p2
+                    LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id
+                    LEFT JOIN inventory_balance ib2 ON ib2.sku_id = s2.sku_id
+                    GROUP BY p2.product_id
+                ) prod_qty ON prod_qty.product_id = p.product_id
+                GROUP BY p.brand_id
+            ) prod ON prod.brand_id = b.brand_id
+
+            -- ====== imported units per brand (RANGE affects this) ======
+            LEFT JOIN (
+                SELECT
+                  p.brand_id,
+                  COALESCE(SUM(irl.qty),0) AS imported_units
+                FROM import_receipts ir
+                JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
+                JOIN product_skus s ON s.sku_id = irl.sku_id
+                JOIN products p ON p.product_id = s.product_id
+                WHERE ir.status='CONFIRMED'
+                  AND ir.receipt_date IS NOT NULL
+        """);
+
+        // param #1: lowThreshold
+        params.add(lowThreshold);
+
+        if (fromDate != null) {
+            sql.append(" AND DATE(ir.receipt_date) >= ? ");
+            params.add(fromDate);
+        }
+        if (toDate != null) {
+            sql.append(" AND DATE(ir.receipt_date) <= ? ");
+            params.add(toDate);
+        }
+
+        sql.append("""
+                GROUP BY p.brand_id
+            ) imp ON imp.brand_id = b.brand_id
+
+            -- ====== exported units per brand (RANGE affects this) ======
+            LEFT JOIN (
+                SELECT
+                  p.brand_id,
+                  COALESCE(SUM(exl.qty),0) AS exported_units
+                FROM export_receipts ex
+                JOIN export_receipt_lines exl ON exl.export_id = ex.export_id
+                JOIN product_skus s ON s.sku_id = exl.sku_id
+                JOIN products p ON p.product_id = s.product_id
+                WHERE ex.status='CONFIRMED'
+                  AND ex.export_date IS NOT NULL
+        """);
+
+        if (fromDate != null) {
+            sql.append(" AND DATE(ex.export_date) >= ? ");
+            params.add(fromDate);
+        }
+        if (toDate != null) {
+            sql.append(" AND DATE(ex.export_date) <= ? ");
+            params.add(toDate);
+        }
+
+        sql.append("""
+                GROUP BY p.brand_id
+            ) exp ON exp.brand_id = b.brand_id
+
+            WHERE 1=1
+        """);
+
+        // brand filters
+        appendBrandFiltersOnBrandsAliasB(sql, params, q, brandStatus, brandId);
+
+        // IMPORTANT: order by expression (not alias) for stable sorting
+        sql.append(" ORDER BY ").append(orderBy(sortBy)).append(" ").append(orderDir(sortOrder))
+                .append(", b.brand_name ASC, b.brand_id ASC ");
+
+        sql.append(" LIMIT ? OFFSET ? ");
+        params.add(pageSize);
+        params.add(offset);
+
+        List<BrandStatsRow> list = new ArrayList<>();
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            bindParams(ps, params);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    BrandStatsRow r = new BrandStatsRow();
+                    r.setBrandId(rs.getLong("brand_id"));
+                    r.setBrandName(rs.getString("brand_name"));
+                    r.setActive(rs.getInt("is_active") == 1);
+
+                    r.setTotalProducts(rs.getInt("total_products"));
+                    r.setTotalStockUnits(rs.getInt("total_stock_units"));
+                    r.setLowStockProducts(rs.getInt("low_stock_products"));
+                    r.setImportedUnits(rs.getInt("imported_units"));
+                    r.setExportedUnits(rs.getInt("exported_units"));
+
+                    list.add(r);
+                }
+            }
+        }
+
+        return list;
+    }
+
+    // =========================
+    //4) Brand detail
+    // =========================
+    public List<ProductStatsRow> listBrandDetail(long brandId, int lowThreshold,
+            Date fromDate, Date toDate, String dSortBy, String dSortOrder) throws Exception {
+
+        String orderCol;
+        if ("import".equalsIgnoreCase(dSortBy)) {
+            orderCol = "imported_units";
+        } else if ("export".equalsIgnoreCase(dSortBy)) {
+            orderCol = "exported_units";
+        } else if ("name".equalsIgnoreCase(dSortBy)) {
+            orderCol = "product_name";
+        } else {
+            orderCol = "total_stock_units"; // default stock
+        }
+        String orderDir = "ASC".equalsIgnoreCase(dSortOrder) ? "ASC" : "DESC";
+
+        StringBuilder sql = new StringBuilder("""
+        SELECT
+          p.product_id,
+          p.product_code,
+          p.product_name,
+          COALESCE(stock.total_stock_units,0) AS total_stock_units,
+          COALESCE(imp.imported_units,0) AS imported_units,
+          COALESCE(exp.exported_units,0) AS exported_units,
+          imp.last_import_at,
+          exp.last_export_at
+        FROM products p
+
+        LEFT JOIN (
+            SELECT s.product_id, COALESCE(SUM(ib.qty_on_hand),0) AS total_stock_units
+            FROM product_skus s
+            LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
+            GROUP BY s.product_id
+        ) stock ON stock.product_id = p.product_id
+
+        LEFT JOIN (
+            SELECT
+              s.product_id,
+              COALESCE(SUM(irl.qty),0) AS imported_units,
+              MAX(ir.receipt_date) AS last_import_at
+            FROM import_receipts ir
+            JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
+            JOIN product_skus s ON s.sku_id = irl.sku_id
+            WHERE ir.status='CONFIRMED'
+              AND ir.receipt_date IS NOT NULL
+    """);
+
+        List<Object> params = new ArrayList<>();
+
+        if (fromDate != null) {
+            sql.append(" AND DATE(ir.receipt_date) >= ? ");
+            params.add(fromDate);
+        }
+        if (toDate != null) {
+            sql.append(" AND DATE(ir.receipt_date) <= ? ");
+            params.add(toDate);
+        }
+
+        sql.append("""
+            GROUP BY s.product_id
+        ) imp ON imp.product_id = p.product_id
+
+        LEFT JOIN (
+            SELECT
+              s.product_id,
+              COALESCE(SUM(exl.qty),0) AS exported_units,
+              MAX(ex.export_date) AS last_export_at
+            FROM export_receipts ex
+            JOIN export_receipt_lines exl ON exl.export_id = ex.export_id
+            JOIN product_skus s ON s.sku_id = exl.sku_id
+            WHERE ex.status='CONFIRMED'
+              AND ex.export_date IS NOT NULL
+    """);
+
+        if (fromDate != null) {
+            sql.append(" AND DATE(ex.export_date) >= ? ");
+            params.add(fromDate);
+        }
+        if (toDate != null) {
+            sql.append(" AND DATE(ex.export_date) <= ? ");
+            params.add(toDate);
+        }
+
+        sql.append("""
+            GROUP BY s.product_id
+        ) exp ON exp.product_id = p.product_id
+
+        WHERE p.brand_id = ?
+        ORDER BY
+    """);
+
+        params.add(brandId);
+
+        // Tie-breaker để sort ổn định
+        sql.append(orderCol).append(" ").append(orderDir).append(", p.product_id ASC");
+
+        List<ProductStatsRow> list = new ArrayList<>();
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductStatsRow r = new ProductStatsRow();
+                    r.setProductId(rs.getLong("product_id"));
+                    r.setProductCode(rs.getString("product_code"));
+                    r.setProductName(rs.getString("product_name"));
+
+                    int stock = rs.getInt("total_stock_units");
+                    r.setTotalStockUnits(stock);
+
+                    r.setImportedUnits(rs.getInt("imported_units"));
+                    r.setExportedUnits(rs.getInt("exported_units"));
+
+                    r.setLastImportAt(rs.getTimestamp("last_import_at"));
+                    r.setLastExportAt(rs.getTimestamp("last_export_at"));
+
+                    String status = (stock == 0) ? "OUT" : (stock <= lowThreshold ? "LOW" : "OK");
+                    r.setStockStatus(status);
+
+                    list.add(r);
+                }
+            }
+        }
+        return list;
+    }
+
+    // =========================
+// Brand detail with range movement + sort
+// sortBy: "stock", "import", "export", "name"
+// =========================
+    public List<ProductStatsRow> listBrandDetailWithMovement(long brandId, int lowThreshold,
+            Date fromDate, Date toDate, String sortBy, String sortOrder) throws Exception {
+
+        if (sortBy == null || sortBy.isBlank()) {
+            sortBy = "stock";
+        }
+        if (sortOrder == null || sortOrder.isBlank()) {
+            sortOrder = "DESC";
+        }
+
+        String orderCol;
+        switch (sortBy) {
+            case "name":
+                orderCol = "product_name";
+                break;
+            case "import":
+                orderCol = "imported_units";
+                break;
+            case "export":
+                orderCol = "exported_units";
+                break;
+            default:
+                orderCol = "total_stock_units";
+                break;
+        }
+
+        String dir = "ASC".equalsIgnoreCase(sortOrder) ? "ASC" : "DESC";
+
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        sql.append("""
+        SELECT
+          p.product_id,
+          p.product_code,
+          p.product_name,
+          COALESCE(stock.total_stock_units,0) AS total_stock_units,
+          COALESCE(imp.imported_units,0)      AS imported_units,
+          COALESCE(exp.exported_units,0)      AS exported_units
+        FROM products p
+
+        LEFT JOIN (
+            SELECT s.product_id, COALESCE(SUM(ib.qty_on_hand),0) AS total_stock_units
+            FROM product_skus s
+            LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
+            GROUP BY s.product_id
+        ) stock ON stock.product_id = p.product_id
+
+        LEFT JOIN (
+            SELECT s.product_id, COALESCE(SUM(irl.qty),0) AS imported_units
+            FROM import_receipts ir
+            JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
+            JOIN product_skus s ON s.sku_id = irl.sku_id
+            WHERE ir.status='CONFIRMED'
+              AND ir.receipt_date IS NOT NULL
+    """);
+
+        if (fromDate != null) {
+            sql.append(" AND DATE(ir.receipt_date) >= ? ");
+            params.add(fromDate);
+        }
+        if (toDate != null) {
+            sql.append(" AND DATE(ir.receipt_date) <= ? ");
+            params.add(toDate);
+        }
+
+        sql.append("""
+            GROUP BY s.product_id
+        ) imp ON imp.product_id = p.product_id
+
+        LEFT JOIN (
+            SELECT s.product_id, COALESCE(SUM(exl.qty),0) AS exported_units
+            FROM export_receipts ex
+            JOIN export_receipt_lines exl ON exl.export_id = ex.export_id
+            JOIN product_skus s ON s.sku_id = exl.sku_id
+            WHERE ex.status='CONFIRMED'
+              AND ex.export_date IS NOT NULL
+    """);
+
+        if (fromDate != null) {
+            sql.append(" AND DATE(ex.export_date) >= ? ");
+            params.add(fromDate);
+        }
+        if (toDate != null) {
+            sql.append(" AND DATE(ex.export_date) <= ? ");
+            params.add(toDate);
+        }
+
+        sql.append("""
+            GROUP BY s.product_id
+        ) exp ON exp.product_id = p.product_id
+
+        WHERE p.brand_id = ?
+    """);
+        params.add(brandId);
+
+        sql.append(" ORDER BY ").append(orderCol).append(" ").append(dir).append(", p.product_id ASC ");
+
+        List<ProductStatsRow> list = new ArrayList<>();
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductStatsRow r = new ProductStatsRow();
+                    r.setProductId(rs.getLong("product_id"));
+                    r.setProductCode(rs.getString("product_code"));
+                    r.setProductName(rs.getString("product_name"));
+
+                    int stock = rs.getInt("total_stock_units");
+                    r.setTotalStockUnits(stock);
+
+                    r.setImportedUnits(rs.getInt("imported_units"));
+                    r.setExportedUnits(rs.getInt("exported_units"));
+
+                    String status = (stock == 0) ? "OUT" : (stock <= lowThreshold ? "LOW" : "OK");
+                    r.setStockStatus(status);
+
+                    list.add(r);
+                }
+            }
+        }
+
+        return list;
+    }
+
+// quick summary for detail cards (1 row)
+    public BrandStatsSummary getBrandDetailSummary(long brandId, int lowThreshold,
+            Date fromDate, Date toDate) throws Exception {
+
+        StringBuilder sql = new StringBuilder();
+        List<Object> params = new ArrayList<>();
+
+        sql.append("""
+        SELECT
+          COUNT(DISTINCT p.product_id) AS total_products,
+          COALESCE(SUM(ib.qty_on_hand),0) AS total_stock_units,
+          COUNT(DISTINCT CASE WHEN COALESCE(prod_qty.product_qty,0) <= ? THEN p.product_id END) AS low_stock_products
+        FROM products p
+        LEFT JOIN product_skus s ON s.product_id = p.product_id
+        LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
+        LEFT JOIN (
+            SELECT p2.product_id, COALESCE(SUM(ib2.qty_on_hand),0) AS product_qty
+            FROM products p2
+            LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id
+            LEFT JOIN inventory_balance ib2 ON ib2.sku_id = s2.sku_id
+            GROUP BY p2.product_id
+        ) prod_qty ON prod_qty.product_id = p.product_id
+        WHERE p.brand_id = ?
+    """);
+
+        params.add(lowThreshold);
+        params.add(brandId);
+
+        BrandStatsSummary sum = new BrandStatsSummary();
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    sum.setTotalProducts(rs.getInt("total_products"));
+                    sum.setTotalStockUnits(rs.getInt("total_stock_units"));
+                    sum.setLowStockProducts(rs.getInt("low_stock_products"));
+                }
+            }
+        }
+
+        // range movement for this brand
+        sum.setImportedUnitsInRange(sumImportedUnitsForBrandInRange(brandId, fromDate, toDate));
+        sum.setExportedUnitsInRange(sumExportedUnitsForBrandInRange(brandId, fromDate, toDate));
+
+        return sum;
+    }
+
+    private int sumImportedUnitsForBrandInRange(long brandId, Date fromDate, Date toDate) throws Exception {
+        StringBuilder sql = new StringBuilder("""
+        SELECT COALESCE(SUM(irl.qty),0)
+        FROM import_receipts ir
+        JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
+        JOIN product_skus s ON s.sku_id = irl.sku_id
+        JOIN products p ON p.product_id = s.product_id
+        WHERE ir.status='CONFIRMED'
+          AND ir.receipt_date IS NOT NULL
+          AND p.brand_id = ?
+    """);
+
+        List<Object> params = new ArrayList<>();
+        params.add(brandId);
+        if (fromDate != null) {
+            sql.append(" AND DATE(ir.receipt_date) >= ? ");
+            params.add(fromDate);
+        }
+        if (toDate != null) {
+            sql.append(" AND DATE(ir.receipt_date) <= ? ");
+            params.add(toDate);
         }
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
             }
-            ResultSet rs = ps.executeQuery();
-
-            BrandStatsSummary s = new BrandStatsSummary();
-            if (rs.next()) {
-                s.setTotalBrands(rs.getInt("total_brands"));
-                s.setTotalProducts(rs.getInt("total_products"));
-                s.setTotalStockUnits(rs.getInt("total_stock_units"));
-                s.setLowStockProducts(rs.getInt("low_stock_products"));
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
             }
-            return s;
         }
     }
 
-   
-    public List<BrandStatsRow> listBrandStats(String q, String brandStatus, Long brandId,
-        String sortBy, String sortOrder,
-        int page, int pageSize, int lowThreshold, Date fromDate, Date toDate) throws Exception {
-
-    int offset = (page - 1) * pageSize;
-
-    StringBuilder sql = new StringBuilder();
-    List<Object> params = new ArrayList<>();
-
-    sql.append("""
-        SELECT
-          b.brand_id,
-          b.brand_name,
-          b.is_active,
-          COALESCE(prod.total_products, 0)     AS total_products,
-          COALESCE(prod.total_stock_units, 0)  AS total_stock_units,
-          COALESCE(prod.low_stock_products, 0) AS low_stock_products,
-          COALESCE(imp.imported_units, 0)      AS imported_units
-        FROM brands b
-
-        -- ====== product/stock stats per brand (all-time, independent of range) ======
-        LEFT JOIN (
-            SELECT
-              p.brand_id,
-              COUNT(DISTINCT p.product_id) AS total_products,
-              COALESCE(SUM(ib.qty_on_hand),0) AS total_stock_units,
-              COUNT(DISTINCT CASE WHEN COALESCE(prod_qty.product_qty,0) <= ? THEN p.product_id END) AS low_stock_products
-            FROM products p
-            LEFT JOIN product_skus s ON s.product_id = p.product_id
-            LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
-            LEFT JOIN (
-                SELECT p2.product_id, COALESCE(SUM(ib2.qty_on_hand),0) AS product_qty
-                FROM products p2
-                LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id
-                LEFT JOIN inventory_balance ib2 ON ib2.sku_id = s2.sku_id
-                GROUP BY p2.product_id
-            ) prod_qty ON prod_qty.product_id = p.product_id
-            GROUP BY p.brand_id
-        ) prod ON prod.brand_id = b.brand_id
-
-        -- ====== imported units per brand (filtered by range) ======
-        LEFT JOIN (
-            SELECT
-              p.brand_id,
-              COALESCE(SUM(irl.qty),0) AS imported_units
-            FROM import_receipts ir
-            JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
-            JOIN product_skus s ON s.sku_id = irl.sku_id
-            JOIN products p ON p.product_id = s.product_id
-            WHERE ir.status='CONFIRMED'
-              AND ir.receipt_date IS NOT NULL
+    private int sumExportedUnitsForBrandInRange(long brandId, Date fromDate, Date toDate) throws Exception {
+        StringBuilder sql = new StringBuilder("""
+        SELECT COALESCE(SUM(exl.qty),0)
+        FROM export_receipts ex
+        JOIN export_receipt_lines exl ON exl.export_id = ex.export_id
+        JOIN product_skus s ON s.sku_id = exl.sku_id
+        JOIN products p ON p.product_id = s.product_id
+        WHERE ex.status='CONFIRMED'
+          AND ex.export_date IS NOT NULL
+          AND p.brand_id = ?
     """);
 
-   
-    params.add(lowThreshold);
-
-    
-    if (fromDate != null) {
-        sql.append(" AND DATE(ir.receipt_date) >= ? ");
-        params.add(fromDate);
-    }
-    if (toDate != null) {
-        sql.append(" AND DATE(ir.receipt_date) <= ? ");
-        params.add(toDate);
-    }
-
-    sql.append("""
-            GROUP BY p.brand_id
-        ) imp ON imp.brand_id = b.brand_id
-
-        WHERE 1=1
-    """);
-
-   
-    if (q != null && !q.trim().isEmpty()) {
-        sql.append(" AND b.brand_name LIKE ? ");
-        params.add("%" + q.trim() + "%");
-    }
-
-    if (brandId != null) {
-        sql.append(" AND b.brand_id = ? ");
+        List<Object> params = new ArrayList<>();
         params.add(brandId);
-    }
-
-    if (brandStatus != null && !brandStatus.isBlank()) {
-        if ("active".equalsIgnoreCase(brandStatus)) {
-            sql.append(" AND b.is_active = 1 ");
-        } else if ("inactive".equalsIgnoreCase(brandStatus)) {
-            sql.append(" AND b.is_active = 0 ");
-        }
-    }
-
-  
-    if (fromDate != null || toDate != null) {
-        sql.append("""
-            AND EXISTS (
-                SELECT 1
-                FROM import_receipts ir2
-                JOIN import_receipt_lines irl2 ON irl2.import_id = ir2.import_id
-                JOIN product_skus s2 ON s2.sku_id = irl2.sku_id
-                JOIN products p2 ON p2.product_id = s2.product_id
-                WHERE ir2.status='CONFIRMED'
-                  AND ir2.receipt_date IS NOT NULL
-                  AND p2.brand_id = b.brand_id
-        """);
-
         if (fromDate != null) {
-            sql.append(" AND DATE(ir2.receipt_date) >= ? ");
+            sql.append(" AND DATE(ex.export_date) >= ? ");
             params.add(fromDate);
         }
         if (toDate != null) {
-            sql.append(" AND DATE(ir2.receipt_date) <= ? ");
+            sql.append(" AND DATE(ex.export_date) <= ? ");
             params.add(toDate);
         }
 
-        sql.append(") ");
-    }
-
-  
-    sql.append(" ORDER BY ").append(orderBy(sortBy)).append(" ").append(orderDir(sortOrder))
-       .append(", b.brand_id ASC ");
-    sql.append(" LIMIT ? OFFSET ? ");
-    params.add(pageSize);
-    params.add(offset);
-
-   
-    List<BrandStatsRow> list = new ArrayList<>();
-    try (Connection con = DBContext.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql.toString())) {
-
-        for (int i = 0; i < params.size(); i++) {
-            ps.setObject(i + 1, params.get(i));
-        }
-
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                BrandStatsRow r = new BrandStatsRow();
-                r.setBrandId(rs.getLong("brand_id"));
-                r.setBrandName(rs.getString("brand_name"));
-                r.setActive(rs.getInt("is_active") == 1);
-
-                r.setTotalProducts(rs.getInt("total_products"));
-                r.setTotalStockUnits(rs.getInt("total_stock_units"));
-                r.setLowStockProducts(rs.getInt("low_stock_products"));
-                r.setImportedUnits(rs.getInt("imported_units"));
-
-                list.add(r);
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
             }
         }
     }
-    return list;
-}
 
-
-    // detail by brand: list products with stock
-    public List<ProductStatsRow> listBrandDetail(long brandId, int lowThreshold) throws Exception {
-        String sql = """
-            SELECT
-              p.product_id,
-              p.product_code,
-              p.product_name,
-              p.status,
-              COALESCE(SUM(ib.qty_on_hand),0) AS total_stock_units
-            FROM products p
-            LEFT JOIN product_skus s ON s.product_id = p.product_id
-            LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
-            WHERE p.brand_id = ?
-            GROUP BY p.product_id, p.product_code, p.product_name, p.status
-            ORDER BY total_stock_units ASC
-        """;
-
-        List<ProductStatsRow> list = new ArrayList<>();
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setLong(1, brandId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                ProductStatsRow r = new ProductStatsRow();
-                r.setProductId(rs.getLong("product_id"));
-                r.setProductCode(rs.getString("product_code"));
-                r.setProductName(rs.getString("product_name"));
-                r.setStockStatus(rs.getString("status"));
-                int stock = rs.getInt("total_stock_units");
-                r.setTotalStockUnits(stock);
-
-                String status = (stock == 0) ? "OUT" : (stock <= lowThreshold ? "LOW" : "OK");
-                r.setStockStatus(status);
-
-                list.add(r);
-            }
-        }
-        return list;
-    }
 }
