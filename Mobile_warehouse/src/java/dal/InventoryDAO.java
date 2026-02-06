@@ -8,10 +8,14 @@ package dal;
  *
  * @author Admin
  */
-import java.sql.*;
-import java.util.*;
 import model.IdName;
 import model.InventoryModelRow;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
 
 public class InventoryDAO {
 
@@ -21,14 +25,17 @@ public class InventoryDAO {
         return DBContext.getConnection();
     }
 
+    // Dropdown All Brands
     public List<IdName> getActiveBrands() {
         List<IdName> list = new ArrayList<>();
         String sql = "SELECT brand_id, brand_name FROM brands WHERE is_active = 1 ORDER BY brand_name";
         try (Connection con = getConn();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
+
             while (rs.next()) {
-                list.add(new IdName(String.valueOf(rs.getLong("brand_id")), rs.getString("brand_name")));
+                // IdName constructor nhận long
+                list.add(new IdName(rs.getLong("brand_id"), rs.getString("brand_name")));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -36,7 +43,7 @@ public class InventoryDAO {
         return list;
     }
 
-   
+    // Summary cards: Total Products / Total Qty / Low Stock / Out of Stock
     public Map<String, Integer> getSummary(String q, String brandId) {
         Map<String, Integer> m = new HashMap<>();
         m.put("totalProducts", 0);
@@ -54,10 +61,9 @@ public class InventoryDAO {
         }
         if (brandId != null && !brandId.trim().isEmpty()) {
             where.append(" AND p.brand_id = ? ");
-            params.add(Long.parseLong(brandId.trim()));
+            params.add(parseLongSafe(brandId));
         }
 
-       
         String sql1 =
                 "SELECT COUNT(DISTINCT p.product_id) AS total_products, " +
                 "       COALESCE(SUM(ib.qty_on_hand),0) AS total_qty " +
@@ -67,7 +73,6 @@ public class InventoryDAO {
                 "LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id " +
                 where;
 
-       
         String sql2 =
                 "SELECT " +
                 "  SUM(CASE WHEN t.total_qty = 0 THEN 1 ELSE 0 END) AS out_items, " +
@@ -124,7 +129,7 @@ public class InventoryDAO {
         }
         if (brandId != null && !brandId.trim().isEmpty()) {
             where.append(" AND p.brand_id = ? ");
-            params.add(Long.parseLong(brandId.trim()));
+            params.add(parseLongSafe(brandId));
         }
 
         String having = buildHaving(stockStatus);
@@ -143,6 +148,7 @@ public class InventoryDAO {
 
         try (Connection con = getConn();
              PreparedStatement ps = con.prepareStatement(sql)) {
+
             bindParams(ps, params, 1);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return rs.getInt(1);
@@ -168,7 +174,7 @@ public class InventoryDAO {
         }
         if (brandId != null && !brandId.trim().isEmpty()) {
             where.append(" AND p.brand_id = ? ");
-            params.add(Long.parseLong(brandId.trim()));
+            params.add(parseLongSafe(brandId));
         }
 
         String having = buildHaving(stockStatus);
@@ -234,15 +240,9 @@ public class InventoryDAO {
         if (stockStatus == null || stockStatus.trim().isEmpty()) return "";
         stockStatus = stockStatus.trim().toUpperCase();
 
-        if ("OK".equals(stockStatus)) {
-            return " HAVING total_qty > " + LOW_STOCK_THRESHOLD + " ";
-        }
-        if ("LOW".equals(stockStatus)) {
-            return " HAVING total_qty BETWEEN 1 AND " + LOW_STOCK_THRESHOLD + " ";
-        }
-        if ("OUT".equals(stockStatus)) {
-            return " HAVING total_qty = 0 ";
-        }
+        if ("OK".equals(stockStatus)) return " HAVING total_qty > " + LOW_STOCK_THRESHOLD + " ";
+        if ("LOW".equals(stockStatus)) return " HAVING total_qty BETWEEN 1 AND " + LOW_STOCK_THRESHOLD + " ";
+        if ("OUT".equals(stockStatus)) return " HAVING total_qty = 0 ";
         return "";
     }
 
@@ -254,5 +254,10 @@ public class InventoryDAO {
             else ps.setObject(idx++, o);
         }
         return idx;
+    }
+
+    private long parseLongSafe(String s) {
+        try { return Long.parseLong(s.trim()); }
+        catch (Exception e) { return -1; }
     }
 }

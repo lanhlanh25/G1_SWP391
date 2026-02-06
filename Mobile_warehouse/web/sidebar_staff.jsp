@@ -11,20 +11,24 @@
 <ul>
     <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
 
-    <li><a href="<%=ctx%>/home?p=inbound">Create Import Receipt</a></li>
+    <li>
+  <a href="${pageContext.request.contextPath}/create-import-receipt">
+     Create Import Receipt
+  </a>
+</li>
     <li><a href="<%=ctx%>/home?p=outbound">Create Export Receipt</a></li>
 
-    
+
     <li><a href="<%=ctx%>/inventory">Inventory Management</a></li>
     <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
 
-   
+
     <li><a href="<%=ctx%>/home?p=view_supplier">View Supplier List</a></li>
 
-    
+
     <li><a href="<%=ctx%>/home?p=brand-list">Brand Management</a></li>
 
-    
+
     <li><a href="<%=ctx%>/home?p=profile">My Profile</a></li>
     <li><a href="<%=ctx%>/home?p=change-password">Change Password</a></li>
 </ul>

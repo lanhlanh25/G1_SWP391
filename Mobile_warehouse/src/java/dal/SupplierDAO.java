@@ -11,7 +11,7 @@ import model.Supplier;
 import model.SupplierDetailDTO;
 import model.SupplierListItem;
 import model.SupplierReceiptHistoryItem;
-
+import model.IdName;
 /**
  *
  * @author Admin
@@ -491,4 +491,23 @@ public class SupplierDAO {
             throw new SQLException("Search import receipts history failed", e);
         }
     }
+public List<IdName> listActive() throws Exception {
+    List<IdName> list = new ArrayList<>();
+    String sql = "SELECT supplier_id, supplier_name "
+               + "FROM suppliers "
+               + "WHERE is_active = 1 "
+               + "ORDER BY supplier_name";
+
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+
+        while (rs.next()) {
+            list.add(new IdName(rs.getLong("supplier_id"), rs.getString("supplier_name")));
+        }
+    }
+    return list;
+}
+
+
 }

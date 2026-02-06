@@ -34,14 +34,13 @@ public class ConductInventoryCount extends HttpServlet {
         }
 
         String role = getRole(session).toUpperCase();
-        
         if (!"STAFF".equals(role) && !"MANAGER".equals(role)) {
             response.sendError(403, "Forbidden");
             return;
         }
 
-        String q = request.getParameter("q");
-        String brandId = request.getParameter("brandId");
+        String q = trimToNull(request.getParameter("q"));
+        String brandId = trimToNull(request.getParameter("brandId"));
 
         int page = parseInt(request.getParameter("page"), 1);
         int pageSize = parseInt(request.getParameter("pageSize"), 10);
@@ -63,6 +62,7 @@ public class ConductInventoryCount extends HttpServlet {
         request.setAttribute("pageNumber", page);
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalItems", totalItems);
 
         request.setAttribute("sidebarPage", resolveSidebar(role));
         request.setAttribute("contentPage", "conduct_inventory_count.jsp");
@@ -87,8 +87,8 @@ public class ConductInventoryCount extends HttpServlet {
             return;
         }
 
-        String q = request.getParameter("q");
-        String brandId = request.getParameter("brandId");
+        String q = trimToNull(request.getParameter("q"));
+        String brandId = trimToNull(request.getParameter("brandId"));
         int page = parseInt(request.getParameter("page"), 1);
         int pageSize = parseInt(request.getParameter("pageSize"), 10);
 
@@ -103,7 +103,7 @@ public class ConductInventoryCount extends HttpServlet {
         Map<Long, Integer> updates = new LinkedHashMap<>();
         try {
             for (int i = 0; i < skuIds.length; i++) {
-                long skuId = Long.parseLong(skuIds[i]);
+                long skuId = Long.parseLong(skuIds[i].trim());
                 String raw = (counted[i] == null) ? "" : counted[i].trim();
                 int qty = raw.isEmpty() ? 0 : Integer.parseInt(raw);
                 if (qty < 0) qty = 0;
@@ -126,7 +126,6 @@ public class ConductInventoryCount extends HttpServlet {
         }
     }
 
- 
     private String getRole(HttpSession session) {
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
@@ -147,6 +146,12 @@ public class ConductInventoryCount extends HttpServlet {
         }
     }
 
+    private String trimToNull(String s) {
+        if (s == null) return null;
+        s = s.trim();
+        return s.isEmpty() ? null : s;
+    }
+
     private void redirectBack(HttpServletRequest req, HttpServletResponse resp,
                               String q, String brandId, int page, int pageSize, String err) throws IOException {
         resp.sendRedirect(req.getContextPath() + "/inventory-count"
@@ -157,8 +162,8 @@ public class ConductInventoryCount extends HttpServlet {
     private String buildQuery(String q, String brandId, int page, int pageSize) {
         StringBuilder sb = new StringBuilder("?");
         sb.append("page=").append(page).append("&pageSize=").append(pageSize);
-        if (q != null && !q.isBlank()) sb.append("&q=").append(URLEncoder.encode(q, StandardCharsets.UTF_8));
-        if (brandId != null && !brandId.isBlank()) sb.append("&brandId=").append(URLEncoder.encode(brandId, StandardCharsets.UTF_8));
+        if (q != null) sb.append("&q=").append(URLEncoder.encode(q, StandardCharsets.UTF_8));
+        if (brandId != null) sb.append("&brandId=").append(URLEncoder.encode(brandId, StandardCharsets.UTF_8));
         return sb.toString();
     }
 
