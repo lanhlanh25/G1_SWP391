@@ -12,9 +12,10 @@
     <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
 
     <li>
-  <a href="${pageContext.request.contextPath}/create-import-receipt">
-     Create Import Receipt
-  </a>
+  <a href="<%=ctx%>/home?p=create-import-receipt">
+    Create Import Receipt
+</a>
+
 </li>
     <li><a href="<%=ctx%>/home?p=outbound">Create Export Receipt</a></li>
 

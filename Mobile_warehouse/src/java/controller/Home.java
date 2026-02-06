@@ -6,12 +6,14 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
-import java.sql.Date;
+import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Date;               // ✅ dùng java.sql.Date
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +22,9 @@ import model.*;
 
 @WebServlet(name = "HomeServlet", urlPatterns = {"/home"})
 public class Home extends HttpServlet {
+
+    private static final Logger LOG = Logger.getLogger(Home.class.getName());
+    private static final DateTimeFormatter DTF_UI = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -34,29 +39,18 @@ public class Home extends HttpServlet {
         }
 
         String p = request.getParameter("p");
-        if (p == null || p.isBlank()) {
-            p = "dashboard";
-        }
-        if ("sku-add".equals(p)) {
-            ProductDAO dao = new ProductDAO();
-            try {
-                request.setAttribute("products", dao.getAll());
-            } catch (Exception ex) {
-                Logger.getLogger(Home.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        if (p == null || p.isBlank()) p = "dashboard";
+
+        // ✅ role
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
             role = UserDAO.getRoleNameByUserId(u.getUserId());
-            if (role == null || role.isBlank()) {
-                role = "STAFF";
-            }
+            if (role == null || role.isBlank()) role = "STAFF";
             session.setAttribute("roleName", role);
         }
         role = role.toUpperCase();
 
         String sidebarPage = resolveSidebar(role);
-
         String contentPage = resolveContent(role, p);
         if (contentPage == null) {
             response.sendError(403, "Forbidden");
@@ -64,20 +58,13 @@ public class Home extends HttpServlet {
         }
 
         try {
-            prepareData(p, request, response);
+            prepareData(p, request, response, u);
         } catch (Exception ex) {
-            Logger.getLogger(Home.class.getName()).log(Level.SEVERE, null, ex);
-
+            LOG.log(Level.SEVERE, "prepareData failed", ex);
             request.setAttribute("err", "Internal error: " + ex.getMessage());
         }
 
-        if (response.isCommitted()) {
-            return;
-        }
-
-        if (response.isCommitted()) {
-            return;
-        }
+        if (response.isCommitted()) return;
 
         request.setAttribute("sidebarPage", sidebarPage);
         request.setAttribute("contentPage", contentPage);
@@ -86,8 +73,8 @@ public class Home extends HttpServlet {
         request.getRequestDispatcher("homepage.jsp").forward(request, response);
     }
 
-    private void prepareData(String p, HttpServletRequest request, HttpServletResponse response)
-            throws IOException, Exception {
+    private void prepareData(String p, HttpServletRequest request, HttpServletResponse response, User authUser)
+            throws Exception {
 
         BrandDAO brandDAO = new BrandDAO();
         UserDAO userDAO = new UserDAO();
@@ -96,25 +83,56 @@ public class Home extends HttpServlet {
 
         switch (p) {
 
+            // =========================
+            // ✅ CREATE IMPORT RECEIPT (LOAD DATA FOR create_import_receipt.jsp)
+            // =========================
+            case "create-import-receipt": {
+                SupplierDAO sdao = new SupplierDAO();
+                ProductDAO pdao = new ProductDAO();
+                ProductSkuDAO skdao = new ProductSkuDAO();
+                ImportReceiptDAO irDao = new ImportReceiptDAO();
+
+                request.setAttribute("suppliers", sdao.listActive());
+                request.setAttribute("products", pdao.listActive());
+                request.setAttribute("skus", skdao.listActive());
+
+                try (Connection con = DBContext.getConnection()) {
+                    String importCode = irDao.generateImportCode(con);
+                    request.setAttribute("importCode", importCode);
+                }
+
+                String receiptDateDefault = LocalDateTime.now()
+                        .withSecond(0).withNano(0)
+                        .format(DTF_UI);
+                request.setAttribute("receiptDateDefault", receiptDateDefault);
+
+                String createdByName = "Staff";
+                HttpSession session = request.getSession(false);
+                if (session != null && session.getAttribute("fullName") != null) {
+                    createdByName = String.valueOf(session.getAttribute("fullName"));
+                } else if (authUser != null && authUser.getFullName() != null) {
+                    createdByName = authUser.getFullName();
+                }
+                request.setAttribute("createdByName", createdByName);
+                break;
+            }
+
+            // =========================
+            // USER
+            // =========================
             case "user-list":
             case "user-toggle": {
                 String q = request.getParameter("q");
                 String st = request.getParameter("status");
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) {
-                    page = 1;
-                }
+                if (page < 1) page = 1;
 
                 int pageSize = 5;
                 int totalItems = userDAO.countUsersWithRole(q, st);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) {
-                    totalPages = 1;
-                }
-                if (page > totalPages) {
-                    page = totalPages;
-                }
+                if (totalPages < 1) totalPages = 1;
+                if (page > totalPages) page = totalPages;
 
                 List<UserRoleDetail> users = userDAO.getAllUsersWithRole(q, st, page, pageSize);
 
@@ -154,8 +172,10 @@ public class Home extends HttpServlet {
                 break;
             }
 
+            // =========================
+            // ROLE
+            // =========================
             case "role-list": {
-
                 String keyword = request.getParameter("q");
                 String st = request.getParameter("status");
 
@@ -167,13 +187,9 @@ public class Home extends HttpServlet {
                         status = null;
                         st = "";
                     }
-                } else {
-                    st = "";
-                }
+                } else st = "";
 
-                if (keyword == null) {
-                    keyword = "";
-                }
+                if (keyword == null) keyword = "";
                 keyword = keyword.trim();
 
                 List<Role> roles = roleDAO.searchRoles(keyword, status);
@@ -185,14 +201,11 @@ public class Home extends HttpServlet {
             }
 
             case "role-toggle": {
-
                 String keyword = request.getParameter("q");
                 String st = request.getParameter("status");
 
                 Integer status = null;
-                if (st != null && !st.isBlank()) {
-                    status = Integer.parseInt(st.trim());
-                }
+                if (st != null && !st.isBlank()) status = Integer.parseInt(st.trim());
 
                 List<Role> roles = roleDAO.searchRoles(keyword, status);
                 request.setAttribute("roles", roles);
@@ -213,15 +226,22 @@ public class Home extends HttpServlet {
                 request.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
 
                 Set<Integer> permIds = rpDAO.getPermissionIdsByRole(roleId);
-
                 request.setAttribute("rolePermIds", permIds);
 
                 request.setAttribute("rolePerms", new ArrayList<Permission>());
                 break;
             }
 
-            case "product-add": {
+            // =========================
+            // PRODUCT
+            // =========================
+            case "sku-add": {
+                ProductDAO dao = new ProductDAO();
+                request.setAttribute("products", dao.getAll());
+                break;
+            }
 
+            case "product-add": {
                 request.setAttribute("brands", brandDAO.list(null, "active", "name", "ASC", 1, 1000));
                 break;
             }
@@ -232,32 +252,21 @@ public class Home extends HttpServlet {
                 String st = request.getParameter("status");
 
                 Long brandId = null;
-                if (brandIdRaw != null && !brandIdRaw.isBlank()) {
-                    brandId = Long.parseLong(brandIdRaw);
-                }
+                if (brandIdRaw != null && !brandIdRaw.isBlank()) brandId = Long.parseLong(brandIdRaw);
 
                 String status = null;
-                if (st != null && !st.isBlank()) {
-                    status = st;
-                }
+                if (st != null && !st.isBlank()) status = st;
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) {
-                    page = 1;
-                }
+                if (page < 1) page = 1;
 
                 int pageSize = 5;
 
                 ProductDAO pdao = new ProductDAO();
                 int totalItems = pdao.count(q, brandId, status);
-
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) {
-                    totalPages = 1;
-                }
-                if (page > totalPages) {
-                    page = totalPages;
-                }
+                if (totalPages < 1) totalPages = 1;
+                if (page > totalPages) page = totalPages;
 
                 List<ProductListItem> products = pdao.list(q, brandId, status, page, pageSize);
 
@@ -275,6 +284,9 @@ public class Home extends HttpServlet {
                 break;
             }
 
+            // =========================
+            // BRAND
+            // =========================
             case "brand-list": {
                 String q = request.getParameter("q");
                 String st = request.getParameter("status");
@@ -282,20 +294,14 @@ public class Home extends HttpServlet {
                 String sortOrder = request.getParameter("sortOrder");
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) {
-                    page = 1;
-                }
+                if (page < 1) page = 1;
 
                 int pageSize = 5;
 
                 int totalItems = brandDAO.count(q, st);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) {
-                    totalPages = 1;
-                }
-                if (page > totalPages) {
-                    page = totalPages;
-                }
+                if (totalPages < 1) totalPages = 1;
+                if (page > totalPages) page = totalPages;
 
                 List<Brand> brands = brandDAO.list(q, st, sortBy, sortOrder, page, pageSize);
 
@@ -343,89 +349,61 @@ public class Home extends HttpServlet {
                 String brandIdRaw = request.getParameter("brandId");
                 String range = request.getParameter("range");
 
-                if (range == null || range.isBlank()) {
-                    range = "all";
-                }
-                // default
-                if (sortBy == null || sortBy.isBlank()) {
-                    sortBy = "stock";
-                }
-                if (sortOrder == null || sortOrder.isBlank()) {
-                    sortOrder = "DESC";
-                }
+                if (range == null || range.isBlank()) range = "all";
+                if (sortBy == null || sortBy.isBlank()) sortBy = "stock";
+                if (sortOrder == null || sortOrder.isBlank()) sortOrder = "DESC";
 
                 Date fromDate = null;
                 Date toDate = null;
 
                 LocalDate today = LocalDate.now();
                 switch (range) {
-                    case "today": {
+                    case "today":
                         fromDate = Date.valueOf(today);
                         toDate = Date.valueOf(today);
                         break;
-                    }
-
-                    case "last7": { // rolling 7 days (today + 6 previous days)
+                    case "last7":
                         fromDate = Date.valueOf(today.minusDays(6));
                         toDate = Date.valueOf(today);
                         break;
-                    }
-
-                    case "last30": { // rolling 30 days
+                    case "last30":
                         fromDate = Date.valueOf(today.minusDays(29));
                         toDate = Date.valueOf(today);
                         break;
-                    }
-
-                    case "last90": { // rolling 90 days (Quarter)
+                    case "last90":
                         fromDate = Date.valueOf(today.minusDays(89));
                         toDate = Date.valueOf(today);
                         break;
-                    }
-
-                    case "month": { // This month (calendar)
+                    case "month":
                         fromDate = Date.valueOf(today.withDayOfMonth(1));
                         toDate = Date.valueOf(today);
                         break;
-                    }
-
-                    case "lastMonth": { // Previous calendar month
+                    case "lastMonth":
                         LocalDate firstDayLastMonth = today.minusMonths(1).withDayOfMonth(1);
                         LocalDate lastDayLastMonth = today.withDayOfMonth(1).minusDays(1);
                         fromDate = Date.valueOf(firstDayLastMonth);
                         toDate = Date.valueOf(lastDayLastMonth);
                         break;
-                    }
-
-                    default: { // all
+                    default:
                         fromDate = null;
                         toDate = null;
                         range = "all";
                         break;
-                    }
                 }
 
                 Long brandId = null;
-                if (brandIdRaw != null && !brandIdRaw.isBlank()) {
-                    brandId = Long.parseLong(brandIdRaw);
-                }
+                if (brandIdRaw != null && !brandIdRaw.isBlank()) brandId = Long.parseLong(brandIdRaw);
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) {
-                    page = 1;
-                }
+                if (page < 1) page = 1;
 
                 int pageSize = 5;
                 int lowThreshold = 5;
 
                 int totalItems = statsDAO.countBrands(q, brandStatus, brandId, fromDate, toDate);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) {
-                    totalPages = 1;
-                }
-                if (page > totalPages) {
-                    page = totalPages;
-                }
+                if (totalPages < 1) totalPages = 1;
+                if (page > totalPages) page = totalPages;
 
                 BrandStatsSummary summary = statsDAO.getSummary(q, brandStatus, brandId, lowThreshold, fromDate, toDate);
                 List<BrandStatsRow> rows = statsDAO.listBrandStats(q, brandStatus, brandId, sortBy, sortOrder, page, pageSize, lowThreshold, fromDate, toDate);
@@ -461,21 +439,13 @@ public class Home extends HttpServlet {
 
                 int lowThreshold = 5;
 
-                // sort of detail
                 String dSortBy = request.getParameter("dSortBy");
                 String dSortOrder = request.getParameter("dSortOrder");
-                if (dSortBy == null || dSortBy.isBlank()) {
-                    dSortBy = "stock";
-                }
-                if (dSortOrder == null || dSortOrder.isBlank()) {
-                    dSortOrder = "DESC";
-                }
+                if (dSortBy == null || dSortBy.isBlank()) dSortBy = "stock";
+                if (dSortOrder == null || dSortOrder.isBlank()) dSortOrder = "DESC";
 
-                // range: lấy từ listRange (vì bạn pass listRange khi click View Details)
                 String range = request.getParameter("listRange");
-                if (range == null || range.isBlank()) {
-                    range = "all";
-                }
+                if (range == null || range.isBlank()) range = "all";
 
                 Date fromDate = null, toDate = null;
                 LocalDate today = LocalDate.now();
@@ -507,7 +477,7 @@ public class Home extends HttpServlet {
                         toDate = Date.valueOf(last);
                         break;
                     default:
-                        break; // all
+                        break;
                 }
 
                 Brand b = brandDAO.findById(brandId);
@@ -515,8 +485,8 @@ public class Home extends HttpServlet {
                     response.sendRedirect(request.getContextPath() + "/home?p=brand-stats&err=Brand not found");
                     return;
                 }
-                BrandStatsSummary detailSummary = statsDAO.getBrandDetailSummary(brandId, lowThreshold, fromDate, toDate);
 
+                BrandStatsSummary detailSummary = statsDAO.getBrandDetailSummary(brandId, lowThreshold, fromDate, toDate);
                 List<ProductStatsRow> products = statsDAO.listBrandDetail(
                         brandId, lowThreshold, fromDate, toDate, dSortBy, dSortOrder
                 );
@@ -527,10 +497,12 @@ public class Home extends HttpServlet {
                 request.setAttribute("dSortOrder", dSortOrder);
                 request.setAttribute("detailSummary", detailSummary);
                 request.setAttribute("range", range);
-
                 break;
             }
 
+            // =========================
+            // SUPPLIER (đầy đủ các case bạn đưa)
+            // =========================
             case "view_supplier": {
                 SupplierDAO supplierDAO = new SupplierDAO();
 
@@ -539,31 +511,22 @@ public class Home extends HttpServlet {
                 String sortBy = request.getParameter("sortBy");
                 String sortOrder = request.getParameter("sortOrder");
 
-                if (sortBy == null || sortBy.isBlank()) {
-                    sortBy = "newest";
-                }
-                if (sortOrder == null || sortOrder.isBlank()) {
-                    sortOrder = "DESC";
-                }
+                if (sortBy == null || sortBy.isBlank()) sortBy = "newest";
+                if (sortOrder == null || sortOrder.isBlank()) sortOrder = "DESC";
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) {
-                    page = 1;
-                }
+                if (page < 1) page = 1;
 
                 int pageSize = 5;
 
                 try {
                     int totalItems = supplierDAO.countSuppliers(q, status);
                     int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                    if (totalPages < 1) {
-                        totalPages = 1;
-                    }
-                    if (page > totalPages) {
-                        page = totalPages;
-                    }
+                    if (totalPages < 1) totalPages = 1;
+                    if (page > totalPages) page = totalPages;
 
-                    List<SupplierListItem> suppliers = supplierDAO.searchSuppliers(q, status, sortBy, sortOrder, page, pageSize);
+                    List<SupplierListItem> suppliers =
+                            supplierDAO.searchSuppliers(q, status, sortBy, sortOrder, page, pageSize);
 
                     request.setAttribute("suppliers", suppliers);
                     request.setAttribute("q", q);
@@ -577,7 +540,7 @@ public class Home extends HttpServlet {
                     request.setAttribute("totalPages", totalPages);
 
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    LOG.log(Level.SEVERE, "Database error while loading supplier list", ex);
 
                     request.setAttribute("suppliers", java.util.Collections.emptyList());
                     request.setAttribute("q", q);
@@ -592,7 +555,6 @@ public class Home extends HttpServlet {
 
                     request.setAttribute("msg", "Database error while loading supplier list.");
                 }
-
                 break;
             }
 
@@ -605,7 +567,7 @@ public class Home extends HttpServlet {
 
                 long supplierId;
                 try {
-                    supplierId = Long.parseLong(idRaw);
+                    supplierId = Long.parseLong(idRaw.trim());
                 } catch (Exception e) {
                     response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Invalid supplier id");
                     return;
@@ -620,7 +582,7 @@ public class Home extends HttpServlet {
                     }
                     request.setAttribute("supplierDetail", dto);
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    LOG.log(Level.SEVERE, "Database error while loading supplier detail", ex);
                     request.setAttribute("msg", "Database error while loading supplier detail.");
                 }
                 break;
@@ -641,7 +603,7 @@ public class Home extends HttpServlet {
 
                 long supplierId;
                 try {
-                    supplierId = Long.parseLong(idRaw);
+                    supplierId = Long.parseLong(idRaw.trim());
                 } catch (Exception e) {
                     response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Invalid supplier id");
                     return;
@@ -656,7 +618,7 @@ public class Home extends HttpServlet {
                     }
                     request.setAttribute("supplier", s);
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    LOG.log(Level.SEVERE, "Database error while loading supplier", ex);
                     request.setAttribute("msg", "Database error while loading supplier.");
                 }
                 break;
@@ -669,7 +631,7 @@ public class Home extends HttpServlet {
                     return;
                 }
 
-                long supplierId = Long.parseLong(idRaw);
+                long supplierId = Long.parseLong(idRaw.trim());
 
                 SupplierDAO supplierDAO = new SupplierDAO();
                 Supplier supplier = supplierDAO.getById(supplierId);
@@ -682,12 +644,10 @@ public class Home extends HttpServlet {
                 request.setAttribute("supplier", supplier);
                 break;
             }
+
             case "view_history": {
-                // supplierId param có thể là supplierId (từ detail) hoặc id (nếu bạn muốn hỗ trợ)
                 String sidRaw = request.getParameter("supplierId");
-                if (sidRaw == null || sidRaw.isBlank()) {
-                    sidRaw = request.getParameter("id");
-                }
+                if (sidRaw == null || sidRaw.isBlank()) sidRaw = request.getParameter("id");
                 if (sidRaw == null || sidRaw.isBlank()) {
                     response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Please select a supplier");
                     return;
@@ -701,9 +661,8 @@ public class Home extends HttpServlet {
                     return;
                 }
 
-                // filters
                 String q = request.getParameter("q");
-                String status = request.getParameter("status"); // e.g. CONFIRMED/DRAFT/CANCELLED...
+                String status = request.getParameter("status");
                 String fromRaw = request.getParameter("from");
                 String toRaw = request.getParameter("to");
 
@@ -711,29 +670,14 @@ public class Home extends HttpServlet {
                 java.sql.Date toDate = null;
 
                 try {
-                    if (fromRaw != null && !fromRaw.isBlank()) {
-                        fromDate = java.sql.Date.valueOf(fromRaw.trim());
-                    }
-                } catch (Exception ignore) {
-                }
-
+                    if (fromRaw != null && !fromRaw.isBlank()) fromDate = java.sql.Date.valueOf(fromRaw.trim());
+                } catch (Exception ignore) {}
                 try {
-                    if (toRaw != null && !toRaw.isBlank()) {
-                        toDate = java.sql.Date.valueOf(toRaw.trim());
-                    }
-                } catch (Exception ignore) {
-                }
+                    if (toRaw != null && !toRaw.isBlank()) toDate = java.sql.Date.valueOf(toRaw.trim());
+                } catch (Exception ignore) {}
 
-                // paging
-                int page = 1;
-                try {
-                    page = Integer.parseInt(request.getParameter("page"));
-                    if (page < 1) {
-                        page = 1;
-                    }
-                } catch (Exception e) {
-                    page = 1;
-                }
+                int page = parseInt(request.getParameter("page"), 1);
+                if (page < 1) page = 1;
                 int pageSize = 5;
 
                 SupplierDAO supplierDAO = new SupplierDAO();
@@ -746,15 +690,11 @@ public class Home extends HttpServlet {
 
                     int totalItems = supplierDAO.countImportReceiptsHistory(supplierId, q, fromDate, toDate, status);
                     int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                    if (totalPages == 0) {
-                        totalPages = 1;
-                    }
-                    if (page > totalPages) {
-                        page = totalPages;
-                    }
+                    if (totalPages < 1) totalPages = 1;
+                    if (page > totalPages) page = totalPages;
 
-                    List<model.SupplierReceiptHistoryItem> receipts
-                            = supplierDAO.searchImportReceiptsHistory(supplierId, q, fromDate, toDate, status, page, pageSize);
+                    List<SupplierReceiptHistoryItem> receipts =
+                            supplierDAO.searchImportReceiptsHistory(supplierId, q, fromDate, toDate, status, page, pageSize);
 
                     request.setAttribute("supplier", sup);
                     request.setAttribute("receipts", receipts);
@@ -770,7 +710,7 @@ public class Home extends HttpServlet {
                     request.setAttribute("totalPages", totalPages);
 
                 } catch (SQLException ex) {
-                    ex.printStackTrace();
+                    LOG.log(Level.SEVERE, "Database error while loading transaction history", ex);
                     request.setAttribute("msg", "Database error while loading transaction history.");
                     request.setAttribute("receipts", java.util.Collections.emptyList());
                 }
@@ -784,9 +724,7 @@ public class Home extends HttpServlet {
 
     private int parseInt(String raw, int def) {
         try {
-            if (raw == null || raw.isBlank()) {
-                return def;
-            }
+            if (raw == null || raw.isBlank()) return def;
             return Integer.parseInt(raw.trim());
         } catch (Exception e) {
             return def;
@@ -795,165 +733,106 @@ public class Home extends HttpServlet {
 
     private String resolveSidebar(String role) {
         switch (role) {
-            case "ADMIN":
-                return "sidebar_admin.jsp";
-            case "MANAGER":
-                return "sidebar_manager.jsp";
-            case "SALE":
-                return "sidebar_sales.jsp";
-            default:
-                return "sidebar_staff.jsp";
+            case "ADMIN":   return "sidebar_admin.jsp";
+            case "MANAGER": return "sidebar_manager.jsp";
+            case "SALE":    return "sidebar_sales.jsp";
+            default:        return "sidebar_staff.jsp";
         }
     }
 
     private String resolveContent(String role, String p) {
-
-        if (role == null) {
-            role = "";
-        }
-        if (p == null) {
-            p = "";
-        }
+        if (role == null) role = "";
+        if (p == null) p = "";
         role = role.toUpperCase();
 
         switch (role) {
             case "ADMIN":
                 switch (p) {
-                    case "dashboard":
-                        return "admin_dashboard.jsp";
-                    case "user-list":
-                        return "user_list.jsp";
-                    case "user-add":
-                        return "user_add.jsp";
-                    case "user-update":
-                        return "update_user_information.jsp";
-                    case "user-toggle":
-                        return "active_user.jsp";
-
-                    case "role-list":
-                        return "view_role_list.jsp";
-                    case "role-update":
-                        return "edit_role_permissions.jsp";
-                    case "role-toggle":
-                        return "active_role.jsp";
-                    case "role-perm-view":
-                        return "role_detail.jsp";
-
+                    case "dashboard": return "admin_dashboard.jsp";
+                    case "user-list": return "user_list.jsp";
+                    case "user-add": return "user_add.jsp";
+                    case "user-update": return "update_user_information.jsp";
+                    case "user-toggle": return "active_user.jsp";
+                    case "role-list": return "view_role_list.jsp";
+                    case "role-update": return "edit_role_permissions.jsp";
+                    case "role-toggle": return "active_role.jsp";
+                    case "role-perm-view": return "role_detail.jsp";
                     case "my-profile":
-                    case "profile":
-                        return "view_profile.jsp";
-
+                    case "profile": return "view_profile.jsp";
                     case "change-password":
-                    case "change_password":
-                        return "change_password.jsp";
-
-                    default:
-                        return null;
+                    case "change_password": return "change_password.jsp";
+                    default: return null;
                 }
 
             case "MANAGER":
                 switch (p) {
-                    case "dashboard":
-                        return "manager_dashboard.jsp";
-                    case "reports":
-                        return "reports.jsp";
-                    case "product-add":
-                        return "add_product.jsp";
-                    case "product-list":
-                        return "product_list.jsp";
-                    case "user-list":
-                        return "user_list.jsp";
-                    case "user-detail":
-                        return "view_user_information.jsp";
-                    case "sku-add":
-                        return "add_sku.jsp";
-                    case "brand-list":
-                        return "brand_list.jsp";
-                    case "brand-add":
-                        return "brand_add.jsp";
-                    case "brand-detail":
-                        return "brand_detail.jsp";
-                    case "brand-update":
-                        return "brand_update.jsp";
-                    case "brand-disable":
-                        return "brand_disable_confirm.jsp";
-                    case "brand-stats":
-                        return "brand_stats.jsp";
-                    case "brand-stats-detail":
-                        return "brand_stats_detail.jsp";
+                    case "dashboard": return "manager_dashboard.jsp";
+                    case "reports": return "reports.jsp";
+                    case "product-add": return "add_product.jsp";
+                    case "product-list": return "product_list.jsp";
+                    case "user-list": return "user_list.jsp";
+                    case "user-detail": return "view_user_information.jsp";
+                    case "sku-add": return "add_sku.jsp";
 
-                    case "add_supplier":
-                        return "add_supplier.jsp";
-                    case "view_supplier":
-                        return "supplier_list.jsp";
-                    case "supplier_detail":
-                        return "supplier_detail.jsp";
-                    case "update_supplier":
-                        return "update_supplier.jsp";
-                    case "supplier_inactive":
-                        return "inactive_supplier.jsp";
-                    case "view_history":
-                        return "supplier_history.jsp";
+                    case "brand-list": return "brand_list.jsp";
+                    case "brand-add": return "brand_add.jsp";
+                    case "brand-detail": return "brand_detail.jsp";
+                    case "brand-update": return "brand_update.jsp";
+                    case "brand-disable": return "brand_disable_confirm.jsp";
+                    case "brand-stats": return "brand_stats.jsp";
+                    case "brand-stats-detail": return "brand_stats_detail.jsp";
+
+                    case "add_supplier": return "add_supplier.jsp";
+                    case "view_supplier": return "supplier_list.jsp";
+                    case "supplier_detail": return "supplier_detail.jsp";
+                    case "update_supplier": return "update_supplier.jsp";
+                    case "supplier_inactive": return "inactive_supplier.jsp";
+                    case "view_history": return "supplier_history.jsp";
+
+                    // ✅ nếu bạn muốn manager cũng xem được trang create import:
+                    case "create-import-receipt": return "create_import_receipt.jsp";
+
                     case "my-profile":
-                    case "profile":
-                        return "view_profile.jsp";
-
+                    case "profile": return "view_profile.jsp";
                     case "change-password":
-                    case "change_password":
-                        return "change_password.jsp";
-
-                    default:
-                        return null;
+                    case "change_password": return "change_password.jsp";
+                    default: return null;
                 }
 
             case "SALE":
                 switch (p) {
-                    case "dashboard":
-                        return "sales_dashboard.jsp";
-
-                    case "view_supplier":
-                        return "supplier_list.jsp";
-                    case "supplier_detail":
-                        return "supplier_detail.jsp";
-
+                    case "dashboard": return "sales_dashboard.jsp";
+                    case "view_supplier": return "supplier_list.jsp";
+                    case "supplier_detail": return "supplier_detail.jsp";
                     case "my-profile":
-                    case "profile":
-                        return "view_profile.jsp";
-
+                    case "profile": return "view_profile.jsp";
                     case "change-password":
-                    case "change_password":
-                        return "change_password.jsp";
-
-                    default:
-                        return null;
+                    case "change_password": return "change_password.jsp";
+                    default: return null;
                 }
 
-            default:
+            default: // STAFF
                 switch (p) {
-                    case "dashboard":
-                        return "staff_dashboard.jsp";
+                    case "dashboard": return "staff_dashboard.jsp";
 
-                    case "view_supplier":
-                        return "supplier_list.jsp";
-                    case "supplier_detail":
-                        return "supplier_detail.jsp";
+                    // ✅ quan trọng: route đúng cho sidebar staff
+                    case "create-import-receipt": return "create_import_receipt.jsp";
 
-                    case "brand-list":
-                        return "brand_list.jsp";
-                    case "brand-detail":
-                        return "brand_detail.jsp";
+                    case "view_supplier": return "supplier_list.jsp";
+                    case "supplier_detail": return "supplier_detail.jsp";
+
+                    case "brand-list": return "brand_list.jsp";
+                    case "brand-detail": return "brand_detail.jsp";
 
                     case "my-profile":
-                    case "profile":
-                        return "view_profile.jsp";
+                    case "profile": return "view_profile.jsp";
 
                     case "change-password":
-                    case "change_password":
-                        return "change_password.jsp";
+                    case "change_password": return "change_password.jsp";
 
-                    default:
-                        return null;
+                    default: return null;
                 }
         }
     }
 }
+
