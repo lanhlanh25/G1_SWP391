@@ -12,20 +12,54 @@ import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import model.IdName;
 import model.ProductSku;
+
 public class ProductSkuDAO {
 
-    public void inactivateSkusByProduct(long productId) throws Exception {
-        // Nếu DB dùng status:
-        String sql = "UPDATE product_skus SET status='INACTIVE' WHERE product_id=?";
-        // Nếu DB dùng is_active: String sql = "UPDATE product_skus SET is_active=0 WHERE product_id=?";
+    public List<ProductSku> getSkusByProductId(int productId) {
+        List<ProductSku> list = new ArrayList<>();
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setLong(1, productId);
+        String sql = """
+        SELECT sku_id, product_id, sku_code, color, ram_gb, storage_gb,
+               price, supplier_id, status, created_at, updated_at
+        FROM product_skus
+        WHERE product_id = ?
+    """;
+
+        try (
+                Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                ProductSku sku = new ProductSku();
+                sku.setSkuId(rs.getInt("sku_id"));
+                sku.setProductId(rs.getInt("product_id"));
+                sku.setSkuCode(rs.getString("sku_code"));
+                sku.setColor(rs.getString("color"));
+                sku.setRamGb(rs.getInt("ram_gb"));
+                sku.setStorageGb(rs.getInt("storage_gb"));
+                sku.setPrice(rs.getDouble("price"));
+                sku.setSupplierId(rs.getInt("supplier_id"));
+                sku.setStatus(rs.getString("status"));
+                sku.setCreatedAt(rs.getTimestamp("created_at"));
+                sku.setUpdatedAt(rs.getTimestamp("updated_at"));
+
+                list.add(sku);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    public void inactivateSkusByProduct(int productId) throws Exception {
+        String sql = "UPDATE product_skus SET status = 'INACTIVE' WHERE product_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
             ps.executeUpdate();
         }
     }
@@ -103,9 +137,9 @@ public class ProductSkuDAO {
 
             while (rs.next()) {
                 ProductSku k = new ProductSku();
-                k.setSkuId(rs.getLong("sku_id"));
+                k.setSkuId(rs.getInt("sku_id"));
                 k.setSkuCode(rs.getString("sku_code"));
-                k.setProductId(rs.getLong("product_id"));
+                k.setProductId(rs.getInt("product_id"));
                 list.add(k);
             }
         }

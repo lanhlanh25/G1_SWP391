@@ -20,6 +20,43 @@ import model.IdName;
 import model.ProductLite;
 public class ProductDAO {
 
+    public Product getProductById(int productId) {
+        String sql = """
+        SELECT p.product_id,
+               p.product_code,
+               p.product_name,
+               p.model,
+               p.status,
+               p.description,
+               b.brand_name
+        FROM products p
+        JOIN brands b ON p.brand_id = b.brand_id
+        WHERE p.product_id = ?
+    """;
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, productId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                Product p = new Product();
+                p.setProductId(rs.getInt("product_id"));
+                p.setProductCode(rs.getString("product_code"));
+                p.setProductName(rs.getString("product_name"));
+                p.setModel(rs.getString("model"));
+                p.setStatus(rs.getString("status"));
+                p.setDescription(rs.getString("description"));
+                p.setBrandName(rs.getString("brand_name"));
+                return p;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public int count(String q, Long brandId, String status) throws Exception {
         StringBuilder sql = new StringBuilder(
                 "SELECT COUNT(*) "

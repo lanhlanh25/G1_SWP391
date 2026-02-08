@@ -283,10 +283,21 @@ public class Home extends HttpServlet {
                 request.setAttribute("allBrands", brandDAO.list(null, "", "name", "ASC", 1, 1000));
                 break;
             }
+            case "product-detail": {
+                int productId = Integer.parseInt(request.getParameter("id"));
 
-            // =========================
-            // BRAND
-            // =========================
+                ProductDAO productDAO = new ProductDAO();
+                ProductSkuDAO skuDAO = new ProductSkuDAO();
+
+                Product product = productDAO.getProductById(productId);
+                List<ProductSku> skuList = skuDAO.getSkusByProductId(productId);
+
+                request.setAttribute("product", product);
+                request.setAttribute("skuList", skuList);
+
+                request.getRequestDispatcher("product_detail.jsp").forward(request, response);
+                return;
+            }
             case "brand-list": {
                 String q = request.getParameter("q");
                 String st = request.getParameter("status");
@@ -766,22 +777,38 @@ public class Home extends HttpServlet {
 
             case "MANAGER":
                 switch (p) {
-                    case "dashboard": return "manager_dashboard.jsp";
-                    case "reports": return "reports.jsp";
-                    case "product-add": return "add_product.jsp";
-                    case "product-list": return "product_list.jsp";
-                    case "user-list": return "user_list.jsp";
-                    case "user-detail": return "view_user_information.jsp";
-                    case "sku-add": return "add_sku.jsp";
+                    case "dashboard":
+                        return "manager_dashboard.jsp";
+                    case "reports":
+                        return "reports.jsp";
+                    case "product-add":
+                        return "add_product.jsp";
+                    case "product-list":
+                        return "product_list.jsp";
+                    case "product-detail":
+                        return "product_detail.jsp";
+                    case "user-list":
+                        return "user_list.jsp";
+                    case "user-detail":
+                        return "view_user_information.jsp";
+                    case "sku-add":
+                        return "add_sku.jsp";
+                    case "brand-list":
+                        return "brand_list.jsp";
+                    case "brand-add":
+                        return "brand_add.jsp";
+                    case "brand-detail":
+                        return "brand_detail.jsp";
+                    case "brand-update":
+                        return "brand_update.jsp";
+                    case "brand-disable":
+                        return "brand_disable_confirm.jsp";
+                    case "brand-stats":
+                        return "brand_stats.jsp";
+                    case "brand-stats-detail":
+                        return "brand_stats_detail.jsp";
 
-                    case "brand-list": return "brand_list.jsp";
-                    case "brand-add": return "brand_add.jsp";
-                    case "brand-detail": return "brand_detail.jsp";
-                    case "brand-update": return "brand_update.jsp";
-                    case "brand-disable": return "brand_disable_confirm.jsp";
-                    case "brand-stats": return "brand_stats.jsp";
-                    case "brand-stats-detail": return "brand_stats_detail.jsp";
-
+     
                     case "add_supplier": return "add_supplier.jsp";
                     case "view_supplier": return "supplier_list.jsp";
                     case "supplier_detail": return "supplier_detail.jsp";
