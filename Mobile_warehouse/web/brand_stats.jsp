@@ -185,9 +185,18 @@
 
         <div class="btn-row">
             <%-- Export button is visible only to MANAGER (adjust as you wish) --%>
-            <c:if test="${roleName == 'MANAGER'}">
-                <a class="btn" href="${exportUrl}">Export</a>
+            <c:if test="${sessionScope.roleName != null && fn:toUpperCase(sessionScope.roleName) == 'MANAGER'}">
+                <c:url var="exportPdfUrl" value="/manager/brand-stats-export-pdf">
+                    <c:param name="q" value="${q}"/>
+                    <c:param name="status" value="${status}"/>
+                    <c:param name="brandId" value="${brandId}"/>
+                    <c:param name="sortBy" value="${sortBy}"/>
+                    <c:param name="sortOrder" value="${sortOrder}"/>
+                    <c:param name="range" value="${range}"/>
+                </c:url>
+                <a class="btn" href="${exportPdfUrl}">Export PDF</a>
             </c:if>
+
         </div>
     </div>
 
