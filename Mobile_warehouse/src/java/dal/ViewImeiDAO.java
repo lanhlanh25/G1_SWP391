@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dal;
 
-/**
- *
- * @author Admin
- */
 import model.ImeiRow;
 
 import java.sql.*;
@@ -59,29 +51,24 @@ public class ViewImeiDAO {
         return null;
     }
 
-    public int countImeis(long skuId, String q, String status) {
-        StringBuilder sql = new StringBuilder(
-                "SELECT COUNT(*) FROM product_units pu WHERE pu.sku_id = ? "
-        );
-
-        List<Object> params = new ArrayList<>();
-        params.add(skuId);
-
-        if (q != null && !q.trim().isEmpty()) {
-            sql.append(" AND pu.imei LIKE ? ");
-            params.add("%" + q.trim() + "%");
-        }
-
-        
-        if (status != null && !status.trim().isEmpty()) {
-            sql.append(" AND pu.unit_status = ? ");
-            params.add(status.trim().toUpperCase()); 
-        }
+    // ✅ Updated to join with import/export receipts
+    public int countImeis(long skuId, String q) {
+        String sql =
+            "SELECT COUNT(DISTINCT iru.imei) " +
+            "FROM import_receipt_units iru " +
+            "JOIN import_receipt_lines irl ON irl.line_id = iru.line_id " +
+            "JOIN import_receipts ir ON ir.import_id = irl.import_id " +
+            "WHERE irl.sku_id = ? " +
+            "  AND ir.status = 'CONFIRMED' " +  // Only count confirmed imports
+            (q != null && !q.trim().isEmpty() ? "  AND iru.imei LIKE ? " : "");
 
         try (Connection con = getConn();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            bind(ps, params);
+            ps.setLong(1, skuId);
+            if (q != null && !q.trim().isEmpty()) {
+                ps.setString(2, "%" + q.trim() + "%");
+            }
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) return rs.getInt(1);
@@ -93,43 +80,52 @@ public class ViewImeiDAO {
         return 0;
     }
 
-    public List<ImeiRow> listImeis(long skuId, String q, String status, int page, int pageSize) {
+    // ✅ Updated to fetch import_date and export_date
+    public List<ImeiRow> listImeis(long skuId, String q, int page, int pageSize) {
         List<ImeiRow> list = new ArrayList<>();
         int offset = (page - 1) * pageSize;
 
-        StringBuilder sql = new StringBuilder(
-                "SELECT pu.imei, pu.unit_status " +
-                "FROM product_units pu " +
-                "WHERE pu.sku_id = ? "
-        );
-
-        List<Object> params = new ArrayList<>();
-        params.add(skuId);
-
-        if (q != null && !q.trim().isEmpty()) {
-            sql.append(" AND pu.imei LIKE ? ");
-            params.add("%" + q.trim() + "%");
-        }
-
-        if (status != null && !status.trim().isEmpty()) {
-            sql.append(" AND pu.unit_status = ? ");
-            params.add(status.trim().toUpperCase()); 
-        }
-
-        sql.append(" ORDER BY pu.imei LIMIT ? OFFSET ? ");
-        params.add(pageSize);
-        params.add(offset);
+        // ✅ Query to get IMEI with import date and export date (if exported)
+        String sql =
+            "SELECT " +
+            "  iru.imei, " +
+            "  ir.receipt_date AS import_date, " +
+            "  er.export_date AS export_date " +
+            "FROM import_receipt_units iru " +
+            "JOIN import_receipt_lines irl ON irl.line_id = iru.line_id " +
+            "JOIN import_receipts ir ON ir.import_id = irl.import_id " +
+            
+            // ✅ LEFT JOIN export receipts (may not exist if not exported yet)
+            "LEFT JOIN export_receipt_units eru ON eru.imei = iru.imei " +
+            "LEFT JOIN export_receipt_lines erl ON erl.line_id = eru.line_id " +
+            "LEFT JOIN export_receipts er ON er.export_id = erl.export_id " +
+            
+            "WHERE irl.sku_id = ? " +
+            "  AND ir.status = 'CONFIRMED' " +  // Only show confirmed imports
+            (q != null && !q.trim().isEmpty() ? "  AND iru.imei LIKE ? " : "") +
+            "GROUP BY iru.imei, ir.receipt_date, er.export_date " +  // Prevent duplicates
+            "ORDER BY iru.imei " +
+            "LIMIT ? OFFSET ?";
 
         try (Connection con = getConn();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            bind(ps, params);
+            int idx = 1;
+            ps.setLong(idx++, skuId);
+            
+            if (q != null && !q.trim().isEmpty()) {
+                ps.setString(idx++, "%" + q.trim() + "%");
+            }
+            
+            ps.setInt(idx++, pageSize);
+            ps.setInt(idx, offset);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     ImeiRow r = new ImeiRow();
                     r.setImei(rs.getString("imei"));
-                    r.setStatus(rs.getString("unit_status")); 
+                    r.setImportDate(rs.getTimestamp("import_date"));
+                    r.setExportDate(rs.getTimestamp("export_date"));  // null if not exported
                     list.add(r);
                 }
             }
@@ -139,14 +135,5 @@ public class ViewImeiDAO {
         }
 
         return list;
-    }
-
-    private void bind(PreparedStatement ps, List<Object> params) throws SQLException {
-        int idx = 1;
-        for (Object o : params) {
-            if (o instanceof Long) ps.setLong(idx++, (Long) o);
-            else if (o instanceof Integer) ps.setInt(idx++, (Integer) o);
-            else ps.setString(idx++, String.valueOf(o));
-        }
     }
 }

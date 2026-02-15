@@ -1,23 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dal;
 
-/**
- *
- * @author Admin
- */
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.List;
-import java.sql.Types; 
-
+import java.sql.*;
+import java.util.*;
 
 public class ImportReceiptDAO {
 
@@ -36,39 +20,47 @@ public class ImportReceiptDAO {
         return prefix + String.format("%04d", count + 1);
     }
 
-    // ✅ supplierId dùng Long (nullable)
-    public long insertDraftReceipt(Connection con, String importCode, Long supplierId,
-                                  Timestamp receiptDate, String note, int createdBy) throws SQLException {
+    public long insertReceipt(Connection con,
+                          String importCode,
+                          Long supplierId,
+                          Timestamp receiptDate,
+                          String note,
+                          int createdBy,
+                          String status) throws Exception {
 
-        String sql = "INSERT INTO import_receipts(import_code, supplier_id, status, receipt_date, note, created_by) " +
-                     "VALUES(?, ?, 'DRAFT', ?, ?, ?)";
+    String sql = "INSERT INTO import_receipts(import_code, supplier_id, status, receipt_date, note, created_by) "
+               + "VALUES(?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, importCode);
+    try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        ps.setString(1, importCode);
 
-            if (supplierId == null) ps.setNull(2, Types.BIGINT);
-else ps.setLong(2, supplierId);
+        if (supplierId == null) ps.setNull(2, java.sql.Types.BIGINT);
+        else ps.setLong(2, supplierId);
 
+        ps.setString(3, status);
+        ps.setTimestamp(4, receiptDate);
+        ps.setString(5, (note == null || note.isBlank()) ? null : note.trim());
+        ps.setInt(6, createdBy);
 
-            ps.setTimestamp(3, receiptDate);
-            ps.setString(4, (note == null || note.isBlank()) ? null : note.trim());
-            ps.setInt(5, createdBy);
-            ps.executeUpdate();
-
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) return rs.getLong(1);
-            }
+        ps.executeUpdate();
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (rs.next()) return rs.getLong(1);
         }
-        throw new SQLException("Cannot insert import_receipts");
     }
+    throw new Exception("Cannot insert import_receipts");
+}
 
-    public long insertLine(Connection con, long importId, long productId, long skuId, int qty) throws SQLException {
-        String sql = "INSERT INTO import_receipt_lines(import_id, product_id, sku_id, qty, unit_price) VALUES(?, ?, ?, ?, 0)";
+    // ✅ Updated: Thêm parameter itemNote
+    public long insertLine(Connection con, long importId, long productId, long skuId, int qty, String itemNote) throws SQLException {
+        String sql = "INSERT INTO import_receipt_lines(import_id, product_id, sku_id, qty, unit_price, item_note) "
+                   + "VALUES(?, ?, ?, ?, 0, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, importId);
             ps.setLong(2, productId);
             ps.setLong(3, skuId);
             ps.setInt(4, qty);
+            ps.setString(5, (itemNote == null || itemNote.isBlank()) ? null : itemNote.trim());
+
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
                 if (rs.next()) return rs.getLong(1);
