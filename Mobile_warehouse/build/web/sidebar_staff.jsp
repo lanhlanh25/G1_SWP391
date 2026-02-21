@@ -8,9 +8,12 @@
     <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
 
     <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
+    <li><a href="<%=ctx%>/import-receipt-list">View Import Receipt List</a></li>
 
-    <!-- ✅ VIEW LIST -->
-   <li><a href="<%=ctx%>/import-receipt-list">View Import Receipt List</a></li>
+    <li><a href="<%=ctx%>/home?p=export-request-listt">View Export Request List</a></li>
+    <li><a href="<%=ctx%>/home?p=create-export-receipt">Create Export Receipt</a></li>
+
+<li><a href="<%=ctx%>/home?p=export-receipt-list">View Export Receipt List</a></li>
 
 
     <li><a href="<%=ctx%>/inventory">Inventory Management</a></li>
