@@ -16,6 +16,16 @@ public class ImportReceiptLineDetail {
     private String imeiText;       // already formatted with new lines
     private String itemNote;
     private String createdByName;
+    private int inStock;
+
+    public int getInStock() {
+        return inStock;
+    }
+
+    public void setInStock(int inStock) {
+        this.inStock = inStock;
+    }
+
 
     public long getLineId() { return lineId; }
     public void setLineId(long lineId) { this.lineId = lineId; }

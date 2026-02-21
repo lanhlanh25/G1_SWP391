@@ -2,6 +2,8 @@ package dal;
 
 import java.sql.*;
 import java.util.*;
+import model.ImportReceiptDetail;
+import model.ImportReceiptLineDetail;
 
 public class ImportReceiptDAO {
 
@@ -113,4 +115,124 @@ public class ImportReceiptDAO {
         }
         throw new SQLException("SKU not found: " + skuCode);
     }
+    // ===== PDF/DETAIL QUERIES =====
+public ImportReceiptDetail getDetailHeader(Connection con, long importId) throws SQLException {
+    String sql = """
+        SELECT ir.import_id, ir.import_code, ir.receipt_date, ir.note, ir.status,
+               s.supplier_name,
+               u.full_name AS created_by_name
+        FROM import_receipts ir
+        JOIN suppliers s ON s.supplier_id = ir.supplier_id
+        JOIN users u ON u.user_id = ir.created_by
+        WHERE ir.import_id = ?
+    """;
+
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setLong(1, importId);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (!rs.next()) return null;
+
+            ImportReceiptDetail d = new ImportReceiptDetail();
+            d.setImportId(rs.getLong("import_id"));
+            d.setImportCode(rs.getString("import_code"));
+            d.setReceiptDate(rs.getTimestamp("receipt_date"));
+            d.setSupplierName(rs.getString("supplier_name"));
+            d.setCreatedByName(rs.getString("created_by_name"));
+            d.setNote(rs.getString("note"));
+            d.setStatus(rs.getString("status"));
+            return d;
+        }
+    }
+}
+
+public List<ImportReceiptLineDetail> getDetailLines(Connection con, long importId) throws SQLException {
+    String sql = """
+        SELECT irl.line_id, irl.qty, irl.item_note,
+               p.product_code,
+               sk.sku_code,
+               sk.sku_id
+        FROM import_receipt_lines irl
+        JOIN products p ON p.product_id = irl.product_id
+        JOIN product_skus sk ON sk.sku_id = irl.sku_id
+        WHERE irl.import_id = ?
+        ORDER BY irl.line_id ASC
+    """;
+
+    List<ImportReceiptLineDetail> out = new ArrayList<>();
+
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setLong(1, importId);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                long lineId = rs.getLong("line_id");
+                long skuId = rs.getLong("sku_id");
+
+                ImportReceiptLineDetail it = new ImportReceiptLineDetail();
+                it.setLineId(lineId);
+                it.setQty(rs.getInt("qty"));
+                it.setItemNote(rs.getString("item_note"));
+                it.setProductCode(rs.getString("product_code"));
+                it.setSkuCode(rs.getString("sku_code"));
+
+                // ✅ In Stock = inventory_balance.qty_on_hand
+                it.setInStock(getInStockBySku(con, skuId));
+
+                // ✅ IMEI text (2 imei / line)
+                List<String> imeis = getImeisByLine(con, lineId);
+                it.setImeiText(formatImeis(imeis, 2));
+
+                out.add(it);
+            }
+        }
+    }
+    return out;
+}
+
+private int getInStockBySku(Connection con, long skuId) throws SQLException {
+    String sql = "SELECT qty_on_hand FROM inventory_balance WHERE sku_id=? LIMIT 1";
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setLong(1, skuId);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt("qty_on_hand");
+        }
+    }
+    return 0;
+}
+
+private List<String> getImeisByLine(Connection con, long lineId) throws SQLException {
+    String sql = """
+        SELECT imei
+        FROM import_receipt_units
+        WHERE line_id = ?
+        ORDER BY iru_id ASC
+    """;
+    List<String> out = new ArrayList<>();
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setLong(1, lineId);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) out.add(rs.getString("imei"));
+        }
+    }
+    return out;
+}
+
+private static String formatImeis(List<String> imeis, int perLine) {
+    if (imeis == null || imeis.isEmpty()) return "";
+
+    List<String> cleaned = new ArrayList<>();
+    for (String s : imeis) {
+        if (s == null) continue;
+        s = s.trim();
+        if (!s.isEmpty()) cleaned.add(s);
+    }
+    if (cleaned.isEmpty()) return "";
+
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < cleaned.size(); i += perLine) {
+        int end = Math.min(i + perLine, cleaned.size());
+        if (sb.length() > 0) sb.append("\n");
+        sb.append(String.join(", ", cleaned.subList(i, end)));
+    }
+    return sb.toString();
+}
 }
