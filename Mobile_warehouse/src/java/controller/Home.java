@@ -8,7 +8,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Date;               // ✅ dùng java.sql.Date
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -41,7 +41,6 @@ public class Home extends HttpServlet {
         String p = request.getParameter("p");
         if (p == null || p.isBlank()) p = "dashboard";
 
-        // ✅ role
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
             role = UserDAO.getRoleNameByUserId(u.getUserId());
@@ -83,9 +82,6 @@ public class Home extends HttpServlet {
 
         switch (p) {
 
-            // =========================
-            // ✅ CREATE IMPORT RECEIPT (LOAD DATA FOR create_import_receipt.jsp)
-            // =========================
             case "create-import-receipt": {
                 SupplierDAO sdao = new SupplierDAO();
                 ProductDAO pdao = new ProductDAO();
@@ -117,9 +113,6 @@ public class Home extends HttpServlet {
                 break;
             }
 
-            // =========================
-            // USER
-            // =========================
             case "user-list":
             case "user-toggle": {
                 String q = request.getParameter("q");
@@ -172,9 +165,6 @@ public class Home extends HttpServlet {
                 break;
             }
 
-            // =========================
-            // ROLE
-            // =========================
             case "role-list": {
                 String keyword = request.getParameter("q");
                 String st = request.getParameter("status");
@@ -232,9 +222,6 @@ public class Home extends HttpServlet {
                 break;
             }
 
-            // =========================
-            // PRODUCT
-            // =========================
             case "sku-add": {
                 ProductDAO dao = new ProductDAO();
                 request.setAttribute("products", dao.getAll());
@@ -511,9 +498,6 @@ public class Home extends HttpServlet {
                 break;
             }
 
-            // =========================
-            // SUPPLIER (đầy đủ các case bạn đưa)
-            // =========================
             case "view_supplier": {
                 SupplierDAO supplierDAO = new SupplierDAO();
 
@@ -728,6 +712,72 @@ public class Home extends HttpServlet {
                 break;
             }
 
+            // ========================================
+            // ✅ REQUEST DELETE IMPORT RECEIPT
+            // ========================================
+            case "request-delete-import-receipt": {
+                String importIdStr = request.getParameter("id");
+                if (importIdStr == null || importIdStr.trim().isEmpty()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=import-receipt-list&err=Missing+import+ID");
+                    return;
+                }
+                
+                long importId = Long.parseLong(importIdStr.trim());
+                
+                ImportReceiptDeleteRequestDAO dao = new ImportReceiptDeleteRequestDAO();
+                ImportReceiptDeleteRequest importInfo = dao.getImportInfoForRequest(importId);
+                
+                if (importInfo == null) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=import-receipt-list&err=Import+receipt+not+found");
+                    return;
+                }
+                
+                request.setAttribute("importInfo", importInfo);
+                request.setAttribute("currentUser", authUser.getFullName());
+                break;
+            }
+
+            case "request-delete-import-receipt-list": {
+                String importCodeSearch = request.getParameter("q");
+                String transactionTimeStr = request.getParameter("transactionTime");
+                
+                java.sql.Date searchDate = null;
+                if (transactionTimeStr != null && !transactionTimeStr.trim().isEmpty()) {
+                    try {
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                        sdf.setLenient(false);
+                        java.util.Date utilDate = sdf.parse(transactionTimeStr.trim());
+                        searchDate = new java.sql.Date(utilDate.getTime());
+                    } catch (Exception e) {
+                        // Invalid date format, ignore
+                    }
+                }
+                
+                int page = parseInt(request.getParameter("page"), 1);
+                if (page < 1) page = 1;
+                int pageSize = 10;
+                
+                ImportReceiptDeleteRequestDAO dao = new ImportReceiptDeleteRequestDAO();
+                
+                int totalItems = dao.countRequests(importCodeSearch, searchDate);
+                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+                if (totalPages < 1) totalPages = 1;
+                if (page > totalPages) page = totalPages;
+                
+                List<ImportReceiptDeleteRequest> requests = dao.listRequests(
+                    importCodeSearch, searchDate, page, pageSize
+                );
+                
+                request.setAttribute("requests", requests);
+                request.setAttribute("q", importCodeSearch);
+                request.setAttribute("transactionTime", transactionTimeStr);
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("totalItems", totalItems);
+                break;
+            }
+
             default:
                 break;
         }
@@ -816,9 +866,10 @@ public class Home extends HttpServlet {
                     case "supplier_inactive": return "inactive_supplier.jsp";
                     case "view_history": return "supplier_history.jsp";
 
-                    // ✅ nếu bạn muốn manager cũng xem được trang create import:
                     case "create-import-receipt": return "create_import_receipt.jsp";
-
+                    case "import-receipt-list": return "import_receipt_list.jsp";
+                    case "request-delete-import-receipt-list": return "request_delete_import_receipt_list.jsp";
+                    
                     case "my-profile":
                     case "profile": return "view_profile.jsp";
                     case "change-password":
@@ -841,10 +892,10 @@ public class Home extends HttpServlet {
             default: // STAFF
                 switch (p) {
                     case "dashboard": return "staff_dashboard.jsp";
-
-                    // ✅ quan trọng: route đúng cho sidebar staff
                     case "create-import-receipt": return "create_import_receipt.jsp";
-
+                    case "import-receipt-list": return "import_receipt_list.jsp";
+                    case "request-delete-import-receipt": return "request_delete_import_receipt.jsp";
+                    
                     case "view_supplier": return "supplier_list.jsp";
                     case "supplier_detail": return "supplier_detail.jsp";
 
@@ -853,7 +904,6 @@ public class Home extends HttpServlet {
 
                     case "my-profile":
                     case "profile": return "view_profile.jsp";
-
                     case "change-password":
                     case "change_password": return "change_password.jsp";
 
@@ -862,4 +912,3 @@ public class Home extends HttpServlet {
         }
     }
 }
-

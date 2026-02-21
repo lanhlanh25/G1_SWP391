@@ -1,9 +1,8 @@
-<%-- 
-    Document   : view_imei_list
---%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <style>
   .wrap{ padding:10px; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif; }
@@ -11,17 +10,30 @@
   .btn{ padding:6px 14px; border:1px solid #333; background:#eee; text-decoration:none; color:#000; display:inline-block; border-radius:6px; }
   .title{ margin:0 0 0 10px; font-weight:700; }
 
-  .cards{ margin-top:10px; display:flex; gap:12px; flex-wrap:wrap; }
-  .card{ width:120px; height:55px; background:#3a7bd5; border:2px solid #1d4f91; padding:6px 8px; font-size:12px; color:#fff; border-radius:8px; }
-  .card .v{ font-weight:800; font-size:14px; margin-top:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  /* ✅ Updated cards layout for full SKU info */
+  .cards{ margin-top:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
+  .card{ 
+    background:#3a7bd5; 
+    border:2px solid #1d4f91; 
+    padding:8px 10px; 
+    font-size:12px; 
+    color:#fff; 
+    border-radius:8px;
+    min-height:50px;
+  }
+  .card .label{ font-size:11px; opacity:0.9; }
+  .card .value{ 
+    font-weight:800; 
+    font-size:14px; 
+    margin-top:4px; 
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
 
   .box{ margin-top:10px; border:2px solid #3b5db7; background:#fff; padding:10px; border-radius:10px; }
   table{ width:100%; border-collapse:collapse; margin-top:10px; }
   th,td{ border:1px solid #333; padding:6px; font-size:12px; }
   th{ background:#ddd; }
-
-  .st-active{ color:#0a8a0a; font-weight:700; }
-  .st-inactive{ color:#d00000; font-weight:700; }
 
   .paging { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap; }
   .pg {
@@ -44,12 +56,30 @@
   </div>
 
   <div class="cards">
-    <div class="card"><div>SKU</div><div class="v">${skuCode}</div></div>
-    <div class="card"><div>Product Code</div><div class="v">${productCode}</div></div>
-    <div class="card" style="width:170px;"><div>Product model</div><div class="v">${productModel}</div></div>
-    <div class="card"><div>Color</div><div class="v">${color}</div></div>
-    <div class="card"><div>Ram</div><div class="v">${ramGb} GB</div></div>
-    <div class="card"><div>Storage</div><div class="v">${storageGb} GB</div></div>
+    <div class="card">
+      <div class="label">SKU Code</div>
+      <div class="value">${skuCode}</div>
+    </div>
+    <div class="card">
+      <div class="label">Product Code</div>
+      <div class="value">${productCode}</div>
+    </div>
+    <div class="card">
+      <div class="label">Product Model</div>
+      <div class="value">${productModel}</div>
+    </div>
+    <div class="card">
+      <div class="label">Color</div>
+      <div class="value">${color}</div>
+    </div>
+    <div class="card">
+      <div class="label">RAM</div>
+      <div class="value">${ramGb} GB</div>
+    </div>
+    <div class="card">
+      <div class="label">Storage</div>
+      <div class="value">${storageGb} GB</div>
+    </div>
   </div>
 
   <div class="box">
@@ -60,14 +90,8 @@
       <input type="hidden" name="page" value="1"/>
       <input type="hidden" name="pageSize" value="${pageSize}"/>
 
-      <input type="text" name="q" value="${q}" placeholder="IMEI..."
+      <input type="text" name="q" value="${q}" placeholder="Search IMEI..."
              style="width:240px; height:28px; padding:0 8px;"/>
-
-      <select name="status" style="height:30px; margin-left:14px;">
-        <option value="" ${empty status ? "selected" : ""}>Status</option>
-        <option value="ACTIVE" ${status=="ACTIVE" ? "selected" : ""}>Active</option>
-        <option value="INACTIVE" ${status=="INACTIVE" ? "selected" : ""}>Inactive</option>
-      </select>
 
       <button class="btn" type="submit" style="margin-left:12px;">Search</button>
       <a class="btn" href="${pageContext.request.contextPath}/imei-list?skuId=${skuId}">Reset</a>
@@ -76,8 +100,9 @@
     <table>
       <thead>
         <tr>
-          <th style="width:60%;">IMEI</th>
-          <th>Status</th>
+          <th style="width:40%;">IMEI</th>
+          <th style="width:30%;">Import Date</th>
+          <th style="width:30%;">Export Date</th>
         </tr>
       </thead>
 
@@ -85,23 +110,34 @@
         <c:forEach var="r" items="${imeiRows}">
           <tr>
             <td style="text-align:center;">${r.imei}</td>
+            
             <td style="text-align:center;">
               <c:choose>
-                <c:when test="${r.status == 'ACTIVE'}"><span class="st-active">Active</span></c:when>
-                <c:when test="${r.status == 'INACTIVE'}"><span class="st-inactive">Inactive</span></c:when>
-                <c:otherwise><span>${r.status}</span></c:otherwise>
+                <c:when test="${not empty r.importDate}">
+                  <fmt:formatDate value="${r.importDate}" pattern="dd/MM/yyyy HH:mm"/>
+                </c:when>
+                <c:otherwise>-</c:otherwise>
+              </c:choose>
+            </td>
+            
+            <td style="text-align:center;">
+              <c:choose>
+                <c:when test="${not empty r.exportDate}">
+                  <fmt:formatDate value="${r.exportDate}" pattern="dd/MM/yyyy HH:mm"/>
+                </c:when>
+                <c:otherwise><span style="color:#999;">-</span></c:otherwise>
               </c:choose>
             </td>
           </tr>
         </c:forEach>
 
         <c:if test="${empty imeiRows}">
-          <tr><td colspan="2" style="text-align:center;">No data</td></tr>
+          <tr><td colspan="3" style="text-align:center;">No data</td></tr>
         </c:if>
       </tbody>
     </table>
 
-    <!-- paging window -->
+    <%-- Paging window --%>
     <c:choose>
       <c:when test="${totalPages <= 3}">
         <c:set var="startPage" value="1"/>
@@ -128,7 +164,6 @@
         <c:url var="prevUrl" value="/imei-list">
           <c:param name="skuId" value="${skuId}"/>
           <c:param name="q" value="${q}"/>
-          <c:param name="status" value="${status}"/>
           <c:param name="pageSize" value="${pageSize}"/>
           <c:param name="page" value="${pageNumber-1}"/>
         </c:url>
@@ -143,7 +178,6 @@
               <c:url var="pageUrl" value="/imei-list">
                 <c:param name="skuId" value="${skuId}"/>
                 <c:param name="q" value="${q}"/>
-                <c:param name="status" value="${status}"/>
                 <c:param name="pageSize" value="${pageSize}"/>
                 <c:param name="page" value="${i}"/>
               </c:url>
@@ -155,7 +189,6 @@
         <c:url var="nextUrl" value="/imei-list">
           <c:param name="skuId" value="${skuId}"/>
           <c:param name="q" value="${q}"/>
-          <c:param name="status" value="${status}"/>
           <c:param name="pageSize" value="${pageSize}"/>
           <c:param name="page" value="${pageNumber+1}"/>
         </c:url>
@@ -164,7 +197,7 @@
 
       <div>
         Show
-        <select onchange="location.href='${pageContext.request.contextPath}/imei-list?skuId=${skuId}&q=${q}&status=${status}&page=1&pageSize='+this.value;">
+        <select onchange="location.href='${pageContext.request.contextPath}/imei-list?skuId=${skuId}&q=${q}&page=1&pageSize='+this.value;">
           <option value="10" ${pageSize==10 ? "selected" : ""}>10 Row</option>
           <option value="20" ${pageSize==20 ? "selected" : ""}>20 Row</option>
         </select>
