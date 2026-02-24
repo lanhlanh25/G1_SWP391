@@ -136,7 +136,7 @@
                 </tr>
             </c:if>
 
-            <c:forEach var="r" items="${list}">
+            <c:forEach var="r" items="${erList}">
                 <tr>
                     <td>${fn:escapeXml(r.requestCode)}</td>
                     <td>${fn:escapeXml(r.createdByName)}</td>

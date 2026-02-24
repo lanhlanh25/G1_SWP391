@@ -181,15 +181,19 @@ public class Home extends HttpServlet {
                     if (fromRaw != null && !fromRaw.isBlank()) {
                         fromDate = java.sql.Date.valueOf(fromRaw.trim());
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
                 try {
                     if (toRaw != null && !toRaw.isBlank()) {
                         toDate = java.sql.Date.valueOf(toRaw.trim());
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
 
                 // normalize for UI
-                if (status == null || status.isBlank()) status = "all";
+                if (status == null || status.isBlank()) {
+                    status = "all";
+                }
                 status = status.trim().toLowerCase();
 
                 // map for DB (nếu DB lưu PENDING/COMPLETED/CANCELLED)
@@ -199,14 +203,20 @@ public class Home extends HttpServlet {
                 }
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
 
                 int pageSize = 10;
 
                 int totalItems = dao.countList(q, statusForDao, fromDate, toDate);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) totalPages = 1;
-                if (page > totalPages) page = totalPages;
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
 
                 List<ExportReceiptListItem> rows = dao.list(q, statusForDao, fromDate, toDate, page, pageSize);
 
@@ -847,12 +857,14 @@ public class Home extends HttpServlet {
                     if (fromRaw != null && !fromRaw.isBlank()) {
                         fromDate = java.sql.Date.valueOf(fromRaw.trim());
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
                 try {
                     if (toRaw != null && !toRaw.isBlank()) {
                         toDate = java.sql.Date.valueOf(toRaw.trim());
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
 
                 int page = parseInt(request.getParameter("page"), 1);
                 if (page < 1) {
@@ -904,6 +916,15 @@ public class Home extends HttpServlet {
 // EXPORT REQUEST (MANAGER + SALE)
 // =========================
             case "export-request-list": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !(roleName.equalsIgnoreCase("MANAGER")
+                        || roleName.equalsIgnoreCase("SALE")
+                        || roleName.equalsIgnoreCase("STAFF"))) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                Integer userId = (Integer) request.getSession().getAttribute("userId");
                 ExportRequestDAO dao = new ExportRequestDAO();
 
                 String q = request.getParameter("q");
@@ -924,20 +945,27 @@ public class Home extends HttpServlet {
                 } catch (Exception ignore) {
                 }
 
-                java.sql.Date reqFrom = reqDate, reqTo = reqDate;
-                java.sql.Date expFrom = expDate, expTo = expDate;
-
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) {
-                    page = 1;
-                }
-
                 int pageSize = 10;
 
-                int totalItems = dao.count(q, reqFrom, reqTo, expFrom, expTo);
+                boolean onlyMine = roleName.equalsIgnoreCase("SALE");
+                Long requestedBy = null;
+                if (onlyMine) {
+                    if (userId == null) {
+                        response.sendRedirect(request.getContextPath() + "/login.jsp");
+                        return;
+                    }
+                    requestedBy = userId.longValue();
+                }
+
+                int totalItems = dao.count(q, reqDate, expDate, requestedBy);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
                 if (totalPages < 1) {
                     totalPages = 1;
+                }
+
+                if (page < 1) {
+                    page = 1;
                 }
                 if (page > totalPages) {
                     page = totalPages;
@@ -945,9 +973,9 @@ public class Home extends HttpServlet {
 
                 int offset = (page - 1) * pageSize;
 
-                List<ExportRequest> list = dao.list(q, reqFrom, reqTo, expFrom, expTo, offset, pageSize);
+                List<ExportRequest> list = dao.list(q, reqDate, expDate, requestedBy, offset, pageSize);
 
-                request.setAttribute("list", list);
+                request.setAttribute("erList", list);
                 request.setAttribute("q", q);
                 request.setAttribute("reqDate", reqDateRaw);
                 request.setAttribute("expDate", expDateRaw);
@@ -958,63 +986,72 @@ public class Home extends HttpServlet {
                 request.setAttribute("totalPages", totalPages);
                 break;
             }
-
             case "export-request-detail": {
-                String idRaw = request.getParameter("id");
-                if (idRaw == null || idRaw.isBlank()) {
-                    response.sendRedirect(request.getContextPath() + "/home?p=export-request-list&msg=Missing request id");
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !(roleName.equalsIgnoreCase("MANAGER")
+                        || roleName.equalsIgnoreCase("SALE")
+                        || roleName.equalsIgnoreCase("STAFF"))) {
+                    response.sendError(403, "Forbidden");
                     return;
                 }
 
+                String idRaw = request.getParameter("id");
+                if (idRaw == null || idRaw.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=export-request-list&msg=Missing id");
+                    return;
+                }
                 long requestId;
                 try {
                     requestId = Long.parseLong(idRaw.trim());
                 } catch (Exception e) {
-                    response.sendRedirect(request.getContextPath() + "/home?p=export-request-list&msg=Invalid request id");
+                    response.sendRedirect(request.getContextPath() + "/home?p=export-request-list&msg=Invalid id");
                     return;
                 }
 
                 ExportRequestDAO dao = new ExportRequestDAO();
+                ExportRequest header = dao.getHeader(requestId);
+                if (header == null) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=export-request-list&msg=Request not found");
+                    return;
+                }
 
-                ExportRequest header = dao.getHeader(requestId);     // ✅ MUST
+                // ✅ Sale chỉ xem request của mình
+                if (roleName.equalsIgnoreCase("SALE")) {
+                    Integer userId = (Integer) request.getSession().getAttribute("userId");
+                    if (userId == null || header.getCreatedBy() != userId.longValue()) {
+                        response.sendError(403, "Forbidden");
+                        return;
+                    }
+                }
+
                 List<ExportRequestItem> items = dao.listItems(requestId);
 
                 request.setAttribute("erHeader", header);
                 request.setAttribute("erItems", items);
-
                 break;
             }
             case "create-export-request": {
-                // Load dropdown
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !roleName.equalsIgnoreCase("SALE")) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
                 ProductDAO pdao = new ProductDAO();
                 ProductSkuDAO skdao = new ProductSkuDAO();
-                request.setAttribute("erProducts", pdao.listForExportRequest());        // hoặc listActive()
-                request.setAttribute("erSkus", skdao.listActive());           // hoặc listActive()
-
-                // Generate Request Code (auto)
                 ExportRequestCreateDAO dao = new ExportRequestCreateDAO();
+
+                request.setAttribute("erProducts", pdao.listForExportRequest()); // ✅ List<Product>
+                request.setAttribute("erSkus", skdao.listActive());
+
                 try (Connection con = DBContext.getConnection()) {
-                    String code = dao.generateRequestCode(con);           // ER-YYYYMMDD-0001 (4 digits)
-                    request.setAttribute("erCreateCode", code);
+                    request.setAttribute("erCreateCode", dao.generateRequestCode(con));
                 }
 
-                // Request Date default (auto now)
-                String nowUi = LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI);
-                request.setAttribute("erRequestDateDefault", nowUi);
-
-                // Created By name (auto sale name)
-                String createdByName = "Sale";
-                HttpSession session = request.getSession(false);
-                if (session != null && session.getAttribute("fullName") != null) {
-                    createdByName = String.valueOf(session.getAttribute("fullName"));
-                } else if (authUser != null && authUser.getFullName() != null) {
-                    createdByName = authUser.getFullName();
-                }
+                String createdByName = String.valueOf(request.getSession().getAttribute("fullName"));
                 request.setAttribute("erCreatedByName", createdByName);
 
-                // giữ lại old values nếu validation fail
-                request.setAttribute("erOldExpected", request.getParameter("expected_export_date"));
-                request.setAttribute("erOldNote", request.getParameter("note"));
+                request.setAttribute("erRequestDateDefault", LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
                 break;
             }
             default:
@@ -1138,12 +1175,15 @@ public class Home extends HttpServlet {
                     case "request-delete-import-receipt-list":
                         return "request_delete_import_receipt_list.jsp";
 
-                        
+                    case "export-request-list":
+                        return "view_export_request_list.jsp";
+                    case "export-request-detail":
+                        return "view_export_request_detail.jsp";
                     case "export-receipt-list":
                         return "export_receipt_list.jsp";
                     case "export-receipt-detail":
                         return "export_receipt_detail.jsp";
-                        
+
                     case "my-profile":
                     case "profile":
                         return "view_profile.jsp";
@@ -1172,9 +1212,9 @@ public class Home extends HttpServlet {
                     case "create-export-request":
                         return "create_export_request.jsp";
                     case "export-request-list":
-                        return "export_request_list.jsp";
+                        return "view_export_request_list.jsp";
                     case "export-request-detail":
-                        return "export_request_detail.jsp";
+                        return "view_export_request_detail.jsp";
                     case "export-request-edit":
                         return "export_request_edit.jsp";
 
@@ -1193,9 +1233,12 @@ public class Home extends HttpServlet {
                         return "import_receipt_list.jsp";
                     case "request-delete-import-receipt":
                         return "request_delete_import_receipt.jsp";
-
+                    case "create-export-request":
+                        return "create_export_request.jsp";
                     case "export-request-list":
-                        return "export_request_list.jsp";
+                        return "view_export_request_list.jsp";
+                    case "export-request-detail":
+                        return "view_export_request_detail.jsp";
                     case "export-receipt-list":
                         return "export_receipt_list.jsp";
                     case "create-export-receipt":

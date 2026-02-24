@@ -41,9 +41,6 @@ public class ExportRequestListServlet extends HttpServlet {
         Date expDate = parseDate(req.getParameter("expDate"));
 
         // (UI của bạn chỉ có 1 date cho mỗi loại => mình filter exact date)
-        Date reqFrom = reqDate, reqTo = reqDate;
-        Date expFrom = expDate, expTo = expDate;
-
         int page = parseInt(req.getParameter("page"), 1);
         if (page < 1) {
             page = 1;
@@ -53,8 +50,18 @@ public class ExportRequestListServlet extends HttpServlet {
 
         try {
             ExportRequestDAO dao = new ExportRequestDAO();
+            String roleName = (String) req.getSession().getAttribute("roleName");
+            Integer userId = (Integer) req.getSession().getAttribute("userId");
 
-            int totalItems = dao.count(q, reqFrom, reqTo, expFrom, expTo);
+            Long requestedBy = null;
+            if (roleName != null && roleName.equalsIgnoreCase("SALE")) {
+                if (userId == null) {
+                    resp.sendRedirect(req.getContextPath() + "/login.jsp");
+                    return;
+                }
+                requestedBy = userId.longValue();
+            }
+            int totalItems = dao.count(q, reqDate, expDate, requestedBy);
             int totalPages = (int) Math.ceil(totalItems * 1.0 / PAGE_SIZE);
 
             if (totalPages == 0) {
@@ -65,7 +72,7 @@ public class ExportRequestListServlet extends HttpServlet {
                 offset = (page - 1) * PAGE_SIZE;
             }
 
-            List<ExportRequest> list = dao.list(q, reqFrom, reqTo, expFrom, expTo, offset, PAGE_SIZE);
+            List<ExportRequest> list = dao.list(q, reqDate, expDate, requestedBy, offset, PAGE_SIZE);
 
             req.setAttribute("list", list);
             req.setAttribute("q", q);
@@ -84,12 +91,12 @@ public class ExportRequestListServlet extends HttpServlet {
         }
     }
 
-    private Date parseDate(String s) {
-        if (s == null || s.trim().isEmpty()) {
-            return null;
-        }
+    private java.sql.Date parseDate(String s) {
         try {
-            return (Date) DF.parse(s.trim());
+            if (s == null || s.trim().isEmpty()) {
+                return null;
+            }
+            return java.sql.Date.valueOf(s.trim()); // yyyy-MM-dd
         } catch (Exception e) {
             return null;
         }
