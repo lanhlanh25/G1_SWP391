@@ -1026,6 +1026,12 @@ public class Home extends HttpServlet {
                     case "request-delete-import-receipt-list":
                         return "request_delete_import_receipt_list.jsp";
 
+                        
+                    case "export-receipt-list":
+                        return "export_receipt_list.jsp";
+                    case "export-receipt-detail":
+                        return "export_receipt_detail.jsp";
+                        
                     case "my-profile":
                     case "profile":
                         return "view_profile.jsp";
