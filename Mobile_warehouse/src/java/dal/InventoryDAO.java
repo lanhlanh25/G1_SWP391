@@ -260,4 +260,16 @@ public class InventoryDAO {
         try { return Long.parseLong(s.trim()); }
         catch (Exception e) { return -1; }
     }
+    public Map<Long, Integer> mapQtyOnHand() throws Exception {
+        String sql = "SELECT sku_id, qty_on_hand FROM inventory_balance";
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            Map<Long, Integer> map = new HashMap<>();
+            while (rs.next()) {
+                map.put(rs.getLong("sku_id"), rs.getInt("qty_on_hand"));
+            }
+            return map;
+        }
+    }
 }

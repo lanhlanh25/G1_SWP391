@@ -9,41 +9,34 @@ package model;
  * @author Admin
  */
 
-public class ExportReceiptListItem {
+
+public class ExportReceiptDetailHeader {
     private long exportId;
     private String exportCode;
-    private String requestCode;
-    private String createdByName;
     private String exportDateUi;
-    private int totalQty;
+    private String requestCode;
+    private String note;
     private String status;
-    private int totalQuantity;
+    private String createdByName;
 
-    public int getTotalQuantity() {
-        return totalQuantity;
-    }
-
-    public void setTotalQuantity(int totalQuantity) {
-        this.totalQuantity = totalQuantity;
-    }
     public long getExportId() { return exportId; }
     public void setExportId(long exportId) { this.exportId = exportId; }
 
     public String getExportCode() { return exportCode; }
     public void setExportCode(String exportCode) { this.exportCode = exportCode; }
 
-    public String getRequestCode() { return requestCode; }
-    public void setRequestCode(String requestCode) { this.requestCode = requestCode; }
-
-    public String getCreatedByName() { return createdByName; }
-    public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
-
     public String getExportDateUi() { return exportDateUi; }
     public void setExportDateUi(String exportDateUi) { this.exportDateUi = exportDateUi; }
 
-    public int getTotalQty() { return totalQty; }
-    public void setTotalQty(int totalQty) { this.totalQty = totalQty; }
+    public String getRequestCode() { return requestCode; }
+    public void setRequestCode(String requestCode) { this.requestCode = requestCode; }
+
+    public String getNote() { return note; }
+    public void setNote(String note) { this.note = note; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
+    public String getCreatedByName() { return createdByName; }
+    public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
 }
