@@ -4,8 +4,8 @@ import java.sql.Timestamp;
 
 public class ImeiRow {
     private String imei;
-    private Timestamp importDate;   // From import_receipts.receipt_date
-    private Timestamp exportDate;   // From export_receipts.export_date (null if not exported)
+    private Timestamp importDate;   
+    private Timestamp exportDate;   
     
     public ImeiRow() {}
     

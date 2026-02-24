@@ -1,19 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
 
-/**
- *
- * @author Admin
- */
 public class ImportReceiptLineDetail {
     private long lineId;
-    private String productCode;
-    private String skuCode;
+    private String productName; 
+    private String color;      
+    private int storageGb;      
+    private int ramGb;         
     private int qty;
-    private String imeiText;       // already formatted with new lines
+    private String imeiText;    
     private String itemNote;
     private String createdByName;
     private int inStock;
@@ -30,11 +24,17 @@ public class ImportReceiptLineDetail {
     public long getLineId() { return lineId; }
     public void setLineId(long lineId) { this.lineId = lineId; }
 
-    public String getProductCode() { return productCode; }
-    public void setProductCode(String productCode) { this.productCode = productCode; }
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
 
-    public String getSkuCode() { return skuCode; }
-    public void setSkuCode(String skuCode) { this.skuCode = skuCode; }
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
+
+    public int getStorageGb() { return storageGb; }
+    public void setStorageGb(int storageGb) { this.storageGb = storageGb; }
+
+    public int getRamGb() { return ramGb; }
+    public void setRamGb(int ramGb) { this.ramGb = ramGb; }
 
     public int getQty() { return qty; }
     public void setQty(int qty) { this.qty = qty; }

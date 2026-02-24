@@ -405,6 +405,8 @@ public class Home extends HttpServlet {
                 request.setAttribute("allBrands", brandDAO.list(null, "", "name", "ASC", 1, 1000));
                 break;
             }
+            case "product-detail": {
+                int productId = Integer.parseInt(request.getParameter("id"));
 
             // =========================
             // BRANDS

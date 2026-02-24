@@ -1,6 +1,4 @@
-<%-- 
-    Document   : view_imei_list - UPDATED
---%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -57,7 +55,6 @@
     <h3 class="title">View IMEI List</h3>
   </div>
 
-  <%-- ✅ Updated: Full SKU info display --%>
   <div class="cards">
     <div class="card">
       <div class="label">SKU Code</div>
@@ -100,7 +97,6 @@
       <a class="btn" href="${pageContext.request.contextPath}/imei-list?skuId=${skuId}">Reset</a>
     </form>
 
-    <%-- ✅ Updated table: Removed Status, added Import Date and Export Date --%>
     <table>
       <thead>
         <tr>
@@ -115,7 +111,6 @@
           <tr>
             <td style="text-align:center;">${r.imei}</td>
             
-            <%-- ✅ Import Date --%>
             <td style="text-align:center;">
               <c:choose>
                 <c:when test="${not empty r.importDate}">
@@ -125,7 +120,6 @@
               </c:choose>
             </td>
             
-            <%-- ✅ Export Date (empty if not exported) --%>
             <td style="text-align:center;">
               <c:choose>
                 <c:when test="${not empty r.exportDate}">

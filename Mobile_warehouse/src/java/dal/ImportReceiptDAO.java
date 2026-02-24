@@ -52,7 +52,6 @@ public class ImportReceiptDAO {
     throw new Exception("Cannot insert import_receipts");
 }
 
-    // ✅ Updated: Thêm parameter itemNote
     public long insertLine(Connection con, long importId, long productId, long skuId, int qty, String itemNote) throws SQLException {
         String sql = "INSERT INTO import_receipt_lines(import_id, product_id, sku_id, qty, unit_price, item_note) "
                    + "VALUES(?, ?, ?, ?, 0, ?)";

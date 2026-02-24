@@ -16,7 +16,7 @@ public class ImportReceiptListItem {
     private String supplierName;
     private String createdByName;
     private Timestamp receiptDate;
-    private String status;          // DB status: PENDING / CONFIRMED / CANCELED
+    private String status;          
     private int totalQuantity;
     
     public ImportReceiptListItem() {}
@@ -61,11 +61,11 @@ public class ImportReceiptListItem {
         this.receiptDate = receiptDate;
     }
     
-    public String getStatus() { // DB status
+    public String getStatus() { 
         return status;
     }
     
-    public void setStatus(String status) { // DB status
+    public void setStatus(String status) {
         this.status = status;
     }
     
@@ -77,7 +77,6 @@ public class ImportReceiptListItem {
         this.totalQuantity = totalQuantity;
     }
     
-    // ✅ JSP uses r.statusUi -> calls getStatusUi()
     public String getStatusUi() {
         if (status == null) return "";
         switch (status.toUpperCase()) {
@@ -94,7 +93,6 @@ public class ImportReceiptListItem {
         }
     }
     
-    // ✅ Useful in JSP/controller to check pending
     public boolean isPending() {
         return status != null && 
                ("PENDING".equalsIgnoreCase(status) || "DRAFT".equalsIgnoreCase(status));

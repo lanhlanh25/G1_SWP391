@@ -16,16 +16,13 @@ public class ImportReceiptListDAO {
         }
     }
 
-    // ✅ CASCADING DELETE - Reject all delete requests first, then delete receipt
     public boolean deleteDraft(long importId) throws SQLException {
         String checkSql = "SELECT status FROM import_receipts WHERE import_id=? FOR UPDATE";
         
-        // ✅ Update delete requests to REJECTED (preserve history)
         String rejectRequests = "UPDATE import_receipt_delete_requests " +
                                "SET status='REJECTED', decided_by=NULL, decided_at=NOW() " +
                                "WHERE import_id=? AND status='PENDING'";
         
-        // ✅ Delete in correct order: units -> lines -> receipt
         String delUnits = "DELETE FROM import_receipt_units WHERE line_id IN " +
                          "(SELECT line_id FROM import_receipt_lines WHERE import_id=?)";
         String delLines = "DELETE FROM import_receipt_lines WHERE import_id=?";
@@ -34,7 +31,6 @@ public class ImportReceiptListDAO {
         try (Connection con = openConn()) {
             con.setAutoCommit(false);
 
-            // Check status
             String curStatus;
             try (PreparedStatement ps = con.prepareStatement(checkSql)) {
                 ps.setLong(1, importId);
@@ -47,7 +43,6 @@ public class ImportReceiptListDAO {
                 }
             }
 
-            // ✅ Only allow delete DRAFT or PENDING
             if (curStatus == null) {
                 con.rollback();
                 return false;
@@ -59,25 +54,21 @@ public class ImportReceiptListDAO {
                 return false;
             }
 
-            // ✅ Step 0: Reject all pending delete requests (preserve history)
             try (PreparedStatement ps = con.prepareStatement(rejectRequests)) {
                 ps.setLong(1, importId);
                 ps.executeUpdate();
             }
 
-            // ✅ Step 1: Delete units (IMEIs)
             try (PreparedStatement ps = con.prepareStatement(delUnits)) {
                 ps.setLong(1, importId);
                 ps.executeUpdate();
             }
 
-            // ✅ Step 2: Delete lines
             try (PreparedStatement ps = con.prepareStatement(delLines)) {
                 ps.setLong(1, importId);
                 ps.executeUpdate();
             }
 
-            // ✅ Step 3: Delete receipt
             int affected;
             try (PreparedStatement ps = con.prepareStatement(delReceipt)) {
                 ps.setLong(1, importId);
@@ -89,7 +80,6 @@ public class ImportReceiptListDAO {
         }
     }
 
-    // Count by UI status (for tabs)
     public Map<String, Integer> countByUiStatus(String q, LocalDate from, LocalDate to) throws SQLException {
         Map<String, Integer> m = new LinkedHashMap<>();
         m.put("all", 0);
@@ -129,7 +119,6 @@ public class ImportReceiptListDAO {
         return m;
     }
 
-    // Count items
     public int count(String q, String uiStatus, LocalDate from, LocalDate to) throws SQLException {
         String sql = "SELECT COUNT(*) FROM import_receipts ir WHERE 1=1 " +
                      buildWhere(q, uiStatus, from, to);
@@ -144,7 +133,6 @@ public class ImportReceiptListDAO {
         }
     }
 
-    // List items with pagination
     public List<ImportReceiptListItem> list(String q, String uiStatus, LocalDate from, LocalDate to,
                                            int page, int pageSize) throws SQLException {
         String sql =
@@ -186,7 +174,6 @@ public class ImportReceiptListDAO {
         return out;
     }
 
-    // Build WHERE clause
     private String buildWhere(String q, String uiStatus, LocalDate from, LocalDate to) {
         StringBuilder sb = new StringBuilder();
         if (q != null && !q.isBlank()) sb.append(" AND ir.import_code LIKE ? ");
@@ -198,7 +185,6 @@ public class ImportReceiptListDAO {
         return sb.toString();
     }
 
-    // Set parameters
     private int setParams(PreparedStatement ps, String q, String uiStatus,
                          LocalDate from, LocalDate to) throws SQLException {
         int idx = 1;
@@ -208,7 +194,6 @@ public class ImportReceiptListDAO {
         return idx;
     }
 
-    // Map DB status to UI status
     private String mapDbToUiStatus(String dbStatus) {
         if (dbStatus == null) return "pending";
         switch (dbStatus.toUpperCase()) {
@@ -225,7 +210,6 @@ public class ImportReceiptListDAO {
         }
     }
 
-    // Map UI status to DB condition
     private String mapUiStatusToDbCondition(String uiStatus) {
         if (uiStatus == null) return "1=1";
         switch (uiStatus.toLowerCase()) {

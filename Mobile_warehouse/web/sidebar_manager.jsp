@@ -11,13 +11,11 @@
     <li><a href="<%=ctx%>/inventory">Inventory Management</a></li>
     <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
 
-    <!-- ✅ IMPORT RECEIPT -->
     <li style="list-style:none;">
         <details open>
             <summary style="cursor:pointer;">Import Receipt</summary>
             <ul style="margin-top:6px;">
                 <li><a href="<%=ctx%>/import-receipt-list">View Import Receipt List</a></li>
-
                 <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
             </ul>
         </details>
@@ -29,6 +27,16 @@
             <summary style="cursor:pointer;">Export Receipt</summary>
             <ul style="margin-top:6px;">
                 <li><a href="<%=ctx%>/home?p=export-receipt-list">View Export Receipt List</a></li>
+            </ul>
+        </details>
+    </li>
+
+    <li style="list-style:none;">
+        <details open>
+            <summary style="cursor:pointer;">Export Receipt</summary>
+            <ul style="margin-top:6px;">
+                <li><a href="<%=ctx%>/export-receipt-list">View Export Receipt List</a></li>
+                <li><a href="<%=ctx%>/create-export-receipt">Create Export Receipt</a></li>
             </ul>
         </details>
     </li>
