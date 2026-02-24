@@ -4,7 +4,11 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/D:/Semester5/SWP391/Project/G1_SWP391/Mobile_warehouse/src/java/util/EmailUtil.java</file>
+            <file>file:/D:/Semester5/SWP391/Project/G1_SWP391/Mobile_warehouse/web/homepage.jsp</file>
+            <file>file:/D:/Semester5/SWP391/Project/G1_SWP391/Mobile_warehouse/web/import_receipt_list.jsp</file>
+            <file>file:/D:/Semester5/SWP391/Project/G1_SWP391/Mobile_warehouse/src/java/dal/ExportReceiptDAO.java</file>
             <file>file:/D:/Semester5/SWP391/Project/G1_SWP391/Mobile_warehouse/src/java/controller/CreateImportReceipt.java</file>
+            <file>file:/D:/Semester5/SWP391/Project/G1_SWP391/Mobile_warehouse/web/export_receipt_list.jsp</file>
         </group>
     </open-files>
 </project-private>
