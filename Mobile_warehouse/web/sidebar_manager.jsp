@@ -31,16 +31,7 @@
         </details>
     </li>
 
-    <li style="list-style:none;">
-        <details open>
-            <summary style="cursor:pointer;">Export Receipt</summary>
-            <ul style="margin-top:6px;">
-                <li><a href="<%=ctx%>/export-receipt-list">View Export Receipt List</a></li>
-                <li><a href="<%=ctx%>/create-export-receipt">Create Export Receipt</a></li>
-            </ul>
-        </details>
-    </li>
-
+  
     <li style="list-style:none;">
         <details open>
             <summary style="cursor:pointer;">Brand Management</summary>

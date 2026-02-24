@@ -406,7 +406,7 @@ public class Home extends HttpServlet {
                 break;
             }
             case "product-detail": {
-                int productId = Integer.parseInt(request.getParameter("id"));
+                int productId = Integer.parseInt(request.getParameter("id"));}
 
             // =========================
             // BRANDS
