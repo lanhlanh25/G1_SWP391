@@ -1,219 +1,175 @@
+<%-- 
+    Document   : view_import_detail
+    Created on : Feb 13, 2026, 5:15:20 PM
+    Author     : Admin
+--%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
-
 <style>
-  .detail-container {
-    background-color: #f2f2f2;
-    padding: 30px;
-    font-family: sans-serif;
+  .box {
+    border: 2px solid #555;
+    background: #fff;
+    padding: 12px;
   }
-  .header-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    margin-bottom: 20px;
+  .head {
+    font-weight: 700;
+    margin-bottom: 8px;
   }
-  .btn-action {
-    padding: 8px 16px;
-    border: none;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
+  .meta {
+    display: grid;
+    grid-template-columns: 160px 1fr;
+    row-gap: 6px;
+    column-gap: 12px;
+    margin: 10px 0 14px;
+    max-width: 720px;
   }
-  .btn-draft { background-color: #4A86E8; }
-  .btn-approve { background-color: #00AA00; }
-  .btn-reject { background-color: #CC0000; }
-  
-  .info-block {
-    margin-bottom: 20px;
-    font-size: 15px;
-    line-height: 1.6;
-  }
-  .table-custom {
+  .meta .k { color:#111; }
+  .meta .v { color:#111; }
+  .tbl {
     width: 100%;
     border-collapse: collapse;
-    background-color: #d9d9d9;
+    margin-top: 8px;
   }
-  .table-custom th {
-    text-align: left;
-    padding: 12px;
-    color: #333;
-  }
-  .table-custom td {
-    background-color: white;
-    padding: 12px;
-    border-bottom: 1px solid #ccc;
-  }
-  .btn-view-imei {
-    background-color: #4A86E8;
-    color: white;
-    text-decoration: none;
-    padding: 6px 12px;
-    font-size: 13px;
+  .tbl th, .tbl td {
     border: 1px solid #333;
-    cursor: pointer; 
+    padding: 6px 8px;
+    vertical-align: top;
   }
-  .footer-total {
-    text-align: right;
-    margin-top: 10px;
-    font-weight: bold;
-    padding-right: 20px;
-  }
-  .note-box {
-    margin-top: 30px;
-    padding: 10px;
-    background-color: white;
+  .tbl th { background: #f0f0f0; }
+  .btnbar { margin-top: 14px; display:flex; gap:10px; }
+  .btn {
     border: 1px solid #333;
-    min-height: 50px;
-  }
-
-  .modal {
-    display: none; 
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5); 
-  }
-  .modal-content {
-    background-color: #fefefe;
-    margin: 10% auto; 
-    padding: 20px;
-    border: 1px solid #888;
-    width: 40%;
-    min-width: 300px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  }
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+    background: #f6f6f6;
+    padding: 6px 14px;
     cursor: pointer;
   }
-  .close:hover, .close:focus {
-    color: black;
-    text-decoration: none;
+  .btn.primary { background:#e7f0ff; }
+  .msg { margin: 8px 0; color: green; }
+  .err { margin: 8px 0; color: red; }
+  .tab {
+    display: inline-block;
+    border: 1px solid #333;
+    padding: 6px 10px;
+    margin-right: 8px;
+    background: #f6f6f6;
+    font-weight: 600;
   }
 </style>
 
-<div class="detail-container">
+<div class="box">
+   <div style="display:flex; gap:10px; align-items:center;">
+      <c:set var="ctx" value="${pageContext.request.contextPath}" />
+<a class="btn" href="${ctx}/import-receipt-list">← Back</a>
+        <div class="title">View Import Receipt Detail</div>
+    </div>
+
+  <c:if test="${not empty param.msg}">
+    <div class="msg">${param.msg}</div>
+  </c:if>
+  <c:if test="${not empty err}">
+    <div class="err">${err}</div>
+  </c:if>
+
+  <div>
+    <span class="tab">Import Form</span>
+    <span class="tab">Role: ${role}</span>
+  </div>
+
   <c:if test="${not empty receipt}">
-    
-    <div class="header-actions">
-      <c:set var="statusUpper" value="${fn:toUpperCase(receipt.status)}" />
-      <c:if test="${statusUpper eq 'DRAFT'}">
-          <button class="btn-action btn-draft">Draft</button>
-      </c:if>
-      
-      <c:if test="${role eq 'MANAGER' && (statusUpper eq 'DRAFT' || statusUpper eq 'PENDING')}">
-          <form method="post" action="${pageContext.request.contextPath}/import-receipt-detail" style="display:inline;">
-              <input type="hidden" name="id" value="${receipt.importId}"/>
-              <input type="hidden" name="action" value="approve"/>
-              <button type="submit" class="btn-action btn-approve" onclick="return confirm('Approve this receipt?');">Approve</button>
-          </form>
-          
-          <form method="post" action="${pageContext.request.contextPath}/import-receipt-detail" style="display:inline;">
-              <input type="hidden" name="id" value="${receipt.importId}"/>
-              <input type="hidden" name="action" value="cancel"/>
-              <button type="submit" class="btn-action btn-reject" onclick="return confirm('Reject this receipt?');">Reject</button>
-          </form>
-      </c:if>
+    <div class="meta">
+      <div class="k">Import Code</div>
+      <div class="v">${receipt.importCode}</div>
+
+      <div class="k">Transaction time</div>
+      <div class="v">
+        <c:choose>
+          <c:when test="${not empty receipt.receiptDate}">
+            <fmt:formatDate value="${receipt.receiptDate}" pattern="dd/MM/yyyy hh:mm a"/>
+          </c:when>
+          <c:otherwise>-</c:otherwise>
+        </c:choose>
+      </div>
+
+      <div class="k">Supplier</div>
+      <div class="v">${receipt.supplierName}</div>
+
+      <div class="k">Note</div>
+      <div class="v">${receipt.note}</div>
+
+      <div class="k">Status</div>
+      <div class="v">${receipt.status}</div>
     </div>
 
-    <div class="info-block">
-      <div>Receipt Code: ${receipt.importCode}</div>
-      <div>Supplier: ${receipt.supplierName}</div>
-      <div>Created By: ${receipt.createdByName}</div>
-      <div>Created Date: <fmt:formatDate value="${receipt.receiptDate}" pattern="dd/MM/yyyy"/></div>
-    </div>
+    <div style="font-weight:700; margin-top:10px;">Import Items</div>
 
-    <table class="table-custom">
+    <table class="tbl">
       <thead>
         <tr>
-          <th>Product</th>
-          <th>Color</th>
-          <th>Storage</th>
-          <th>RAM</th>
-          <th style="text-align:center;">Quantity</th>
-          <th></th>
+          <th style="width:50px;">#</th>
+          <th style="width:140px;">Product Code</th>
+          <th style="width:200px;">SKU</th>
+          <th style="width:120px;">Quantity</th>
+          <th>Imei Numbers</th>
+          <th style="width:140px;">Item note</th>
+          <th style="width:120px;">Create By</th>
         </tr>
       </thead>
       <tbody>
-        <c:set var="totalItems" value="0"/>
-        <c:forEach var="it" items="${lines}">
+        <c:forEach var="it" items="${lines}" varStatus="st">
           <tr>
-            <td>${it.productName}</td>
-            <td>${it.color}</td>
-            <td>${it.storageGb}G</td>
-            <td>${it.ramGb}GB</td>
-            <td style="text-align:center;">${it.qty}</td>
-            
-            <td style="text-align:right;">
-                <div id="imei-data-${it.lineId}" style="display:none;">
-                    <c:choose>
-                        <c:when test="${not empty it.imeiText}">
-                            <c:out value="${it.imeiText}" />
-                        </c:when>
-                        <c:otherwise>Không có dữ liệu IMEI</c:otherwise>
-                    </c:choose>
-                </div>
-                <button type="button" class="btn-view-imei" onclick="openImeiModal(${it.lineId})">
-                    View IMEI
-                </button>
-            </td>
-
+            <td>${st.index + 1}</td>
+            <td>${it.productCode}</td>
+            <td>${it.skuCode}</td>
+            <td>Products: ${it.qty}</td>
+<td style="white-space:pre-line;">
+  <c:choose>
+    <c:when test="${not empty it.imeiText}">
+      <c:out value="${it.imeiText}"/>
+    </c:when>
+    <c:otherwise>-</c:otherwise>
+  </c:choose>
+</td>
+            <td>${it.itemNote}</td>
+            <td>${it.createdByName}</td>
           </tr>
-          <c:set var="totalItems" value="${totalItems + it.qty}"/>
         </c:forEach>
+
         <c:if test="${empty lines}">
-          <tr><td colspan="6" style="text-align:center;">No items found</td></tr>
+          <tr><td colspan="7">No items</td></tr>
         </c:if>
       </tbody>
     </table>
 
-    <%-- Tổng số lượng --%>
-    <div class="footer-total">
-        Total: ${totalItems}
-    </div>
+    <%-- ✅ UPDATED: Show buttons for both DRAFT and PENDING status --%>
+    <c:if test="${role eq 'MANAGER' && receipt.status ne null}">
+      <c:set var="statusUpper" value="${fn:toUpperCase(receipt.status)}" />
+      
+      <%-- ✅ Show Approve/Cancel buttons for DRAFT or PENDING --%>
+      <c:if test="${statusUpper eq 'DRAFT' || statusUpper eq 'PENDING'}">
+        <div class="btnbar">
+          <form method="post" action="${pageContext.request.contextPath}/import-receipt-detail" style="margin:0;">
+            <input type="hidden" name="id" value="${receipt.importId}"/>
+            <input type="hidden" name="action" value="approve"/>
+            <button class="btn primary" type="submit"
+                    onclick="return confirm('Approve this receipt? This will add stock to inventory and change status to CONFIRMED.');">
+              Approve
+            </button>
+          </form>
 
-    <%-- Hộp Ghi chú --%>
-    <div class="note-box">
-        Note: ${receipt.note}
-    </div>
+          <form method="post" action="${pageContext.request.contextPath}/import-receipt-detail" style="margin:0;">
+            <input type="hidden" name="id" value="${receipt.importId}"/>
+            <input type="hidden" name="action" value="cancel"/>
+            <button class="btn" type="submit"
+                    onclick="return confirm('Cancel this receipt? Products will NOT be added to inventory.');">
+              Cancel
+            </button>
+          </form>
+        </div>
+      </c:if>
+    </c:if>
 
   </c:if>
 </div>
-
-<div id="imeiModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeModal()">&times;</span>
-    <h3 style="margin-top:0;">Danh sách IMEI</h3>
-    <hr>
-    <div id="imeiListContent" style="white-space: pre-line; line-height: 1.5; max-height: 300px; overflow-y: auto;">
-    </div>
-  </div>
-</div>
-
-<script>
-    function openImeiModal(lineId) {
-        var imeiData = document.getElementById('imei-data-' + lineId).innerHTML;
-        document.getElementById('imeiListContent').innerHTML = imeiData;
-        document.getElementById('imeiModal').style.display = 'block';
-    }
-
-    function closeModal() {
-        document.getElementById('imeiModal').style.display = 'none';
-    }
-
-    window.onclick = function(event) {
-        var modal = document.getElementById('imeiModal');
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-</script>
