@@ -8,24 +8,20 @@ package model;
  *
  * @author Admin
  */
-public class ImportReceiptLineDetail {
+
+import java.util.List;
+
+public class ExportReceiptDetailLine {
     private long lineId;
     private String productCode;
     private String skuCode;
     private int qty;
-    private String imeiText;       // already formatted with new lines
+    private List<String> imeis;
+
+    // optional (nếu bạn add cột export_receipt_lines.item_note sau)
     private String itemNote;
+
     private String createdByName;
-    private int inStock;
-
-    public int getInStock() {
-        return inStock;
-    }
-
-    public void setInStock(int inStock) {
-        this.inStock = inStock;
-    }
-
 
     public long getLineId() { return lineId; }
     public void setLineId(long lineId) { this.lineId = lineId; }
@@ -39,8 +35,8 @@ public class ImportReceiptLineDetail {
     public int getQty() { return qty; }
     public void setQty(int qty) { this.qty = qty; }
 
-    public String getImeiText() { return imeiText; }
-    public void setImeiText(String imeiText) { this.imeiText = imeiText; }
+    public List<String> getImeis() { return imeis; }
+    public void setImeis(List<String> imeis) { this.imeis = imeis; }
 
     public String getItemNote() { return itemNote; }
     public void setItemNote(String itemNote) { this.itemNote = itemNote; }
