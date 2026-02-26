@@ -51,7 +51,6 @@ public class ViewImeiDAO {
         return null;
     }
 
-    // ✅ Updated to join with import/export receipts
     public int countImeis(long skuId, String q) {
         String sql =
             "SELECT COUNT(DISTINCT iru.imei) " +
@@ -80,12 +79,10 @@ public class ViewImeiDAO {
         return 0;
     }
 
-    // ✅ Updated to fetch import_date and export_date
     public List<ImeiRow> listImeis(long skuId, String q, int page, int pageSize) {
         List<ImeiRow> list = new ArrayList<>();
         int offset = (page - 1) * pageSize;
 
-        // ✅ Query to get IMEI with import date and export date (if exported)
         String sql =
             "SELECT " +
             "  iru.imei, " +
@@ -95,15 +92,14 @@ public class ViewImeiDAO {
             "JOIN import_receipt_lines irl ON irl.line_id = iru.line_id " +
             "JOIN import_receipts ir ON ir.import_id = irl.import_id " +
             
-            // ✅ LEFT JOIN export receipts (may not exist if not exported yet)
             "LEFT JOIN export_receipt_units eru ON eru.imei = iru.imei " +
             "LEFT JOIN export_receipt_lines erl ON erl.line_id = eru.line_id " +
             "LEFT JOIN export_receipts er ON er.export_id = erl.export_id " +
             
             "WHERE irl.sku_id = ? " +
-            "  AND ir.status = 'CONFIRMED' " +  // Only show confirmed imports
+            "  AND ir.status = 'CONFIRMED' " +  
             (q != null && !q.trim().isEmpty() ? "  AND iru.imei LIKE ? " : "") +
-            "GROUP BY iru.imei, ir.receipt_date, er.export_date " +  // Prevent duplicates
+            "GROUP BY iru.imei, ir.receipt_date, er.export_date " +  
             "ORDER BY iru.imei " +
             "LIMIT ? OFFSET ?";
 
@@ -125,7 +121,7 @@ public class ViewImeiDAO {
                     ImeiRow r = new ImeiRow();
                     r.setImei(rs.getString("imei"));
                     r.setImportDate(rs.getTimestamp("import_date"));
-                    r.setExportDate(rs.getTimestamp("export_date"));  // null if not exported
+                    r.setExportDate(rs.getTimestamp("export_date"));  
                     list.add(r);
                 }
             }

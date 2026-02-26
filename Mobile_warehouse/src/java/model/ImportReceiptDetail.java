@@ -14,7 +14,6 @@ public class ImportReceiptDetail {
     private String note;
     private String status;
 
-    // ✅ add
     private String createdByName;
 
     public long getImportId() { return importId; }
@@ -35,7 +34,6 @@ public class ImportReceiptDetail {
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    // ✅ add
     public String getCreatedByName() { return createdByName; }
     public void setCreatedByName(String createdByName) { this.createdByName = createdByName; }
 }

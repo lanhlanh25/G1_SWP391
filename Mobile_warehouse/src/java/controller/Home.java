@@ -429,6 +429,8 @@ public class Home extends HttpServlet {
                 request.setAttribute("allBrands", brandDAO.list(null, "", "name", "ASC", 1, 1000));
                 break;
             }
+            case "product-detail": {
+                int productId = Integer.parseInt(request.getParameter("id"));}
 
             // =========================
             // BRANDS
@@ -1316,7 +1318,8 @@ public class Home extends HttpServlet {
                         return "inactive_supplier.jsp";
                     case "view_history":
                         return "supplier_history.jsp";
-
+                    case "import-receipt-detail":
+                        return "view_import_detail.jsp";
                     case "create-import-receipt":
                         return "create_import_receipt.jsp";
                     case "import-receipt-list":

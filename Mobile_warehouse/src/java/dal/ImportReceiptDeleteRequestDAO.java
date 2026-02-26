@@ -20,7 +20,6 @@ public class ImportReceiptDeleteRequestDAO {
         return DBContext.getConnection();
     }
     
-    // Create new delete request
     public boolean createRequest(long importId, String importCode, String note, int requestedBy) throws SQLException {
         String sql = "INSERT INTO import_receipt_delete_requests(import_id, import_code, note, requested_by) " +
                      "VALUES (?, ?, ?, ?)";
@@ -72,7 +71,6 @@ public class ImportReceiptDeleteRequestDAO {
         return null;
     }
     
-    // Count pending requests
     public int countRequests(String importCodeSearch, java.sql.Date searchDate) throws SQLException {
         StringBuilder sql = new StringBuilder(
             "SELECT COUNT(*) FROM import_receipt_delete_requests irdr " +
@@ -112,7 +110,6 @@ public class ImportReceiptDeleteRequestDAO {
         return 0;
     }
     
-    // List delete requests with pagination
     public List<ImportReceiptDeleteRequest> listRequests(String importCodeSearch, java.sql.Date searchDate, 
                                                          int page, int pageSize) throws SQLException {
         List<ImportReceiptDeleteRequest> list = new ArrayList<>();
@@ -175,14 +172,12 @@ public class ImportReceiptDeleteRequestDAO {
         return list;
     }
     
-    // Approve request and delete the import receipt
     public boolean approveRequest(long requestId, int managerId) throws SQLException {
         Connection con = null;
         try {
             con = getConn();
             con.setAutoCommit(false);
             
-            // Get import_id from request
             String getSql = "SELECT import_id FROM import_receipt_delete_requests WHERE request_id = ?";
             long importId;
             
@@ -197,12 +192,8 @@ public class ImportReceiptDeleteRequestDAO {
                 }
             }
             
-            // Delete import receipt (cascading)
             ImportReceiptListDAO dao = new ImportReceiptListDAO();
-            // Note: You may need to expose a method that accepts Connection
-            // For now, assuming deleteDraft works with the connection
             
-            // Update request status
             String updateSql = "UPDATE import_receipt_delete_requests " +
                               "SET status = 'APPROVED', decided_by = ?, decided_at = NOW() " +
                               "WHERE request_id = ?";
@@ -225,7 +216,6 @@ public class ImportReceiptDeleteRequestDAO {
         }
     }
     
-    // Reject request
     public boolean rejectRequest(long requestId, int managerId) throws SQLException {
         String sql = "UPDATE import_receipt_delete_requests " +
                      "SET status = 'REJECTED', decided_by = ?, decided_at = NOW() " +

@@ -1,3 +1,7 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package controller;
 
 import dal.DBContext;
@@ -52,6 +56,7 @@ public class CreateImportReceipt extends HttpServlet {
             if (req.getAttribute("mode") == null) {
                 req.setAttribute("mode", "manual");
             }
+ 
 
             req.getRequestDispatcher("/create_import_receipt.jsp").forward(req, resp);
 

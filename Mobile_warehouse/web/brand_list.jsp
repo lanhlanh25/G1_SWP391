@@ -230,6 +230,15 @@
         if (f)
             f.submit();
     }
+    function openDescModal(title, fullText) {
+        document.getElementById('descModalTitle').textContent = title || 'Description';
+        document.getElementById('descModalBody').textContent = fullText || '';
+        document.getElementById('descModalBackdrop').style.display = 'block';
+    }
+
+    function closeDescModal() {
+        document.getElementById('descModalBackdrop').style.display = 'none';
+    }
 </script>
 
 

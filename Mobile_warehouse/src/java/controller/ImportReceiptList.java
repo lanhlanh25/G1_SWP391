@@ -50,7 +50,7 @@ public class ImportReceiptList extends HttpServlet {
     private LocalDate parseDate(String raw) {
         try {
             if (raw == null || raw.isBlank()) return null;
-            return LocalDate.parse(raw.trim()); // yyyy-MM-dd
+            return LocalDate.parse(raw.trim()); 
         } catch (Exception e) {
             return null;
         }
@@ -67,9 +67,9 @@ public class ImportReceiptList extends HttpServlet {
 
         String role = ensureRole(session, u);
 
-        String action = req.getParameter("action"); // export
-        String q = req.getParameter("q");           // search import_code
-        String status = req.getParameter("status"); // all/pending/completed/cancelled
+        String action = req.getParameter("action"); 
+        String q = req.getParameter("q");          
+        String status = req.getParameter("status"); 
         if (status == null || status.isBlank()) status = "all";
 
         LocalDate from = parseDate(req.getParameter("from"));
@@ -82,7 +82,6 @@ public class ImportReceiptList extends HttpServlet {
 
         ImportReceiptListDAO dao = new ImportReceiptListDAO();
 
-        // EXPORT CSV
         if ("export".equalsIgnoreCase(action)) {
             try {
                 List<ImportReceiptListItem> rows = dao.list(q, status, from, to, 1, 100000);
@@ -118,10 +117,9 @@ public class ImportReceiptList extends HttpServlet {
             req.setAttribute("totalItems", totalItems);
             req.setAttribute("totalPages", totalPages);
 
-          // set layout like /home
-req.setAttribute("sidebarPage", resolveSidebar(role));     // sidebar theo role
-req.setAttribute("contentPage", "import_receipt_list.jsp"); // content nhúng vào homepage
-req.setAttribute("currentPage", "import-receipt-list");     // optional
+req.setAttribute("sidebarPage", resolveSidebar(role));     
+req.setAttribute("contentPage", "import_receipt_list.jsp"); 
+req.setAttribute("currentPage", "import-receipt-list");    
 
 req.getRequestDispatcher("/homepage.jsp").forward(req, resp);
         } catch (SQLException e) {
@@ -129,7 +127,6 @@ req.getRequestDispatcher("/homepage.jsp").forward(req, resp);
         }
     }
 
-    // DELETE (Manager only, Pending only)
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession();

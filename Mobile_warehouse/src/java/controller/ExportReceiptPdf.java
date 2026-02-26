@@ -102,7 +102,7 @@ public class ExportReceiptPdf extends HttpServlet {
 
         try {
             PdfWriter writer = PdfWriter.getInstance(doc, resp.getOutputStream());
-            writer.setPageEvent(new FooterEvent()); // ✅ footer cố định đáy mọi trang
+            writer.setPageEvent(new FooterEvent()); //  footer cố định đáy mọi trang
 
             doc.open();
 
@@ -110,7 +110,7 @@ public class ExportReceiptPdf extends HttpServlet {
             addItemsTable(doc, lines);
             addSummary(doc, lines);
             addSignatures(doc);
-            // ❌ không addFooter(doc) nữa
+            // không addFooter(doc) nữa
 
         } catch (Exception e) {
             throw new ServletException(e);
@@ -328,7 +328,7 @@ public class ExportReceiptPdf extends HttpServlet {
         for (int i = 0; i < cleaned.size(); i += perLine) {
             int end = Math.min(i + perLine, cleaned.size());
             if (sb.length() > 0) {
-                sb.append("\n");           // xuống dòng giữa các group
+                sb.append("\n");           
             }
             sb.append(String.join(" ", cleaned.subList(i, end)));
         }

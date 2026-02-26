@@ -18,8 +18,8 @@ public class ImportReceiptDeleteRequest {
     private int requestedBy;
     private String requestedByName;
     private Timestamp requestedAt;
-    private Timestamp transactionTime; // From import_receipts.receipt_date
-    private String status; // PENDING, APPROVED, REJECTED
+    private Timestamp transactionTime; 
+    private String status; 
     private Integer decidedBy;
     private Timestamp decidedAt;
     
