@@ -25,13 +25,14 @@ public class ExportReceiptDAO {
             WHERE er.export_id = ?
         """;
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setLong(1, exportId);
 
             try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
+                if (!rs.next()) {
+                    return null;
+                }
 
                 ExportReceiptDetailHeader h = new ExportReceiptDetailHeader();
                 h.setExportId(rs.getLong("export_id"));
@@ -62,18 +63,18 @@ public class ExportReceiptDAO {
     // =========================
     public List<ExportReceiptDetailLine> getDetailLines(long exportId) {
         String sql = """
-            SELECT erl.line_id, erl.qty,
-                   p.product_code,
-                   s.sku_code,
-                   u.full_name AS created_by_name
-            FROM export_receipt_lines erl
-            JOIN products p ON p.product_id = erl.product_id
-            JOIN product_skus s ON s.sku_id = erl.sku_id
-            JOIN export_receipts er ON er.export_id = erl.export_id
-            JOIN users u ON u.user_id = er.created_by
-            WHERE erl.export_id = ?
-            ORDER BY erl.line_id ASC
-        """;
+    SELECT erl.line_id, erl.qty, erl.item_note,
+           p.product_code,
+           s.sku_code,
+           u.full_name AS created_by_name
+    FROM export_receipt_lines erl
+    JOIN products p ON p.product_id = erl.product_id
+    JOIN product_skus s ON s.sku_id = erl.sku_id
+    JOIN export_receipts er ON er.export_id = erl.export_id
+    JOIN users u ON u.user_id = er.created_by
+    WHERE erl.export_id = ?
+    ORDER BY erl.line_id ASC
+""";
 
         String sqlImei = """
             SELECT imei
@@ -84,9 +85,7 @@ public class ExportReceiptDAO {
 
         List<ExportReceiptDetailLine> out = new ArrayList<>();
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             PreparedStatement psImei = con.prepareStatement(sqlImei)) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); PreparedStatement psImei = con.prepareStatement(sqlImei)) {
 
             ps.setLong(1, exportId);
 
@@ -100,7 +99,7 @@ public class ExportReceiptDAO {
                     it.setProductCode(rs.getString("product_code"));
                     it.setSkuCode(rs.getString("sku_code"));
                     it.setCreatedByName(rs.getString("created_by_name"));
-                    it.setItemNote(null); // schema chưa có
+                    it.setItemNote(rs.getString("item_note"));
 
                     // IMEIs
                     List<String> imeis = new ArrayList<>();
@@ -154,10 +153,11 @@ public class ExportReceiptDAO {
             params.add(to);
         }
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
-            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
 
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
@@ -171,7 +171,7 @@ public class ExportReceiptDAO {
     }
 
     public List<ExportReceiptListItem> list(String q, String status, java.sql.Date from, java.sql.Date to,
-                                           int page, int pageSize) {
+            int page, int pageSize) {
 
         StringBuilder sql = new StringBuilder("""
             SELECT er.export_id, er.export_code, er.export_date, er.status,
@@ -215,10 +215,11 @@ public class ExportReceiptDAO {
 
         List<ExportReceiptListItem> out = new ArrayList<>();
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
-            for (int i = 0; i < params.size(); i++) ps.setObject(i + 1, params.get(i));
+            for (int i = 0; i < params.size(); i++) {
+                ps.setObject(i + 1, params.get(i));
+            }
 
             try (ResultSet rs = ps.executeQuery()) {
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
@@ -250,11 +251,11 @@ public class ExportReceiptDAO {
     // CREATE EXPORT RECEIPT (manual)
     // =========================
     public long createReceipt(Connection con,
-                             Long requestId,
-                             long createdBy,
-                             Timestamp exportDate,
-                             String note,
-                             String status) throws SQLException {
+            Long requestId,
+            long createdBy,
+            Timestamp exportDate,
+            String note,
+            String status) throws SQLException {
 
         String sql = """
             INSERT INTO export_receipts(request_id, export_code, created_by, export_date, note, status)
@@ -265,23 +266,32 @@ public class ExportReceiptDAO {
 
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            if (requestId == null) ps.setNull(1, Types.BIGINT);
-            else ps.setLong(1, requestId);
+            if (requestId == null) {
+                ps.setNull(1, Types.BIGINT);
+            } else {
+                ps.setLong(1, requestId);
+            }
 
             ps.setString(2, exportCode);
             ps.setLong(3, createdBy);
             ps.setTimestamp(4, exportDate);
 
-            if (note == null) note = "";
+            if (note == null) {
+                note = "";
+            }
             ps.setString(5, note);
 
-            if (status == null || status.isBlank()) status = "DRAFT";
+            if (status == null || status.isBlank()) {
+                status = "DRAFT";
+            }
             ps.setString(6, status);
 
             ps.executeUpdate();
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) return rs.getLong(1);
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
             }
         }
 
@@ -289,26 +299,30 @@ public class ExportReceiptDAO {
     }
 
     public long createLine(Connection con,
-                           long exportId,
-                           long productId,
-                           long skuId,
-                           int qty) throws SQLException {
+            long exportId,
+            long productId,
+            long skuId,
+            int qty,
+            String itemNote) throws SQLException {
 
         String sql = """
-            INSERT INTO export_receipt_lines(export_id, product_id, sku_id, qty)
-            VALUES(?, ?, ?, ?)
-        """;
+    INSERT INTO export_receipt_lines(export_id, product_id, sku_id, qty, item_note)
+    VALUES(?, ?, ?, ?, ?)
+""";
 
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, exportId);
             ps.setLong(2, productId);
             ps.setLong(3, skuId);
             ps.setInt(4, qty);
+            ps.setString(5, itemNote);
 
             ps.executeUpdate();
 
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) return rs.getLong(1);
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
             }
         }
 
@@ -316,7 +330,9 @@ public class ExportReceiptDAO {
     }
 
     public void insertUnitImeis(Connection con, long lineId, List<String> imeis) throws SQLException {
-        if (imeis == null || imeis.isEmpty()) return;
+        if (imeis == null || imeis.isEmpty()) {
+            return;
+        }
 
         String sql = """
             INSERT INTO export_receipt_units(line_id, imei)
@@ -325,9 +341,13 @@ public class ExportReceiptDAO {
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             for (String imei : imeis) {
-                if (imei == null) continue;
+                if (imei == null) {
+                    continue;
+                }
                 imei = imei.trim();
-                if (imei.isBlank()) continue;
+                if (imei.isBlank()) {
+                    continue;
+                }
 
                 ps.setLong(1, lineId);
                 ps.setString(2, imei);
@@ -338,9 +358,9 @@ public class ExportReceiptDAO {
     }
 
     /**
-     * Code format: EX-yyyymmdd-XXX
-     * NOTE: nếu bạn tạo nhiều phiếu cùng 1 giây, COUNT(*) có thể trùng seq khi chạy đồng thời.
-     * (Cho project môn học thì ok; nếu muốn chắc chắn thì dùng table sequence riêng.)
+     * Code format: EX-yyyymmdd-XXX NOTE: nếu bạn tạo nhiều phiếu cùng 1 giây,
+     * COUNT(*) có thể trùng seq khi chạy đồng thời. (Cho project môn học thì
+     * ok; nếu muốn chắc chắn thì dùng table sequence riêng.)
      */
     public String generateExportCode(Connection con) throws SQLException {
         String sql = """
@@ -350,9 +370,10 @@ public class ExportReceiptDAO {
         """;
 
         int countToday = 0;
-        try (PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) countToday = rs.getInt(1);
+        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                countToday = rs.getInt(1);
+            }
         }
 
         java.time.LocalDate today = java.time.LocalDate.now();

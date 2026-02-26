@@ -538,69 +538,49 @@
                 document.getElementById("btnAddRow").addEventListener("click", addRow);
 
                 manualForm.addEventListener("submit", function (e) {
-                    const rows = tbody.children;
-                    if (rows.length === 0) {
-                        e.preventDefault();
-                        alert("Please add at least 1 product line.");
-                        return;
-                    }
+    const rows = tbody.children;
+    if (rows.length === 0) {
+        e.preventDefault();
+        alert("Please add at least 1 product line.");
+        return;
+    }
 
-                    for (let i = 0; i < rows.length; i++) {
-                        const row = rows[i];
-                        for (let i = 0; i < rows.length; i++) {
-                            const row = rows[i];
-                            const rowIdx = row.dataset.rowIdx;
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const rowIdx = row.dataset.rowIdx;
 
-                            const productId = row.querySelector('select[name="productId_' + rowIdx + '"]').value;
-                            const skuId = row.querySelector('select[name="skuId_' + rowIdx + '"]').value;
-                            const qty = parseInt(row.querySelector('input[name="qty_' + rowIdx + '"]').value) || 0;
+        const productSelect = row.querySelector('select[name="productId_' + rowIdx + '"]');
+        const skuSelect = row.querySelector('select[name="skuId_' + rowIdx + '"]');
+        const qtyInput = row.querySelector('input[name="qty_' + rowIdx + '"]');
 
-                            if (!productId || !skuId || qty < 1) {
-                                e.preventDefault();
-                                alert("Row " + (i + 1) + ": Please fill Product Code, SKU and Quantity");
-                                return;
-                            }
+        const productId = productSelect ? productSelect.value : "";
+        const skuId = skuSelect ? skuSelect.value : "";
+        const qty = qtyInput ? (parseInt(qtyInput.value) || 0) : 0;
 
-                            for (let j = 1; j <= qty; j++) {
-                                const imeiInput = row.querySelector('input[name="imei_' + rowIdx + '_' + j + '"]');
-                                const imei = (imeiInput ? imeiInput.value.trim() : "");
+        if (!productId || !skuId || qty < 1) {
+            e.preventDefault();
+            alert("Row " + (i + 1) + ": Please fill Product Code, SKU and Quantity");
+            return;
+        }
 
-                                if (!imei) {
-                                    e.preventDefault();
-                                    alert("Row " + (i + 1) + ", IMEI " + j + ": Please enter IMEI");
-                                    return;
-                                }
-                                if (imei.length !== 15) {
-                                    e.preventDefault();
-                                    alert("Row " + (i + 1) + ", IMEI " + j + ": IMEI must be exactly 15 digits");
-                                    return;
-                                }
-                            }
-                        }
+        for (let j = 1; j <= qty; j++) {
+            const imeiInput = row.querySelector('input[name="imei_' + rowIdx + '_' + j + '"]');
+            const imei = imeiInput ? imeiInput.value.trim() : "";
 
+            if (!imei) {
+                e.preventDefault();
+                alert("Row " + (i + 1) + ", IMEI " + j + ": Please enter IMEI");
+                return;
+            }
 
-                        if (!productId || !skuId || qty < 1) {
-                            e.preventDefault();
-                            alert("Row " + (i + 1) + ": Please fill Product Code, SKU and Quantity");
-                            return;
-                        }
-
-                        const imeiInputs = row.querySelectorAll('.imeiRow input');
-                        for (let j = 0; j < imeiInputs.length; j++) {
-                            const imei = imeiInputs[j].value.trim();
-                            if (!imei) {
-                                e.preventDefault();
-                                alert("Row " + (i + 1) + ", IMEI " + (j + 1) + ": Please enter IMEI");
-                                return;
-                            }
-                            if (imei.length !== 15) {
-                                e.preventDefault();
-                                alert("Row " + (i + 1) + ", IMEI " + (j + 1) + ": IMEI must be exactly 15 digits");
-                                return;
-                            }
-                        }
-                    }
-                });
+            if (imei.length !== 15) {
+                e.preventDefault();
+                alert("Row " + (i + 1) + ", IMEI " + j + ": IMEI must be exactly 15 digits");
+                return;
+            }
+        }
+    }
+});
 
                 document.querySelectorAll('.tabBtn').forEach(btn => {
                     btn.addEventListener('click', function () {

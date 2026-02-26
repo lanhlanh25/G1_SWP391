@@ -3,6 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package controller;
+
 import dal.ExportReceiptDAO;
 import model.ExportReceiptDetailHeader;
 import model.ExportReceiptDetailLine;
@@ -12,6 +13,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.List;
+
 /**
  *
  * @author Admin
@@ -37,10 +39,10 @@ public class ExportReceiptDetail extends HttpServlet {
         }
 
         ExportReceiptDAO dao = new ExportReceiptDAO();
-        ExportReceiptDetailHeader header = dao.getDetailHeader(exportId);
+        ExportReceiptDetailHeader receiptHeader = dao.getDetailHeader(exportId);
         List<ExportReceiptDetailLine> lines = dao.getDetailLines(exportId);
 
-        req.setAttribute("header", header);
+        req.setAttribute("receiptHeader", receiptHeader);
         req.setAttribute("lines", lines);
 
         req.getRequestDispatcher("/export_receipt_detail.jsp").forward(req, resp);

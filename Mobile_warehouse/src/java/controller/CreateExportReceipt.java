@@ -139,7 +139,7 @@ public class CreateExportReceipt extends HttpServlet {
             long exportId = dao.createReceipt(con, null, createdBy, exportDate, note, status);
 
             for (RowInput r : rows) {
-                long lineId = dao.createLine(con, exportId, r.productId, r.skuId, r.qty);
+                long lineId = dao.createLine(con, exportId, r.productId, r.skuId, r.qty, r.itemNote);
                 dao.insertUnitImeis(con, lineId, r.imeis);
             }
 
