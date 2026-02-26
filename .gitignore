@@ -1,1 +1,5 @@
-/Mobile_warehouse/dist/
+build/
+dist/
+nbproject/private/
+*.class
+*.jar

@@ -56,6 +56,7 @@ public class CreateImportReceipt extends HttpServlet {
             if (req.getAttribute("mode") == null) {
                 req.setAttribute("mode", "manual");
             }
+ 
 
             req.getRequestDispatcher("/create_import_receipt.jsp").forward(req, resp);
 
