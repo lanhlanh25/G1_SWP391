@@ -166,7 +166,7 @@ public class Home extends HttpServlet {
             }
 
             // =========================
-            // ✅ EXPORT RECEIPT LIST  (FIXED + tabCounts + normalize status)
+            //  EXPORT RECEIPT LIST  (FIXED + tabCounts + normalize status)
             // =========================
             case "export-receipt-list": {
                 ExportReceiptDAO dao = new ExportReceiptDAO();

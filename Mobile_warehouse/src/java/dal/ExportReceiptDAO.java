@@ -250,53 +250,40 @@ public class ExportReceiptDAO {
     // =========================
     // CREATE EXPORT RECEIPT (manual)
     // =========================
-    public long createReceipt(Connection con,
-            Long requestId,
-            long createdBy,
-            Timestamp exportDate,
-            String note,
-            String status) throws SQLException {
+public long createReceipt(Connection con,
+        Long requestId,
+        long createdBy,
+        Timestamp exportDate,
+        String note,
+        String status) throws SQLException {
 
-        String sql = """
-            INSERT INTO export_receipts(request_id, export_code, created_by, export_date, note, status)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """;
+    String sql = """
+        INSERT INTO export_receipts(request_id, export_code, created_by, export_date, note, status)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """;
 
-        String exportCode = generateExportCode(con);
+    String exportCode = generateExportCode(con, exportDate);
 
-        try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+    try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            if (requestId == null) {
-                ps.setNull(1, Types.BIGINT);
-            } else {
-                ps.setLong(1, requestId);
-            }
+        if (requestId == null) ps.setNull(1, Types.BIGINT);
+        else ps.setLong(1, requestId);
 
-            ps.setString(2, exportCode);
-            ps.setLong(3, createdBy);
-            ps.setTimestamp(4, exportDate);
+        ps.setString(2, exportCode);
+        ps.setLong(3, createdBy);
+        ps.setTimestamp(4, exportDate);
 
-            if (note == null) {
-                note = "";
-            }
-            ps.setString(5, note);
+        ps.setString(5, note == null ? "" : note);
+        ps.setString(6, (status == null || status.isBlank()) ? "DRAFT" : status);
 
-            if (status == null || status.isBlank()) {
-                status = "DRAFT";
-            }
-            ps.setString(6, status);
+        ps.executeUpdate();
 
-            ps.executeUpdate();
-
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getLong(1);
-                }
-            }
+        try (ResultSet rs = ps.getGeneratedKeys()) {
+            if (rs.next()) return rs.getLong(1);
         }
-
-        throw new SQLException("Cannot create export receipt");
     }
+    throw new SQLException("Cannot create export receipt");
+}
 
     public long createLine(Connection con,
             long exportId,
@@ -357,28 +344,101 @@ public class ExportReceiptDAO {
         }
     }
 
-    /**
-     * Code format: EX-yyyymmdd-XXX NOTE: nếu bạn tạo nhiều phiếu cùng 1 giây,
-     * COUNT(*) có thể trùng seq khi chạy đồng thời. (Cho project môn học thì
-     * ok; nếu muốn chắc chắn thì dùng table sequence riêng.)
-     */
-    public String generateExportCode(Connection con) throws SQLException {
-        String sql = """
-            SELECT COUNT(*)
-            FROM export_receipts
-            WHERE DATE(export_date) = CURRENT_DATE()
-        """;
+public String generateExportCode(Connection con, Timestamp exportDate) throws SQLException {
+    if (exportDate == null) exportDate = new Timestamp(System.currentTimeMillis());
 
-        int countToday = 0;
-        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                countToday = rs.getInt(1);
+    String sql = """
+        SELECT COUNT(*)
+        FROM export_receipts
+        WHERE DATE(export_date) = DATE(?)
+    """;
+
+    int count = 0;
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setTimestamp(1, exportDate);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) count = rs.getInt(1);
+        }
+    }
+
+    java.time.LocalDate d = exportDate.toLocalDateTime().toLocalDate();
+    String ymd = d.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
+    String seq = String.format("%03d", count + 1);
+
+    return "EX-" + ymd + "-" + seq;
+}
+
+    public Long findProductIdByCode(Connection con, String productCode) throws Exception {
+        String sql = "SELECT product_id FROM products WHERE product_code = ?";
+        try (var ps = con.prepareStatement(sql)) {
+            ps.setString(1, productCode);
+            try (var rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
             }
         }
-
-        java.time.LocalDate today = java.time.LocalDate.now();
-        String ymd = today.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
-        String seq = String.format("%03d", countToday + 1);
-        return "EX-" + ymd + "-" + seq;
+        return null;
     }
+
+    public Long findSkuIdByCode(Connection con, String skuCode) throws Exception {
+        String sql = "SELECT sku_id FROM product_skus WHERE sku_code = ?";
+        try (var ps = con.prepareStatement(sql)) {
+            ps.setString(1, skuCode);
+            try (var rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        }
+        return null;
+    }
+
+// Optional: verify SKU belongs to Product
+    public boolean skuBelongsToProduct(Connection con, long skuId, long productId) throws Exception {
+        String sql = "SELECT 1 FROM product_skus WHERE sku_id=? AND product_id=?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, skuId);
+            ps.setLong(2, productId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+    
+    // 1) List IMEIs available in stock for a SKU (ACTIVE only)
+public List<String> listAvailableImeisBySku(Connection con, long skuId) throws SQLException {
+    String sql = """
+        SELECT imei
+        FROM product_units
+        WHERE sku_id = ?
+          AND unit_status = 'ACTIVE'
+        ORDER BY imei ASC
+        LIMIT 500
+    """;
+    List<String> out = new ArrayList<>();
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setLong(1, skuId);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) out.add(rs.getString(1));
+        }
+    }
+    return out;
+}
+
+// 2) Mark an IMEI as exported (ACTIVE -> INACTIVE). Return true if success.
+public boolean markUnitInactive(Connection con, long skuId, String imei) throws SQLException {
+    String sql = """
+        UPDATE product_units
+        SET unit_status = 'INACTIVE', updated_at = CURRENT_TIMESTAMP
+        WHERE sku_id = ?
+          AND imei = ?
+          AND unit_status = 'ACTIVE'
+    """;
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setLong(1, skuId);
+        ps.setString(2, imei);
+        return ps.executeUpdate() == 1;
+    }
+}
 }
