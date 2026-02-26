@@ -16,45 +16,52 @@ public class ImportReceiptDAO {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, prefix + "%");
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) count = rs.getInt(1);
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
             }
         }
         return prefix + String.format("%04d", count + 1);
     }
 
     public long insertReceipt(Connection con,
-                          String importCode,
-                          Long supplierId,
-                          Timestamp receiptDate,
-                          String note,
-                          int createdBy,
-                          String status) throws Exception {
+            String importCode,
+            Long supplierId,
+            Timestamp receiptDate,
+            String note,
+            int createdBy,
+            String status) throws Exception {
 
-    String sql = "INSERT INTO import_receipts(import_code, supplier_id, status, receipt_date, note, created_by) "
-               + "VALUES(?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO import_receipts(import_code, supplier_id, status, receipt_date, note, created_by) "
+                + "VALUES(?, ?, ?, ?, ?, ?)";
 
-    try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-        ps.setString(1, importCode);
+        try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, importCode);
 
-        if (supplierId == null) ps.setNull(2, java.sql.Types.BIGINT);
-        else ps.setLong(2, supplierId);
+            if (supplierId == null) {
+                ps.setNull(2, java.sql.Types.BIGINT);
+            } else {
+                ps.setLong(2, supplierId);
+            }
 
-        ps.setString(3, status);
-        ps.setTimestamp(4, receiptDate);
-        ps.setString(5, (note == null || note.isBlank()) ? null : note.trim());
-        ps.setInt(6, createdBy);
+            ps.setString(3, status);
+            ps.setTimestamp(4, receiptDate);
+            ps.setString(5, (note == null || note.isBlank()) ? null : note.trim());
+            ps.setInt(6, createdBy);
 
-        ps.executeUpdate();
-        try (ResultSet rs = ps.getGeneratedKeys()) {
-            if (rs.next()) return rs.getLong(1);
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
         }
+        throw new Exception("Cannot insert import_receipts");
     }
-    throw new Exception("Cannot insert import_receipts");
-}
 
     public long insertLine(Connection con, long importId, long productId, long skuId, int qty, String itemNote) throws SQLException {
         String sql = "INSERT INTO import_receipt_lines(import_id, product_id, sku_id, qty, unit_price, item_note) "
-                   + "VALUES(?, ?, ?, ?, 0, ?)";
+                + "VALUES(?, ?, ?, ?, 0, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, importId);
             ps.setLong(2, productId);
@@ -64,7 +71,9 @@ public class ImportReceiptDAO {
 
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) return rs.getLong(1);
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
             }
         }
         throw new SQLException("Cannot insert import_receipt_lines");
@@ -98,7 +107,9 @@ public class ImportReceiptDAO {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, productCode);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getLong(1);
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
             }
         }
         throw new SQLException("Product not found: " + productCode);
@@ -109,14 +120,17 @@ public class ImportReceiptDAO {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, skuCode);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getLong(1);
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
             }
         }
         throw new SQLException("SKU not found: " + skuCode);
     }
     // ===== PDF/DETAIL QUERIES =====
-public ImportReceiptDetail getDetailHeader(Connection con, long importId) throws SQLException {
-    String sql = """
+
+    public ImportReceiptDetail getDetailHeader(Connection con, long importId) throws SQLException {
+        String sql = """
         SELECT ir.import_id, ir.import_code, ir.receipt_date, ir.note, ir.status,
                s.supplier_name,
                u.full_name AS created_by_name
@@ -126,26 +140,28 @@ public ImportReceiptDetail getDetailHeader(Connection con, long importId) throws
         WHERE ir.import_id = ?
     """;
 
-    try (PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setLong(1, importId);
-        try (ResultSet rs = ps.executeQuery()) {
-            if (!rs.next()) return null;
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, importId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
 
-            ImportReceiptDetail d = new ImportReceiptDetail();
-            d.setImportId(rs.getLong("import_id"));
-            d.setImportCode(rs.getString("import_code"));
-            d.setReceiptDate(rs.getTimestamp("receipt_date"));
-            d.setSupplierName(rs.getString("supplier_name"));
-            d.setCreatedByName(rs.getString("created_by_name"));
-            d.setNote(rs.getString("note"));
-            d.setStatus(rs.getString("status"));
-            return d;
+                ImportReceiptDetail d = new ImportReceiptDetail();
+                d.setImportId(rs.getLong("import_id"));
+                d.setImportCode(rs.getString("import_code"));
+                d.setReceiptDate(rs.getTimestamp("receipt_date"));
+                d.setSupplierName(rs.getString("supplier_name"));
+                d.setCreatedByName(rs.getString("created_by_name"));
+                d.setNote(rs.getString("note"));
+                d.setStatus(rs.getString("status"));
+                return d;
+            }
         }
     }
-}
 
-public List<ImportReceiptLineDetail> getDetailLines(Connection con, long importId) throws SQLException {
-    String sql = """
+    public List<ImportReceiptLineDetail> getDetailLines(Connection con, long importId) throws SQLException {
+        String sql = """
         SELECT irl.line_id, irl.qty, irl.item_note,
                p.product_code,
                sk.sku_code,
@@ -157,81 +173,95 @@ public List<ImportReceiptLineDetail> getDetailLines(Connection con, long importI
         ORDER BY irl.line_id ASC
     """;
 
-    List<ImportReceiptLineDetail> out = new ArrayList<>();
+        List<ImportReceiptLineDetail> out = new ArrayList<>();
 
-    try (PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setLong(1, importId);
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                long lineId = rs.getLong("line_id");
-                long skuId = rs.getLong("sku_id");
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, importId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    long lineId = rs.getLong("line_id");
+                    long skuId = rs.getLong("sku_id");
 
-                ImportReceiptLineDetail it = new ImportReceiptLineDetail();
-                it.setLineId(lineId);
-                it.setQty(rs.getInt("qty"));
-                it.setItemNote(rs.getString("item_note"));
-                it.setProductCode(rs.getString("product_code"));
-                it.setSkuCode(rs.getString("sku_code"));
+                    ImportReceiptLineDetail it = new ImportReceiptLineDetail();
+                    it.setLineId(lineId);
+                    it.setQty(rs.getInt("qty"));
+                    it.setItemNote(rs.getString("item_note"));
+                    it.setProductCode(rs.getString("product_code"));
+                    it.setSkuCode(rs.getString("sku_code"));
 
-                // ✅ In Stock = inventory_balance.qty_on_hand
-                it.setInStock(getInStockBySku(con, skuId));
+                    // ✅ In Stock = inventory_balance.qty_on_hand
+                    it.setInStock(getInStockBySku(con, skuId));
 
-                // ✅ IMEI text (2 imei / line)
-                List<String> imeis = getImeisByLine(con, lineId);
-                it.setImeiText(formatImeis(imeis, 2));
+                    // ✅ IMEI text (2 imei / line)
+                    List<String> imeis = getImeisByLine(con, lineId);
+                    it.setImeiText(formatImeis(imeis, 2));
 
-                out.add(it);
+                    out.add(it);
+                }
             }
         }
+        return out;
     }
-    return out;
-}
 
-private int getInStockBySku(Connection con, long skuId) throws SQLException {
-    String sql = "SELECT qty_on_hand FROM inventory_balance WHERE sku_id=? LIMIT 1";
-    try (PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setLong(1, skuId);
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) return rs.getInt("qty_on_hand");
+    private int getInStockBySku(Connection con, long skuId) throws SQLException {
+        String sql = "SELECT qty_on_hand FROM inventory_balance WHERE sku_id=? LIMIT 1";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, skuId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("qty_on_hand");
+                }
+            }
         }
+        return 0;
     }
-    return 0;
-}
 
-private List<String> getImeisByLine(Connection con, long lineId) throws SQLException {
-    String sql = """
+    private List<String> getImeisByLine(Connection con, long lineId) throws SQLException {
+        String sql = """
         SELECT imei
         FROM import_receipt_units
         WHERE line_id = ?
         ORDER BY iru_id ASC
     """;
-    List<String> out = new ArrayList<>();
-    try (PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setLong(1, lineId);
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) out.add(rs.getString("imei"));
+        List<String> out = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, lineId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(rs.getString("imei"));
+                }
+            }
         }
+        return out;
     }
-    return out;
-}
 
-private static String formatImeis(List<String> imeis, int perLine) {
-    if (imeis == null || imeis.isEmpty()) return "";
+    private static String formatImeis(List<String> imeis, int perLine) {
+        if (imeis == null || imeis.isEmpty()) {
+            return "";
+        }
 
-    List<String> cleaned = new ArrayList<>();
-    for (String s : imeis) {
-        if (s == null) continue;
-        s = s.trim();
-        if (!s.isEmpty()) cleaned.add(s);
+        List<String> cleaned = new ArrayList<>();
+        for (String s : imeis) {
+            if (s == null) {
+                continue;
+            }
+            s = s.trim();
+            if (!s.isEmpty()) {
+                cleaned.add(s);
+            }
+        }
+        if (cleaned.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cleaned.size(); i += perLine) {
+            int end = Math.min(i + perLine, cleaned.size());
+            if (sb.length() > 0) {
+                sb.append("\n");
+            }
+            sb.append(String.join(", ", cleaned.subList(i, end)));
+        }
+        return sb.toString();
     }
-    if (cleaned.isEmpty()) return "";
-
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < cleaned.size(); i += perLine) {
-        int end = Math.min(i + perLine, cleaned.size());
-        if (sb.length() > 0) sb.append("\n");
-        sb.append(String.join(", ", cleaned.subList(i, end)));
-    }
-    return sb.toString();
-}
 }

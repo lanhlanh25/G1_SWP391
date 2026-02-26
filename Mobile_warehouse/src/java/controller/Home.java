@@ -430,7 +430,8 @@ public class Home extends HttpServlet {
                 break;
             }
             case "product-detail": {
-                int productId = Integer.parseInt(request.getParameter("id"));}
+                int productId = Integer.parseInt(request.getParameter("id"));
+            }
 
             // =========================
             // BRANDS
@@ -1205,6 +1206,71 @@ public class Home extends HttpServlet {
                 request.setAttribute("irItems", items);
                 break;
             }
+            case "request-delete-import-receipt": {
+                String importIdStr = request.getParameter("id");
+                if (importIdStr == null || importIdStr.trim().isEmpty()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=import-receipt-list&err=Missing+import+ID");
+                    return;
+                }
+
+                long importId = Long.parseLong(importIdStr.trim());
+
+                ImportReceiptDeleteRequestDAO dao = new ImportReceiptDeleteRequestDAO();
+                ImportReceiptDeleteRequest importInfo = dao.getImportInfoForRequest(importId);
+
+                if (importInfo == null) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=import-receipt-list&err=Import+receipt+not+found");
+                    return;
+                }
+
+                request.setAttribute("importInfo", importInfo);
+                request.setAttribute("currentUser", authUser.getFullName());
+                break;
+            }
+            case "request-delete-import-receipt-list": {
+                String importCodeSearch = request.getParameter("q");
+                String transactionTimeStr = request.getParameter("transactionTime");
+
+                java.sql.Date searchDate = null;
+                if (transactionTimeStr != null && !transactionTimeStr.trim().isEmpty()) {
+                    try {
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                        sdf.setLenient(false);
+                        java.util.Date utilDate = sdf.parse(transactionTimeStr.trim());
+                        searchDate = new java.sql.Date(utilDate.getTime());
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
+
+                int page = parseInt(request.getParameter("page"), 1);
+                if (page < 1) {
+                    page = 1;
+                }
+                int pageSize = 10;
+
+                ImportReceiptDeleteRequestDAO dao = new ImportReceiptDeleteRequestDAO();
+
+                int totalItems = dao.countRequests(importCodeSearch, searchDate);
+                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
+
+                List<ImportReceiptDeleteRequest> requests = dao.listRequests(importCodeSearch, searchDate, page, pageSize);
+
+                request.setAttribute("requests", requests);
+                request.setAttribute("q", importCodeSearch);
+                request.setAttribute("transactionTime", transactionTimeStr);
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                request.setAttribute("totalPages", totalPages);
+                request.setAttribute("totalItems", totalItems);
+                break;
+            }
             default:
                 break;
         }
@@ -1305,7 +1371,8 @@ public class Home extends HttpServlet {
                         return "brand_stats.jsp";
                     case "brand-stats-detail":
                         return "brand_stats_detail.jsp";
-
+                    case "product-detail":
+                        return "product_detail.jsp";
                     case "add_supplier":
                         return "add_supplier.jsp";
                     case "view_supplier":
