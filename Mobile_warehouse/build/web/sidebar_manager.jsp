@@ -29,6 +29,7 @@
             <summary style="cursor:pointer;">Export Receipt</summary>
             <ul style="margin-top:6px;">
                 <li><a href="<%=ctx%>/home?p=export-receipt-list">View Export Receipt List</a></li>
+                
             </ul>
         </details>
     </li>
@@ -71,6 +72,7 @@
             <ul style="margin-top:6px;">
                 
                 <li><a href="<%=ctx%>/home?p=export-request-list">View Export Request List</a></li>
+                <li><a href="<%=ctx%>/home?p=import-request-list">View Import Request List</a></li>
             </ul>
         </details>
     </li>

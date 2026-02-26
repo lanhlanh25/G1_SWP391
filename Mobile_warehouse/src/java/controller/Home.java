@@ -1090,7 +1090,9 @@ public class Home extends HttpServlet {
             }
             case "import-request-list": {
                 String roleName = (String) request.getSession().getAttribute("roleName");
-                if (roleName == null || !"SALE".equalsIgnoreCase(roleName)) {
+                if (roleName == null || !(roleName.equalsIgnoreCase("MANAGER")
+                        || roleName.equalsIgnoreCase("SALE")
+                        || roleName.equalsIgnoreCase("STAFF"))) {
                     response.sendError(403, "Forbidden");
                     return;
                 }
@@ -1127,7 +1129,10 @@ public class Home extends HttpServlet {
                     page = 1;
                 }
 
-                Long requestedBy = userId.longValue();
+                Long requestedBy = null;
+                if (roleName.equalsIgnoreCase("SALE")) {
+                    requestedBy = userId.longValue();
+                }
 
                 int totalItems = dao.count(q, reqDate, expDate, requestedBy);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
@@ -1319,6 +1324,11 @@ public class Home extends HttpServlet {
                     case "request-delete-import-receipt-list":
                         return "request_delete_import_receipt_list.jsp";
 
+                    case "import-request-list":
+                        return "view_import_request_list.jsp";
+                    case "import-request-detail":
+                        return "view_import_request_detail.jsp";
+
                     case "export-request-list":
                         return "view_export_request_list.jsp";
                     case "export-request-detail":
@@ -1394,7 +1404,10 @@ public class Home extends HttpServlet {
                         return "create_export_receipt.jsp";
                     case "export-receipt-detail":
                         return "export_receipt_detail.jsp";
-
+                    case "import-request-list":
+                        return "view_import_request_list.jsp";
+                    case "import-request-detail":
+                        return "view_import_request_detail.jsp";
                     case "view_supplier":
                         return "supplier_list.jsp";
                     case "supplier_detail":
