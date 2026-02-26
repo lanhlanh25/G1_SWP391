@@ -97,7 +97,7 @@
     <div class="card">
 
         <div class="topbar">
-            <div class="title">Create Export Request</div>
+            <div class="title">Create Import Request</div>
             <div style="display:flex;gap:10px;">
                 <button class="btn" type="submit" form="frm" name="action" value="submit">Submit Request</button>
             </div>
@@ -105,30 +105,30 @@
 
         <c:if test="${param.err == '1'}">
             <div class="msg" style="border-color:#b00020;color:#b00020;">
-                Submit failed. Please check inputs.
+                Submit failed. Please check inputs.<br/>
                 <c:out value="${param.errMsg}" />
             </div>
         </c:if>
 
-        <form id="frm" method="post" action="${ctx}/create-export-request">
+        <form id="frm" method="post" action="${ctx}/create-import-request">
             <div class="section">
                 <div class="sectionTitle">Request Information</div>
 
                 <div class="grid">
                     <div>Request Code</div>
-                    <input type="text" value="${erCreateCode}" readonly />
+                    <input type="text" value="${irCreateCode}" readonly />
                     <div>auto</div>
 
                     <div>Request Date</div>
-                    <input type="text" value="${erRequestDateDefault}" readonly />
+                    <input type="text" value="${irRequestDateDefault}" readonly />
                     <div>auto now</div>
 
                     <div>Created By</div>
-                    <input type="text" value="${erCreatedByName}" readonly />
+                    <input type="text" value="${irCreatedByName}" readonly />
                     <div>auto sale name</div>
 
-                    <div>Expected Export Date</div>
-                    <input type="date" name="expected_export_date" value="${param.expected_export_date}" />
+                    <div>Expected Import Date</div>
+                    <input type="date" name="expected_import_date" value="${param.expected_import_date}" />
                     <div></div>
 
                     <div>Note</div>
@@ -150,7 +150,7 @@
                         <tr>
                             <th style="width:70px;">No</th>
                             <th>Product Code</th>
-                            <th>SKU (option)</th>
+                            <th>SKU</th>
                             <th style="width:140px;">Request Qty</th>
                             <th style="width:120px;">Remove</th>
                         </tr>
@@ -165,14 +165,14 @@
         </form>
         <select id="tplProductOptions" style="display:none">
             <option value="">Select Product Code</option>
-            <c:forEach var="p" items="${erProducts}">
+            <c:forEach var="p" items="${irProducts}">
                 <option value="${p.productId}">${fn:escapeXml(p.productCode)}</option>
             </c:forEach>
         </select>
         <!-- SKU template: mỗi option có data-product -->
         <select id="tplSkuOptions" style="display:none">
             <option value="">Select SKU</option>
-            <c:forEach var="s" items="${erSkus}">
+            <c:forEach var="s" items="${irSkus}">
                 <option value="${s.skuId}" data-product="${s.productId}">
                     ${fn:escapeXml(s.skuCode)}
                 </option>

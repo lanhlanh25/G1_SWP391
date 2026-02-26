@@ -17,8 +17,10 @@
 
     <li><a href="${pageContext.request.contextPath}/inventory">Inventory Management</a></li>
 
-   <li> <a href="<%=ctx%>/home?p=create-export-request">Create Export Request</a></li>
- <li><a href="<%=ctx%>/home?p=export-request-list">View Export Request Lists</a></li>
+    <li> <a href="<%=ctx%>/home?p=create-export-request">Create Export Request</a></li>
+    <li><a href="<%=ctx%>/home?p=export-request-list">View Export Request Lists</a></li>
+    <li><a href="<%=ctx%>/home?p=create-import-request">Create Import Request</a></li>
+    <li><a href="<%=ctx%>/home?p=import-request-list">View Import Request List</a></li>
 
 
     <li><a href="<%=ctx%>/home?p=profile">My Profile</a></li>

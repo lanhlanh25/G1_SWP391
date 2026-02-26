@@ -7,7 +7,7 @@
 <style>
     .wrap{
         padding:16px;
-        font-family:Arial, Helvetica, sans-serif;
+        font-family:Arial,Helvetica,sans-serif;
         background:#f4f4f4;
     }
     .card{
@@ -42,13 +42,16 @@
         border:1px solid #333;
         background:#f6f6f6;
         cursor:pointer;
+        text-decoration:none;
+        color:#111;
+        display:inline-block;
     }
     table{
         width:100%;
         border-collapse:collapse;
         background:#fff;
     }
-    th, td{
+    th,td{
         border:1px solid #333;
         padding:8px;
         font-size:13px;
@@ -56,14 +59,6 @@
     }
     th{
         background:#eee;
-    }
-    .actions a{
-        display:inline-block;
-        padding:5px 14px;
-        border:1px solid #333;
-        background:#f6f6f6;
-        text-decoration:none;
-        color:#111;
     }
     .pager{
         display:flex;
@@ -92,10 +87,10 @@
 
 <div class="wrap">
     <div class="card">
-        <div class="title">Export Request List</div>
+        <div class="title">Import Request List</div>
 
         <form class="filters" method="get" action="${ctx}/home">
-            <input type="hidden" name="p" value="export-request-list"/>
+            <input type="hidden" name="p" value="import-request-list"/>
             <div class="field">
                 <label>Search</label>
                 <input type="text" name="q" placeholder="request code" value="${fn:escapeXml(q)}"/>
@@ -107,13 +102,13 @@
             </div>
 
             <div class="field">
-                <label>Expected Export Date</label>
+                <label>Expected Import Date</label>
                 <input type="date" name="expDate" value="${expDate}"/>
             </div>
 
             <div class="field">
                 <button class="btn" type="submit">Apply</button>
-                <a class="btn" href="<%=request.getContextPath()%>/home?p=export-request-list" style="text-decoration:none; color:#111; display:inline-block;">Reset</a>
+                <a class="btn" href="${ctx}/home?p=import-request-list">Reset</a>
             </div>
         </form>
 
@@ -123,57 +118,57 @@
                     <th>Request Code</th>
                     <th>Created By</th>
                     <th>Request Date</th>
-                    <th>Expected Export Date</th>
+                    <th>Expected Import Date</th>
                     <th>Total Items</th>
                     <th>Total Qty</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                <c:if test="${empty erList}">
-                    <tr>
-                        <td colspan="7">No requests found.</td>
-                    </tr>
-                </c:if>
+            <c:if test="${empty irList}">
+                <tr><td colspan="7">No requests found.</td></tr>
+            </c:if>
 
-                <c:forEach var="r" items="${erList}">
-                    <tr>
-                        <td>${fn:escapeXml(r.requestCode)}</td>
-                        <td>${fn:escapeXml(r.createdByName)}</td>
-                        <td><c:out value="${r.requestDate}"/></td>
-                        <td><c:out value="${r.expectedExportDate}"/></td>
-                        <td>${r.totalItems}</td>
-                        <td>${r.totalQty}</td>
-                        <td class="actions">
-                            <a href="${ctx}/home?p=export-request-detail&id=${r.requestId}">View</a>
-                        </td>
-                    </tr>
-                </c:forEach>
+            <c:forEach var="r" items="${irList}">
+                <tr>
+                    <td>${fn:escapeXml(r.requestCode)}</td>
+                    <td>${fn:escapeXml(r.createdByName)}</td>
+                    <td><c:out value="${r.requestDate}"/></td>
+                <td><c:out value="${r.expectedImportDate}"/></td>
+                <td>${r.totalItems}</td>
+                <td>${r.totalQty}</td>
+                <td>
+                    <a class="btn" href="${ctx}/home?p=import-request-detail&id=${r.requestId}">View</a>
+                </td>
+                </tr>
+            </c:forEach>
             </tbody>
         </table>
+
         <c:url var="baseUrl" value="/home">
-            <c:param name="p" value="export-request-list"/>
-            <c:param name="q" value="${q}" />
-            <c:param name="reqDate" value="${reqDate}" />
-            <c:param name="expDate" value="${expDate}" />
+            <c:param name="p" value="import-request-list"/>
+            <c:param name="q" value="${q}"/>
+            <c:param name="reqDate" value="${reqDate}"/>
+            <c:param name="expDate" value="${expDate}"/>
         </c:url>
 
         <div class="pager">
             <c:if test="${page > 1}">
-                <a class="btn" href="${baseUrl}&page=${page-1}">Prev</a>
+                <a class="pagebtn" href="${baseUrl}&page=${page-1}">Prev</a>
             </c:if>
 
             <c:forEach var="i" begin="1" end="${totalPages}">
-                <a class="btn ${i==page?'active':''}" href="${baseUrl}&page=${i}">${i}</a>
+                <a class="pagebtn ${i==page?'active':''}" href="${baseUrl}&page=${i}">${i}</a>
             </c:forEach>
 
             <c:if test="${page < totalPages}">
-                <a class="btn" href="${baseUrl}&page=${page+1}">Next</a>
+                <a class="pagebtn" href="${baseUrl}&page=${page+1}">Next</a>
             </c:if>
         </div>
 
         <div class="hint">
             Total: ${totalItems} item(s) • Page ${page}/${totalPages}
         </div>
+
     </div>
 </div>
