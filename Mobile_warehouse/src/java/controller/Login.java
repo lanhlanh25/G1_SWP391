@@ -56,7 +56,7 @@ public class Login extends HttpServlet {
         session.setAttribute("authUser", u);
         session.setAttribute("userId", u.getUserId());
         session.setAttribute("roleId", u.getRoleId());
-
+        session.setAttribute("fullName", u.getFullName());
        
         String roleName = dao.getRoleNameByUserId(u.getUserId());
         session.setAttribute("roleName", roleName);

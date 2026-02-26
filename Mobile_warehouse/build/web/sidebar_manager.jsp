@@ -29,6 +29,7 @@
             <summary style="cursor:pointer;">Export Receipt</summary>
             <ul style="margin-top:6px;">
                 <li><a href="<%=ctx%>/home?p=export-receipt-list">View Export Receipt List</a></li>
+                
             </ul>
         </details>
     </li>
@@ -65,6 +66,17 @@
         </details>
     </li>
 
-    <li><a href="<%=ctx%>/home?p=my-profile">My Profile</a></li>
-    <li><a href="<%=ctx%>/home?p=change-password">Change Password</a></li>
+    <li style="list-style:none;">
+        <details open>
+            <summary style="cursor:pointer;">Export Request Management</summary>
+            <ul style="margin-top:6px;">
+                
+                <li><a href="<%=ctx%>/home?p=export-request-list">View Export Request List</a></li>
+                <li><a href="<%=ctx%>/home?p=import-request-list">View Import Request List</a></li>
+            </ul>
+        </details>
+    </li>
+</li>
+<li><a href="<%=ctx%>/home?p=my-profile">My Profile</a></li>
+<li><a href="<%=ctx%>/home?p=change-password">Change Password</a></li>
 </ul>

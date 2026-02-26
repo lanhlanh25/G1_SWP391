@@ -239,7 +239,7 @@
                         <td>
                             <div class="actions">
                                 <!-- nếu bạn đã có trang receipt detail thì link vào đó -->
-                                <a class="btn" href="${pageContext.request.contextPath}/home?p=import_receipt_detail&id=${r.importId}">
+                                <a class="btn" href="${pageContext.request.contextPath}/import-receipt-detail?id=${r.importId}">
                                     View Receipt
                                 </a>
                             </div>

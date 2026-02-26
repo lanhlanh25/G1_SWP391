@@ -18,6 +18,7 @@ import model.ProductListItem;
 import model.ProductSimple;
 import model.IdName;
 import model.ProductLite;
+
 public class ProductDAO {
 
     public Product getProductById(int productId) {
@@ -232,30 +233,45 @@ public class ProductDAO {
         }
         return null;
     }
-public List<ProductLite> listActive() throws Exception {
-    List<ProductLite> list = new ArrayList<>();
 
-    // tuỳ schema: nếu products cũng dùng status
-    String sql = "SELECT product_id, product_code "
-               + "FROM products "
-               + "WHERE status = 'ACTIVE' "
-               + "ORDER BY product_code";
+    public List<ProductLite> listActive() throws Exception {
+        List<ProductLite> list = new ArrayList<>();
 
-    try (Connection con = DBContext.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
+        // tuỳ schema: nếu products cũng dùng status
+        String sql = "SELECT product_id, product_code "
+                + "FROM products "
+                + "WHERE status = 'ACTIVE' "
+                + "ORDER BY product_code";
 
-        while (rs.next()) {
-            ProductLite p = new ProductLite();
-            p.setProductId(rs.getLong("product_id"));
-            p.setProductCode(rs.getString("product_code"));
-            list.add(p);
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                ProductLite p = new ProductLite();
+                p.setProductId(rs.getLong("product_id"));
+                p.setProductCode(rs.getString("product_code"));
+                list.add(p);
+            }
         }
+        return list;
     }
-    return list;
-}
 
+    public List<Product> listForExportRequest() throws Exception {
+        List<Product> list = new ArrayList<>();
 
+        String sql = "SELECT product_id, product_code "
+                + "FROM products "
+                + "ORDER BY product_code";
 
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Product p = new Product();
+                p.setProductId(rs.getLong("product_id"));
+                p.setProductCode(rs.getString("product_code")); // ✅ quan trọng
+                list.add(p);
+            }
+        }
+        return list;
+    }
 
 }

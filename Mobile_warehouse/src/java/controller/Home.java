@@ -181,15 +181,19 @@ public class Home extends HttpServlet {
                     if (fromRaw != null && !fromRaw.isBlank()) {
                         fromDate = java.sql.Date.valueOf(fromRaw.trim());
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
                 try {
                     if (toRaw != null && !toRaw.isBlank()) {
                         toDate = java.sql.Date.valueOf(toRaw.trim());
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
 
                 // normalize for UI
-                if (status == null || status.isBlank()) status = "all";
+                if (status == null || status.isBlank()) {
+                    status = "all";
+                }
                 status = status.trim().toLowerCase();
 
                 // map for DB (nếu DB lưu PENDING/COMPLETED/CANCELLED)
@@ -199,14 +203,20 @@ public class Home extends HttpServlet {
                 }
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
 
                 int pageSize = 10;
 
                 int totalItems = dao.countList(q, statusForDao, fromDate, toDate);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) totalPages = 1;
-                if (page > totalPages) page = totalPages;
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
 
                 List<ExportReceiptListItem> rows = dao.list(q, statusForDao, fromDate, toDate, page, pageSize);
 
@@ -240,13 +250,19 @@ public class Home extends HttpServlet {
                 String st = request.getParameter("status");
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
 
                 int pageSize = 5;
                 int totalItems = userDAO.countUsersWithRole(q, st);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) totalPages = 1;
-                if (page > totalPages) page = totalPages;
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
 
                 List<UserRoleDetail> users = userDAO.getAllUsersWithRole(q, st, page, pageSize);
 
@@ -305,7 +321,9 @@ public class Home extends HttpServlet {
                     st = "";
                 }
 
-                if (keyword == null) keyword = "";
+                if (keyword == null) {
+                    keyword = "";
+                }
                 keyword = keyword.trim();
 
                 List<Role> roles = roleDAO.searchRoles(keyword, status);
@@ -380,15 +398,21 @@ public class Home extends HttpServlet {
                 }
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
 
                 int pageSize = 5;
 
                 ProductDAO pdao = new ProductDAO();
                 int totalItems = pdao.count(q, brandId, status);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) totalPages = 1;
-                if (page > totalPages) page = totalPages;
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
 
                 List<ProductListItem> products = pdao.list(q, brandId, status, page, pageSize);
 
@@ -406,7 +430,8 @@ public class Home extends HttpServlet {
                 break;
             }
             case "product-detail": {
-                int productId = Integer.parseInt(request.getParameter("id"));}
+                int productId = Integer.parseInt(request.getParameter("id"));
+            }
 
             // =========================
             // BRANDS
@@ -418,14 +443,20 @@ public class Home extends HttpServlet {
                 String sortOrder = request.getParameter("sortOrder");
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
 
                 int pageSize = 5;
 
                 int totalItems = brandDAO.count(q, st);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) totalPages = 1;
-                if (page > totalPages) page = totalPages;
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
 
                 List<Brand> brands = brandDAO.list(q, st, sortBy, sortOrder, page, pageSize);
 
@@ -476,9 +507,15 @@ public class Home extends HttpServlet {
                 String brandIdRaw = request.getParameter("brandId");
                 String range = request.getParameter("range");
 
-                if (range == null || range.isBlank()) range = "all";
-                if (sortBy == null || sortBy.isBlank()) sortBy = "stock";
-                if (sortOrder == null || sortOrder.isBlank()) sortOrder = "DESC";
+                if (range == null || range.isBlank()) {
+                    range = "all";
+                }
+                if (sortBy == null || sortBy.isBlank()) {
+                    sortBy = "stock";
+                }
+                if (sortOrder == null || sortOrder.isBlank()) {
+                    sortOrder = "DESC";
+                }
 
                 Date fromDate = null;
                 Date toDate = null;
@@ -524,15 +561,21 @@ public class Home extends HttpServlet {
                 }
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
 
                 int pageSize = 5;
                 int lowThreshold = 5;
 
                 int totalItems = statsDAO.countBrands(q, brandStatus, brandId, fromDate, toDate);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) totalPages = 1;
-                if (page > totalPages) page = totalPages;
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
 
                 BrandStatsSummary summary = statsDAO.getSummary(q, brandStatus, brandId, lowThreshold, fromDate, toDate);
                 List<BrandStatsRow> rows = statsDAO.listBrandStats(q, brandStatus, brandId, sortBy, sortOrder, page, pageSize, lowThreshold, fromDate, toDate);
@@ -570,11 +613,17 @@ public class Home extends HttpServlet {
 
                 String dSortBy = request.getParameter("dSortBy");
                 String dSortOrder = request.getParameter("dSortOrder");
-                if (dSortBy == null || dSortBy.isBlank()) dSortBy = "stock";
-                if (dSortOrder == null || dSortOrder.isBlank()) dSortOrder = "DESC";
+                if (dSortBy == null || dSortBy.isBlank()) {
+                    dSortBy = "stock";
+                }
+                if (dSortOrder == null || dSortOrder.isBlank()) {
+                    dSortOrder = "DESC";
+                }
 
                 String range = request.getParameter("listRange");
-                if (range == null || range.isBlank()) range = "all";
+                if (range == null || range.isBlank()) {
+                    range = "all";
+                }
 
                 Date fromDate = null, toDate = null;
                 LocalDate today = LocalDate.now();
@@ -638,19 +687,29 @@ public class Home extends HttpServlet {
                 String sortBy = request.getParameter("sortBy");
                 String sortOrder = request.getParameter("sortOrder");
 
-                if (sortBy == null || sortBy.isBlank()) sortBy = "newest";
-                if (sortOrder == null || sortOrder.isBlank()) sortOrder = "DESC";
+                if (sortBy == null || sortBy.isBlank()) {
+                    sortBy = "newest";
+                }
+                if (sortOrder == null || sortOrder.isBlank()) {
+                    sortOrder = "DESC";
+                }
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
 
                 int pageSize = 5;
 
                 try {
                     int totalItems = supplierDAO.countSuppliers(q, status);
                     int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                    if (totalPages < 1) totalPages = 1;
-                    if (page > totalPages) page = totalPages;
+                    if (totalPages < 1) {
+                        totalPages = 1;
+                    }
+                    if (page > totalPages) {
+                        page = totalPages;
+                    }
 
                     List<SupplierListItem> suppliers = supplierDAO.searchSuppliers(q, status, sortBy, sortOrder, page, pageSize);
 
@@ -801,15 +860,19 @@ public class Home extends HttpServlet {
                     if (fromRaw != null && !fromRaw.isBlank()) {
                         fromDate = java.sql.Date.valueOf(fromRaw.trim());
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
                 try {
                     if (toRaw != null && !toRaw.isBlank()) {
                         toDate = java.sql.Date.valueOf(toRaw.trim());
                     }
-                } catch (Exception ignore) {}
+                } catch (Exception ignore) {
+                }
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
                 int pageSize = 5;
 
                 SupplierDAO supplierDAO = new SupplierDAO();
@@ -822,11 +885,15 @@ public class Home extends HttpServlet {
 
                     int totalItems = supplierDAO.countImportReceiptsHistory(supplierId, q, fromDate, toDate, status);
                     int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                    if (totalPages < 1) totalPages = 1;
-                    if (page > totalPages) page = totalPages;
+                    if (totalPages < 1) {
+                        totalPages = 1;
+                    }
+                    if (page > totalPages) {
+                        page = totalPages;
+                    }
 
-                    List<SupplierReceiptHistoryItem> receipts =
-                            supplierDAO.searchImportReceiptsHistory(supplierId, q, fromDate, toDate, status, page, pageSize);
+                    List<SupplierReceiptHistoryItem> receipts
+                            = supplierDAO.searchImportReceiptsHistory(supplierId, q, fromDate, toDate, status, page, pageSize);
 
                     request.setAttribute("supplier", sup);
                     request.setAttribute("receipts", receipts);
@@ -848,10 +915,297 @@ public class Home extends HttpServlet {
                 }
                 break;
             }
+            // =========================
+// EXPORT REQUEST (MANAGER + SALE)
+// =========================
+            case "export-request-list": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !(roleName.equalsIgnoreCase("MANAGER")
+                        || roleName.equalsIgnoreCase("SALE")
+                        || roleName.equalsIgnoreCase("STAFF"))) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
 
-            // ========================================
-            // ✅ REQUEST DELETE IMPORT RECEIPT
-            // ========================================
+                Integer userId = (Integer) request.getSession().getAttribute("userId");
+                ExportRequestDAO dao = new ExportRequestDAO();
+
+                String q = request.getParameter("q");
+                String reqDateRaw = request.getParameter("reqDate");
+                String expDateRaw = request.getParameter("expDate");
+
+                java.sql.Date reqDate = null, expDate = null;
+                try {
+                    if (reqDateRaw != null && !reqDateRaw.isBlank()) {
+                        reqDate = java.sql.Date.valueOf(reqDateRaw.trim());
+                    }
+                } catch (Exception ignore) {
+                }
+                try {
+                    if (expDateRaw != null && !expDateRaw.isBlank()) {
+                        expDate = java.sql.Date.valueOf(expDateRaw.trim());
+                    }
+                } catch (Exception ignore) {
+                }
+
+                int page = parseInt(request.getParameter("page"), 1);
+                int pageSize = 10;
+
+                boolean onlyMine = roleName.equalsIgnoreCase("SALE");
+                Long requestedBy = null;
+                if (onlyMine) {
+                    if (userId == null) {
+                        response.sendRedirect(request.getContextPath() + "/login.jsp");
+                        return;
+                    }
+                    requestedBy = userId.longValue();
+                }
+
+                int totalItems = dao.count(q, reqDate, expDate, requestedBy);
+                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+
+                if (page < 1) {
+                    page = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
+
+                int offset = (page - 1) * pageSize;
+
+                List<ExportRequest> list = dao.list(q, reqDate, expDate, requestedBy, offset, pageSize);
+
+                request.setAttribute("erList", list);
+                request.setAttribute("q", q);
+                request.setAttribute("reqDate", reqDateRaw);
+                request.setAttribute("expDate", expDateRaw);
+
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                request.setAttribute("totalItems", totalItems);
+                request.setAttribute("totalPages", totalPages);
+                break;
+            }
+            case "export-request-detail": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !(roleName.equalsIgnoreCase("MANAGER")
+                        || roleName.equalsIgnoreCase("SALE")
+                        || roleName.equalsIgnoreCase("STAFF"))) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                String idRaw = request.getParameter("id");
+                if (idRaw == null || idRaw.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=export-request-list&msg=Missing id");
+                    return;
+                }
+                long requestId;
+                try {
+                    requestId = Long.parseLong(idRaw.trim());
+                } catch (Exception e) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=export-request-list&msg=Invalid id");
+                    return;
+                }
+
+                ExportRequestDAO dao = new ExportRequestDAO();
+                ExportRequest header = dao.getHeader(requestId);
+                if (header == null) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=export-request-list&msg=Request not found");
+                    return;
+                }
+
+                // ✅ Sale chỉ xem request của mình
+                if (roleName.equalsIgnoreCase("SALE")) {
+                    Integer userId = (Integer) request.getSession().getAttribute("userId");
+                    if (userId == null || header.getCreatedBy() != userId.longValue()) {
+                        response.sendError(403, "Forbidden");
+                        return;
+                    }
+                }
+
+                List<ExportRequestItem> items = dao.listItems(requestId);
+
+                request.setAttribute("erHeader", header);
+                request.setAttribute("erItems", items);
+                break;
+            }
+            case "create-export-request": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !roleName.equalsIgnoreCase("SALE")) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                ProductDAO pdao = new ProductDAO();
+                ProductSkuDAO skdao = new ProductSkuDAO();
+                ExportRequestCreateDAO dao = new ExportRequestCreateDAO();
+
+                request.setAttribute("erProducts", pdao.listForExportRequest()); // ✅ List<Product>
+                request.setAttribute("erSkus", skdao.listActive());
+
+                try (Connection con = DBContext.getConnection()) {
+                    request.setAttribute("erCreateCode", dao.generateRequestCode(con));
+                }
+
+                String createdByName = String.valueOf(request.getSession().getAttribute("fullName"));
+                request.setAttribute("erCreatedByName", createdByName);
+
+                request.setAttribute("erRequestDateDefault", LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
+                break;
+            }
+            case "create-import-request": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !"SALE".equalsIgnoreCase(roleName)) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                ProductDAO pdao = new ProductDAO();
+                ProductSkuDAO skdao = new ProductSkuDAO();
+                ImportRequestCreateDAO dao = new ImportRequestCreateDAO();
+
+                request.setAttribute("irProducts", pdao.listForExportRequest());
+                request.setAttribute("irSkus", skdao.listActive());
+
+                try (Connection con = DBContext.getConnection()) {
+                    request.setAttribute("irCreateCode", dao.generateRequestCode(con));
+                }
+
+                // created by name
+                HttpSession session = request.getSession(false);
+                String createdByName = "Sale User";
+                if (session != null && session.getAttribute("fullName") != null) {
+                    String x = String.valueOf(session.getAttribute("fullName")).trim();
+                    if (!x.isBlank() && !"null".equalsIgnoreCase(x)) {
+                        createdByName = x;
+                    }
+                }
+                request.setAttribute("irCreatedByName", createdByName);
+
+                request.setAttribute("irRequestDateDefault",
+                        LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
+
+                break;
+            }
+            case "import-request-list": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !(roleName.equalsIgnoreCase("MANAGER")
+                        || roleName.equalsIgnoreCase("SALE")
+                        || roleName.equalsIgnoreCase("STAFF"))) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                Integer userId = (Integer) request.getSession().getAttribute("userId");
+                if (userId == null) {
+                    response.sendRedirect(request.getContextPath() + "/login.jsp");
+                    return;
+                }
+
+                ImportRequestDAO dao = new ImportRequestDAO();
+
+                String q = request.getParameter("q");
+                String reqDateRaw = request.getParameter("reqDate");
+                String expDateRaw = request.getParameter("expDate");
+
+                java.sql.Date reqDate = null, expDate = null;
+                try {
+                    if (reqDateRaw != null && !reqDateRaw.isBlank()) {
+                        reqDate = java.sql.Date.valueOf(reqDateRaw.trim());
+                    }
+                } catch (Exception ignore) {
+                }
+                try {
+                    if (expDateRaw != null && !expDateRaw.isBlank()) {
+                        expDate = java.sql.Date.valueOf(expDateRaw.trim());
+                    }
+                } catch (Exception ignore) {
+                }
+
+                int page = parseInt(request.getParameter("page"), 1);
+                int pageSize = 10;
+                if (page < 1) {
+                    page = 1;
+                }
+
+                Long requestedBy = null;
+                if (roleName.equalsIgnoreCase("SALE")) {
+                    requestedBy = userId.longValue();
+                }
+
+                int totalItems = dao.count(q, reqDate, expDate, requestedBy);
+                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
+
+                int offset = (page - 1) * pageSize;
+
+                List<ImportRequest> list = dao.list(q, reqDate, expDate, requestedBy, offset, pageSize);
+
+                request.setAttribute("irList", list);
+                request.setAttribute("q", q);
+                request.setAttribute("reqDate", reqDateRaw);
+                request.setAttribute("expDate", expDateRaw);
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                request.setAttribute("totalItems", totalItems);
+                request.setAttribute("totalPages", totalPages);
+                break;
+            }
+            case "import-request-detail": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !(roleName.equalsIgnoreCase("SALE")
+                        || roleName.equalsIgnoreCase("MANAGER")
+                        || roleName.equalsIgnoreCase("STAFF"))) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                String idRaw = request.getParameter("id");
+                if (idRaw == null || idRaw.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=import-request-list&msg=Missing id");
+                    return;
+                }
+
+                long requestId;
+                try {
+                    requestId = Long.parseLong(idRaw.trim());
+                } catch (Exception e) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=import-request-list&msg=Invalid id");
+                    return;
+                }
+
+                ImportRequestDAO dao = new ImportRequestDAO();
+
+                ImportRequest header = dao.getHeader(requestId);
+                if (header == null) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=import-request-list&msg=Request not found");
+                    return;
+                }
+
+                // ✅ SALE chỉ được xem request của mình
+                if (roleName.equalsIgnoreCase("SALE")) {
+                    Integer userId = (Integer) request.getSession().getAttribute("userId");
+                    if (userId == null || header.getCreatedBy() != userId.longValue()) {
+                        response.sendError(403, "Forbidden");
+                        return;
+                    }
+                }
+
+                List<ImportRequestItem> items = dao.listItems(requestId);
+
+                request.setAttribute("irHeader", header);
+                request.setAttribute("irItems", items);
+                break;
+            }
             case "request-delete-import-receipt": {
                 String importIdStr = request.getParameter("id");
                 if (importIdStr == null || importIdStr.trim().isEmpty()) {
@@ -873,7 +1227,6 @@ public class Home extends HttpServlet {
                 request.setAttribute("currentUser", authUser.getFullName());
                 break;
             }
-
             case "request-delete-import-receipt-list": {
                 String importCodeSearch = request.getParameter("q");
                 String transactionTimeStr = request.getParameter("transactionTime");
@@ -891,15 +1244,21 @@ public class Home extends HttpServlet {
                 }
 
                 int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) page = 1;
+                if (page < 1) {
+                    page = 1;
+                }
                 int pageSize = 10;
 
                 ImportReceiptDeleteRequestDAO dao = new ImportReceiptDeleteRequestDAO();
 
                 int totalItems = dao.countRequests(importCodeSearch, searchDate);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) totalPages = 1;
-                if (page > totalPages) page = totalPages;
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
 
                 List<ImportReceiptDeleteRequest> requests = dao.listRequests(importCodeSearch, searchDate, page, pageSize);
 
@@ -912,7 +1271,6 @@ public class Home extends HttpServlet {
                 request.setAttribute("totalItems", totalItems);
                 break;
             }
-
             default:
                 break;
         }
@@ -920,7 +1278,9 @@ public class Home extends HttpServlet {
 
     private int parseInt(String raw, int def) {
         try {
-            if (raw == null || raw.isBlank()) return def;
+            if (raw == null || raw.isBlank()) {
+                return def;
+            }
             return Integer.parseInt(raw.trim());
         } catch (Exception e) {
             return def;
@@ -941,8 +1301,12 @@ public class Home extends HttpServlet {
     }
 
     private String resolveContent(String role, String p) {
-        if (role == null) role = "";
-        if (p == null) p = "";
+        if (role == null) {
+            role = "";
+        }
+        if (p == null) {
+            p = "";
+        }
         role = role.toUpperCase();
 
         switch (role) {
@@ -1007,7 +1371,8 @@ public class Home extends HttpServlet {
                         return "brand_stats.jsp";
                     case "brand-stats-detail":
                         return "brand_stats_detail.jsp";
-
+                    case "product-detail":
+                        return "product_detail.jsp";
                     case "add_supplier":
                         return "add_supplier.jsp";
                     case "view_supplier":
@@ -1020,7 +1385,8 @@ public class Home extends HttpServlet {
                         return "inactive_supplier.jsp";
                     case "view_history":
                         return "supplier_history.jsp";
-
+                    case "import-receipt-detail":
+                        return "view_import_detail.jsp";
                     case "create-import-receipt":
                         return "create_import_receipt.jsp";
                     case "import-receipt-list":
@@ -1028,12 +1394,20 @@ public class Home extends HttpServlet {
                     case "request-delete-import-receipt-list":
                         return "request_delete_import_receipt_list.jsp";
 
-                        
+                    case "import-request-list":
+                        return "view_import_request_list.jsp";
+                    case "import-request-detail":
+                        return "view_import_request_detail.jsp";
+
+                    case "export-request-list":
+                        return "view_export_request_list.jsp";
+                    case "export-request-detail":
+                        return "view_export_request_detail.jsp";
                     case "export-receipt-list":
                         return "export_receipt_list.jsp";
                     case "export-receipt-detail":
                         return "export_receipt_detail.jsp";
-                        
+
                     case "my-profile":
                     case "profile":
                         return "view_profile.jsp";
@@ -1062,12 +1436,17 @@ public class Home extends HttpServlet {
                     case "create-export-request":
                         return "create_export_request.jsp";
                     case "export-request-list":
-                        return "export_request_list.jsp";
+                        return "view_export_request_list.jsp";
                     case "export-request-detail":
-                        return "export_request_detail.jsp";
+                        return "view_export_request_detail.jsp";
                     case "export-request-edit":
                         return "export_request_edit.jsp";
-
+                    case "create-import-request":
+                        return "create_import_request.jsp";
+                    case "import-request-list":
+                        return "view_import_request_list.jsp";
+                    case "import-request-detail":
+                        return "view_import_request_detail.jsp";
                     default:
                         return null;
                 }
@@ -1083,16 +1462,22 @@ public class Home extends HttpServlet {
                         return "import_receipt_list.jsp";
                     case "request-delete-import-receipt":
                         return "request_delete_import_receipt.jsp";
-
+                    case "create-export-request":
+                        return "create_export_request.jsp";
                     case "export-request-list":
-                        return "export_request_list.jsp";
+                        return "view_export_request_list.jsp";
+                    case "export-request-detail":
+                        return "view_export_request_detail.jsp";
                     case "export-receipt-list":
                         return "export_receipt_list.jsp";
                     case "create-export-receipt":
                         return "create_export_receipt.jsp";
                     case "export-receipt-detail":
                         return "export_receipt_detail.jsp";
-
+                    case "import-request-list":
+                        return "view_import_request_list.jsp";
+                    case "import-request-detail":
+                        return "view_import_request_detail.jsp";
                     case "view_supplier":
                         return "supplier_list.jsp";
                     case "supplier_detail":
