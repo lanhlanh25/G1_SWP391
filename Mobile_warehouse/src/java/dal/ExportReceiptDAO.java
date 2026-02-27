@@ -250,7 +250,7 @@ public class ExportReceiptDAO {
     // =========================
     // CREATE EXPORT RECEIPT (manual)
     // =========================
-public long createReceipt(Connection con,
+    public long createReceipt(Connection con,
         Long requestId,
         long createdBy,
         Timestamp exportDate,
@@ -262,27 +262,58 @@ public long createReceipt(Connection con,
         VALUES (?, ?, ?, ?, ?, ?)
     """;
 
-    String exportCode = generateExportCode(con, exportDate);
+    int attempts = 0;
+    while (attempts < 8) {
+        attempts++;
 
-    try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        String exportCode = generateExportCode(con);
 
-        if (requestId == null) ps.setNull(1, Types.BIGINT);
-        else ps.setLong(1, requestId);
+        try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            if (requestId == null) ps.setNull(1, Types.BIGINT);
+            else ps.setLong(1, requestId);
 
-        ps.setString(2, exportCode);
-        ps.setLong(3, createdBy);
-        ps.setTimestamp(4, exportDate);
+            ps.setString(2, exportCode);
+            ps.setLong(3, createdBy);
+            ps.setTimestamp(4, exportDate); // vẫn lưu export_date theo user chọn
+            ps.setString(5, note == null ? "" : note);
+            ps.setString(6, (status == null || status.isBlank()) ? "DRAFT" : status);
 
-        ps.setString(5, note == null ? "" : note);
-        ps.setString(6, (status == null || status.isBlank()) ? "DRAFT" : status);
+            ps.executeUpdate();
 
-        ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) return rs.getLong(1);
+            }
+            throw new SQLException("No generated key");
 
-        try (ResultSet rs = ps.getGeneratedKeys()) {
-            if (rs.next()) return rs.getLong(1);
+        } catch (SQLException ex) {
+            // MySQL duplicate key
+            if (ex.getErrorCode() == 1062) continue;
+            throw ex;
         }
     }
-    throw new SQLException("Cannot create export receipt");
+
+    throw new SQLException("Cannot create export receipt: export_code duplicated too many times");
+}
+
+    public String generateExportCode(Connection con) throws SQLException {
+    String sql = """
+        SELECT COUNT(*)
+        FROM export_receipts
+        WHERE DATE(created_at) = CURDATE()
+        FOR UPDATE
+    """;
+
+    int count = 0;
+    try (PreparedStatement ps = con.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        if (rs.next()) count = rs.getInt(1);
+    }
+
+    String ymd = java.time.LocalDate.now()
+            .format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
+
+    String seq = String.format("%03d", count + 1);
+    return "EX-" + ymd + "-" + seq;
 }
 
     public long createLine(Connection con,
@@ -344,30 +375,6 @@ public long createReceipt(Connection con,
         }
     }
 
-public String generateExportCode(Connection con, Timestamp exportDate) throws SQLException {
-    if (exportDate == null) exportDate = new Timestamp(System.currentTimeMillis());
-
-    String sql = """
-        SELECT COUNT(*)
-        FROM export_receipts
-        WHERE DATE(export_date) = DATE(?)
-    """;
-
-    int count = 0;
-    try (PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setTimestamp(1, exportDate);
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) count = rs.getInt(1);
-        }
-    }
-
-    java.time.LocalDate d = exportDate.toLocalDateTime().toLocalDate();
-    String ymd = d.format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
-    String seq = String.format("%03d", count + 1);
-
-    return "EX-" + ymd + "-" + seq;
-}
-
     public Long findProductIdByCode(Connection con, String productCode) throws Exception {
         String sql = "SELECT product_id FROM products WHERE product_code = ?";
         try (var ps = con.prepareStatement(sql)) {
@@ -405,10 +412,10 @@ public String generateExportCode(Connection con, Timestamp exportDate) throws SQ
             }
         }
     }
-    
+
     // 1) List IMEIs available in stock for a SKU (ACTIVE only)
-public List<String> listAvailableImeisBySku(Connection con, long skuId) throws SQLException {
-    String sql = """
+    public List<String> listAvailableImeisBySku(Connection con, long skuId) throws SQLException {
+        String sql = """
         SELECT imei
         FROM product_units
         WHERE sku_id = ?
@@ -416,29 +423,31 @@ public List<String> listAvailableImeisBySku(Connection con, long skuId) throws S
         ORDER BY imei ASC
         LIMIT 500
     """;
-    List<String> out = new ArrayList<>();
-    try (PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setLong(1, skuId);
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) out.add(rs.getString(1));
+        List<String> out = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, skuId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(rs.getString(1));
+                }
+            }
         }
+        return out;
     }
-    return out;
-}
 
 // 2) Mark an IMEI as exported (ACTIVE -> INACTIVE). Return true if success.
-public boolean markUnitInactive(Connection con, long skuId, String imei) throws SQLException {
-    String sql = """
+    public boolean markUnitInactive(Connection con, long skuId, String imei) throws SQLException {
+        String sql = """
         UPDATE product_units
         SET unit_status = 'INACTIVE', updated_at = CURRENT_TIMESTAMP
         WHERE sku_id = ?
           AND imei = ?
           AND unit_status = 'ACTIVE'
     """;
-    try (PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setLong(1, skuId);
-        ps.setString(2, imei);
-        return ps.executeUpdate() == 1;
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, skuId);
+            ps.setString(2, imei);
+            return ps.executeUpdate() == 1;
+        }
     }
-}
 }

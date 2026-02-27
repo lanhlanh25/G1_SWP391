@@ -916,8 +916,8 @@ public class Home extends HttpServlet {
                 break;
             }
             // =========================
-// EXPORT REQUEST (MANAGER + SALE)
-// =========================
+           // EXPORT REQUEST (MANAGER + SALE)
+            // =========================
             case "export-request-list": {
                 String roleName = (String) request.getSession().getAttribute("roleName");
                 if (roleName == null || !(roleName.equalsIgnoreCase("MANAGER")
