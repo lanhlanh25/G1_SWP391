@@ -17,8 +17,8 @@ public class ExportReceiptDetailLine {
     private String skuCode;
     private int qty;
     private List<String> imeis;
+    
 
-    // optional (nếu bạn add cột export_receipt_lines.item_note sau)
     private String itemNote;
 
     private String createdByName;

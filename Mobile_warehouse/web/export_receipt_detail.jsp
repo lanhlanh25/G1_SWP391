@@ -55,7 +55,7 @@
   <div class="frame">
 
     <div class="topbar">
-      <a class="btn" href="${ctx}/export-receipt-list">← Back</a>
+      <a class="btn" href="${ctx}/home?p=export-receipt-list">← Back</a>
       <div class="title">View Export Receipt Detail</div>
     </div>
 
@@ -64,26 +64,26 @@
       <div class="badge role">Role: <c:out value="${role}"/></div>
     </div>
 
-    <c:if test="${empty header}">
-      <div class="muted">No data (receipt not found).</div>
-    </c:if>
+    <c:if test="${empty receiptHeader}">
+  <div class="muted">No data (receipt not found).</div>
+</c:if>
 
-    <c:if test="${not empty header}">
+    <c:if test="${not empty receiptHeader}">
       <div class="infoGrid">
         <div class="lbl">Export Code</div>
-        <div class="val"><c:out value="${header.exportCode}"/></div>
+        <div class="val"><c:out value="${receiptHeader.exportCode}"/></div>
 
         <div class="lbl">Transaction time</div>
-        <div class="val"><c:out value="${header.exportDateUi}"/></div>
+        <div class="val"><c:out value="${receiptHeader.exportDateUi}"/></div>
 
         <div class="lbl">Request Code</div>
         <div class="val">
           <c:choose>
-            <c:when test="${empty header.requestCode}">
+            <c:when test="${empty receiptHeader.requestCode}">
               <span class="muted">N/A</span>
             </c:when>
             <c:otherwise>
-              <c:out value="${header.requestCode}"/>
+              <c:out value="${receiptHeader.requestCode}"/>
             </c:otherwise>
           </c:choose>
         </div>
@@ -91,17 +91,17 @@
         <div class="lbl">Note</div>
         <div class="val">
           <c:choose>
-            <c:when test="${empty header.note}">
+            <c:when test="${empty receiptHeader.note}">
               <span class="muted">-</span>
             </c:when>
             <c:otherwise>
-              <c:out value="${header.note}"/>
+              <c:out value="${receiptHeader.note}"/>
             </c:otherwise>
           </c:choose>
         </div>
 
         <div class="lbl">Status</div>
-        <div class="val"><c:out value="${header.status}"/></div>
+        <div class="val"><c:out value="${receiptHeader.status}"/></div>
       </div>
 
       <div class="sectionTitle">Export Items</div>

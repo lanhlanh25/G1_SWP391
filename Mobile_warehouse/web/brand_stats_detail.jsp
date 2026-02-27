@@ -9,7 +9,7 @@
 
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<style>
+ <style>
     .wrap{
         padding:16px;
     }

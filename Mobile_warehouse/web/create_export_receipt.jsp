@@ -187,6 +187,12 @@
                 gap:6px;
                 align-items:center;
             }
+            .imeiRow select{
+                flex:1;
+                min-width:200px;
+                padding:4px 6px;
+                font-size:12px;
+            }
             .imeiRow span{
                 min-width:50px;
                 font-size:11px;
@@ -217,11 +223,11 @@
                     <div class="title">Create Export Receipt</div>
                 </div>
 
-                <c:if test="${not empty err}">
-                    <div class="err">${fn:escapeXml(err)}</div>
+                <c:if test="${not empty param.err}">
+                    <div class="err">${fn:escapeXml(param.err)}</div>
                 </c:if>
-                <c:if test="${not empty msg}">
-                    <div class="ok">${fn:escapeXml(msg)}</div>
+                <c:if test="${not empty param.msg}">
+                    <div class="ok">${fn:escapeXml(param.msg)}</div>
                 </c:if>
 
                 <div class="sectionTitle">Export Form</div>
@@ -300,7 +306,8 @@
                         <input type="hidden" name="mode" value="excel"/>
 
                         <div class="hint">
-                            <b>Excel Format:</b> 3 columns: <b>product_code</b>, <b>sku_code</b>, <b>imei</b> (IMEI 15 digits)
+                            <b>Excel Format:</b> 4 columns:
+                            <b>product_code</b>, <b>sku_code</b>, <b>imei</b> (15 digits), <b>item_note</b> (optional)
                         </div>
 
                         <div class="row">
@@ -351,14 +358,12 @@
 
         <script>
             (function () {
-                // Products: DO NOT use productName (your DAO may return ProductLite only)
                 const PRODUCTS = [
             <c:forEach var="p" items="${products}" varStatus="st">
                 { id: ${p.productId}, code: "${fn:escapeXml(p.productCode)}" }<c:if test="${!st.last}">,</c:if>
             </c:forEach>
                 ];
 
-                // SKUs: must have skuId, skuCode, productId
                 const SKUS = [
             <c:forEach var="k" items="${skus}" varStatus="st">
                 { id: ${k.skuId}, code: "${fn:escapeXml(k.skuCode)}", productId: ${k.productId} }<c:if test="${!st.last}">,</c:if>
@@ -369,9 +374,20 @@
                 const manualForm = document.getElementById("manualForm");
                 let rowCounter = 0;
 
+                async function fetchImeisBySku(skuId) {
+                    try {
+                        const res = await fetch("${ctx}/api/available-imeis?skuId=" + encodeURIComponent(skuId));
+                        if (!res.ok)
+                            return [];
+                        const data = await res.json();
+                        return Array.isArray(data) ? data : [];
+                    } catch (e) {
+                        return [];
+                    }
+                }
+
                 function buildProductSelect() {
                     const sel = document.createElement("select");
-                    sel.name = "productId";
                     sel.required = true;
                     sel.innerHTML = '<option value="">-- Select Product Code --</option>';
                     PRODUCTS.forEach(p => {
@@ -382,7 +398,6 @@
 
                 function buildSkuSelect() {
                     const sel = document.createElement("select");
-                    sel.name = "skuId";
                     sel.required = true;
                     sel.innerHTML = '<option value="">-- Select SKU --</option>';
                     return sel;
@@ -397,7 +412,7 @@
                     });
                 }
 
-                function buildImeiBox(rowIdx, qty) {
+                function buildImeiBox(rowIdx, qty, imeiOptions) {
                     const box = document.createElement("div");
                     box.className = "imeiBox";
 
@@ -408,28 +423,21 @@
                         const label = document.createElement("span");
                         label.textContent = "Imei " + i + ":";
 
-                        const input = document.createElement("input");
-                        input.type = "text";
-                        input.name = "imei_" + rowIdx + "_" + i;   // parse by rowIdx & order
-                        input.placeholder = "15 digits";
-                        input.required = true;
-                        input.maxLength = 15;
+                        const sel = document.createElement("select");
+                        sel.name = "imei_" + rowIdx + "_" + i;
+                        sel.required = true;
 
-                        input.addEventListener("input", function () {
-                            this.value = this.value.replace(/\D/g, "").slice(0, 15);
-                            if (this.value.length === 15) {
-                                this.classList.add("valid");
-                                this.classList.remove("invalid");
-                            } else if (this.value.length > 0) {
-                                this.classList.add("invalid");
-                                this.classList.remove("valid");
-                            } else {
-                                this.classList.remove("valid", "invalid");
-                            }
+                        sel.innerHTML = '<option value="">-- Select IMEI --</option>';
+                        sel.addEventListener("change", syncImeiDisabledOptions);
+                        (imeiOptions || []).forEach(v => {
+                            const opt = document.createElement("option");
+                            opt.value = v;
+                            opt.textContent = v;
+                            sel.appendChild(opt);
                         });
 
                         row.appendChild(label);
-                        row.appendChild(input);
+                        row.appendChild(sel);
                         box.appendChild(row);
                     }
                     return box;
@@ -456,10 +464,12 @@
 
                     const tdProd = document.createElement("td");
                     const selProd = buildProductSelect();
+                    selProd.name = "productId_" + rowIdx;
                     tdProd.appendChild(selProd);
 
                     const tdSku = document.createElement("td");
                     const selSku = buildSkuSelect();
+                    selSku.name = "skuId_" + rowIdx;
                     tdSku.appendChild(selSku);
 
                     const hidden = document.createElement("input");
@@ -468,39 +478,25 @@
                     hidden.value = String(rowIdx);
                     tr.appendChild(hidden);
 
-
-                    selProd.addEventListener("change", function () {
-                        refreshSkuOptions(selSku, this.value);
-                    });
-
                     const tdQty = document.createElement("td");
                     const qtyInp = document.createElement("input");
                     qtyInp.type = "number";
-                    qtyInp.name = "qty";
                     qtyInp.min = "1";
                     qtyInp.value = "1";
                     qtyInp.required = true;
+                    qtyInp.name = "qty_" + rowIdx;
                     tdQty.appendChild(qtyInp);
 
                     const tdImei = document.createElement("td");
-                    let imeiBox = buildImeiBox(rowIdx, 1);
+                    let currentImeiOptions = [];
+                    let imeiBox = buildImeiBox(rowIdx, 1, currentImeiOptions);
                     tdImei.appendChild(imeiBox);
-
-                    qtyInp.addEventListener("input", function () {
-                        let q = parseInt(this.value) || 1;
-                        if (q < 1)
-                            q = 1;
-                        this.value = q;
-
-                        tdImei.innerHTML = "";
-                        imeiBox = buildImeiBox(rowIdx, q);
-                        tdImei.appendChild(imeiBox);
-                    });
+                    syncImeiDisabledOptions();
 
                     const tdNote = document.createElement("td");
                     const noteInp = document.createElement("input");
                     noteInp.type = "text";
-                    noteInp.name = "itemNote";
+                    noteInp.name = "itemNote_" + rowIdx;
                     noteInp.placeholder = "Notes";
                     tdNote.appendChild(noteInp);
 
@@ -514,15 +510,43 @@
                         tr.remove();
                         renumber();
                     });
-
-                    selProd.name = "productId_" + rowIdx;
-                    selSku.name = "skuId_" + rowIdx;
-
-                    qtyInp.name = "qty_" + rowIdx;
-                    noteInp.name = "itemNote_" + rowIdx;
-
-
                     tdAct.appendChild(delBtn);
+
+                    selProd.addEventListener("change", function () {
+                        refreshSkuOptions(selSku, this.value);
+                        // reset IMEI when product changes
+                        currentImeiOptions = [];
+                        tdImei.innerHTML = "";
+                        imeiBox = buildImeiBox(rowIdx, parseInt(qtyInp.value) || 1, currentImeiOptions);
+                        tdImei.appendChild(imeiBox);
+                        syncImeiDisabledOptions();
+                    });
+
+                    selSku.addEventListener("change", async function () {
+                        const skuId = this.value;
+                        currentImeiOptions = skuId ? await fetchImeisBySku(skuId) : [];
+
+                        tdImei.innerHTML = "";
+                        imeiBox = buildImeiBox(rowIdx, parseInt(qtyInp.value) || 1, currentImeiOptions);
+                        tdImei.appendChild(imeiBox);
+                        syncImeiDisabledOptions();
+
+                        if (skuId && currentImeiOptions.length === 0) {
+                            alert("No available IMEIs in stock for this SKU.");
+                        }
+                    });
+
+                    qtyInp.addEventListener("input", function () {
+                        let q = parseInt(this.value) || 1;
+                        if (q < 1)
+                            q = 1;
+                        this.value = q;
+
+                        tdImei.innerHTML = "";
+                        imeiBox = buildImeiBox(rowIdx, q, currentImeiOptions);
+                        tdImei.appendChild(imeiBox);
+                        syncImeiDisabledOptions();
+                    });
 
                     tr.appendChild(tdNo);
                     tr.appendChild(tdProd);
@@ -534,6 +558,86 @@
 
                     tbody.appendChild(tr);
                 }
+
+                function getSelectedImeisBySku() {
+                    const map = new Map();
+
+                    Array.from(tbody.children).forEach(tr => {
+                        const rowIdx = tr.dataset.rowIdx;
+                        const skuSel = tr.querySelector(`select[name="skuId_${rowIdx}"]`);
+                        const skuId = skuSel ? skuSel.value : "";
+                        if (!skuId)
+                            return;
+
+                        const selects = tr.querySelectorAll(`select[name^="imei_${rowIdx}_"]`);
+                        selects.forEach(s => {
+                            const v = (s.value || "").trim();
+                            if (!v)
+                                return;
+                            if (!map.has(skuId))
+                                map.set(skuId, new Set());
+                            map.get(skuId).add(v);
+                        });
+                    });
+
+                    return map;
+                }
+
+                function syncImeiDisabledOptions() {
+    const selectedMap = getSelectedImeisBySku();
+
+    // helper: đếm IMEI đang được chọn bao nhiêu lần trong cùng SKU
+    function countSelectedInSku(skuId, imeiVal) {
+        let count = 0;
+        Array.from(tbody.children).forEach(tr2 => {
+            const rowIdx2 = tr2.dataset.rowIdx;
+            const skuSel2 = tr2.querySelector(`select[name="skuId_${rowIdx2}"]`);
+            const skuId2 = skuSel2 ? skuSel2.value : "";
+            if (skuId2 !== skuId) return;
+
+            const s2 = tr2.querySelectorAll(`select[name^="imei_${rowIdx2}_"]`);
+            s2.forEach(x => {
+                if ((x.value || "").trim() === imeiVal) count++;
+            });
+        });
+        return count;
+    }
+
+    Array.from(tbody.children).forEach(tr => {
+        const rowIdx = tr.dataset.rowIdx;
+        const skuSel = tr.querySelector(`select[name="skuId_${rowIdx}"]`);
+        const skuId = skuSel ? skuSel.value : "";
+        if (!skuId) return;
+
+        const chosen = selectedMap.get(skuId) || new Set();
+        const selects = tr.querySelectorAll(`select[name^="imei_${rowIdx}_"]`);
+
+        selects.forEach(sel => {
+            const myVal = (sel.value || "").trim();
+
+            // 1) Ẩn option đã được chọn ở dropdown khác (cùng SKU)
+            Array.from(sel.options).forEach(opt => {
+                if (!opt.value) return; // placeholder
+                // Ẩn nếu option nằm trong chosen và không phải option đang được chọn của chính select này
+                opt.hidden = (chosen.has(opt.value) && opt.value !== myVal);
+                opt.disabled = false; // đảm bảo không bị xám (tuỳ bạn)
+            });
+
+            // 2) Nếu select hiện tại đang trùng (cùng SKU) -> reset về rỗng
+            if (myVal && countSelectedInSku(skuId, myVal) > 1) {
+                sel.value = "";
+            }
+
+            // 3) Sau khi reset, cần chạy lại hide ngay lập tức để UI sạch
+            // (không bắt buộc nhưng giúp nhất quán)
+            const newVal = (sel.value || "").trim();
+            Array.from(sel.options).forEach(opt => {
+                if (!opt.value) return;
+                opt.hidden = (chosen.has(opt.value) && opt.value !== newVal);
+            });
+        });
+    });
+}
 
                 document.getElementById("btnAddRow").addEventListener("click", addRow);
 
@@ -547,37 +651,15 @@
 
                     for (let i = 0; i < rows.length; i++) {
                         const row = rows[i];
-                        for (let i = 0; i < rows.length; i++) {
-                            const row = rows[i];
-                            const rowIdx = row.dataset.rowIdx;
+                        const rowIdx = row.dataset.rowIdx;
 
-                            const productId = row.querySelector('select[name="productId_' + rowIdx + '"]').value;
-                            const skuId = row.querySelector('select[name="skuId_' + rowIdx + '"]').value;
-                            const qty = parseInt(row.querySelector('input[name="qty_' + rowIdx + '"]').value) || 0;
+                        const productSelect = row.querySelector('select[name="productId_' + rowIdx + '"]');
+                        const skuSelect = row.querySelector('select[name="skuId_' + rowIdx + '"]');
+                        const qtyInput = row.querySelector('input[name="qty_' + rowIdx + '"]');
 
-                            if (!productId || !skuId || qty < 1) {
-                                e.preventDefault();
-                                alert("Row " + (i + 1) + ": Please fill Product Code, SKU and Quantity");
-                                return;
-                            }
-
-                            for (let j = 1; j <= qty; j++) {
-                                const imeiInput = row.querySelector('input[name="imei_' + rowIdx + '_' + j + '"]');
-                                const imei = (imeiInput ? imeiInput.value.trim() : "");
-
-                                if (!imei) {
-                                    e.preventDefault();
-                                    alert("Row " + (i + 1) + ", IMEI " + j + ": Please enter IMEI");
-                                    return;
-                                }
-                                if (imei.length !== 15) {
-                                    e.preventDefault();
-                                    alert("Row " + (i + 1) + ", IMEI " + j + ": IMEI must be exactly 15 digits");
-                                    return;
-                                }
-                            }
-                        }
-
+                        const productId = productSelect ? productSelect.value : "";
+                        const skuId = skuSelect ? skuSelect.value : "";
+                        const qty = qtyInput ? (parseInt(qtyInput.value) || 0) : 0;
 
                         if (!productId || !skuId || qty < 1) {
                             e.preventDefault();
@@ -585,19 +667,22 @@
                             return;
                         }
 
-                        const imeiInputs = row.querySelectorAll('.imeiRow input');
-                        for (let j = 0; j < imeiInputs.length; j++) {
-                            const imei = imeiInputs[j].value.trim();
-                            if (!imei) {
+                        // validate IMEI dropdown selected
+                        const imeiSet = new Set();
+                        for (let j = 1; j <= qty; j++) {
+                            const sel = row.querySelector('select[name="imei_' + rowIdx + '_' + j + '"]');
+                            const v = sel ? (sel.value || "").trim() : "";
+                            if (!v) {
                                 e.preventDefault();
-                                alert("Row " + (i + 1) + ", IMEI " + (j + 1) + ": Please enter IMEI");
+                                alert("Row " + (i + 1) + ", IMEI " + j + ": Please select an IMEI");
                                 return;
                             }
-                            if (imei.length !== 15) {
+                            if (imeiSet.has(v)) {
                                 e.preventDefault();
-                                alert("Row " + (i + 1) + ", IMEI " + (j + 1) + ": IMEI must be exactly 15 digits");
+                                alert("Row " + (i + 1) + ": Duplicate IMEI selected: " + v);
                                 return;
                             }
+                            imeiSet.add(v);
                         }
                     }
                 });

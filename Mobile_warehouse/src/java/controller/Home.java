@@ -157,16 +157,16 @@ public class Home extends HttpServlet {
                 long id = Long.parseLong(idRaw.trim());
 
                 ExportReceiptDAO dao = new ExportReceiptDAO();
-                ExportReceiptDetailHeader header = dao.getDetailHeader(id);
+                ExportReceiptDetailHeader receiptHeader = dao.getDetailHeader(id);
                 List<ExportReceiptDetailLine> lines = dao.getDetailLines(id);
 
-                request.setAttribute("header", header);
+                request.setAttribute("receiptHeader", receiptHeader);
                 request.setAttribute("lines", lines);
                 break;
             }
 
             // =========================
-            // ✅ EXPORT RECEIPT LIST  (FIXED + tabCounts + normalize status)
+            //  EXPORT RECEIPT LIST  (FIXED + tabCounts + normalize status)
             // =========================
             case "export-receipt-list": {
                 ExportReceiptDAO dao = new ExportReceiptDAO();
