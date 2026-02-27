@@ -89,55 +89,61 @@ public class UpdateInventoryDAO {
         return 0;
     }
 
-    public List<SkuInventoryRow> listSkuRows(long productId, int page, int pageSize) {
-        List<SkuInventoryRow> list = new ArrayList<>();
-        int offset = (page - 1) * pageSize;
+   public List<SkuInventoryRow> listSkuRows(long productId, int page, int pageSize) {
+    List<SkuInventoryRow> list = new ArrayList<>();
+    int offset = (page - 1) * pageSize;
 
-        String sql =
-                "SELECT " +
-                "  s.sku_id, s.sku_code, s.color, s.ram_gb, s.storage_gb, " +
-                "  COALESCE(ib.qty_on_hand,0) AS qty, " +
-                "  DATE_FORMAT(COALESCE(ib.updated_at, CURRENT_DATE), '%Y-%m-%d') AS last_updated, " +
-                "  CASE " +
-                "    WHEN COALESCE(ib.qty_on_hand,0)=0 THEN 'OUT' " +
-                "    WHEN COALESCE(ib.qty_on_hand,0) <= ? THEN 'LOW' " +
-                "    ELSE 'OK' " +
-                "  END AS stock_status " +
-                "FROM product_skus s " +
-                "LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id " +
-                "WHERE s.product_id = ? AND s.status='ACTIVE' " +
-                "ORDER BY s.sku_code " +
-                "LIMIT ? OFFSET ?";
+    String sql =
+            "SELECT " +
+            "  s.sku_id, s.sku_code, s.color, s.ram_gb, s.storage_gb, " +
+            "  COALESCE((" +
+            "    SELECT COUNT(*) FROM product_units pu " +
+            "    WHERE pu.sku_id = s.sku_id AND pu.unit_status = 'ACTIVE'" +
+            "  ), 0) AS qty, " +
+            "  DATE_FORMAT(s.updated_at, '%Y-%m-%d') AS last_updated " +
+            "FROM product_skus s " +
+            "WHERE s.product_id = ? AND s.status = 'ACTIVE' " +
+            "ORDER BY s.sku_code " +
+            "LIMIT ? OFFSET ?";
 
-        try (Connection con = getConn();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+    try (Connection con = getConn();
+         PreparedStatement ps = con.prepareStatement(sql)) {
 
-            int idx = 1;
-            ps.setInt(idx++, LOW_STOCK_THRESHOLD);
-            ps.setLong(idx++, productId);
-            ps.setInt(idx++, pageSize);
-            ps.setInt(idx++, offset);
+        ps.setLong(1, productId);
+        ps.setInt(2, pageSize);
+        ps.setInt(3, offset);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    SkuInventoryRow r = new SkuInventoryRow();
-                    r.setSkuId(rs.getLong("sku_id"));
-                    r.setSkuCode(rs.getString("sku_code"));
-                    r.setColor(rs.getString("color"));
-                    r.setRamGb(rs.getInt("ram_gb"));
-                    r.setStorageGb(rs.getInt("storage_gb"));
-                    r.setQty(rs.getInt("qty"));
-                    r.setLastUpdated(rs.getString("last_updated"));
-                    r.setStockStatus(rs.getString("stock_status"));
-                    list.add(r);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                SkuInventoryRow row = new SkuInventoryRow();
+                row.setSkuId(rs.getLong("sku_id"));
+                row.setSkuCode(rs.getString("sku_code"));
+                row.setColor(rs.getString("color"));
+                row.setRamGb(rs.getInt("ram_gb"));
+                row.setStorageGb(rs.getInt("storage_gb"));
+
+                int qty = rs.getInt("qty");
+                row.setQty(qty);
+
+             
+                if (qty == 0) {
+                    row.setStockStatus("OUT");
+                } else if (qty <= 10) {
+                    row.setStockStatus("LOW");
+                } else {
+                    row.setStockStatus("OK");
                 }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
 
-        return list;
+                row.setLastUpdated(rs.getString("last_updated"));
+                list.add(row);
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
     }
+
+    return list;
+}
 
     public boolean saveQuantities(Map<Long, Integer> updates) {
         String sql =

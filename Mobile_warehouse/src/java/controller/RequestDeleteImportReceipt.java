@@ -36,13 +36,13 @@ public class RequestDeleteImportReceipt extends HttpServlet {
         User user = (User) session.getAttribute("authUser");
         String role = getRoleName(session, user);
 
-        // Only STAFF can create delete request
+        
         if (!"STAFF".equalsIgnoreCase(role)) {
             resp.sendError(403, "Only staff can create delete requests");
             return;
         }
 
-        // Get import_id parameter
+       
         String importIdStr = req.getParameter("id");
         if (importIdStr == null || importIdStr.trim().isEmpty()) {
             resp.sendRedirect(req.getContextPath() + "/import-receipt-list?err=Missing+import+ID");
@@ -57,7 +57,7 @@ public class RequestDeleteImportReceipt extends HttpServlet {
             return;
         }
 
-        // Get import receipt info
+     
         ImportReceiptDeleteRequestDAO dao = new ImportReceiptDeleteRequestDAO();
         try {
             ImportReceiptDeleteRequest importInfo = dao.getImportInfoForRequest(importId);
@@ -67,7 +67,7 @@ public class RequestDeleteImportReceipt extends HttpServlet {
                 return;
             }
 
-            // Set attributes for JSP
+         
             req.setAttribute("role", role);
             req.setAttribute("username", user.getUsername());
             req.setAttribute("importInfo", importInfo);
@@ -99,7 +99,7 @@ public class RequestDeleteImportReceipt extends HttpServlet {
             return;
         }
 
-        // Get form data
+     
         String importIdStr = req.getParameter("importId");
         String importCode = req.getParameter("importCode");
         String note = req.getParameter("note");
@@ -112,7 +112,7 @@ public class RequestDeleteImportReceipt extends HttpServlet {
 
         long importId = Long.parseLong(importIdStr);
 
-        // Create request
+      
         ImportReceiptDeleteRequestDAO dao = new ImportReceiptDeleteRequestDAO();
         try {
             boolean success = dao.createRequest(importId, importCode, note.trim(), user.getUserId());

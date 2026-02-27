@@ -1,37 +1,25 @@
 package dal;
 
+import java.sql.*;
+import java.util.*;
 import model.ImportReceiptDetail;
 import model.ImportReceiptLineDetail;
 
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-
 public class ImportReceiptDetailDAO {
 
-    public static final String ST_DRAFT = "DRAFT";
-    public static final String ST_PENDING = "PENDING";
-    public static final String ST_CONFIRMED = "CONFIRMED";
-    public static final String ST_CANCELED = "CANCELED";
+   
+    public ImportReceiptDetail getReceipt(long importId) {
+        String sql = """
+            SELECT ir.import_id, ir.import_code, ir.receipt_date, ir.note, ir.status,
+                   COALESCE(s.supplier_name, '-') AS supplier_name,
+                   u.full_name AS created_by_name
+            FROM import_receipts ir
+            LEFT JOIN suppliers s ON s.supplier_id = ir.supplier_id
+            JOIN users u ON u.user_id = ir.created_by
+            WHERE ir.import_id = ?
+        """;
 
-    private Connection openConn() throws SQLException {
-        try {
-            return DBContext.getConnection();
-        } catch (Exception e) {
-            throw new SQLException("Cannot open DB connection", e);
-        }
-    }
-
-    public ImportReceiptDetail getReceipt(long importId) throws SQLException {
-        String sql =
-            "SELECT ir.import_id, ir.import_code, ir.receipt_date, ir.note, ir.status, " +
-            "       s.supplier_name, u.full_name AS created_by_name " +
-            "FROM import_receipts ir " +
-            "LEFT JOIN suppliers s ON s.supplier_id = ir.supplier_id " +
-            "LEFT JOIN users u ON u.user_id = ir.created_by " +
-            "WHERE ir.import_id = ?";
-
-        try (Connection con = openConn();
+        try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setLong(1, importId);
@@ -43,39 +31,37 @@ public class ImportReceiptDetailDAO {
                 d.setImportId(rs.getLong("import_id"));
                 d.setImportCode(rs.getString("import_code"));
                 d.setReceiptDate(rs.getTimestamp("receipt_date"));
-                d.setNote(rs.getString("note"));
-                d.setStatus(rs.getString("status"));
                 d.setSupplierName(rs.getString("supplier_name"));
                 d.setCreatedByName(rs.getString("created_by_name"));
+                d.setNote(rs.getString("note"));
+                d.setStatus(rs.getString("status"));
                 return d;
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
     }
 
-    public List<ImportReceiptLineDetail> getLines(long importId) throws SQLException {
-
-        String sql =
-            "SELECT " +
-            "  irl.line_id, " +
-            "  p.product_code, " +
-            "  ps.sku_code, " +
-            "  irl.qty, " +
-            "  irl.item_note, " +
-            "  u.full_name AS created_by_name, " +
-            "  COALESCE(GROUP_CONCAT(iru.imei ORDER BY iru.imei SEPARATOR '\n'), '') AS imeis " +
-            "FROM import_receipt_lines irl " +
-            "JOIN import_receipts ir ON ir.import_id = irl.import_id " +
-            "JOIN products p ON p.product_id = irl.product_id " +
-            "JOIN product_skus ps ON ps.sku_id = irl.sku_id " +
-            "LEFT JOIN users u ON u.user_id = ir.created_by " +
-            "LEFT JOIN import_receipt_units iru ON iru.line_id = irl.line_id " +
-            "WHERE irl.import_id = ? " +
-            "GROUP BY irl.line_id, p.product_code, ps.sku_code, irl.qty, irl.item_note, u.full_name " +
-            "ORDER BY irl.line_id ASC";
+  
+    public List<ImportReceiptLineDetail> getLines(long importId) {
+        String sql = """
+            SELECT irl.line_id, irl.qty, irl.item_note,
+                   p.product_code,
+                   sk.sku_code,
+                   u.full_name AS created_by_name
+            FROM import_receipt_lines irl
+            JOIN products p ON p.product_id = irl.product_id
+            JOIN product_skus sk ON sk.sku_id = irl.sku_id
+            JOIN import_receipts ir ON ir.import_id = irl.import_id
+            JOIN users u ON u.user_id = ir.created_by
+            WHERE irl.import_id = ?
+            ORDER BY irl.line_id ASC
+        """;
 
         List<ImportReceiptLineDetail> out = new ArrayList<>();
 
-        try (Connection con = openConn();
+        try (Connection con = DBContext.getConnection();
              PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setLong(1, importId);
@@ -84,194 +70,241 @@ public class ImportReceiptDetailDAO {
                 while (rs.next()) {
                     ImportReceiptLineDetail it = new ImportReceiptLineDetail();
                     it.setLineId(rs.getLong("line_id"));
+                    it.setQty(rs.getInt("qty"));
+                    it.setItemNote(rs.getString("item_note"));
                     it.setProductCode(rs.getString("product_code"));
                     it.setSkuCode(rs.getString("sku_code"));
-                    it.setQty(rs.getInt("qty"));
+                    it.setCreatedByName(rs.getString("created_by_name"));
 
-                    String rawImeis = rs.getString("imeis");
-                    it.setImeiText(formatImeisWithIndex(rawImeis));
-
-                    String itemNote = rs.getString("item_note");
-                    it.setItemNote(itemNote == null ? "" : itemNote);
-                    
-                    String createdByName = rs.getString("created_by_name");
-                    it.setCreatedByName(createdByName == null ? "Unknown" : createdByName);
+                    List<String> imeis = getImeisByLine(con, rs.getLong("line_id"));
+                    it.setImeiText(formatImeis(imeis));
 
                     out.add(it);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return out;
+    }
+
+    private List<String> getImeisByLine(Connection con, long lineId) throws SQLException {
+        String sql = "SELECT imei FROM import_receipt_units WHERE line_id = ? ORDER BY iru_id ASC";
+        List<String> out = new ArrayList<>();
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, lineId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    out.add(rs.getString("imei"));
                 }
             }
         }
         return out;
     }
 
-    private String formatImeisWithIndex(String raw) {
-        if (raw == null) return "";
-        raw = raw.replace("\r", "").trim();
-        if (raw.isEmpty()) return "";
-
-        String[] arr = raw.split("\n");
+    private String formatImeis(List<String> imeis) {
+        if (imeis == null || imeis.isEmpty()) return "";
+        
         StringBuilder sb = new StringBuilder();
-
-        int idx = 1;
-        for (String s : arr) {
-            if (s == null) continue;
-            s = s.trim();
-            if (s.isEmpty()) continue;
-
-            sb.append("Imei ").append(idx).append(": ").append(s);
-            sb.append("\n");
-            idx++;
+        int perLine = 2;
+        
+        for (int i = 0; i < imeis.size(); i += perLine) {
+            if (i > 0) sb.append("\n");
+            int end = Math.min(i + perLine, imeis.size());
+            sb.append(String.join(", ", imeis.subList(i, end)));
         }
-
-        if (sb.length() > 0) sb.setLength(sb.length() - 1);
+        
         return sb.toString();
     }
 
-    // ✅ APPROVE - Updated to insert IMEIs into product_units
-    public boolean approve(long importId) throws SQLException {
-        String lockSql = "SELECT status FROM import_receipts WHERE import_id=? FOR UPDATE";
-        String updSql  = "UPDATE import_receipts SET status=? WHERE import_id=?";
-
-        try (Connection con = openConn()) {
+ 
+    public boolean approve(long importId) {
+        Connection con = null;
+        try {
+            con = DBContext.getConnection();
             con.setAutoCommit(false);
 
-            String curStatus;
-            try (PreparedStatement ps = con.prepareStatement(lockSql)) {
-                ps.setLong(1, importId);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) { 
-                        con.rollback(); 
-                        return false; 
-                    }
-                    curStatus = rs.getString(1);
-                }
-            }
-
-            if (curStatus == null) {
-                con.rollback();
-                return false;
-            }
+        
+            String checkSql = "SELECT status FROM import_receipts WHERE import_id = ?";
+            String currentStatus;
             
-            String statusUpper = curStatus.toUpperCase();
-            if (!ST_DRAFT.equals(statusUpper) && !ST_PENDING.equals(statusUpper)) {
-                con.rollback();
-                return false;
-            }
-
-            // ✅ Add stock to inventory
-            applyStockOnApprove(con, importId);
-            
-            // ✅ Insert IMEIs into product_units
-            insertImeisToProductUnits(con, importId);
-
-            // Update status to CONFIRMED
-            int affected;
-            try (PreparedStatement ps = con.prepareStatement(updSql)) {
-                ps.setString(1, ST_CONFIRMED);
-                ps.setLong(2, importId);
-                affected = ps.executeUpdate();
-            }
-
-            con.commit();
-            return affected > 0;
-        }
-    }
-
-    public boolean cancel(long importId) throws SQLException {
-        String lockSql = "SELECT status FROM import_receipts WHERE import_id=? FOR UPDATE";
-        String updSql = "UPDATE import_receipts SET status=? WHERE import_id=?";
-
-        try (Connection con = openConn()) {
-            con.setAutoCommit(false);
-
-            String curStatus;
-            try (PreparedStatement ps = con.prepareStatement(lockSql)) {
+            try (PreparedStatement ps = con.prepareStatement(checkSql)) {
                 ps.setLong(1, importId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (!rs.next()) {
                         con.rollback();
                         return false;
                     }
-                    curStatus = rs.getString(1);
+                    currentStatus = rs.getString("status");
                 }
             }
 
-            if (curStatus == null) {
+           
+            if (!"PENDING".equalsIgnoreCase(currentStatus) && !"DRAFT".equalsIgnoreCase(currentStatus)) {
                 con.rollback();
                 return false;
             }
 
-            String statusUpper = curStatus.toUpperCase();
-            if (!ST_DRAFT.equals(statusUpper) && !ST_PENDING.equals(statusUpper)) {
-                con.rollback();
-                return false;
+           
+            String updateSql = "UPDATE import_receipts SET status = 'CONFIRMED' WHERE import_id = ?";
+            try (PreparedStatement ps = con.prepareStatement(updateSql)) {
+                ps.setLong(1, importId);
+                ps.executeUpdate();
             }
 
-            int affected;
-            try (PreparedStatement ps = con.prepareStatement(updSql)) {
-                ps.setString(1, ST_CANCELED);
-                ps.setLong(2, importId);
-                affected = ps.executeUpdate();
-            }
+            
+            handleImeiApproval(con, importId);
 
             con.commit();
-            return affected > 0;
-        }
-    }
+            return true;
 
-    private void applyStockOnApprove(Connection con, long importId) throws SQLException {
-        String readLines = "SELECT sku_id, qty FROM import_receipt_lines WHERE import_id=?";
-        String upsertInv =
-            "INSERT INTO inventory_balance(sku_id, qty_on_hand) VALUES (?, ?) " +
-            "ON DUPLICATE KEY UPDATE qty_on_hand = qty_on_hand + VALUES(qty_on_hand)";
-
-        try (PreparedStatement psRead = con.prepareStatement(readLines);
-             PreparedStatement psUpsert = con.prepareStatement(upsertInv)) {
-
-            psRead.setLong(1, importId);
-
-            try (ResultSet rs = psRead.executeQuery()) {
-                while (rs.next()) {
-                    long skuId = rs.getLong("sku_id");
-                    int qty = rs.getInt("qty");
-
-                    psUpsert.setLong(1, skuId);
-                    psUpsert.setInt(2, qty);
-                    psUpsert.addBatch();
-                }
-                psUpsert.executeBatch();
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (con != null) {
+                try { 
+                    con.rollback(); 
+                } catch (Exception ignore) {}
+            }
+            return false;
+        } finally {
+            if (con != null) {
+                try { 
+                    con.close(); 
+                } catch (Exception ignore) {}
             }
         }
     }
 
-    // ✅ NEW: Insert IMEIs from import_receipt_units to product_units
-    private void insertImeisToProductUnits(Connection con, long importId) throws SQLException {
-        String readImeis = 
-            "SELECT irl.sku_id, iru.imei " +
-            "FROM import_receipt_lines irl " +
-            "JOIN import_receipt_units iru ON iru.line_id = irl.line_id " +
-            "WHERE irl.import_id = ?";
+    
+    private void handleImeiApproval(Connection con, long importId) throws SQLException {
+       
+        String sql = """
+            SELECT iru.imei, irl.sku_id
+            FROM import_receipt_units iru
+            JOIN import_receipt_lines irl ON irl.line_id = iru.line_id
+            WHERE irl.import_id = ?
+        """;
+
+        List<ImeiToProcess> list = new ArrayList<>();
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, importId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    list.add(new ImeiToProcess(
+                        rs.getString("imei"),
+                        rs.getLong("sku_id")
+                    ));
+                }
+            }
+        }
+
         
-        String insertUnit = 
-            "INSERT INTO product_units(sku_id, imei, unit_status) VALUES (?, ?, 'INACTIVE') " +
-            "ON DUPLICATE KEY UPDATE sku_id=sku_id"; // Ignore if IMEI already exists
+        for (ImeiToProcess item : list) {
+            processImei(con, item.imei, item.skuId);
+        }
 
-        try (PreparedStatement psRead = con.prepareStatement(readImeis);
-             PreparedStatement psInsert = con.prepareStatement(insertUnit)) {
+       
+        updateInventoryBalance(con, importId);
+    }
 
-            psRead.setLong(1, importId);
+    private void processImei(Connection con, String imei, long skuId) throws SQLException {
+       
+        String checkSql = "SELECT unit_id, unit_status FROM product_units WHERE imei = ?";
+        
+        try (PreparedStatement ps = con.prepareStatement(checkSql)) {
+            ps.setString(1, imei);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    
+                    String status = rs.getString("unit_status");
+                    
+                    if ("INACTIVE".equalsIgnoreCase(status)) {
+                        
+                        String updateSql = "UPDATE product_units SET unit_status = 'ACTIVE', updated_at = CURRENT_TIMESTAMP WHERE imei = ?";
+                        try (PreparedStatement psUpdate = con.prepareStatement(updateSql)) {
+                            psUpdate.setString(1, imei);
+                            psUpdate.executeUpdate();
+                        }
+                    }
+                   
+                    
+                } else {
+                   
+                    String insertSql = "INSERT INTO product_units(sku_id, imei, unit_status) VALUES(?, ?, 'ACTIVE')";
+                    try (PreparedStatement psInsert = con.prepareStatement(insertSql)) {
+                        psInsert.setLong(1, skuId);
+                        psInsert.setString(2, imei);
+                        psInsert.executeUpdate();
+                    }
+                }
+            }
+        }
+    }
 
-            try (ResultSet rs = psRead.executeQuery()) {
+    private void updateInventoryBalance(Connection con, long importId) throws SQLException {
+        String sql = """
+            SELECT sku_id, SUM(qty) AS total_qty
+            FROM import_receipt_lines
+            WHERE import_id = ?
+            GROUP BY sku_id
+        """;
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, importId);
+            try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     long skuId = rs.getLong("sku_id");
-                    String imei = rs.getString("imei");
+                    int qty = rs.getInt("total_qty");
 
-                    psInsert.setLong(1, skuId);
-                    psInsert.setString(2, imei);
-                    psInsert.addBatch();
+                   
+                    String upsertSql = """
+                        INSERT INTO inventory_balance(sku_id, qty_on_hand)
+                        VALUES(?, ?)
+                        ON DUPLICATE KEY UPDATE qty_on_hand = qty_on_hand + VALUES(qty_on_hand)
+                    """;
+
+                    try (PreparedStatement psUpsert = con.prepareStatement(upsertSql)) {
+                        psUpsert.setLong(1, skuId);
+                        psUpsert.setInt(2, qty);
+                        psUpsert.executeUpdate();
+                    }
                 }
-                psInsert.executeBatch();
             }
+        }
+    }
+
+    
+    public boolean cancel(long importId) {
+        String sql = """
+            UPDATE import_receipts
+            SET status = 'CANCELED'
+            WHERE import_id = ?
+            AND status IN ('PENDING', 'DRAFT')
+        """;
+
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, importId);
+            return ps.executeUpdate() > 0;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // ✅ Inner class for IMEI processing
+    private static class ImeiToProcess {
+        String imei;
+        long skuId;
+
+        ImeiToProcess(String imei, long skuId) {
+            this.imei = imei;
+            this.skuId = skuId;
         }
     }
 }

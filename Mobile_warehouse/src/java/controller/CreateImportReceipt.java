@@ -76,7 +76,7 @@ public class CreateImportReceipt extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String mode = Optional.ofNullable(req.getParameter("mode")).orElse("manual");
 
-        // ✅ Always create as PENDING
+    
         String status = "PENDING";
 
         Connection con = null;
@@ -111,175 +111,201 @@ public class CreateImportReceipt extends HttpServlet {
         }
     }
 
-    // ✅ MANUAL MODE
-    private void createByManual(Connection con, HttpServletRequest req, String status) throws Exception {
-        ImportReceiptDAO dao = new ImportReceiptDAO();
+   private void createByManual(Connection con, HttpServletRequest req, String status) throws Exception {
+    ImportReceiptDAO dao = new ImportReceiptDAO();
 
-        String importCode = req.getParameter("importCode");
-        Long supplierId = parseLongNullable(req.getParameter("supplierId"));
-        Timestamp receiptDate = Timestamp.valueOf(parseDT(req.getParameter("receiptDate")));
-        String note = req.getParameter("note");
+    String importCode = req.getParameter("importCode");
+    Long supplierId = parseLongNullable(req.getParameter("supplierId"));
+    Timestamp receiptDate = Timestamp.valueOf(parseDT(req.getParameter("receiptDate")));
+    String note = req.getParameter("note");
 
-        int createdBy = getUserId(req);
-        if (createdBy <= 0) {
-            throw new IllegalArgumentException("Missing session userId.");
+    int createdBy = getUserId(req);
+    if (createdBy <= 0) {
+        throw new IllegalArgumentException("Missing session userId.");
+    }
+
+    String[] productIds = req.getParameterValues("productId");
+    String[] skuIds = req.getParameterValues("skuId");
+    String[] qtys = req.getParameterValues("qty");
+    String[] itemNotes = req.getParameterValues("itemNote");
+
+    if (productIds == null || productIds.length == 0) {
+        throw new IllegalArgumentException("Please add at least 1 product line.");
+    }
+
+    int n = productIds.length;
+
+    if (skuIds == null || skuIds.length != n || qtys == null || qtys.length != n) {
+        throw new IllegalArgumentException("Invalid data: array length mismatch");
+    }
+
+  
+    Set<String> allImeis = new HashSet<>();
+    
+    for (int i = 0; i < n; i++) {
+        String productIdRaw = productIds[i];
+        String skuIdRaw = skuIds[i];
+        String qtyRaw = qtys[i];
+
+        if (isBlank(productIdRaw) && isBlank(skuIdRaw) && isBlank(qtyRaw)) {
+            continue;
         }
 
-        String[] productIds = req.getParameterValues("productId");
-        String[] skuIds = req.getParameterValues("skuId");
-        String[] qtys = req.getParameterValues("qty");
-        String[] itemNotes = req.getParameterValues("itemNote");
+        int qty = parseInt(qtyRaw, 0);
+        if (qty <= 0) continue;
 
-        if (productIds == null || productIds.length == 0) {
-            throw new IllegalArgumentException("Please add at least 1 product line.");
-        }
+        int rowIdx = i + 1;
 
-        int n = productIds.length;
+        for (int k = 1; k <= qty; k++) {
+            String paramName = "imei_" + rowIdx + "_" + k;
+            String imeiValue = req.getParameter(paramName);
 
-        if (skuIds == null || skuIds.length != n || qtys == null || qtys.length != n) {
-            throw new IllegalArgumentException("Invalid data: array length mismatch");
-        }
-
-        long importId = dao.insertReceipt(con, importCode, supplierId, receiptDate, note, createdBy, status);
-
-        int insertedLines = 0;
-
-        for (int i = 0; i < n; i++) {
-            String productIdRaw = productIds[i];
-            String skuIdRaw = skuIds[i];
-            String qtyRaw = qtys[i];
-
-            if (isBlank(productIdRaw) && isBlank(skuIdRaw) && isBlank(qtyRaw)) {
-                continue;
+            if (isBlank(imeiValue)) {
+                throw new IllegalArgumentException("Line " + (i + 1) + ", IMEI " + k + ": IMEI is required");
             }
 
-            long productId = parseLongRequired(productIdRaw, "Line " + (i + 1) + ": product required");
-            long skuId = parseLongRequired(skuIdRaw, "Line " + (i + 1) + ": sku required");
-            int qty = parseInt(qtyRaw, 0);
+            String imei = imeiValue.trim().replaceAll("\\D", "");
 
-            if (qty <= 0) {
-                throw new IllegalArgumentException("Line " + (i + 1) + ": qty must be > 0");
+            if (!imei.matches("^\\d{15}$")) {
+                throw new IllegalArgumentException("Line " + (i + 1) + ", IMEI " + k + ": must be 15 digits. Got: " + imei);
             }
 
-            if (!dao.skuBelongsToProduct(con, skuId, productId)) {
-                throw new IllegalArgumentException("Line " + (i + 1) + ": SKU not belong to Product");
+           
+            String error = dao.validateImeiForInsert(con, imei);
+            if (error != null) {
+                throw new IllegalArgumentException(error);
             }
 
-            String itemNote = (itemNotes != null && i < itemNotes.length) ? itemNotes[i] : null;
-
-            int rowIdx = i + 1;
-            List<String> imeis = new ArrayList<>();
-
-            for (int k = 1; k <= qty; k++) {
-                String paramName = "imei_" + rowIdx + "_" + k;
-                String imeiValue = req.getParameter(paramName);
-
-                if (isBlank(imeiValue)) {
-                    throw new IllegalArgumentException(
-                            "Line " + (i + 1) + ", IMEI " + k + ": IMEI is required"
-                    );
-                }
-
-                String imei = imeiValue.trim().replaceAll("\\D", "");
-
-                if (!imei.matches("^\\d{15}$")) {
-                    throw new IllegalArgumentException(
-                            "Line " + (i + 1) + ", IMEI " + k + ": must be 15 digits. Got: " + imei
-                    );
-                }
-
-                imeis.add(imei);
+            if (!allImeis.add(imei)) {
+                throw new IllegalArgumentException("Duplicate IMEI found: " + imei);
             }
-
-            if (imeis.size() != qty) {
-                throw new IllegalArgumentException(
-                        "Line " + (i + 1) + ": IMEI count (" + imeis.size()
-                        + ") must equal quantity (" + qty + ")"
-                );
-            }
-
-            Set<String> uniqueImeis = new HashSet<>(imeis);
-            if (uniqueImeis.size() != imeis.size()) {
-                throw new IllegalArgumentException("Line " + (i + 1) + ": Duplicate IMEIs found");
-            }
-
-            long lineId = dao.insertLine(con, importId, productId, skuId, qty, itemNote);
-            dao.insertUnits(con, lineId, imeis);
-
-            insertedLines++;
-        }
-
-        if (insertedLines == 0) {
-            throw new IllegalArgumentException("Please add at least 1 valid product line.");
         }
     }
 
-    // ✅ EXCEL MODE
-    private void createByExcel(Connection con, HttpServletRequest req, String status) throws Exception {
-        ImportReceiptDAO dao = new ImportReceiptDAO();
+    
+    long importId = dao.insertReceipt(con, importCode, supplierId, receiptDate, note, createdBy, status);
 
-        String importCode = req.getParameter("importCode");
-        Long supplierId = parseLongNullable(req.getParameter("supplierId"));
-        Timestamp receiptDate = Timestamp.valueOf(parseDT(req.getParameter("receiptDate")));
-        String note = req.getParameter("note");
+    int insertedLines = 0;
 
-        int createdBy = getUserId(req);
-        if (createdBy <= 0) {
-            throw new IllegalArgumentException("Missing session userId.");
+    for (int i = 0; i < n; i++) {
+        String productIdRaw = productIds[i];
+        String skuIdRaw = skuIds[i];
+        String qtyRaw = qtys[i];
+
+        if (isBlank(productIdRaw) && isBlank(skuIdRaw) && isBlank(qtyRaw)) {
+            continue;
         }
 
-        Part filePart = req.getPart("excelFile");
-        if (filePart == null || filePart.getSize() == 0) {
-            throw new IllegalArgumentException("Excel file required.");
+        long productId = parseLongRequired(productIdRaw, "Line " + (i + 1) + ": product required");
+        long skuId = parseLongRequired(skuIdRaw, "Line " + (i + 1) + ": sku required");
+        int qty = parseInt(qtyRaw, 0);
+
+        if (qty <= 0) {
+            throw new IllegalArgumentException("Line " + (i + 1) + ": qty must be > 0");
         }
 
-        List<ExcelRow> rows;
-        try (InputStream is = filePart.getInputStream()) {
-            rows = parseExcel(is);
-        }
-        if (rows.isEmpty()) {
-            throw new IllegalArgumentException("Excel has no data.");
-        }
-        long importId = dao.insertReceipt(con, importCode, supplierId, receiptDate, note, createdBy, status);
-
-        Map<String, List<String>> grouped = new LinkedHashMap<>();
-        Set<String> allImeis = new HashSet<>();
-
-        for (ExcelRow r : rows) {
-            long productId = dao.findProductIdByCode(con, r.productCode);
-            long skuId = dao.findSkuIdByCode(con, r.skuCode);
-
-            if (!dao.skuBelongsToProduct(con, skuId, productId)) {
-                throw new IllegalArgumentException(
-                        "SKU " + r.skuCode + " not belong to product " + r.productCode
-                );
-            }
-
-            if (!r.imei.matches("^\\d{15}$")) {
-                throw new IllegalArgumentException("Invalid IMEI (15 digits): " + r.imei);
-            }
-
-            if (!allImeis.add(r.imei)) {
-                throw new IllegalArgumentException("Duplicate IMEI found: " + r.imei);
-            }
-
-            String key = productId + "_" + skuId;
-            grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(r.imei);
+        if (!dao.skuBelongsToProduct(con, skuId, productId)) {
+            throw new IllegalArgumentException("Line " + (i + 1) + ": SKU not belong to Product");
         }
 
-        for (Map.Entry<String, List<String>> en : grouped.entrySet()) {
-            String[] parts = en.getKey().split("_");
-            long productId = Long.parseLong(parts[0]);
-            long skuId = Long.parseLong(parts[1]);
+        String itemNote = (itemNotes != null && i < itemNotes.length) ? itemNotes[i] : null;
 
-            List<String> imeis = en.getValue();
+        int rowIdx = i + 1;
+        List<String> imeis = new ArrayList<>();
 
-            long lineId = dao.insertLine(con, importId, productId, skuId, imeis.size(), null);
-            dao.insertUnits(con, lineId, imeis);
+        for (int k = 1; k <= qty; k++) {
+            String paramName = "imei_" + rowIdx + "_" + k;
+            String imeiValue = req.getParameter(paramName);
+            String imei = imeiValue.trim().replaceAll("\\D", "");
+            imeis.add(imei);
         }
+
+        long lineId = dao.insertLine(con, importId, productId, skuId, qty, itemNote);
+        dao.insertUnits(con, lineId, imeis);
+
+        insertedLines++;
     }
 
-    // ===================== Excel parsing =====================
+    if (insertedLines == 0) {
+        throw new IllegalArgumentException("Please add at least 1 valid product line.");
+    }
+}
+
+  
+  private void createByExcel(Connection con, HttpServletRequest req, String status) throws Exception {
+    ImportReceiptDAO dao = new ImportReceiptDAO();
+
+    String importCode = req.getParameter("importCode");
+    Long supplierId = parseLongNullable(req.getParameter("supplierId"));
+    Timestamp receiptDate = Timestamp.valueOf(parseDT(req.getParameter("receiptDate")));
+    String note = req.getParameter("note");
+
+    int createdBy = getUserId(req);
+    if (createdBy <= 0) {
+        throw new IllegalArgumentException("Missing session userId.");
+    }
+
+    Part filePart = req.getPart("excelFile");
+    if (filePart == null || filePart.getSize() == 0) {
+        throw new IllegalArgumentException("Excel file required.");
+    }
+
+    List<ExcelRow> rows;
+    try (InputStream is = filePart.getInputStream()) {
+        rows = parseExcel(is);
+    }
+    if (rows.isEmpty()) {
+        throw new IllegalArgumentException("Excel has no data.");
+    }
+
+  
+    Set<String> allImeis = new HashSet<>();
+    Map<String, List<String>> grouped = new LinkedHashMap<>();
+
+    for (ExcelRow r : rows) {
+        long productId = dao.findProductIdByCode(con, r.productCode);
+        long skuId = dao.findSkuIdByCode(con, r.skuCode);
+
+        if (!dao.skuBelongsToProduct(con, skuId, productId)) {
+            throw new IllegalArgumentException(
+                    "SKU " + r.skuCode + " not belong to product " + r.productCode
+            );
+        }
+
+        if (!r.imei.matches("^\\d{15}$")) {
+            throw new IllegalArgumentException("Invalid IMEI (15 digits): " + r.imei);
+        }
+
+      
+        String error = dao.validateImeiForInsert(con, r.imei);
+        if (error != null) {
+            throw new IllegalArgumentException(error);
+        }
+
+        if (!allImeis.add(r.imei)) {
+            throw new IllegalArgumentException("Duplicate IMEI in Excel: " + r.imei);
+        }
+
+        String key = productId + "_" + skuId;
+        grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(r.imei);
+    }
+
+   
+    long importId = dao.insertReceipt(con, importCode, supplierId, receiptDate, note, createdBy, status);
+
+    for (Map.Entry<String, List<String>> en : grouped.entrySet()) {
+        String[] parts = en.getKey().split("_");
+        long productId = Long.parseLong(parts[0]);
+        long skuId = Long.parseLong(parts[1]);
+
+        List<String> imeis = en.getValue();
+
+        long lineId = dao.insertLine(con, importId, productId, skuId, imeis.size(), null);
+        dao.insertUnits(con, lineId, imeis);
+    }
+}
+
+    
     private List<ExcelRow> parseExcel(InputStream is) throws Exception {
         List<ExcelRow> out = new ArrayList<>();
         try (Workbook wb = new XSSFWorkbook(is)) {
@@ -347,7 +373,7 @@ public class CreateImportReceipt extends HttpServlet {
         }
     }
 
-    // ===================== Helpers =====================
+   
     private LocalDateTime parseDT(String raw) {
         if (isBlank(raw)) {
             return LocalDateTime.now().withSecond(0).withNano(0);

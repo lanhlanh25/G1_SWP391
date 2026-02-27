@@ -256,7 +256,7 @@
                                     Download PDF
                                 </a>
 
-                                <%-- ✅ Manager: Delete button for PENDING receipts --%>
+                                
                                 <c:if test="${role == 'MANAGER' && r.status == 'PENDING'}">
                                     <form class="inline" method="post" action="${ctx}/import-receipt-list"
                                           onsubmit="return confirm('Delete this receipt?');">
@@ -266,7 +266,7 @@
                                     </form>
                                 </c:if>
 
-                                <%-- ✅ Staff: Send Request Delete for PENDING receipts --%>
+                              
                                 <c:if test="${role == 'STAFF' && r.status == 'PENDING'}">
                                     <a class="btn warning" href="${ctx}/home?p=request-delete-import-receipt&id=${r.importId}">Send Request Delete</a>
                                 </c:if>
