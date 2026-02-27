@@ -183,7 +183,7 @@
                 </div>
 
                 <div class="rightFilters">
-                    <!-- ✅ dùng ALL / DRAFT / CONFIRMED / CANCELLED cho khớp DB -->
+                    <!-- ALL / DRAFT / CONFIRMED / CANCELLED -->
                     <select name="status">
                         <option value="ALL" ${status=='ALL' || empty status ? 'selected' : ''}>ALL</option>
                         <option value="DRAFT" ${status=='DRAFT' ? 'selected' : ''}>DRAFT</option>
