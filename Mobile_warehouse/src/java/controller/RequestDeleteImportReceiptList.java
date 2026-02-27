@@ -36,36 +36,36 @@ public class RequestDeleteImportReceiptList extends HttpServlet {
         User user = (User) session.getAttribute("authUser");
         String role = getRoleName(session, user);
         
-        // Only MANAGER can view delete requests
+        
         if (!"MANAGER".equalsIgnoreCase(role)) {
             resp.sendError(403, "Only managers can view delete requests");
             return;
         }
         
-        // Get search parameters
+        
         String importCodeSearch = req.getParameter("q");
         String transactionTimeStr = req.getParameter("transactionTime");
         
         java.sql.Date searchDate = null;
         if (transactionTimeStr != null && !transactionTimeStr.trim().isEmpty()) {
             try {
-                // Parse date string yyyy-MM-dd
+               
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 sdf.setLenient(false);
                 java.util.Date utilDate = sdf.parse(transactionTimeStr.trim());
                 
-                // Convert to java.sql.Date (only date, no time)
+            
                 searchDate = new java.sql.Date(utilDate.getTime());
                 
                 System.out.println("DEBUG Controller: Searching with date = " + searchDate);
             } catch (Exception e) {
                 System.err.println("ERROR: Failed to parse date: " + transactionTimeStr);
                 e.printStackTrace();
-                // Invalid date format, will be ignored
+                
             }
         }
         
-        // Pagination
+      
         int page = parseInt(req.getParameter("page"), 1);
         if (page < 1) page = 1;
         int pageSize = 10;
@@ -84,7 +84,7 @@ public class RequestDeleteImportReceiptList extends HttpServlet {
             
             System.out.println("DEBUG: Found " + requests.size() + " requests (total: " + totalItems + ")");
             
-            // Set attributes for JSP
+        
             req.setAttribute("role", role);
             req.setAttribute("username", user.getUsername());
             req.setAttribute("requests", requests);

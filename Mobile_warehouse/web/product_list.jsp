@@ -228,9 +228,7 @@
                         <td>${x.status}</td>
                         <td><fmt:formatDate value="${x.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
                         <td class="action">
-                            <a href="${pageContext.request.contextPath}/home?p=product-detail&id=${x.productId}">
-                                View
-                            </a>
+                            
 
                             <a href="${pageContext.request.contextPath}/manager/product/update?id=${x.productId}">
                                 Update

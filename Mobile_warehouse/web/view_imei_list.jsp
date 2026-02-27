@@ -10,7 +10,7 @@
   .btn{ padding:6px 14px; border:1px solid #333; background:#eee; text-decoration:none; color:#000; display:inline-block; border-radius:6px; }
   .title{ margin:0 0 0 10px; font-weight:700; }
 
-  /* ✅ Updated cards layout for full SKU info */
+  
   .cards{ margin-top:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
   .card{ 
     background:#3a7bd5; 

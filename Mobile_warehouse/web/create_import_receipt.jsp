@@ -295,7 +295,10 @@
                     </form>
                 </div>
 
-                <!-- ================= Excel ================= -->
+                
+                        
+                        
+                       
                 <div id="tab-excel" class="tabPanel">
                     <form method="post" action="${ctx}/create-import-receipt" enctype="multipart/form-data">
                         <input type="hidden" name="mode" value="excel"/>
@@ -372,9 +375,8 @@
                 const tbody = document.getElementById("itemsTbody");
                 const manualForm = document.getElementById("manualForm");
 
-                let rowCounter = 0; // Global counter
-
-                // Build product select
+                let rowCounter = 0; 
+                
                 function buildProductSelect() {
                     const sel = document.createElement("select");
                     sel.name = "productId";
@@ -386,7 +388,7 @@
                     return sel;
                 }
 
-                // Build SKU select
+                
                 function buildSkuSelect() {
                     const sel = document.createElement("select");
                     sel.name = "skuId";
@@ -395,7 +397,7 @@
                     return sel;
                 }
 
-                // Refresh SKU options based on product
+                
                 function refreshSkuOptions(skuSelect, productId) {
                     skuSelect.innerHTML = '<option value="">-- Select SKU --</option>';
                     if (!productId)
@@ -406,7 +408,7 @@
                     });
                 }
 
-                // Build IMEI inputs box
+                
                 function buildImeiBox(rowIdx, qty) {
                     const box = document.createElement("div");
                     box.className = "imeiBox";
@@ -420,12 +422,12 @@
 
                         const input = document.createElement("input");
                         input.type = "text";
-                        input.name = "imei_" + rowIdx + "_" + i; // CRITICAL: Correct naming
+                        input.name = "imei_" + rowIdx + "_" + i; 
                         input.placeholder = "15 digits";
                         input.required = true;
                         input.maxLength = 15;
 
-                        // Validation
+                        
                         input.addEventListener("input", function () {
                             this.value = this.value.replace(/\D/g, "").slice(0, 15);
 
@@ -448,35 +450,35 @@
                     return box;
                 }
 
-                // Add new row
+               
                 function addRow() {
-                    rowCounter++; // Increment global counter
+                    rowCounter++; 
                     const rowIdx = rowCounter;
 
                     const tr = document.createElement("tr");
                     tr.dataset.rowIdx = rowIdx;
 
-                    // Column #
+                   
                     const tdNo = document.createElement("td");
                     tdNo.className = "center cellNo";
                     tdNo.textContent = tbody.children.length + 1;
 
-                    // Column Product
+                    
                     const tdProd = document.createElement("td");
                     const selProd = buildProductSelect();
                     tdProd.appendChild(selProd);
 
-                    // Column SKU
+                  
                     const tdSku = document.createElement("td");
                     const selSku = buildSkuSelect();
                     tdSku.appendChild(selSku);
 
-                    // Update SKU when product changes
+                    
                     selProd.addEventListener("change", function () {
                         refreshSkuOptions(selSku, this.value);
                     });
 
-                    // Column Quantity
+                  
                     const tdQty = document.createElement("td");
                     const qtyInp = document.createElement("input");
                     qtyInp.type = "number";
@@ -486,25 +488,25 @@
                     qtyInp.required = true;
                     tdQty.appendChild(qtyInp);
 
-                    // Column IMEI
+                    
                     const tdImei = document.createElement("td");
                     let imeiBox = buildImeiBox(rowIdx, 1);
                     tdImei.appendChild(imeiBox);
 
-                    // Update IMEI inputs when quantity changes
+                   
                     qtyInp.addEventListener("input", function () {
                         let q = parseInt(this.value) || 1;
                         if (q < 1)
                             q = 1;
                         this.value = q;
 
-                        // Rebuild IMEI box
+                        
                         tdImei.innerHTML = "";
                         imeiBox = buildImeiBox(rowIdx, q);
                         tdImei.appendChild(imeiBox);
                     });
 
-                    // Column Item Note
+                   
                     const tdNote = document.createElement("td");
                     const noteInp = document.createElement("input");
                     noteInp.type = "text";
@@ -512,11 +514,11 @@
                     noteInp.placeholder = "Notes";
                     tdNote.appendChild(noteInp);
 
-                    // Column Create By
+                  
                     const tdBy = document.createElement("td");
                     tdBy.textContent = CREATED_BY || "Staff";
 
-                    // Column Action
+                    
                     const tdAct = document.createElement("td");
                     tdAct.className = "center";
                     const delBtn = document.createElement("button");
@@ -525,7 +527,7 @@
                     delBtn.textContent = "Delete";
                     delBtn.addEventListener("click", function () {
                         tr.remove();
-                        // Renumber rows
+                        
                         Array.from(tbody.children).forEach((row, idx) => {
                             const noCell = row.querySelector(".cellNo");
                             if (noCell)
@@ -534,7 +536,7 @@
                     });
                     tdAct.appendChild(delBtn);
 
-                    // Append all columns
+                    
                     tr.appendChild(tdNo);
                     tr.appendChild(tdProd);
                     tr.appendChild(tdSku);
@@ -547,10 +549,10 @@
                     tbody.appendChild(tr);
                 }
 
-                // Add row button
+               
                 document.getElementById("btnAddRow").addEventListener("click", addRow);
 
-                // Form validation
+              
                 manualForm.addEventListener("submit", function (e) {
                     const rows = tbody.children;
 
@@ -591,7 +593,7 @@
                     }
                 });
 
-                // Tab switching
+                
                 document.querySelectorAll('.tabBtn').forEach(btn => {
                     btn.addEventListener('click', function () {
                         const tab = this.dataset.tab;
@@ -604,7 +606,7 @@
                     });
                 });
 
-                // Add first row on load
+               
                 addRow();
             })();
         </script>

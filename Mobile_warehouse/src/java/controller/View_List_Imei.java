@@ -55,7 +55,7 @@ public class View_List_Imei extends HttpServlet {
             return;
         }
 
-        String q = request.getParameter("q");  // Search IMEI only
+        String q = request.getParameter("q");  
 
         int page = parseInt(request.getParameter("page"), 1);
         int pageSize = parseInt(request.getParameter("pageSize"), 10);
@@ -71,7 +71,7 @@ public class View_List_Imei extends HttpServlet {
                 return;
             }
 
-            // ✅ Updated: No status filter anymore
+
             int totalItems = dao.countImeis(skuId, q);
             int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
             if (totalPages < 1) totalPages = 1;
@@ -87,7 +87,6 @@ public class View_List_Imei extends HttpServlet {
 
             request.setAttribute("q", q);
 
-            // ✅ Updated: No status parameter
             request.setAttribute("imeiRows", dao.listImeis(skuId, q, page, pageSize));
 
             request.setAttribute("pageNumber", page);

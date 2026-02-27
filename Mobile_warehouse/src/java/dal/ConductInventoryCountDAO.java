@@ -22,7 +22,7 @@ public class ConductInventoryCountDAO {
         return DBContext.getConnection();
     }
 
-    // Dropdown "All Brands"
+
     public List<IdName> getActiveBrands() {
         List<IdName> list = new ArrayList<>();
         String sql = "SELECT brand_id, brand_name FROM brands WHERE is_active = 1 ORDER BY brand_name";
@@ -31,7 +31,7 @@ public class ConductInventoryCountDAO {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                // IdName constructor nhận long
+             
                 list.add(new IdName(rs.getLong("brand_id"), rs.getString("brand_name")));
             }
         } catch (Exception e) {
@@ -75,67 +75,69 @@ public class ConductInventoryCountDAO {
         return 0;
     }
 
-    public List<InventoryCountRow> listRows(String q, String brandId, int page, int pageSize) {
-        List<InventoryCountRow> list = new ArrayList<>();
-        int offset = (page - 1) * pageSize;
+  public List<InventoryCountRow> listRows(String q, String brandId, int page, int pageSize) {
+    List<InventoryCountRow> list = new ArrayList<>();
+    int offset = (page - 1) * pageSize;
 
-        StringBuilder where = new StringBuilder(" WHERE s.status='ACTIVE' AND p.status='ACTIVE' ");
-        List<Object> params = new ArrayList<>();
+    StringBuilder where = new StringBuilder(" WHERE s.status='ACTIVE' AND p.status='ACTIVE' ");
+    List<Object> params = new ArrayList<>();
 
-        if (q != null && !q.trim().isEmpty()) {
-            where.append(" AND (p.product_name LIKE ? OR s.sku_code LIKE ? OR p.product_code LIKE ?) ");
-            String like = "%" + q.trim() + "%";
-            params.add(like);
-            params.add(like);
-            params.add(like);
-        }
-        if (brandId != null && !brandId.trim().isEmpty()) {
-            where.append(" AND p.brand_id = ? ");
-            params.add(parseLongSafe(brandId));
-        }
-
-        String sql =
-                "SELECT " +
-                "  s.sku_id, s.sku_code, p.product_name, s.color, s.ram_gb, s.storage_gb, " +
-                "  COALESCE(ib.qty_on_hand,0) AS system_qty " +
-                "FROM product_skus s " +
-                "JOIN products p ON p.product_id = s.product_id " +
-                "LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id " +
-                where +
-                "ORDER BY s.sku_code " +
-                "LIMIT ? OFFSET ?";
-
-        try (Connection con = getConn();
-             PreparedStatement ps = con.prepareStatement(sql)) {
-
-            int idx = bind(ps, params);
-            ps.setInt(idx++, pageSize);
-            ps.setInt(idx++, offset);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    InventoryCountRow r = new InventoryCountRow();
-                    r.setSkuId(rs.getLong("sku_id"));
-                    r.setSkuCode(rs.getString("sku_code"));
-                    r.setProductName(rs.getString("product_name"));
-                    r.setColor(rs.getString("color"));
-                    r.setRamGb(rs.getInt("ram_gb"));
-                    r.setStorageGb(rs.getInt("storage_gb"));
-
-                    int sys = rs.getInt("system_qty");
-                    r.setSystemQty(sys);
-                    r.setCountedQty(sys); // default counted = system
-
-                    // ❌ KHÔNG gọi r.setDifference(...) vì model bạn không có
-                    list.add(r);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return list;
+    if (q != null && !q.trim().isEmpty()) {
+        where.append(" AND (p.product_name LIKE ? OR s.sku_code LIKE ? OR p.product_code LIKE ?) ");
+        String like = "%" + q.trim() + "%";
+        params.add(like);
+        params.add(like);
+        params.add(like);
     }
+    if (brandId != null && !brandId.trim().isEmpty()) {
+        where.append(" AND p.brand_id = ? ");
+        params.add(parseLongSafe(brandId));
+    }
+
+
+    String sql =
+            "SELECT " +
+            "  s.sku_id, s.sku_code, p.product_name, s.color, s.ram_gb, s.storage_gb, " +
+            "  COALESCE((" +
+            "    SELECT COUNT(*) FROM product_units pu " +
+            "    WHERE pu.sku_id = s.sku_id AND pu.unit_status = 'ACTIVE'" +
+            "  ), 0) AS system_qty " +
+            "FROM product_skus s " +
+            "JOIN products p ON p.product_id = s.product_id " +
+            where +
+            "ORDER BY s.sku_code " +
+            "LIMIT ? OFFSET ?";
+
+    try (Connection con = getConn();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+
+        int idx = bind(ps, params);
+        ps.setInt(idx++, pageSize);
+        ps.setInt(idx++, offset);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                InventoryCountRow r = new InventoryCountRow();
+                r.setSkuId(rs.getLong("sku_id"));
+                r.setSkuCode(rs.getString("sku_code"));
+                r.setProductName(rs.getString("product_name"));
+                r.setColor(rs.getString("color"));
+                r.setRamGb(rs.getInt("ram_gb"));
+                r.setStorageGb(rs.getInt("storage_gb"));
+
+                int sys = rs.getInt("system_qty");
+                r.setSystemQty(sys);
+                r.setCountedQty(sys); 
+
+                list.add(r);
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return list;
+}
 
     public boolean saveCountedQty(Map<Long, Integer> skuToCountedQty) {
         String sql =

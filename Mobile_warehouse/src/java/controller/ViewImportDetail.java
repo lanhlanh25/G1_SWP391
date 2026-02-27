@@ -66,26 +66,19 @@ public class ViewImportDetail extends HttpServlet {
 
         ImportReceiptDetailDAO dao = new ImportReceiptDetailDAO();
 
-        try {
-            ImportReceiptDetail receipt = dao.getReceipt(id);
-            if (receipt == null) {
-                req.setAttribute("err", "Receipt not found");
-            } else {
-                List<ImportReceiptLineDetail> lines = dao.getLines(id);
-                req.setAttribute("receipt", receipt);
-                req.setAttribute("lines", lines);
-            }
-
-            req.setAttribute("role", role);
-            req.setAttribute("sidebarPage", resolveSidebar(role));
-            req.setAttribute("contentPage", "view_import_detail.jsp");
-            req.setAttribute("currentPage", "import-receipt-detail");
-
-            req.getRequestDispatcher("homepage.jsp").forward(req, resp);
-
-        } catch (SQLException ex) {
-            throw new ServletException(ex);
+        ImportReceiptDetail receipt = dao.getReceipt(id);
+        if (receipt == null) {
+            req.setAttribute("err", "Receipt not found");
+        } else {
+            List<ImportReceiptLineDetail> lines = dao.getLines(id);
+            req.setAttribute("receipt", receipt);
+            req.setAttribute("lines", lines);
         }
+        req.setAttribute("role", role);
+        req.setAttribute("sidebarPage", resolveSidebar(role));
+        req.setAttribute("contentPage", "view_import_detail.jsp");
+        req.setAttribute("currentPage", "import-receipt-detail");
+        req.getRequestDispatcher("homepage.jsp").forward(req, resp);
     }
 
     @Override
@@ -103,7 +96,7 @@ public class ViewImportDetail extends HttpServlet {
             return;
         }
 
-        String action = req.getParameter("action"); // approve | cancel
+        String action = req.getParameter("action");
         long id;
         try {
             id = Long.parseLong(req.getParameter("id"));
@@ -114,27 +107,20 @@ public class ViewImportDetail extends HttpServlet {
 
         ImportReceiptDetailDAO dao = new ImportReceiptDetailDAO();
 
-        try {
-            boolean ok;
-            String msg;
-
-            if ("approve".equalsIgnoreCase(action)) {
-                ok = dao.approve(id);
-                msg = ok ? "Approved successfully" : "Only Pending receipt can be approved";
-            } else if ("cancel".equalsIgnoreCase(action)) {
-                ok = dao.cancel(id);
-                msg = ok ? "Cancelled successfully" : "Only Pending receipt can be cancelled";
-            } else {
-                resp.sendRedirect(req.getContextPath() + "/import-receipt-detail?id=" + id);
-                return;
-            }
-
-            resp.sendRedirect(req.getContextPath()
-                    + "/import-receipt-detail?id=" + id
-                    + "&msg=" + URLEncoder.encode(msg, StandardCharsets.UTF_8));
-
-        } catch (SQLException ex) {
-            throw new ServletException(ex);
+        boolean ok;
+        String msg;
+        if ("approve".equalsIgnoreCase(action)) {
+            ok = dao.approve(id);
+            msg = ok ? "Approved successfully" : "Only Pending receipt can be approved";
+        } else if ("cancel".equalsIgnoreCase(action)) {
+            ok = dao.cancel(id);
+            msg = ok ? "Cancelled successfully" : "Only Pending receipt can be cancelled";
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/import-receipt-detail?id=" + id);
+            return;
         }
+        resp.sendRedirect(req.getContextPath()
+                + "/import-receipt-detail?id=" + id
+                + "&msg=" + URLEncoder.encode(msg, StandardCharsets.UTF_8));
     }
 }

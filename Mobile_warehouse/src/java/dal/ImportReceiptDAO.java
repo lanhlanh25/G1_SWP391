@@ -7,22 +7,35 @@ import model.ImportReceiptLineDetail;
 
 public class ImportReceiptDAO {
 
-    public String generateImportCode(Connection con) throws SQLException {
-        String day = new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-        String prefix = "IR-" + day + "-";
-        String sql = "SELECT COUNT(*) FROM import_receipts WHERE import_code LIKE ?";
-        int count = 0;
-
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, prefix + "%");
+public String generateImportCode(Connection con) throws SQLException {
+    String day = new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
+    String prefix = "IR-" + day + "-";
+    
+    int sequence = 1;
+    String code;
+    
+    while (true) {
+        code = prefix + String.format("%04d", sequence);
+        
+        String checkSql = "SELECT COUNT(*) FROM import_receipts WHERE import_code = ?";
+        try (PreparedStatement ps = con.prepareStatement(checkSql)) {
+            ps.setString(1, code);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    count = rs.getInt(1);
+                if (rs.next() && rs.getInt(1) == 0) {
+                    // Code not exists - use it
+                    return code;
                 }
             }
         }
-        return prefix + String.format("%04d", count + 1);
+        
+        sequence++;
+        
+      
+        if (sequence > 9999) {
+            throw new SQLException("Cannot generate import code - sequence overflow");
+        }
     }
+}
 
     public long insertReceipt(Connection con,
             String importCode,
@@ -79,6 +92,25 @@ public class ImportReceiptDAO {
         throw new SQLException("Cannot insert import_receipt_lines");
     }
 
+   
+    public String validateImeiForInsert(Connection con, String imei) throws SQLException {
+        String sql = "SELECT unit_status FROM product_units WHERE imei = ? LIMIT 1";
+        
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, imei);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String status = rs.getString("unit_status");
+                    if ("ACTIVE".equalsIgnoreCase(status)) {
+                        return "IMEI " + imei + " already exists with ACTIVE status";
+                    }
+                    
+                }
+            }
+        }
+        return null;
+    }
+
     public void insertUnits(Connection con, long lineId, List<String> imeis) throws SQLException {
         String sql = "INSERT INTO import_receipt_units(line_id, imei) VALUES(?, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -127,7 +159,8 @@ public class ImportReceiptDAO {
         }
         throw new SQLException("SKU not found: " + skuCode);
     }
-    // ===== PDF/DETAIL QUERIES =====
+
+    
 
     public ImportReceiptDetail getDetailHeader(Connection con, long importId) throws SQLException {
         String sql = """
@@ -189,10 +222,8 @@ public class ImportReceiptDAO {
                     it.setProductCode(rs.getString("product_code"));
                     it.setSkuCode(rs.getString("sku_code"));
 
-                    // ✅ In Stock = inventory_balance.qty_on_hand
                     it.setInStock(getInStockBySku(con, skuId));
 
-                    // ✅ IMEI text (2 imei / line)
                     List<String> imeis = getImeisByLine(con, lineId);
                     it.setImeiText(formatImeis(imeis, 2));
 
