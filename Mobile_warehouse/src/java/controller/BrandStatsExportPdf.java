@@ -72,15 +72,15 @@ public class BrandStatsExportPdf extends HttpServlet {
         }
 
         // 2) Params (LIST screen uses q/status/sortBy/sortOrder/range)
-//    DETAIL screen uses brandId + listRange + dSortBy/dSortOrder (optional)
+        //    DETAIL screen uses brandId + listRange + dSortBy/dSortOrder (optional)
         String q = trimOrNull(request.getParameter("q"));
         String brandStatus = trimOrNull(request.getParameter("status"));
 
-// LIST sort
+        // LIST sort
         String sortBy = trimOrDefault(request.getParameter("sortBy"), "stock");
         String sortOrder = trimOrDefault(request.getParameter("sortOrder"), "DESC");
 
-// brandId is OPTIONAL now
+        // brandId is OPTIONAL now
         String brandIdRaw = trimOrNull(request.getParameter("brandId"));
         Long brandId = null;
         if (brandIdRaw != null) {
@@ -96,7 +96,7 @@ public class BrandStatsExportPdf extends HttpServlet {
             range = trimOrDefault(request.getParameter("listRange"), "all");
         }
 
-// DETAIL sort (fallback to LIST sort if missing)
+        // DETAIL sort (fallback to LIST sort if missing)
         String dSortBy = trimOrDefault(request.getParameter("dSortBy"), null);
         if (dSortBy == null) {
             dSortBy = sortBy;
@@ -573,7 +573,7 @@ public class BrandStatsExportPdf extends HttpServlet {
         items.setSpacingAfter(6f);
         doc.add(items);
 
-        // ===== Items table (NO BORDER like receipt) =====
+        // ===== Items table  =====
         PdfPTable t = new PdfPTable(7);
         t.setWidthPercentage(100);
         t.setHeaderRows(1);
