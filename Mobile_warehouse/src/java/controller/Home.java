@@ -169,78 +169,9 @@ public class Home extends HttpServlet {
             //  EXPORT RECEIPT LIST  (FIXED + tabCounts + normalize status)
             // =========================
             case "export-receipt-list": {
-                ExportReceiptDAO dao = new ExportReceiptDAO();
-
-                String q = request.getParameter("q");
-                String status = request.getParameter("status"); // JSP dùng: all/pending/completed/cancelled
-                String fromRaw = request.getParameter("from");
-                String toRaw = request.getParameter("to");
-
-                java.sql.Date fromDate = null, toDate = null;
-                try {
-                    if (fromRaw != null && !fromRaw.isBlank()) {
-                        fromDate = java.sql.Date.valueOf(fromRaw.trim());
-                    }
-                } catch (Exception ignore) {
-                }
-                try {
-                    if (toRaw != null && !toRaw.isBlank()) {
-                        toDate = java.sql.Date.valueOf(toRaw.trim());
-                    }
-                } catch (Exception ignore) {
-                }
-
-                // normalize for UI
-                if (status == null || status.isBlank()) {
-                    status = "all";
-                }
-                status = status.trim().toLowerCase();
-
-                // map for DB (nếu DB lưu PENDING/COMPLETED/CANCELLED)
-                String statusForDao = status;
-                if (!"all".equals(status)) {
-                    statusForDao = status.toUpperCase();
-                }
-
-                int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) {
-                    page = 1;
-                }
-
-                int pageSize = 10;
-
-                int totalItems = dao.countList(q, statusForDao, fromDate, toDate);
-                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) {
-                    totalPages = 1;
-                }
-                if (page > totalPages) {
-                    page = totalPages;
-                }
-
-                List<ExportReceiptListItem> rows = dao.list(q, statusForDao, fromDate, toDate, page, pageSize);
-
-                // tabCounts để JSP show số
-                Map<String, Integer> tabCounts = new HashMap<>();
-                tabCounts.put("all", dao.countList(q, "ALL", fromDate, toDate)); // dao ignoreCase ALL
-                tabCounts.put("pending", dao.countList(q, "PENDING", fromDate, toDate));
-                tabCounts.put("completed", dao.countList(q, "COMPLETED", fromDate, toDate));
-                tabCounts.put("cancelled", dao.countList(q, "CANCELLED", fromDate, toDate));
-                request.setAttribute("tabCounts", tabCounts);
-
-                request.setAttribute("rows", rows);
-                request.setAttribute("q", q);
-                request.setAttribute("status", status); // để JSP compare 'pending'...
-                request.setAttribute("from", fromRaw);
-                request.setAttribute("to", toRaw);
-
-                request.setAttribute("page", page);
-                request.setAttribute("pageSize", pageSize);
-                request.setAttribute("totalPages", totalPages);
-                request.setAttribute("totalItems", totalItems);
+                ExportReceiptList.handle(request);
                 break;
             }
-
             // =========================
             // USERS
             // =========================
@@ -383,56 +314,14 @@ public class Home extends HttpServlet {
             }
 
             case "product-list": {
-                String q = request.getParameter("q");
-                String brandIdRaw = request.getParameter("brandId");
-                String st = request.getParameter("status");
-
-                Long brandId = null;
-                if (brandIdRaw != null && !brandIdRaw.isBlank()) {
-                    brandId = Long.parseLong(brandIdRaw);
-                }
-
-                String status = null;
-                if (st != null && !st.isBlank()) {
-                    status = st;
-                }
-
-                int page = parseInt(request.getParameter("page"), 1);
-                if (page < 1) {
-                    page = 1;
-                }
-
-                int pageSize = 5;
-
-                ProductDAO pdao = new ProductDAO();
-                int totalItems = pdao.count(q, brandId, status);
-                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-                if (totalPages < 1) {
-                    totalPages = 1;
-                }
-                if (page > totalPages) {
-                    page = totalPages;
-                }
-
-                List<ProductListItem> products = pdao.list(q, brandId, status, page, pageSize);
-
-                request.setAttribute("products", products);
-                request.setAttribute("q", q);
-                request.setAttribute("brandId", brandIdRaw);
-                request.setAttribute("status", st);
-
-                request.setAttribute("page", page);
-                request.setAttribute("pageSize", pageSize);
-                request.setAttribute("totalItems", totalItems);
-                request.setAttribute("totalPages", totalPages);
-
-                request.setAttribute("allBrands", brandDAO.list(null, "", "name", "ASC", 1, 1000));
+                ManagerViewProductList.handle(request);
                 break;
             }
-            case "product-detail": {
-                int productId = Integer.parseInt(request.getParameter("id"));
-            }
 
+            case "product-detail": {
+                ManagerViewProductDetail.handle(request, response);
+                break;
+            }
             // =========================
             // BRANDS
             // =========================
@@ -742,7 +631,10 @@ public class Home extends HttpServlet {
                 }
                 break;
             }
-
+            case "import-receipt-list": {
+                ImportReceiptList.handle(request);
+                break;
+            }
             case "supplier_detail": {
                 String idRaw = request.getParameter("id");
                 if (idRaw == null || idRaw.isBlank()) {
@@ -916,7 +808,7 @@ public class Home extends HttpServlet {
                 break;
             }
             // =========================
-           // EXPORT REQUEST (MANAGER + SALE)
+            // EXPORT REQUEST (MANAGER + SALE)
             // =========================
             case "export-request-list": {
                 String roleName = (String) request.getSession().getAttribute("roleName");

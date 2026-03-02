@@ -4,9 +4,107 @@ import java.sql.*;
 import java.util.*;
 import model.ImportReceiptDetail;
 import model.ImportReceiptLineDetail;
+import model.ImportReceiptListItem;
 
 public class ImportReceiptDAO {
 
+ public int countList(String q, java.sql.Date from, java.sql.Date to) throws Exception {
+
+    StringBuilder sql = new StringBuilder(
+        "SELECT COUNT(*) FROM import_receipts WHERE 1=1 "
+    );
+
+    List<Object> params = new ArrayList<>();
+
+    if (q != null && !q.isBlank()) {
+        sql.append(" AND import_code LIKE ? ");
+        params.add("%" + q.trim() + "%");
+    }
+
+    if (from != null) {
+        sql.append(" AND receipt_date >= ? ");
+        params.add(from);
+    }
+
+    if (to != null) {
+        sql.append(" AND receipt_date <= ? ");
+        params.add(to);
+    }
+
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+        int idx = 1;
+        for (Object p : params) {
+            ps.setObject(idx++, p);
+        }
+
+        try (ResultSet rs = ps.executeQuery()) {
+            rs.next();
+            return rs.getInt(1);
+        }
+    }
+ }
+
+    public List<ImportReceiptListItem> list(
+        String q,
+        java.sql.Date from,
+        java.sql.Date to,
+        int page,
+        int pageSize) throws Exception {
+
+    StringBuilder sql = new StringBuilder(
+        "SELECT import_id, import_code, receipt_date, created_by "
+      + "FROM import_receipts WHERE 1=1 "
+    );
+
+    List<Object> params = new ArrayList<>();
+
+    if (q != null && !q.isBlank()) {
+        sql.append(" AND import_code LIKE ? ");
+        params.add("%" + q.trim() + "%");
+    }
+
+    if (from != null) {
+        sql.append(" AND receipt_date >= ? ");
+        params.add(from);
+    }
+
+    if (to != null) {
+        sql.append(" AND receipt_date <= ? ");
+        params.add(to);
+    }
+
+    sql.append(" ORDER BY receipt_date DESC LIMIT ? OFFSET ? ");
+    params.add(pageSize);
+    params.add((page - 1) * pageSize);
+
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql.toString())) {
+
+        int idx = 1;
+        for (Object p : params) {
+            ps.setObject(idx++, p);
+        }
+
+        try (ResultSet rs = ps.executeQuery()) {
+
+            List<ImportReceiptListItem> list = new ArrayList<>();
+
+            while (rs.next()) {
+                ImportReceiptListItem item = new ImportReceiptListItem();
+                item.setImportId(rs.getLong("import_id"));
+                item.setImportCode(rs.getString("import_code"));
+                item.setReceiptDate(rs.getTimestamp("receipt_date"));
+                item.setCreatedBy(rs.getString("created_by"));
+                list.add(item);
+            }
+
+            return list;
+        }
+    }
+}
+    
 public String generateImportCode(Connection con) throws SQLException {
     String day = new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
     String prefix = "IR-" + day + "-";

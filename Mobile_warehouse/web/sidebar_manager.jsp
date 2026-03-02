@@ -15,7 +15,7 @@
         <details open>
             <summary style="cursor:pointer;">Import Receipt</summary>
             <ul style="margin-top:6px;">
-                <li><a href="<%=ctx%>/import-receipt-list">View Import Receipt List</a></li>
+                <li><a href="${pageContext.request.contextPath}/home?p=import-receipt-list">View Import Receipt List</a></li>
                 <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
             </ul>
         </details>
