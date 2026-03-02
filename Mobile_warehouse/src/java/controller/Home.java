@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Date;
@@ -35,8 +36,12 @@ public class Home extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
         String p = request.getParameter("p");
+
+        if (p != null) {
+            p = p.trim();
+        }
+
         if (p == null || p.isBlank()) {
             p = "dashboard";
         }
@@ -48,6 +53,7 @@ public class Home extends HttpServlet {
                 role = "STAFF";
             }
             session.setAttribute("roleName", role);
+
         }
         role = role.toUpperCase();
 
@@ -72,6 +78,7 @@ public class Home extends HttpServlet {
         request.setAttribute("sidebarPage", sidebarPage);
         request.setAttribute("contentPage", contentPage);
         request.setAttribute("currentPage", p);
+        request.setAttribute("role", role);
 
         request.getRequestDispatcher("homepage.jsp").forward(request, response);
     }
@@ -89,6 +96,29 @@ public class Home extends HttpServlet {
             // =========================
             //  CREATE IMPORT RECEIPT 
             // =========================
+            case "import-receipt-detail": {
+                String idRaw = request.getParameter("id");
+                if (idRaw == null || idRaw.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=import-receipt-list&err=Missing+id");
+                    return;
+                }
+
+                long id = Long.parseLong(idRaw.trim());
+
+                ImportReceiptDetailDAO dao = new ImportReceiptDetailDAO();
+
+                ImportReceiptDetail receipt = dao.getReceipt(id);
+                if (receipt == null) {
+                    request.setAttribute("err", "Receipt not found");
+                    break;
+                }
+
+                List<ImportReceiptLineDetail> lines = dao.getLines(id);
+
+                request.setAttribute("receipt", receipt);
+                request.setAttribute("lines", lines);
+                break;
+            }
             case "create-import-receipt": {
                 SupplierDAO sdao = new SupplierDAO();
                 ProductDAO pdao = new ProductDAO();
@@ -632,6 +662,34 @@ public class Home extends HttpServlet {
                 break;
             }
             case "import-receipt-list": {
+
+                String action = request.getParameter("action");
+
+                if ("export".equalsIgnoreCase(action)) {
+                    response.setContentType("text/csv");
+                    response.setHeader("Content-Disposition", "attachment; filename=import_receipts.csv");
+
+                    PrintWriter out = response.getWriter();
+
+                    ImportReceiptDAO dao = new ImportReceiptDAO();
+                    List<ImportReceiptListItem> list
+                            = dao.list(null, null, null, 1, 1000);
+
+                    out.println("Import Code,Supplier,Created By,Created Date,Total Qty,Status");
+
+                    for (ImportReceiptListItem r : list) {
+                        out.println(r.getImportCode() + ","
+                                + r.getSupplierName() + ","
+                                + r.getCreatedByName() + ","
+                                + r.getReceiptDate() + ","
+                                + r.getTotalQuantity() + ","
+                                + r.getStatus());
+                    }
+
+                    out.flush();
+                    return;
+                }
+
                 ImportReceiptList.handle(request);
                 break;
             }
@@ -1196,6 +1254,9 @@ public class Home extends HttpServlet {
         if (role == null) {
             role = "";
         }
+        if (p != null) {
+            p = p.trim();
+        }
         if (p == null) {
             p = "";
         }
@@ -1278,6 +1339,7 @@ public class Home extends HttpServlet {
                     case "view_history":
                         return "supplier_history.jsp";
                     case "import-receipt-detail":
+
                         return "view_import_detail.jsp";
                     case "create-import-receipt":
                         return "create_import_receipt.jsp";

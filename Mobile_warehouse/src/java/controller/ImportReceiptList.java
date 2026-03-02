@@ -1,33 +1,37 @@
 package controller;
 
-import dal.ImportReceiptDAO;
+import dal.ImportReceiptListDAO;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import model.ImportReceiptListItem;
 
 public class ImportReceiptList {
 
-public static void handle(HttpServletRequest request) throws Exception{
-        ImportReceiptDAO dao = new ImportReceiptDAO();
+    public static void handle(HttpServletRequest request) throws Exception {
+
+        ImportReceiptListDAO dao = new ImportReceiptListDAO();
 
         String q = request.getParameter("q");
+        String status = request.getParameter("status");
         String fromRaw = request.getParameter("from");
         String toRaw = request.getParameter("to");
 
-        java.sql.Date fromDate = null;
-        java.sql.Date toDate = null;
+        LocalDate from = null;
+        LocalDate to = null;
 
         try {
             if (fromRaw != null && !fromRaw.isBlank()) {
-                fromDate = java.sql.Date.valueOf(fromRaw.trim());
+                from = LocalDate.parse(fromRaw);
             }
         } catch (Exception ignore) {}
 
         try {
             if (toRaw != null && !toRaw.isBlank()) {
-                toDate = java.sql.Date.valueOf(toRaw.trim());
+                to = LocalDate.parse(toRaw);
             }
         } catch (Exception ignore) {}
 
@@ -39,18 +43,23 @@ public static void handle(HttpServletRequest request) throws Exception{
 
         int pageSize = 10;
 
-        int totalItems = dao.countList(q, fromDate, toDate);
+        int totalItems = dao.count(q, status, from, to);
         int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
 
         if (totalPages < 1) totalPages = 1;
         if (page > totalPages) page = totalPages;
 
         List<ImportReceiptListItem> rows =
-                dao.list(q, fromDate, toDate, page, pageSize);
+                dao.list(q, status, from, to, page, pageSize);
+
+        Map<String, Integer> tabCounts =
+                dao.countByUiStatus(q, from, to);
 
         request.setAttribute("rows", rows);
+        request.setAttribute("tabCounts", tabCounts);
 
         request.setAttribute("q", q);
+        request.setAttribute("status", status);
         request.setAttribute("from", fromRaw);
         request.setAttribute("to", toRaw);
 
