@@ -126,10 +126,10 @@
               </td>
 
               <td>${fn:escapeXml(it.brandName)}</td>
-              <td class="center">${it.totalQty}</td>
+              <td class="center">${it.totalQty} Phone</td>
 
               <td class="center">
-                <%-- DÙNG it.status (vì model bạn đang có getStatus()) --%>
+               
                 <c:set var="st" value="${it.status}" />
                 <c:choose>
                   <c:when test="${st == 'OK'}"><span class="pill pill-ok">In Stock</span></c:when>

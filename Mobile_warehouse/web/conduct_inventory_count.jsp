@@ -63,6 +63,14 @@
         <button class="btn" type="submit">Save</button>
       </div>
 
+      <%-- link back để IMEI list quay về đúng inventory-count + giữ filter/page --%>
+      <c:url var="backToCount" value="/inventory-count">
+        <c:param name="q" value="${q}"/>
+        <c:param name="brandId" value="${brandId}"/>
+        <c:param name="page" value="${pageNumber}"/>
+        <c:param name="pageSize" value="${pageSize}"/>
+      </c:url>
+
       <table>
         <thead>
           <tr>
@@ -87,12 +95,20 @@
               <td style="text-align:center;">${r.ramGb} GB</td>
               <td style="text-align:center;">${r.storageGb} GB</td>
 
-              <td style="text-align:center;">${r.systemQty}</td>
+              <td style="text-align:center;">${r.systemQty} Phone</td>
 
               <td style="text-align:center;">
                 <input type="hidden" name="skuId" value="${r.skuId}"/>
-                <input class="diff-input js-counted" type="number" name="countedQty"
-                       min="0" value="${r.countedQty}" data-system="${r.systemQty}" />
+
+                <div style="display:inline-flex; align-items:center; gap:6px;">
+                  <input class="diff-input js-counted"
+                         type="number"
+                         name="countedQty"
+                         min="0"
+                         value="${r.countedQty}"
+                         data-system="${r.systemQty}" />
+                  <span>Phone</span>
+                </div>
               </td>
 
               <td style="text-align:center;" class="js-status">
@@ -111,6 +127,7 @@
                   <c:param name="skuId" value="${r.skuId}"/>
                   <c:param name="page" value="1"/>
                   <c:param name="pageSize" value="10"/>
+                  <c:param name="back" value="${backToCount}"/>
                 </c:url>
                 <a href="${imeiUrl}" style="color:#0b39b8; text-decoration:underline;">View List IMEI</a>
               </td>
@@ -123,7 +140,6 @@
         </tbody>
       </table>
     </form>
-
 
     <c:choose>
       <c:when test="${totalPages <= 3}">
@@ -184,15 +200,13 @@
 
       <div>
         Show
-        <select onchange="location.href='${pageContext.request.contextPath}/inventory-count?q=${q}&brandId=${brandId}&page=1&pageSize='+this.value;">
+        <select onchange="location.href='${pageContext.request.contextPath}/inventory-count?q=${fn:escapeXml(q)}&brandId=${fn:escapeXml(brandId)}&page=1&pageSize='+this.value;">
           <option value="10" ${pageSize==10 ? "selected" : ""}>10</option>
           <option value="20" ${pageSize==20 ? "selected" : ""}>20</option>
         </select>
         Row
       </div>
     </div>
-
-
 
     <script>
       function updateStatusForInput(inputEl) {
