@@ -119,6 +119,7 @@ public class Home extends HttpServlet {
                 request.setAttribute("lines", lines);
                 break;
             }
+            
             case "create-import-receipt": {
                 SupplierDAO sdao = new SupplierDAO();
                 ProductDAO pdao = new ProductDAO();
@@ -1436,7 +1437,8 @@ public class Home extends HttpServlet {
                         return "supplier_list.jsp";
                     case "supplier_detail":
                         return "supplier_detail.jsp";
-
+                    case "import-receipt-detail":
+                        return "view_import_detail.jsp";
                     case "brand-list":
                         return "brand_list.jsp";
                     case "brand-detail":

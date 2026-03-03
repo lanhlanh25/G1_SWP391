@@ -167,6 +167,7 @@
 
                 <a class="btn primary"
                    href="${ctx}/home?p=import-receipt-list&action=export&q=${fn:escapeXml(q)}&status=${fn:escapeXml(status)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">
+                   
                     EXPORT
                 </a>
                 <a class="btn" href="${ctx}/home?p=create-import-receipt">CREATE IMPORT RECEIPT</a>
