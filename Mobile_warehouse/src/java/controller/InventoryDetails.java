@@ -8,7 +8,7 @@ package controller;
  *
  * @author Admin
  */
-import dal.UpdateInventoryDAO;
+import dal.InventoryDetailsDAO;
 import dal.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -57,9 +57,9 @@ public class InventoryDetails extends HttpServlet {
         if (pageSize <= 0) pageSize = 10;
 
        
-        UpdateInventoryDAO dao = new UpdateInventoryDAO();
+        InventoryDetailsDAO dao = new InventoryDetailsDAO();
 
-        UpdateInventoryDAO.ProductBrief p = dao.getProductByCode(productCode);
+        InventoryDetailsDAO.ProductBrief p = dao.getProductByCode(productCode);
         if (p == null) {
             response.sendRedirect(request.getContextPath() + "/inventory?err=Product not found");
             return;
