@@ -163,12 +163,12 @@
             </div>
 
             <div class="btnRow">
-                <!-- ✅ Manager: Request Delete Import Receipt List button -->
+                
                 <c:if test="${role == 'MANAGER'}">
                     <a class="btn warning" href="${ctx}/home?p=request-delete-import-receipt-list">Request Delete List</a>
                 </c:if>
 
-                <!-- ✅ Export button -->
+              
                 <a class="btn primary"
                    href="${ctx}/import-receipt-list?action=export&q=${fn:escapeXml(q)}&status=${fn:escapeXml(status)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">
                     EXPORT
@@ -245,7 +245,7 @@
                         <td><c:out value="${r.supplierName}"/></td>
                         <td><c:out value="${r.createdByName}"/></td>
                         <td><c:out value="${r.receiptDate}"/></td>
-                        <td><c:out value="${r.totalQuantity}"/></td>
+                        <td><c:out value="${r.totalQuantity}"/> Phone</td>
                         <td><c:out value="${r.statusUi}"/></td>
 
                         <td>

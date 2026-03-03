@@ -38,12 +38,10 @@
 
   .box { margin-top:10px; border:2px solid var(--line); background:#fff; padding:10px; }
 
-
   table { width:100%; border-collapse:collapse; margin-top:10px; }
   th, td { border:1px solid var(--line); padding:6px; font-size:12px; }
   th { background:var(--th); text-align:left; }
   td.center { text-align:center; }
-
 
   .pill{
     display:inline-block; padding:2px 10px; border:1px solid #333; font-weight:700; font-size:11px;
@@ -51,7 +49,6 @@
   .pill-ok { background:#00ff4c; }
   .pill-low { background:#ffd400; }
   .pill-out { background:#ff3b30; color:#000; }
-
 
   .pagerbar{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:10px; flex-wrap:wrap; }
   .paging { display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap; }
@@ -68,7 +65,6 @@
   <div class="frame">
 
     <div class="topbar">
-   
       <a class="btn" href="${pageContext.request.contextPath}/inventory">Back</a>
       <a class="btn" href="${pageContext.request.contextPath}/home">Home</a>
       <h3 class="title">Inventory Details</h3>
@@ -81,7 +77,6 @@
       <div style="color:red; font-weight:700; margin-top:6px;">${param.err}</div>
     </c:if>
 
-    
     <div class="cards">
       <div class="card">
         <div>Quantity</div>
@@ -98,6 +93,14 @@
     </div>
 
     <div class="box">
+
+      <%-- back link to return from IMEI page if you choose to use it later --%>
+      <c:url var="backToDetails" value="/inventory-details">
+        <c:param name="productCode" value="${productCode}"/>
+        <c:param name="page" value="${pageNumber}"/>
+        <c:param name="pageSize" value="${pageSize}"/>
+      </c:url>
+
       <table>
         <thead>
           <tr>
@@ -107,7 +110,7 @@
             <th style="width:110px;">Storage</th>
             <th style="width:140px;">Inventory Status</th>
             <th style="width:130px;">Quantity</th>
-            <th style="width:130px;">Last Updated</th>
+            <th style="width:130px;">Action</th>
           </tr>
         </thead>
 
@@ -127,10 +130,21 @@
                 </c:choose>
               </td>
 
-              
-              <td class="center">${s.qty}</td>
+              <td class="center">${s.qty} Phone</td>
 
-              <td class="center">${s.lastUpdated}</td>
+              <td class="center">
+                <c:url var="imeiUrl" value="/imei-list">
+                  <c:param name="skuId" value="${s.skuId}"/>
+                  <c:param name="page" value="1"/>
+                  <c:param name="pageSize" value="10"/>
+                  <%-- Optional: pass back link so IMEI page can return here if you later support it --%>
+                  <c:param name="back" value="${backToDetails}"/>
+                </c:url>
+
+                <a href="${imeiUrl}" style="color:#0b39b8; text-decoration:underline;">
+                  View List IMEI
+                </a>
+              </td>
             </tr>
           </c:forEach>
 
@@ -140,7 +154,6 @@
         </tbody>
       </table>
 
-    
       <c:choose>
         <c:when test="${totalPages <= 3}">
           <c:set var="startPage" value="1"/>

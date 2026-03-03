@@ -1,4 +1,3 @@
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -10,22 +9,21 @@
   .btn{ padding:6px 14px; border:1px solid #333; background:#eee; text-decoration:none; color:#000; display:inline-block; border-radius:6px; }
   .title{ margin:0 0 0 10px; font-weight:700; }
 
-  
   .cards{ margin-top:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
-  .card{ 
-    background:#3a7bd5; 
-    border:2px solid #1d4f91; 
-    padding:8px 10px; 
-    font-size:12px; 
-    color:#fff; 
+  .card{
+    background:#3a7bd5;
+    border:2px solid #1d4f91;
+    padding:8px 10px;
+    font-size:12px;
+    color:#fff;
     border-radius:8px;
     min-height:50px;
   }
   .card .label{ font-size:11px; opacity:0.9; }
-  .card .value{ 
-    font-weight:800; 
-    font-size:14px; 
-    margin-top:4px; 
+  .card .value{
+    font-weight:800;
+    font-size:14px;
+    margin-top:4px;
     word-wrap: break-word;
     overflow-wrap: break-word;
   }
@@ -50,36 +48,27 @@
 <div class="wrap">
 
   <div class="topbar">
-    <a class="btn" href="${pageContext.request.contextPath}/inventory-count">Back</a>
+    <%-- Back thông minh: nếu có param.back thì quay về đó --%>
+    <c:choose>
+      <c:when test="${not empty param.back}">
+        <a class="btn" href="${param.back}">Back</a>
+      </c:when>
+      <c:otherwise>
+        <a class="btn" href="${pageContext.request.contextPath}/inventory-count">Back</a>
+      </c:otherwise>
+    </c:choose>
+
     <a class="btn" href="${pageContext.request.contextPath}/home">Home</a>
     <h3 class="title">View IMEI List</h3>
   </div>
 
   <div class="cards">
-    <div class="card">
-      <div class="label">SKU Code</div>
-      <div class="value">${skuCode}</div>
-    </div>
-    <div class="card">
-      <div class="label">Product Code</div>
-      <div class="value">${productCode}</div>
-    </div>
-    <div class="card">
-      <div class="label">Product Model</div>
-      <div class="value">${productModel}</div>
-    </div>
-    <div class="card">
-      <div class="label">Color</div>
-      <div class="value">${color}</div>
-    </div>
-    <div class="card">
-      <div class="label">RAM</div>
-      <div class="value">${ramGb} GB</div>
-    </div>
-    <div class="card">
-      <div class="label">Storage</div>
-      <div class="value">${storageGb} GB</div>
-    </div>
+    <div class="card"><div class="label">SKU Code</div><div class="value">${fn:escapeXml(skuCode)}</div></div>
+    <div class="card"><div class="label">Product Code</div><div class="value">${fn:escapeXml(productCode)}</div></div>
+    <div class="card"><div class="label">Product Model</div><div class="value">${fn:escapeXml(productModel)}</div></div>
+    <div class="card"><div class="label">Color</div><div class="value">${fn:escapeXml(color)}</div></div>
+    <div class="card"><div class="label">RAM</div><div class="value">${ramGb} GB</div></div>
+    <div class="card"><div class="label">Storage</div><div class="value">${storageGb} GB</div></div>
   </div>
 
   <div class="box">
@@ -89,12 +78,18 @@
       <input type="hidden" name="skuId" value="${skuId}"/>
       <input type="hidden" name="page" value="1"/>
       <input type="hidden" name="pageSize" value="${pageSize}"/>
+      <input type="hidden" name="back" value="${param.back}"/>
 
-      <input type="text" name="q" value="${q}" placeholder="Search IMEI..."
+      <input type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Search IMEI..."
              style="width:240px; height:28px; padding:0 8px;"/>
 
       <button class="btn" type="submit" style="margin-left:12px;">Search</button>
-      <a class="btn" href="${pageContext.request.contextPath}/imei-list?skuId=${skuId}">Reset</a>
+
+      <c:url var="resetUrl" value="/imei-list">
+        <c:param name="skuId" value="${skuId}"/>
+        <c:param name="back" value="${param.back}"/>
+      </c:url>
+      <a class="btn" href="${resetUrl}">Reset</a>
     </form>
 
     <table>
@@ -109,8 +104,8 @@
       <tbody>
         <c:forEach var="r" items="${imeiRows}">
           <tr>
-            <td style="text-align:center;">${r.imei}</td>
-            
+            <td style="text-align:center;">${fn:escapeXml(r.imei)}</td>
+
             <td style="text-align:center;">
               <c:choose>
                 <c:when test="${not empty r.importDate}">
@@ -119,7 +114,7 @@
                 <c:otherwise>-</c:otherwise>
               </c:choose>
             </td>
-            
+
             <td style="text-align:center;">
               <c:choose>
                 <c:when test="${not empty r.exportDate}">
@@ -166,6 +161,7 @@
           <c:param name="q" value="${q}"/>
           <c:param name="pageSize" value="${pageSize}"/>
           <c:param name="page" value="${pageNumber-1}"/>
+          <c:param name="back" value="${param.back}"/>
         </c:url>
         <a class="pg ${pageNumber<=1 ? 'disabled' : ''}" href="${prevUrl}">Prev</a>
 
@@ -180,6 +176,7 @@
                 <c:param name="q" value="${q}"/>
                 <c:param name="pageSize" value="${pageSize}"/>
                 <c:param name="page" value="${i}"/>
+                <c:param name="back" value="${param.back}"/>
               </c:url>
               <a class="pg" href="${pageUrl}">${i}</a>
             </c:otherwise>
@@ -191,13 +188,14 @@
           <c:param name="q" value="${q}"/>
           <c:param name="pageSize" value="${pageSize}"/>
           <c:param name="page" value="${pageNumber+1}"/>
+          <c:param name="back" value="${param.back}"/>
         </c:url>
         <a class="pg ${pageNumber>=totalPages ? 'disabled' : ''}" href="${nextUrl}">Next</a>
       </div>
 
       <div>
         Show
-        <select onchange="location.href='${pageContext.request.contextPath}/imei-list?skuId=${skuId}&q=${q}&page=1&pageSize='+this.value;">
+        <select onchange="location.href='${pageContext.request.contextPath}/imei-list?skuId=${skuId}&q=${fn:escapeXml(q)}&back='+encodeURIComponent('${fn:escapeXml(param.back)}')+'&page=1&pageSize='+this.value;">
           <option value="10" ${pageSize==10 ? "selected" : ""}>10 Row</option>
           <option value="20" ${pageSize==20 ? "selected" : ""}>20 Row</option>
         </select>
