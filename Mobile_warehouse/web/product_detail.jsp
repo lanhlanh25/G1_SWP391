@@ -74,7 +74,7 @@
                     <th>Color</th>
                     <th>RAM (GB)</th>
                     <th>Storage (GB)</th>
-                    <th>Price</th>
+                  
                     <th>Status</th>
                 </tr>
 
@@ -90,7 +90,7 @@
                         <td>${s.color}</td>
                         <td>${s.ramGb}</td>
                         <td>${s.storageGb}</td>
-                        <td>${s.price}</td>
+                      
                         <td>${s.status}</td>
                     </tr>
                 </c:forEach>

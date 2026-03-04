@@ -172,7 +172,6 @@
             <div class="err"><c:out value="${err}"/></div>
         </c:if>
 
-        <!-- FILTER -->
         <form method="get" action="${ctx}/home">
             <input type="hidden" name="p" value="export-receipt-list"/>
 
@@ -183,7 +182,6 @@
                 </div>
 
                 <div class="rightFilters">
-                    <!-- ALL / DRAFT / CONFIRMED / CANCELLED -->
                     <select name="status">
                         <option value="ALL" ${status=='ALL' || empty status ? 'selected' : ''}>ALL</option>
                         <option value="DRAFT" ${status=='DRAFT' ? 'selected' : ''}>DRAFT</option>

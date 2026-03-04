@@ -13,7 +13,9 @@
                 <li><a href="<%=ctx%>/home?p=import-request-list">View Import Request List</a></li>
 
                 <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
-                <li><a href="<%=ctx%>/import-receipt-list">View Import Receipt List</a></li>
+                <li><a href="${pageContext.request.contextPath}/home?p=import-receipt-list">
+                        View Import Receipt List
+                    </a></li>
             </ul>
         </details>
     </li>

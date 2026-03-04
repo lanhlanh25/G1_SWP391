@@ -8,8 +8,6 @@ package controller;
  *
  * @author Lanhlanh
  */
-
-
 import dal.ProductCRUDDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -48,7 +46,9 @@ public class ManagerUpdateProduct extends HttpServlet {
                 session.removeAttribute("msg_update_product");
             }
 
-            request.getRequestDispatcher("/update_product.jsp").forward(request, response);
+            request.setAttribute("contentPage", "update_product.jsp");
+            request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+            request.getRequestDispatcher("/homepage.jsp").forward(request, response);
         } catch (Exception e) {
             throw new ServletException(e);
         }
@@ -96,7 +96,8 @@ public class ManagerUpdateProduct extends HttpServlet {
                     status);
 
             request.getSession().setAttribute("msg_update_product", "Update product successfully.");
-            response.sendRedirect(request.getContextPath() + "/manager/product/update?id=" + id);
+            response.sendRedirect(request.getContextPath() + "/home?p=product-list");
+
         } catch (Exception e) {
             throw new ServletException(e);
         }

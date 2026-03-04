@@ -52,7 +52,9 @@ public class ManagerDeleteProduct extends HttpServlet {
                 session.removeAttribute("msg_delete_product");
             }
 
-            request.getRequestDispatcher("/delete_product.jsp").forward(request, response);
+            request.setAttribute("contentPage", "delete_product.jsp");
+            request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+            request.getRequestDispatcher("/homepage.jsp").forward(request, response);
         } catch (Exception e) {
             throw new ServletException(e);
         }
@@ -76,7 +78,7 @@ public class ManagerDeleteProduct extends HttpServlet {
             dao.inactivateProduct(id);
 
             request.getSession().setAttribute("msg_delete_product", "Product set to INACTIVE successfully.");
-            response.sendRedirect(request.getContextPath() + "/manager/product/delete?id=" + id);
+            response.sendRedirect(request.getContextPath() + "/home?p=product-list");
         } catch (Exception e) {
             throw new ServletException(e);
         }

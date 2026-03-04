@@ -157,27 +157,25 @@
     <div class="frame">
 
         <div class="topbar">
-            <div class="btnRow">
-                <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
-                <div class="title">View import receipt list</div>
-            </div>
 
             <div class="btnRow">
-                
+
                 <c:if test="${role == 'MANAGER'}">
                     <a class="btn warning" href="${ctx}/home?p=request-delete-import-receipt-list">Request Delete List</a>
                 </c:if>
 
-              
+
                 <a class="btn primary"
-                   href="${ctx}/import-receipt-list?action=export&q=${fn:escapeXml(q)}&status=${fn:escapeXml(status)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">
+                   href="${ctx}/home?p=import-receipt-list&action=export&q=${fn:escapeXml(q)}&status=${fn:escapeXml(status)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">
+                   
                     EXPORT
                 </a>
                 <a class="btn" href="${ctx}/home?p=create-import-receipt">CREATE IMPORT RECEIPT</a>
             </div>
         </div>
 
-        <form method="get" action="${ctx}/import-receipt-list">
+        <form method="get" action="${pageContext.request.contextPath}/home">
+            <input type="hidden" name="p" value="import-receipt-list"/>
             <div class="filters">
                 <div class="leftFilters">
                     <input type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Search by Import Code" />
@@ -199,24 +197,34 @@
             </div>
         </form>
 
+
         <div class="tabs">
+
+            <c:set var="base"
+                   value="${ctx}/home?p=import-receipt-list&q=${fn:escapeXml(q)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
+
             <a class="tab ${status=='all' || empty status ? 'active' : ''}"
-               href="${ctx}/import-receipt-list?status=all&q=${fn:escapeXml(q)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">
+               href="${base}&status=all">
                 ALL <b><c:out value="${tabCounts['all']}"/></b>
             </a>
+
             <a class="tab ${status=='pending' ? 'active' : ''}"
-               href="${ctx}/import-receipt-list?status=pending&q=${fn:escapeXml(q)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">
+               href="${base}&status=pending">
                 Pending <b><c:out value="${tabCounts['pending']}"/></b>
             </a>
+
             <a class="tab ${status=='completed' ? 'active' : ''}"
-               href="${ctx}/import-receipt-list?status=completed&q=${fn:escapeXml(q)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">
+               href="${base}&status=completed">
                 Completed <b><c:out value="${tabCounts['completed']}"/></b>
             </a>
+
             <a class="tab ${status=='cancelled' ? 'active' : ''}"
-               href="${ctx}/import-receipt-list?status=cancelled&q=${fn:escapeXml(q)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">
+               href="${base}&status=cancelled">
                 Cancelled <b><c:out value="${tabCounts['cancelled']}"/></b>
             </a>
+
         </div>
+
 
         <table>
             <thead>
@@ -250,15 +258,17 @@
 
                         <td>
                             <div class="actions">
-                                <a class="btn" href="${ctx}/import-receipt-detail?id=${r.importId}">View Detail</a>
+                                <a href="home?p=import-receipt-detail&id=${r.importId}">
+                                    View
+                                </a>
                                 <a class="btn primary"
                                    href="${ctx}/import-receipt-pdf?id=${r.importId}">
                                     Download PDF
                                 </a>
 
-                                
+
                                 <c:if test="${role == 'MANAGER' && r.status == 'PENDING'}">
-                                    <form class="inline" method="post" action="${ctx}/import-receipt-list"
+                                    <form class="inline" method="post" action="${ctx}/home?p=import-receipt-list"
                                           onsubmit="return confirm('Delete this receipt?');">
                                         <input type="hidden" name="action" value="delete"/>
                                         <input type="hidden" name="id" value="${r.importId}"/>
@@ -266,7 +276,7 @@
                                     </form>
                                 </c:if>
 
-                              
+
                                 <c:if test="${role == 'STAFF' && r.status == 'PENDING'}">
                                     <a class="btn warning" href="${ctx}/home?p=request-delete-import-receipt&id=${r.importId}">Send Request Delete</a>
                                 </c:if>

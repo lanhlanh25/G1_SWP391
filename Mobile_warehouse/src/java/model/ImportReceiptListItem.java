@@ -18,6 +18,15 @@ public class ImportReceiptListItem {
     private Timestamp receiptDate;
     private String status;          
     private int totalQuantity;
+    private String createdBy;
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
     
     public ImportReceiptListItem() {}
     

@@ -8,174 +8,106 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <style>
-    * {
-        box-sizing: border-box;
-    }
+.wrap {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
 
-    .wrap {
-        width: 100%;
-        max-width: 980px;
-        margin: 16px auto;
-        background: #f1f1f1;
-        padding: 18px;
-    }
+.top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
 
-    .top {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
-    }
+.title {
+    font-size: 22px;
+    font-weight: bold;
+}
 
-    .title {
-        font-size: 40px;
-        font-weight: 900;
-        margin: 0;
-        line-height: 1.1;
-    }
+.btn-add {
+    padding: 8px 14px;
+    background: #28a745;
+    color: #fff;
+    border-radius: 6px;
+    text-decoration: none;
+}
 
-    .btn-add {
-        padding: 10px 16px;
-        border: 2px solid #2b4ea2;
-        background: #2f6fb9;
-        color: #000;
-        font-weight: 700;
-        text-decoration: none;
-        white-space: nowrap;
-    }
+.filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+}
 
-    .filters {
-        display: flex;
-        gap: 12px;
-        align-items: center;
-        flex-wrap: wrap;
-        margin: 12px 0 14px;
-    }
+.searchBox input {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
 
-    .searchBox {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-        flex: 1 1 360px;
-        min-width: 280px;
-    }
+.searchBox button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    background: #007bff;
+    color: #fff;
+}
 
-    .searchBox input {
-        flex: 1 1 auto;
-        min-width: 220px;
-        height: 40px;
-        border: 2px solid #2b4ea2;
-        padding: 0 10px;
-        background: #fff;
-    }
+.filters select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
 
-    .searchBox button {
-        height: 40px;
-        padding: 0 16px;
-        border: 2px solid #2b4ea2;
-        background: #2f6fb9;
-        font-weight: 700;
-        cursor: pointer;
-        white-space: nowrap;
-    }
+.table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
-    .filters select {
-        height: 40px;
-        border: 1px solid #999;
-        padding: 0 10px;
-        font-weight: 600;
-        background: #fff;
-        flex: 0 0 200px;
-        min-width: 180px;
-    }
+.table-wrap th {
+    background: #f8f9fa;
+    padding: 10px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+}
 
-    .table-wrap {
-        width: 100%;
-        overflow-x: auto;
-        background: #fff;
-        border: 2px solid #999;
-    }
+.table-wrap td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
 
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        min-width: 820px;
-    }
+.table-wrap tr:hover {
+    background: #f5f5f5;
+}
 
-    th, td {
-        border: 2px solid #999;
-        padding: 10px 8px;
-        text-align: center;
-        white-space: nowrap;
-    }
+.action a {
+    margin-right: 6px;
+}
 
-    th {
-        background: #eee;
-        font-weight: 800;
-    }
+.paging {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
 
-    .action {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        align-items: center;
-    }
-    .action a {
-        text-decoration: underline;
-        font-weight: 600;
-    }
-    .paging {
-        margin-top: 12px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: 12px;
-        flex-wrap: wrap;
-    }
+.page-btns a {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-decoration: none;
+    margin-right: 4px;
+}
 
-    .page-btns a {
-        display: inline-block;
-        padding: 6px 10px;
-        margin-left: 6px;
-        background: #ccc;
-        color: #000;
-        text-decoration: none;
-    }
-
-    .page-btns .active {
-        background: #999;
-    }
-
-    @media (max-width: 768px) {
-        .wrap {
-            max-width: 100%;
-            padding: 14px;
-        }
-        .title {
-            font-size: 30px;
-        }
-        .filters select {
-            flex: 1 1 180px;
-        }
-        table {
-            min-width: 760px;
-        }
-    }
-
-    @media (max-width: 480px) {
-        .title {
-            font-size: 26px;
-        }
-        .searchBox {
-            flex: 1 1 100%;
-        }
-        .searchBox button {
-            padding: 0 12px;
-        }
-    }
+.page-btns a.active {
+    background: #007bff;
+    color: #fff;
+    border-color: #007bff;
+}
 </style>
+
 <div class="wrap">
     <div class="top">
         <div class="title">View Product List</div>
@@ -228,7 +160,9 @@
                         <td>${x.status}</td>
                         <td><fmt:formatDate value="${x.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
                         <td class="action">
-                            
+                              <a href="${pageContext.request.contextPath}/home?p=product-detail&id=${x.productId}">
+                                View
+                            </a>
 
                             <a href="${pageContext.request.contextPath}/manager/product/update?id=${x.productId}">
                                 Update
