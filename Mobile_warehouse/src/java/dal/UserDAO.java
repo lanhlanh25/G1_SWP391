@@ -427,17 +427,18 @@ public class UserDAO {
     }
 
 
-    public List<model.ResetRequest> getPendingResetRequests() {
+   public List<model.ResetRequest> getPendingResetRequests() {
         List<model.ResetRequest> list = new ArrayList<>();
-        String sql
-                = "SELECT r.request_id, r.user_id, r.email, r.status, r.reason, r.created_at, "
-                + "       u.username, u.full_name "
-                + "FROM password_reset_requests r "
-                + "JOIN users u ON u.user_id = r.user_id "
-                + "WHERE r.status = 'PENDING' "
-                + "ORDER BY r.created_at DESC";
+        String sql = "SELECT r.request_id, r.user_id, r.email, r.status, r.reason, r.created_at, "
+                   + "       u.username, u.full_name "
+                   + "FROM password_reset_requests r "
+                   + "JOIN users u ON u.user_id = r.user_id "
+                   + "WHERE r.status = 'PENDING' "
+                   + "ORDER BY r.created_at DESC";
 
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection con = DBContext.getConnection(); 
+             PreparedStatement ps = con.prepareStatement(sql); 
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 model.ResetRequest rr = new model.ResetRequest();
@@ -490,17 +491,18 @@ public class UserDAO {
 
 
     public boolean decideResetRequest(long requestId, String status, String reason, int adminId) {
-        
-        String sql
-                = "UPDATE password_reset_requests "
-                + "SET status=?, reason=?, decided_by=?, decided_at=NOW() "
-                + "WHERE request_id=? AND status='PENDING'";
+        // NOW() dùng cho MySQL, nếu dùng SQL Server hãy đổi thành GETDATE()
+        String sql = "UPDATE password_reset_requests "
+                   + "SET status=?, reason=?, decided_by=?, decided_at=NOW() "
+                   + "WHERE request_id=? AND status='PENDING'";
 
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBContext.getConnection(); 
+             PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, status);
             ps.setString(2, reason);
             ps.setInt(3, adminId);
             ps.setLong(4, requestId);
+            
             return ps.executeUpdate() > 0;
         } catch (Exception e) {
             e.printStackTrace();

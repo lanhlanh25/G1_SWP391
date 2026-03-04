@@ -1,83 +1,87 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%
-    String ctx = request.getContextPath();
-%>
+<% String ctx = request.getContextPath(); %>
 
-<h3>MANAGER MENU</h3>
+<div class="section-title">Overview</div>
 <ul>
-    <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
-    <li><a href="<%=ctx%>/home?p=reports">Weekly Reports</a></li>
+  <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
+  <li><a href="<%=ctx%>/home?p=reports">Weekly Reports</a></li>
+</ul>
 
-    <li><a href="<%=ctx%>/inventory">Inventory Management</a></li>
-    <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
+<div class="section-title">Receipts</div>
+<ul>
+  <li>
+    <details open>
+      <summary>Import</summary>
+      <ul>
+        <li><a href="<%=ctx%>/import-receipt-list">Import Receipts</a></li>
+        <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
+      </ul>
+    </details>
+  </li>
 
-    <li style="list-style:none;">
-        <details open>
-            <summary style="cursor:pointer;">Import Receipt</summary>
-            <ul style="margin-top:6px;">
-                <li><a href="${pageContext.request.contextPath}/home?p=import-receipt-list">View Import Receipt List</a></li>
-                <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
-            </ul>
-        </details>
-    </li>
+  <li>
+    <details open>
+      <summary>Export</summary>
+      <ul>
+        <li><a href="<%=ctx%>/home?p=export-receipt-list">Export Receipts</a></li>
+      </ul>
+    </details>
+  </li>
+</ul>
 
+<div class="section-title">Inventory</div>
+<ul>
+  <li><a href="<%=ctx%>/inventory">Inventory Management</a></li>
+  <li><a href="<%=ctx%>/inventory-count">Inventory Count</a></li>
+</ul>
 
-    <li style="list-style:none;">
-        <details open>
-            <summary style="cursor:pointer;">Export Receipt</summary>
-            <ul style="margin-top:6px;">
-                <li><a href="<%=ctx%>/home?p=export-receipt-list">View Export Receipt List</a></li>
-                
-            </ul>
-        </details>
-    </li>
+<div class="section-title">Master data</div>
+<ul>
+  <li>
+    <details open>
+      <summary>Brands</summary>
+      <ul>
+        <li><a href="<%=ctx%>/home?p=brand-add">Add Brand</a></li>
+        <li><a href="<%=ctx%>/home?p=brand-list">Brand List</a></li>
+        <li><a href="<%=ctx%>/home?p=brand-stats">Brand Statistics</a></li>
+      </ul>
+    </details>
+  </li>
 
-  
-    <li style="list-style:none;">
-        <details open>
-            <summary style="cursor:pointer;">Brand Management</summary>
-            <ul style="margin-top:6px;">
-                <li><a href="<%=ctx%>/home?p=brand-add">Add New Brand</a></li>
-                <li><a href="<%=ctx%>/home?p=brand-list">Brand List</a></li>
-                <li><a href="<%=ctx%>/home?p=brand-stats">Product Statistics By Brand</a></li>
-            </ul>
-        </details>
-    </li>
+  <li>
+    <details open>
+      <summary>Suppliers</summary>
+      <ul>
+        <li><a href="<%=ctx%>/home?p=add_supplier">Add Supplier</a></li>
+        <li><a href="<%=ctx%>/home?p=view_supplier">Supplier List</a></li>
+      </ul>
+    </details>
+  </li>
+</ul>
 
-    <li style="list-style:none;">
-        <details open>
-            <summary style="cursor:pointer;">Supplier Management</summary>
-            <ul style="margin-top:6px;">
-                <li><a href="<%=ctx%>/home?p=add_supplier">Add New Supplier</a></li>
-                <li><a href="<%=ctx%>/home?p=view_supplier">View Supplier List</a></li>
-            </ul>
-        </details>
-    </li>
+<div class="section-title">Products</div>
+<ul>
+  <li>
+    <details open>
+      <summary>Product Management</summary>
+      <ul>
+        <li><a href="<%=ctx%>/home?p=product-add">Add Product</a></li>
+        <li><a href="<%=ctx%>/home?p=sku-add">Add SKU</a></li>
+        <li><a href="<%=ctx%>/home?p=product-list">Product List</a></li>
+      </ul>
+    </details>
+  </li>
+</ul>
 
-    <li style="list-style:none;">
-        <details open>
-            <summary style="cursor:pointer;">Product Management</summary>
-            <ul style="margin-top:6px;">
-                <li><a href="<%=ctx%>/home?p=product-add">Add Product</a></li>
-                <li><a href="<%=ctx%>/home?p=sku-add">Add SKU</a></li>
-                <li><a href="<%=ctx%>/home?p=product-list">List Product</a></li>
-            </ul>
-        </details>
-    </li>
-
-
-    <li style="list-style:none;">
-        <details open>
-            <summary style="cursor:pointer;">Export Request Management</summary>
-            <ul style="margin-top:6px;">
-                
-                <li><a href="<%=ctx%>/home?p=export-request-list">View Export Request List</a></li>
-                <li><a href="<%=ctx%>/home?p=import-request-list">View Import Request List</a></li>
-            </ul>
-        </details>
-    </li>
-</li>
-<li><a href="<%=ctx%>/home?p=my-profile">My Profile</a></li>
-<li><a href="<%=ctx%>/home?p=change-password">Change Password</a></li>
-
-
+<div class="section-title">Requests</div>
+<ul>
+  <li>
+    <details open>
+      <summary>Receipt Requests</summary>
+      <ul>
+        <li><a href="<%=ctx%>/home?p=export-request-list">Export Requests</a></li>
+        <li><a href="<%=ctx%>/home?p=import-request-list">Import Requests</a></li>
+      </ul>
+    </details>
+  </li>
+</ul>

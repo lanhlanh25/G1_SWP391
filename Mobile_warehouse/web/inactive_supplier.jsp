@@ -1,65 +1,37 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<c:set var="s" value="${supplier}"/>
 
-<style>
-    .wrap{
-        padding:16px;
-        background:#f4f4f4;
-        font-family:Arial, Helvetica, sans-serif;
-    }
-    .card{
-        max-width:900px;
-        margin:0 auto;
-        background:#f5f0e8;
-        border:1px solid #ddd;
-        border-radius:10px;
-        padding:22px;
-    }
-    .h1{
-        font-size:28px;
-        font-weight:900;
-        margin:0;
-    }
-    .msg{
-        margin-top:80px;
-        text-align:center;
-        font-size:22px;
-        color:#777;
-    }
-    .btns{
-        margin-top:120px;
-        display:flex;
-        justify-content:flex-end;
-        gap:14px;
-    }
-    .btn{
-        padding:10px 18px;
-        border:1px solid #333;
-        background:#eee;
-        border-radius:8px;
-        text-decoration:none;
-        color:#000;
-        cursor:pointer;
-    }
-</style>
+<div class="page-wrap">
+  <div class="confirm-page">
 
-<c:set var="s" value="${supplier}" />
-<div class="wrap">
-    <div class="card">
-        <div class="h1">Confirm Inactive?</div>
-
-        <div class="msg">
-            Are you sure you want to inactive Supplier "<b><c:out value='${s.supplierName}'/></b>"
-        </div>
-
-        <div class="btns">
-            <a class="btn" href="${pageContext.request.contextPath}/home?p=supplier_detail&id=${s.supplierId}">Cancel</a>
-
-
-            <form method="post" action="${pageContext.request.contextPath}/supplier-inactive" style="margin:0;">
-                <input type="hidden" name="supplierId" value="${s.supplierId}" />
-                <button type="submit" class="btn">Confirm Inactive</button>
-            </form>
-        </div>
+    <div class="confirm-icon confirm-icon-warn">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
     </div>
+
+    <h2 class="confirm-title">Confirm Inactive?</h2>
+    <p class="confirm-msg">
+      Are you sure you want to inactive supplier
+      <b><c:out value="${s.supplierName}"/></b>?
+      <br/>
+      <span class="small muted">This action can be reversed later.</span>
+    </p>
+
+    <div class="confirm-actions">
+      <a class="btn btn-outline"
+         href="${pageContext.request.contextPath}/home?p=supplier_detail&id=${s.supplierId}">
+        Cancel
+      </a>
+      <form method="post" action="${pageContext.request.contextPath}/supplier-inactive" style="margin:0;">
+        <input type="hidden" name="supplierId" value="${s.supplierId}"/>
+        <button type="submit" class="btn btn-danger">Confirm Inactive</button>
+      </form>
+    </div>
+
+  </div>
 </div>

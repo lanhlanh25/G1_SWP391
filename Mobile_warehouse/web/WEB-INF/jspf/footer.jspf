@@ -1,0 +1,8 @@
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<div class="footer">
+  <div class="footer-inner">
+    <div>© <%= java.time.Year.now().getValue() %> DTLA Mobile Warehouse Management System</div>
+    <div>Build: v1.0 • Support: IT Team</div>
+  </div>
+</div>

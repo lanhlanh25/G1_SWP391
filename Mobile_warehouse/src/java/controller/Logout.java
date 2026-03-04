@@ -21,7 +21,7 @@ public class Logout extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        super.doGet(req, resp); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+        doGet(req, resp);
     }
 
     @Override
@@ -31,7 +31,7 @@ public class Logout extends HttpServlet {
             session.invalidate(); 
         }
 
-        resp.sendRedirect(req.getContextPath() + "/login");
+        resp.sendRedirect(req.getContextPath() + "/");
     }
 
 }

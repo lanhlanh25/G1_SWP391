@@ -1,45 +1,44 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%
-    String ctx = request.getContextPath();
-%>
+<% String ctx = request.getContextPath(); %>
 
-<h3>STAFF MENU</h3>
+<div class="section-title">Overview</div>
 <ul>
-    <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
-    <li style="list-style:none;">
-        <details open>
-            <summary style="cursor:pointer;">Import Receipt</summary>
-            <ul style="margin-top:6px;">
-                <li><a href="<%=ctx%>/home?p=import-request-list">View Import Request List</a></li>
-
-                <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
-                <li><a href="${pageContext.request.contextPath}/home?p=import-receipt-list">
-                        View Import Receipt List
-                    </a></li>
-            </ul>
-        </details>
-    </li>
-
-
-    <li style="list-style:none;">
-        <details open>
-            <summary style="cursor:pointer;">Export Receipt</summary>
-            <ul style="margin-top:6px;">
-                <li><a href="<%=ctx%>/home?p=export-request-list">View Export Request List</a></li>
-                <li><a href="<%=ctx%>/home?p=create-export-receipt">Create Export Receipt</a></li>
-                <li><a href="<%=ctx%>/home?p=export-receipt-list">View Export Receipt List</a></li>
-            </ul>
-        </details>
-    </li>
-
-
-    <li><a href="<%=ctx%>/inventory">Inventory Management</a></li>
-    <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
-
-    <li><a href="<%=ctx%>/home?p=view_supplier">View Supplier List</a></li>
-    <li><a href="<%=ctx%>/home?p=brand-list">Brand Management</a></li>
-
-    <li><a href="<%=ctx%>/home?p=profile">My Profile</a></li>
-    <li><a href="<%=ctx%>/home?p=change-password">Change Password</a></li>
+  <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
 </ul>
 
+<div class="section-title">Receipts</div>
+<ul>
+  <li>
+    <details open>
+      <summary>Import</summary>
+      <ul>
+        <li><a href="<%=ctx%>/home?p=import-request-list">Import Requests</a></li>
+        <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
+        <li><a href="<%=ctx%>/import-receipt-list">Import Receipts</a></li>
+      </ul>
+    </details>
+  </li>
+
+  <li>
+    <details open>
+      <summary>Export</summary>
+      <ul>
+        <li><a href="<%=ctx%>/home?p=export-request-list">Export Requests</a></li>
+        <li><a href="<%=ctx%>/home?p=create-export-receipt">Create Export Receipt</a></li>
+        <li><a href="<%=ctx%>/home?p=export-receipt-list">Export Receipts</a></li>
+      </ul>
+    </details>
+  </li>
+</ul>
+
+<div class="section-title">Inventory</div>
+<ul>
+  <li><a href="<%=ctx%>/inventory">Inventory Management</a></li>
+  <li><a href="<%=ctx%>/inventory-count">Inventory Count</a></li>
+</ul>
+
+<div class="section-title">Master data</div>
+<ul>
+  <li><a href="<%=ctx%>/home?p=view_supplier">Suppliers</a></li>
+  <li><a href="<%=ctx%>/home?p=brand-list">Brands</a></li>
+</ul>

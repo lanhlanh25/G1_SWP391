@@ -5,62 +5,58 @@
 <%@taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 
-<style>
-  .wrap{ padding:10px; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif; }
-  .topbar{ display:flex; gap:10px; align-items:center; }
-  .btn{ padding:6px 14px; border:1px solid #333; background:#eee; text-decoration:none; color:#000; display:inline-block; cursor:pointer; }
-  .title{ margin:0 0 0 10px; font-weight:800; }
-  .box{ margin-top:10px; border:2px solid #3b5db7; background:#fff; padding:10px; }
-  table{ width:100%; border-collapse:collapse; margin-top:10px; }
-  th,td{ border:1px solid #333; padding:6px; font-size:12px; }
-  th{ background:#ddd; }
-  .st-enough{ color:#0a8a0a; font-weight:800; }
-  .st-missing{ color:#d00000; font-weight:800; }
-  .diff-input{ width:90px; padding:3px 6px; }
-  .pagerbar{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:10px; flex-wrap:wrap; }
-  .paging{ display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap; }
-  .pg{ display:inline-block; padding:6px 16px; border:2px solid #1d4f91; background:#eee; color:#000; text-decoration:none; font-weight:600; }
-  .pg.active{ background:#3a7bd5; color:#000; }
-  .pg.disabled{ pointer-events:none; opacity:0.5; }
-</style>
+<div class="page-wrap">
 
-<div class="wrap">
   <div class="topbar">
-    <a class="btn" href="${pageContext.request.contextPath}/home">Back</a>
-    <h3 class="title">Conduct Inventory Count</h3>
+    <div class="title">Conduct Inventory Count</div>
+    <a class="btn" href="${pageContext.request.contextPath}/home">← Back</a>
   </div>
 
-  <div class="box">
-    <b>Search Criteria</b>
+  <%-- Search --%>
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-header">
+      <span class="h2">Search Criteria</span>
+    </div>
+    <div class="card-body">
+      <form method="get" action="${pageContext.request.contextPath}/inventory-count">
+        <div class="filters" style="grid-template-columns: 2fr 1fr auto;">
+          <div>
+            <label class="label">Product name / SKU</label>
+            <input class="input" type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Product name, SKU,..."/>
+          </div>
+          <div>
+            <label class="label">Brand</label>
+            <select class="select" name="brandId">
+              <option value="">All Brands</option>
+              <c:forEach var="b" items="${brands}">
+                <option value="${b.id}" <c:if test="${b.id == brandId}">selected</c:if>>
+                  ${fn:escapeXml(b.name)}
+                </option>
+              </c:forEach>
+            </select>
+          </div>
+          <div style="display:flex; align-items:flex-end; gap:8px;">
+            <button class="btn btn-primary" type="submit">Search</button>
+            <a class="btn btn-outline" href="${pageContext.request.contextPath}/inventory-count">Reset</a>
+          </div>
+        </div>
+        <input type="hidden" name="page" value="1"/>
+        <input type="hidden" name="pageSize" value="${pageSize}"/>
+      </form>
+    </div>
+  </div>
 
-    <form method="get" action="${pageContext.request.contextPath}/inventory-count" style="margin-top:8px;">
-      <input type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Product name, SKU,..."
-             style="width:240px; height:28px; padding:0 8px;"/>
+  <%-- Table + Save --%>
+  <form method="post" action="${pageContext.request.contextPath}/inventory-count">
+    <input type="hidden" name="q" value="${fn:escapeXml(q)}"/>
+    <input type="hidden" name="brandId" value="${fn:escapeXml(brandId)}"/>
+    <input type="hidden" name="page" value="${pageNumber}"/>
+    <input type="hidden" name="pageSize" value="${pageSize}"/>
 
-      <select name="brandId" style="height:30px; margin-left:12px; width:160px;">
-        <option value="">All Brands</option>
-        <c:forEach var="b" items="${brands}">
-          <option value="${b.id}" <c:if test="${b.id == brandId}">selected</c:if>>
-            ${fn:escapeXml(b.name)}
-          </option>
-        </c:forEach>
-      </select>
-
-      <button class="btn" type="submit" style="margin-left:12px;">Search</button>
-      <a class="btn" href="${pageContext.request.contextPath}/inventory-count">Reset</a>
-
-      <input type="hidden" name="page" value="1"/>
-      <input type="hidden" name="pageSize" value="${pageSize}"/>
-    </form>
-
-    <form method="post" action="${pageContext.request.contextPath}/inventory-count" style="margin-top:8px;">
-      <input type="hidden" name="q" value="${fn:escapeXml(q)}"/>
-      <input type="hidden" name="brandId" value="${fn:escapeXml(brandId)}"/>
-      <input type="hidden" name="page" value="${pageNumber}"/>
-      <input type="hidden" name="pageSize" value="${pageSize}"/>
-
-      <div style="display:flex; justify-content:flex-end;">
-        <button class="btn" type="submit">Save</button>
+    <div class="card">
+      <div class="card-header">
+        <span class="h2">Inventory Items</span>
+        <button class="btn btn-primary" type="submit">💾 Save</button>
       </div>
 
       <%-- link back để IMEI list quay về đúng inventory-count + giữ filter/page --%>
@@ -207,23 +203,71 @@
         Row
       </div>
     </div>
+  </form>
 
-    <script>
-      function updateStatusForInput(inputEl) {
-        const systemQty = parseInt(inputEl.dataset.system || "0", 10);
-        const countedQty = parseInt(inputEl.value || "0", 10);
-        const tr = inputEl.closest("tr");
-        const statusCell = tr ? tr.querySelector(".js-status") : null;
-        if (!statusCell) return;
-        statusCell.innerHTML = (countedQty === systemQty)
-          ? '<span class="st-enough">enough</span>'
-          : '<span class="st-missing">missing</span>';
-      }
-      document.querySelectorAll(".js-counted").forEach(inp => {
-        inp.addEventListener("input", () => updateStatusForInput(inp));
-        updateStatusForInput(inp);
-      });
-    </script>
+  <%-- Pagination --%>
+  <c:choose>
+    <c:when test="${totalPages <= 3}"><c:set var="startPage" value="1"/><c:set var="endPage" value="${totalPages}"/></c:when>
+    <c:when test="${pageNumber <= 1}"><c:set var="startPage" value="1"/><c:set var="endPage" value="3"/></c:when>
+    <c:when test="${pageNumber >= totalPages}"><c:set var="startPage" value="${totalPages-2}"/><c:set var="endPage" value="${totalPages}"/></c:when>
+    <c:otherwise><c:set var="startPage" value="${pageNumber-1}"/><c:set var="endPage" value="${pageNumber+1}"/></c:otherwise>
+  </c:choose>
 
+  <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px; flex-wrap:wrap; gap:10px;">
+    <div class="small">Page ${pageNumber} of ${totalPages}</div>
+
+    <div class="paging">
+      <c:url var="prevUrl" value="/inventory-count">
+        <c:param name="q" value="${q}"/><c:param name="brandId" value="${brandId}"/>
+        <c:param name="pageSize" value="${pageSize}"/><c:param name="page" value="${pageNumber-1}"/>
+      </c:url>
+      <a class="paging-btn ${pageNumber<=1 ? 'disabled' : ''}" href="${prevUrl}">← Prev</a>
+
+      <c:forEach var="i" begin="${startPage}" end="${endPage}">
+        <c:choose>
+          <c:when test="${i == pageNumber}"><b>${i}</b></c:when>
+          <c:otherwise>
+            <c:url var="pageUrl" value="/inventory-count">
+              <c:param name="q" value="${q}"/><c:param name="brandId" value="${brandId}"/>
+              <c:param name="pageSize" value="${pageSize}"/><c:param name="page" value="${i}"/>
+            </c:url>
+            <a class="paging-btn" href="${pageUrl}">${i}</a>
+          </c:otherwise>
+        </c:choose>
+      </c:forEach>
+
+      <c:url var="nextUrl" value="/inventory-count">
+        <c:param name="q" value="${q}"/><c:param name="brandId" value="${brandId}"/>
+        <c:param name="pageSize" value="${pageSize}"/><c:param name="page" value="${pageNumber+1}"/>
+      </c:url>
+      <a class="paging-btn ${pageNumber>=totalPages ? 'disabled' : ''}" href="${nextUrl}">Next →</a>
+    </div>
+
+    <div style="display:flex; align-items:center; gap:8px;" class="small">
+      Show
+      <select class="select" style="width:auto; padding:6px 10px;"
+              onchange="location.href='${pageContext.request.contextPath}/inventory-count?q=${q}&brandId=${brandId}&page=1&pageSize='+this.value;">
+        <option value="10" ${pageSize==10 ? "selected" : ""}>10</option>
+        <option value="20" ${pageSize==20 ? "selected" : ""}>20</option>
+      </select>
+      rows
+    </div>
   </div>
+
 </div>
+
+<script>
+  function updateStatus(inp) {
+    const system = parseInt(inp.dataset.system || "0", 10);
+    const counted = parseInt(inp.value || "0", 10);
+    const cell = inp.closest("tr")?.querySelector(".js-status");
+    if (!cell) return;
+    cell.innerHTML = (counted === system)
+      ? '<span class="badge badge-active">Enough</span>'
+      : '<span class="badge badge-inactive">Missing</span>';
+  }
+  document.querySelectorAll(".js-counted").forEach(inp => {
+    inp.addEventListener("input", () => updateStatus(inp));
+    updateStatus(inp);
+  });
+</script>

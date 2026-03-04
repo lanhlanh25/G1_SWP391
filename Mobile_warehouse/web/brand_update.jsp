@@ -16,81 +16,91 @@
   String pageParam = request.getParameter("page");
 %>
 
-<h2>Update Brand</h2>
-
-<% if (request.getParameter("err") != null) { %>
-<p style="color:red;"><%=request.getParameter("err")%></p>
-<% } %>
-
-<style>
-    .hint{
-        color:#666;
-        font-size:12px;
-        margin-top:4px;
-    }
-    textarea{
-        width:420px;
-        max-width:90%;
-    }
-</style>
-
-<form method="post" action="<%=ctx%>/manager/brand-update" onsubmit="return validateDesc255();">
-    <input type="hidden" name="id" value="${brand.brandId}"/>
-
-    <!-- keep list state -->
-    <input type="hidden" name="q" value="<%= (qParam==null?"":qParam) %>"/>
-    <input type="hidden" name="status" value="<%= (statusParam==null?"":statusParam) %>"/>
-    <input type="hidden" name="sortBy" value="<%= (sortByParam==null?"":sortByParam) %>"/>
-    <input type="hidden" name="sortOrder" value="<%= (sortOrderParam==null?"":sortOrderParam) %>"/>
-    <input type="hidden" name="page" value="<%= (pageParam==null?"":pageParam) %>"/>
-
-    Brand Name (*): <br/>
-    <input name="brandName" maxlength="100" required
-           value="${not empty param.brandName ? param.brandName : brand.brandName}"/><br/><br/>
-
-    Description: <br/>
-    <textarea id="desc" name="description" maxlength="255" rows="4"
-              oninput="updateCounter()">${not empty param.description ? param.description : brand.description}</textarea>
-    <div class="hint">
-        <span id="counter">0</span>/255 characters
+<div class="container">
+  <div class="topbar">
+    <div>
+      <div class="title">Update Brand</div>
+      <div class="small">Edit brand info (status is controlled by Active/Inactive action)</div>
     </div>
-    <br/>
+    <div class="actions">
+      <a class="btn btn-outline"
+         href="<%=ctx%>/home?p=brand-list&q=<%= (qParam==null?"":qParam) %>&status=<%= (statusParam==null?"":statusParam) %>&sortBy=<%= (sortByParam==null?"":sortByParam) %>&sortOrder=<%= (sortOrderParam==null?"":sortOrderParam) %>&page=<%= (pageParam==null?"":pageParam) %>">
+        Back
+      </a>
+    </div>
+  </div>
 
+  <% if (request.getParameter("err") != null) { %>
+    <div class="msg-err"><%=request.getParameter("err")%></div>
+  <% } %>
 
-    <%-- Status is controlled by Disable action only. Do not allow editing here. --%>
-    <p><b>Status:</b>
-        <c:choose>
-            <c:when test="${brand.active}">Active</c:when>
-            <c:otherwise>Inactive</c:otherwise>
-        </c:choose>
-    </p>
+  <div class="card">
+    <div class="card-body">
+      <form class="form" method="post" action="<%=ctx%>/manager/brand-update" onsubmit="return validateDesc255();">
+        <input type="hidden" name="id" value="${brand.brandId}"/>
 
+        <!-- keep list state -->
+        <input type="hidden" name="q" value="<%= (qParam==null?"":qParam) %>"/>
+        <input type="hidden" name="status" value="<%= (statusParam==null?"":statusParam) %>"/>
+        <input type="hidden" name="sortBy" value="<%= (sortByParam==null?"":sortByParam) %>"/>
+        <input type="hidden" name="sortOrder" value="<%= (sortOrderParam==null?"":sortOrderParam) %>"/>
+        <input type="hidden" name="page" value="<%= (pageParam==null?"":pageParam) %>"/>
 
+        <div class="form-grid">
+          <div class="label">Brand Name <span class="req">*</span></div>
+          <div>
+            <input class="input" name="brandName" maxlength="100" required
+                   value="${not empty param.brandName ? param.brandName : brand.brandName}"/>
+          </div>
 
-    <br/><br/>
+          <div class="label">Description</div>
+          <div>
+            <textarea class="textarea" id="desc" name="description" maxlength="255" rows="4"
+                      oninput="updateCounter()">${not empty param.description ? param.description : brand.description}</textarea>
+            <div class="muted" style="margin-top:6px;">
+              <span id="counter">0</span>/255 characters
+            </div>
+          </div>
 
-    <button type="submit">Update</button>
+          <div class="label">Status</div>
+          <div>
+            <span class="badge ${brand.active ? 'badge-active' : 'badge-inactive'}">
+              <c:choose>
+                <c:when test="${brand.active}">Active</c:when>
+                <c:otherwise>Inactive</c:otherwise>
+              </c:choose>
+            </span>
+            <div class="muted" style="margin-top:6px;">Status can be changed only via Active/Inactive action in list.</div>
+          </div>
+        </div>
 
-    <a href="<%=ctx%>/home?p=brand-list&q=<%= (qParam==null?"":qParam) %>&status=<%= (statusParam==null?"":statusParam) %>&sortBy=<%= (sortByParam==null?"":sortByParam) %>&sortOrder=<%= (sortOrderParam==null?"":sortOrderParam) %>&page=<%= (pageParam==null?"":pageParam) %>">
-        Cancel
-    </a>
-</form>
+        <div class="form-actions">
+          <button class="btn btn-primary" type="submit">Update</button>
+
+          <a class="btn btn-outline"
+             href="<%=ctx%>/home?p=brand-list&q=<%= (qParam==null?"":qParam) %>&status=<%= (statusParam==null?"":statusParam) %>&sortBy=<%= (sortByParam==null?"":sortByParam) %>&sortOrder=<%= (sortOrderParam==null?"":sortOrderParam) %>&page=<%= (pageParam==null?"":pageParam) %>">
+            Cancel
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <script>
-    function updateCounter() {
-        var el = document.getElementById('desc');
-        var c = (el && el.value) ? el.value.length : 0;
-        document.getElementById('counter').textContent = c;
+  function updateCounter() {
+    var el = document.getElementById('desc');
+    var c = (el && el.value) ? el.value.length : 0;
+    document.getElementById('counter').textContent = c;
+  }
+  function validateDesc255() {
+    var el = document.getElementById('desc');
+    if (!el) return true;
+    if (el.value.length > 255) {
+      alert('Description must be <= 255 characters.');
+      return false;
     }
-    function validateDesc255() {
-        var el = document.getElementById('desc');
-        if (!el)
-            return true;
-        if (el.value.length > 255) {
-            alert('Description must be <= 255 characters.');
-            return false;
-        }
-        return true;
-    }
-    updateCounter();
+    return true;
+  }
+  updateCounter();
 </script>
