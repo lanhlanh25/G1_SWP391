@@ -253,7 +253,7 @@
                         <td><c:out value="${r.supplierName}"/></td>
                         <td><c:out value="${r.createdByName}"/></td>
                         <td><c:out value="${r.receiptDate}"/></td>
-                        <td><c:out value="${r.totalQuantity}"/></td>
+                        <td><c:out value="${r.totalQuantity}"/> Phone</td>
                         <td><c:out value="${r.statusUi}"/></td>
 
                         <td>
