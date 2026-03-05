@@ -440,7 +440,7 @@ public class Home extends HttpServlet {
                 Date fromDate = null;
                 Date toDate = null;
 
-                LocalDate today = LocalDate.now();
+                LocalDate today = LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
                 switch (range) {
                     case "today":
                         fromDate = Date.valueOf(today);
@@ -546,7 +546,7 @@ public class Home extends HttpServlet {
                 }
 
                 Date fromDate = null, toDate = null;
-                LocalDate today = LocalDate.now();
+                LocalDate today = LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
                 switch (range) {
                     case "today":
                         fromDate = Date.valueOf(today);

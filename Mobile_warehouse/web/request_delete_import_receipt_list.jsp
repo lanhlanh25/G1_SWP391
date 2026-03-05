@@ -133,7 +133,7 @@
                 <input type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Search by import code"/>
                 <input type="date" name="transactionTime" value="${fn:escapeXml(transactionTime)}" placeholder="mm/dd/yyyy"/>
                 <button type="submit" class="btn">Search</button>
-                <a href="${ctx}/request-delete-import-receipt-list" class="btn">Reset</a>
+                <a href="${ctx}/home?p=request-delete-import-receipt-list" class="btn">Reset</a>
             </form>
 
             <table>
