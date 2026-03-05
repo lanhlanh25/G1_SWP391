@@ -2,100 +2,64 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<div class="page-wrap">
 
-<style>
-    .wrap{
-        padding:16px;
-        font-family:Arial,Helvetica,sans-serif;
-        background:#f4f4f4;
-    }
-    .card{
-        background:#fff;
-        border:1px solid #333;
-        padding:14px;
-    }
-    .top{
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        margin-bottom:10px;
-    }
-    .title{
-        font-size:20px;
-        font-weight:700;
-    }
-    .btn{
-        padding:6px 14px;
-        border:1px solid #333;
-        background:#f6f6f6;
-        text-decoration:none;
-        color:#111;
-    }
-    .meta{
-        font-size:13px;
-        color:#333;
-        margin-bottom:10px;
-        line-height:1.7;
-    }
-    table{
-        width:100%;
-        border-collapse:collapse;
-        background:#fff;
-    }
-    th,td{
-        border:1px solid #333;
-        padding:8px;
-        font-size:13px;
-        text-align:center;
-    }
-    th{
-        background:#eee;
-    }
-</style>
+  <div class="topbar">
+    <div class="title">Import Request Detail</div>
+    <a class="btn" href="${ctx}/home?p=import-request-list">← Back to List</a>
+  </div>
 
-<div class="wrap">
-    <div class="card">
-        <div class="top">
-            <div class="title">View Import Request Detail</div>
-            <a class="btn" href="${ctx}/home?p=import-request-list">Back to list</a>
-        </div>
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-header"><span class="h2">Request Info</span></div>
+    <div class="card-body">
+      <div class="info-grid">
+        <span class="label">Request Code</span>
+        <span><c:out value="${irHeader.requestCode}"/></span>
 
-        <div class="meta">
-            <b>Request Code:</b> <c:out value="${irHeader.requestCode}"/><br/>
-            <b>Created By:</b> <c:out value="${irHeader.createdByName}"/><br/>
-            <b>Request Date:</b>
-            <fmt:formatDate value="${irHeader.requestDate}" pattern="yyyy-MM-dd HH:mm:ss"/><br/>
-            <b>Expected Import Date:</b>
-            <fmt:formatDate value="${irHeader.expectedImportDate}" pattern="yyyy-MM-dd"/><br/>
-            <b>Status:</b> <c:out value="${irHeader.status}"/><br/>
-        </div>
+        <span class="label">Created By</span>
+        <span><c:out value="${irHeader.createdByName}"/></span>
 
-        <table>
-            <thead>
-                <tr>
-                    <th style="width:70px;">No</th>
-                    <th>Product Code</th>
-                    <th>SKU</th>
-                    <th style="width:140px;">Request Qty</th>
-                </tr>
-            </thead>
-            <tbody>
-            <c:if test="${empty irItems}">
-                <tr><td colspan="4">No items.</td></tr>
-            </c:if>
+        <span class="label">Request Date</span>
+        <span><fmt:formatDate value="${irHeader.requestDate}" pattern="yyyy-MM-dd HH:mm:ss"/></span>
 
-            <c:forEach var="it" items="${irItems}">
-                <tr>
-                    <td>${it.no}</td>
-                    <td>${fn:escapeXml(it.productCode)}</td>
-                    <td>${fn:escapeXml(it.skuCode)}</td>
-                    <td>${it.requestQty}</td>
-                </tr>
-            </c:forEach>
-            </tbody>
-        </table>
+        <span class="label">Expected Import Date</span>
+        <span><fmt:formatDate value="${irHeader.expectedImportDate}" pattern="yyyy-MM-dd"/></span>
 
+        <span class="label">Status</span>
+        <span><c:out value="${irHeader.status}"/></span>
+      </div>
     </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="h2">Items</span></div>
+    <div class="card-body" style="padding:0;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:60px; text-align:center;">No</th>
+            <th>Product Code</th>
+            <th>SKU</th>
+            <th style="width:140px; text-align:center;">Request Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          <c:if test="${empty irItems}">
+            <tr><td colspan="4" class="small muted" style="padding:18px; text-align:center;">No items.</td></tr>
+          </c:if>
+          <c:forEach var="it" items="${irItems}">
+            <tr>
+              <td style="text-align:center;">${it.no}</td>
+              <td>${fn:escapeXml(it.productCode)}</td>
+              <td>${fn:escapeXml(it.skuCode)}</td>
+              <td style="text-align:center;">${it.requestQty}</td>
+            </tr>
+          </c:forEach>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>

@@ -1,15 +1,10 @@
-<%-- 
-    Document   : request_delete_import_receipt_list
-    Created on : Feb 15, 2026, 5:16:34 PM
-    Author     : Admin
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<div class="page-wrap">
 
 <!DOCTYPE html>
 <html>

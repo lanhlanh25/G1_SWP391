@@ -79,5 +79,3 @@
 </li>
 <li><a href="<%=ctx%>/home?p=my-profile">My Profile</a></li>
 <li><a href="<%=ctx%>/home?p=change-password">Change Password</a></li>
-
-

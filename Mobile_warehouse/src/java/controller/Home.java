@@ -1222,6 +1222,12 @@ public class Home extends HttpServlet {
                 request.setAttribute("totalItems", totalItems);
                 break;
             }
+            case "admin/reset-requests": {
+                // Kiểm tra thêm một lần nữa nếu cần (hoặc để resolveContent lo)
+                List<ResetRequest> pending = userDAO.getPendingResetRequests();
+                request.setAttribute("pendingRequests", pending);
+                break;
+            }
             default:
                 break;
         }
@@ -1287,6 +1293,8 @@ public class Home extends HttpServlet {
                     case "my-profile":
                     case "profile":
                         return "view_profile.jsp";
+                    case "admin/reset-requests":
+                        return "admin_reset_requests.jsp";
                     case "change-password":
                     case "change_password":
                         return "change_password.jsp";

@@ -8,12 +8,8 @@
 <%@page import="model.User"%>
 <%
     User u = (User) session.getAttribute("authUser");
-    if (u == null) {
-        response.sendRedirect(request.getContextPath() + "/login");
-        return;
-    }
+    if (u == null) { response.sendRedirect(request.getContextPath() + "/login"); return; }
 
-    
     String role = (String) session.getAttribute("roleName");
     if (role == null || role.isBlank()) {
         int rid = u.getRoleId();
@@ -24,43 +20,65 @@
         else role = "STAFF";
     }
     role = role.toUpperCase();
-
     String p = (String) request.getAttribute("currentPage");
     if (p == null) p = "dashboard";
     String ctx = request.getContextPath();
 %>
 
-<h3>CONTENT</h3>
-<p>Role: <b><%=role%></b> | Page: <b><%=p%></b></p>
+<div class="page-wrap">
 
+  <% if ("dashboard".equals(p)) { %>
+    <div class="topbar">
+      <div class="title">Dashboard</div>
+      <span class="badge badge-info"><%=role%></span>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <p class="small">You are logged in as <b><%=role%></b>. Select a menu item on the left to get started.</p>
+      </div>
+    </div>
 
-<% if ("dashboard".equals(p)) { %>
-    <p>Dashboard (chung)</p>
-
-<% } else if ("profile".equals(p)) { %>
+  <% } else if ("profile".equals(p)) { %>
     <jsp:include page="/view_profile.jsp" />
 
-<% } else if ("change-password".equals(p)) { %>
-    <p>
-        <a href="<%=ctx%>/changepassword">Open Change Password</a>
-    </p>
+  <% } else if ("change-password".equals(p)) { %>
+    <div class="topbar"><div class="title">Change Password</div></div>
+    <div class="card">
+      <div class="card-body">
+        <a class="btn btn-primary" href="<%=ctx%>/changepassword">Open Change Password</a>
+      </div>
+    </div>
 
-<% } else if ("denied".equals(p)) { %>
-    <p style="color:red;">Access Denied!</p>
+  <% } else if ("denied".equals(p)) { %>
+    <div class="topbar"><div class="title">Access Denied</div></div>
+    <div class="card">
+      <div class="card-body">
+        <p class="msg-err">You do not have permission to access this page.</p>
+      </div>
+    </div>
 
+  <% } else if ("ADMIN".equals(role) && "role-list".equals(p)) { %>
+    <div class="topbar"><div class="title">Role List</div></div>
+    <div class="card">
+      <div class="card-body">
+        <a class="btn btn-primary" href="<%=ctx%>/role_list">Open Role List</a>
+      </div>
+    </div>
 
-<% } else if ("ADMIN".equals(role) && "role-list".equals(p)) { %>
-    <p>
-        <a href="<%=ctx%>/role_list">Open Role List</a>
-    </p>
+  <% } else if ("ADMIN".equals(role) && "role-perm-edit".equals(p)) { %>
+    <div class="topbar"><div class="title">Role Permissions</div></div>
+    <div class="card">
+      <div class="card-body">
+        <p class="small">Go to Role List and click <b>View Permissions</b> to edit permissions.</p>
+        <a class="btn btn-outline" href="<%=ctx%>/role_list">→ Go to Role List</a>
+      </div>
+    </div>
 
-<% } else if ("ADMIN".equals(role) && "role-perm-edit".equals(p)) { %>
-    <p>
-        Bạn hãy vào Role List và bấm View Permissions để edit permissions.
-        <br>
-        <a href="<%=ctx%>/role_list">Go to Role List</a>
-    </p>
+  <% } else { %>
+    <div class="topbar"><div class="title">Not Found</div></div>
+    <div class="card">
+      <div class="card-body"><p class="msg-err">Page not found!</p></div>
+    </div>
+  <% } %>
 
-<% } else { %>
-    <p>Page not found!</p>
-<% } %>
+</div>

@@ -42,4 +42,3 @@
     <li><a href="<%=ctx%>/home?p=profile">My Profile</a></li>
     <li><a href="<%=ctx%>/home?p=change-password">Change Password</a></li>
 </ul>
-

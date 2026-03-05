@@ -11,23 +11,57 @@
 %>
 <c:set var="role" value="${sessionScope.roleName}" />
 
-<h2>Brand Detail</h2>
+<div class="container">
+  <div class="topbar">
+    <div>
+      <div class="title">Brand Detail</div>
+      <div class="small">View brand information</div>
+    </div>
+    <div class="actions">
+      <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
+        <a class="btn btn-primary" href="<%=ctx%>/home?p=brand-update&id=${brand.brandId}">Update</a>
+      </c:if>
+      <a class="btn btn-outline" href="<%=ctx%>/home?p=brand-list">Back</a>
+    </div>
+  </div>
 
-<c:if test="${not empty param.msg}">
-    <p style="color:green;">${param.msg}</p>
-</c:if>
+  <c:if test="${not empty param.msg}">
+    <div class="msg-ok">${param.msg}</div>
+  </c:if>
 
-<p><b>Name:</b> ${brand.brandName}</p>
-<p><b>Description:</b> ${brand.description}</p>
-<p><b>Status:</b> <c:choose><c:when test="${brand.active}">Active</c:when><c:otherwise>Inactive</c:otherwise></c:choose></p>
-<p><b>Created At:</b> ${brand.createdAt}</p>
-<p><b>Updated At:</b> ${brand.updatedAt}</p>
-
-<p>
-    <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
-        <a href="<%=ctx%>/home?p=brand-update&id=${brand.brandId}">Update</a>| 
-
-    </c:if>
-    <a href="<%=ctx%>/home?p=brand-list">Back</a>
-</p>
-
+  <div class="card">
+    <div class="card-body">
+      <table class="table">
+        <tbody>
+          <tr>
+            <th style="width:220px;">Name</th>
+            <td>${brand.brandName}</td>
+          </tr>
+          <tr>
+            <th>Description</th>
+            <td>${brand.description}</td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td>
+              <span class="badge ${brand.active ? 'badge-active' : 'badge-inactive'}">
+                <c:choose>
+                  <c:when test="${brand.active}">Active</c:when>
+                  <c:otherwise>Inactive</c:otherwise>
+                </c:choose>
+              </span>
+            </td>
+          </tr>
+          <tr>
+            <th>Created At</th>
+            <td class="muted">${brand.createdAt}</td>
+          </tr>
+          <tr>
+            <th>Updated At</th>
+            <td class="muted">${brand.updatedAt}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

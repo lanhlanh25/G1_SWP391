@@ -15,12 +15,17 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.IOException;
 
-@WebServlet(name="LoginServlet", urlPatterns={"/login"})
+@WebServlet(name = "LoginServlet", urlPatterns = {"/login"})
 public class Login extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession s = request.getSession(false);
+        if (s != null && s.getAttribute("authUser") != null) {
+            response.sendRedirect(request.getContextPath() + "/home");
+            return;
+        }
         request.getRequestDispatcher("login.jsp").forward(request, response);
     }
 
@@ -51,17 +56,16 @@ public class Login extends HttpServlet {
             return;
         }
 
-      
         HttpSession session = request.getSession(true);
         session.setAttribute("authUser", u);
         session.setAttribute("userId", u.getUserId());
         session.setAttribute("roleId", u.getRoleId());
         session.setAttribute("fullName", u.getFullName());
-       
+
         String roleName = dao.getRoleNameByUserId(u.getUserId());
         session.setAttribute("roleName", roleName);
 
         response.sendRedirect(request.getContextPath() + "/home");
     }
-  
+
 }
