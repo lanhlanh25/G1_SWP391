@@ -21,7 +21,7 @@
 
     <!-- Brand -->
     <div class="login-brand">
-      <span class="brand-mark">H</span>
+      <span class="brand-mark">DTLA</span>
       <div>
         <div class="brand-title">DTLA Mobile WMS</div>
         <div class="brand-sub">Warehouse Management System</div>
@@ -61,7 +61,7 @@
       <div>
         <div class="login-row">
           <label class="label" for="password" style="margin:0;">Password</label>
-          <a class="login-forgot" href="<%=ctx%>/forgot_password.jsp">Forgot password?</a>
+          
         </div>
 
         <div class="input-wrap">
@@ -72,13 +72,11 @@
                  placeholder="Enter your password"
                  required>
           <button class="eye-btn" type="button" id="togglePw" aria-label="Show password">👁</button>
+          <a class="login-forgot" href="<%=ctx%>/forgot_password.jsp">Forgot password?</a>
         </div>
       </div>
 
-      <label class="check-row">
-        <input type="checkbox" name="remember" value="1">
-        Keep me signed in
-      </label>
+      
 
       <div class="login-actions">
         <button class="btn btn-primary btn-block" type="submit">Sign in</button>

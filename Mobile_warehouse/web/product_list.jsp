@@ -1,3 +1,8 @@
+<%-- 
+    Document   : product_list
+    Created on : Jan 31, 2026, 10:16:26 PM
+    Author     : Lanhlanh
+--%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
@@ -111,111 +116,89 @@
 
     <form method="get" action="${pageContext.request.contextPath}/home">
         <input type="hidden" name="p" value="product-list"/>
-        <div class="filters" style="grid-template-columns: 2fr 1fr 1fr auto;">
-          <div>
-            <label class="label">Search</label>
-            <input class="input" type="text" name="q" value="${q != null ? q : ''}" placeholder="Product name, code..."/>
-          </div>
-          <div>
-            <label class="label">Brand</label>
-            <select class="select" name="brandId" onchange="this.form.submit()">
-              <option value="">All Brands</option>
-              <c:forEach var="b" items="${allBrands}">
-                <option value="${b.brandId}" ${brandId == (''+b.brandId) ? 'selected' : ''}>${b.brandName}</option>
-              </c:forEach>
+
+        <div class="filters">
+            <div class="searchBox">
+                <input type="text" name="q" value="${q != null ? q : ''}"/>
+                <button type="submit">SEARCH</button>
+            </div>
+
+            <select name="brandId" onchange="this.form.submit()">
+                <option value="">All Brand</option>
+                <c:forEach var="b" items="${allBrands}">
+                    <option value="${b.brandId}" ${brandId == (''+b.brandId) ? 'selected' : ''}>${b.brandName}</option>
+                </c:forEach>
             </select>
-          </div>
-          <div>
-            <label class="label">Status</label>
-            <select class="select" name="status" onchange="this.form.submit()">
-              <option value="">All Status</option>
-              <option value="ACTIVE"   ${status == 'ACTIVE'   ? 'selected' : ''}>Active</option>
-              <option value="INACTIVE" ${status == 'INACTIVE' ? 'selected' : ''}>Inactive</option>
+
+            <select name="status" onchange="this.form.submit()">
+                <option value="">Status</option>
+                <option value="ACTIVE" ${status == 'ACTIVE' ? 'selected' : ''}>Active</option>
+                <option value="INACTIVE" ${status == 'INACTIVE' ? 'selected' : ''}>Inactive</option>
             </select>
-          </div>
-          <div style="display:flex; align-items:flex-end;">
-            <button class="btn btn-primary" type="submit">Search</button>
-          </div>
         </div>
-      </form>
-    </div>
-  </div>
+    </form>
 
-  <%-- Table --%>
-  <div class="card">
-    <div class="card-body" style="padding:0;">
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Product Code</th>
-            <th>Product Name</th>
-            <th>Brand</th>
-            <th style="width:110px;">Status</th>
-            <th style="width:160px;">Created At</th>
-            <th style="width:140px; text-align:center;">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <c:forEach var="x" items="${products}">
-            <tr>
-              <td>${x.productCode}</td>
-              <td>${x.productName}</td>
-              <td>${x.brandName}</td>
-              <td>
-                <c:choose>
-                  <c:when test="${x.status == 'ACTIVE'}">
-                    <span class="badge badge-active">Active</span>
-                  </c:when>
-                  <c:otherwise>
-                    <span class="badge badge-inactive">Inactive</span>
-                  </c:otherwise>
-                </c:choose>
-              </td>
-              <td><fmt:formatDate value="${x.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
-              <td style="text-align:center;">
-                <div style="display:flex; gap:6px; justify-content:center;">
-                  <a class="btn btn-sm"
-                     href="${pageContext.request.contextPath}/manager/product/update?id=${x.productId}">Update</a>
-                  <a class="btn btn-danger btn-sm"
-                     href="${pageContext.request.contextPath}/manager/product/delete?id=${x.productId}">Delete</a>
-                </div>
-              </td>
-            </tr>
-          </c:forEach>
-          <c:if test="${empty products}">
-            <tr><td colspan="6" class="small muted" style="padding:20px; text-align:center;">No data</td></tr>
-          </c:if>
-        </tbody>
-      </table>
-    </div>
-  </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Product Code</th>
+                    <th>Product Name</th>
+                    <th>Brand</th>
+                    <th>Status</th>
+                    <th>Created_At</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
 
-  <%-- Pagination --%>
-  <c:set var="base" value="${pageContext.request.contextPath}/home?p=product-list&q=${q}&brandId=${brandId}&status=${status}"/>
-  <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px; flex-wrap:wrap; gap:10px;">
-    <div class="small">Page ${page} of ${totalPages}</div>
+            <tbody>
+                <c:forEach var="x" items="${products}">
+                    <tr>
+                        <td>${x.productCode}</td>
+                        <td>${x.productName}</td>
+                        <td>${x.brandName}</td>
+                        <td>${x.status}</td>
+                        <td><fmt:formatDate value="${x.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
+                        <td class="action">
+                              <a href="${pageContext.request.contextPath}/home?p=product-detail&id=${x.productId}">
+                                View
+                            </a>
+
+                            <a href="${pageContext.request.contextPath}/manager/product/update?id=${x.productId}">
+                                Update
+                            </a>
+
+                            <a href="${pageContext.request.contextPath}/manager/product/delete?id=${x.productId}">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                </c:forEach>
+
+                <c:if test="${empty products}">
+                    <tr><td colspan="6">No data</td></tr>
+                </c:if>
+            </tbody>
+        </table>
+    </div>
+
     <div class="paging">
-      <c:if test="${page > 1}">
-        <a class="paging-btn" href="${base}&page=${page-1}">← Prev</a>
-      </c:if>
-      <c:if test="${page <= 1}">
-        <span class="paging-btn disabled">← Prev</span>
-      </c:if>
+        <div>${page}</div>
 
-      <c:forEach var="i" begin="1" end="${totalPages}">
-        <c:choose>
-          <c:when test="${i == page}"><b>${i}</b></c:when>
-          <c:otherwise><a class="paging-btn" href="${base}&page=${i}">${i}</a></c:otherwise>
-        </c:choose>
-      </c:forEach>
+        <div class="page-btns">
+            <c:set var="base" value="${pageContext.request.contextPath}/home?p=product-list&q=${q}&brandId=${brandId}&status=${status}"/>
 
-      <c:if test="${page < totalPages}">
-        <a class="paging-btn" href="${base}&page=${page+1}">Next →</a>
-      </c:if>
-      <c:if test="${page >= totalPages}">
-        <span class="paging-btn disabled">Next →</span>
-      </c:if>
+            <c:if test="${page > 1}">
+                <a href="${base}&page=${page-1}">Prev</a>
+            </c:if>
+
+            <c:forEach var="i" begin="1" end="${totalPages}">
+                <a href="${base}&page=${i}" class="${i == page ? 'active' : ''}">${i}</a>
+            </c:forEach>
+
+            <c:if test="${page < totalPages}">
+                <a href="${base}&page=${page+1}">Next</a>
+            </c:if>
+        </div>
     </div>
-  </div>
-
 </div>

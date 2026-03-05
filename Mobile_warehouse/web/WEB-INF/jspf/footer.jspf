@@ -1,8 +1,26 @@
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<div class="footer">
-  <div class="footer-inner">
-    <div>© <%= java.time.Year.now().getValue() %> DTLA Mobile Warehouse Management System</div>
-    <div>Build: v1.0 • Support: IT Team</div>
+<%
+  java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm");
+  String nowStr = sdf.format(new java.util.Date());
+  int year = java.time.Year.now().getValue();
+%>
+
+<footer class="footer">
+  <div class="footer-inner footer-center">
+    <div class="footer-line">
+      <b>DTLA Mobile WMS</b> · Warehouse Operations System
+    </div>
+
+    <div class="footer-line">
+      © <%=year%> DTLA company. All rights reserved.
+    </div>
+
+    <div class="footer-line">
+      Version: 2.7.367 · Environment: Development
+      <span class="dot">•</span>
+      Support: minhduchoang2410@gmail.com · +84 965 298 768
+      <span class="dot">•</span>
+      Server time: <%= nowStr %>
+    </div>
   </div>
-</div>
+</footer>

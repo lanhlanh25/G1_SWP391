@@ -1,8 +1,51 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<div class="page-wrap">
+<style>
+  .wrap{ padding:10px; background:#f4f4f4; font-family:Arial, Helvetica, sans-serif; }
+  .topbar{ display:flex; gap:10px; align-items:center; }
+  .btn{ padding:6px 14px; border:1px solid #333; background:#eee; text-decoration:none; color:#000; display:inline-block; border-radius:6px; }
+  .title{ margin:0 0 0 10px; font-weight:700; }
+
+  .cards{ margin-top:10px; display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; }
+  .card{
+    background:#3a7bd5;
+    border:2px solid #1d4f91;
+    padding:8px 10px;
+    font-size:12px;
+    color:#fff;
+    border-radius:8px;
+    min-height:50px;
+  }
+  .card .label{ font-size:11px; opacity:0.9; }
+  .card .value{
+    font-weight:800;
+    font-size:14px;
+    margin-top:4px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .box{ margin-top:10px; border:2px solid #3b5db7; background:#fff; padding:10px; border-radius:10px; }
+  table{ width:100%; border-collapse:collapse; margin-top:10px; }
+  th,td{ border:1px solid #333; padding:6px; font-size:12px; }
+  th{ background:#ddd; }
+
+  .paging { display:flex; justify-content:center; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .pg {
+    display:inline-block; padding:6px 16px;
+    border:2px solid #1d4f91; background:#eee; color:#000;
+    text-decoration:none; font-weight:600; border-radius:8px;
+  }
+  .pg.active { background:#3a7bd5; color:#000; }
+  .pg.disabled { pointer-events:none; opacity:0.5; }
+
+  .pagerbar{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:10px; flex-wrap:wrap; }
+</style>
+
+<div class="wrap">
 
   <div class="topbar">
     <%-- Back thông minh: nếu có param.back thì quay về đó --%>
@@ -28,33 +71,8 @@
     <div class="card"><div class="label">Storage</div><div class="value">${storageGb} GB</div></div>
   </div>
 
-  <%-- SKU Stats --%>
-  <div class="stat-cards" style="margin-bottom:14px;">
-    <div class="card stat-card-item">
-      <div class="small muted">SKU Code</div>
-      <div class="stat-value" style="font-size:16px;">${skuCode}</div>
-    </div>
-    <div class="card stat-card-item">
-      <div class="small muted">Product Code</div>
-      <div class="stat-value" style="font-size:16px;">${productCode}</div>
-    </div>
-    <div class="card stat-card-item">
-      <div class="small muted">Product Model</div>
-      <div class="stat-value" style="font-size:16px;">${productModel}</div>
-    </div>
-    <div class="card stat-card-item">
-      <div class="small muted">Color</div>
-      <div class="stat-value" style="font-size:16px;">${color}</div>
-    </div>
-    <div class="card stat-card-item">
-      <div class="small muted">RAM</div>
-      <div class="stat-value" style="font-size:16px;">${ramGb} GB</div>
-    </div>
-    <div class="card stat-card-item">
-      <div class="small muted">Storage</div>
-      <div class="stat-value" style="font-size:16px;">${storageGb} GB</div>
-    </div>
-  </div>
+  <div class="box">
+    <b>Search IMEI</b>
 
     <form method="get" action="${pageContext.request.contextPath}/imei-list" style="margin-top:8px;">
       <input type="hidden" name="skuId" value="${skuId}"/>
@@ -183,5 +201,6 @@
         </select>
       </div>
     </div>
+
   </div>
 </div>

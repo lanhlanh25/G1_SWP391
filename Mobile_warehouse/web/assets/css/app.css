@@ -89,7 +89,7 @@ a:hover { color: var(--primary); }
   width: 272px;
   background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-2) 100%);
   border-right: 1px solid rgba(255, 255, 255, .05);
-  padding: 16px 10px;
+  padding: 0px 10px;
   color: var(--sidebar-text);
   overflow: auto;
   flex-shrink: 0;
@@ -326,7 +326,7 @@ a:hover { color: var(--primary); }
 .eye-btn {
   position: absolute;
   right: 12px;
-  top: 50%;
+  top: 35%;
   transform: translateY(-50%);
   background: none;
   border: none;
@@ -1526,7 +1526,7 @@ a:hover { color: var(--primary); }
 }
 
 .login-card {
-  width: min(720px, 94vw);
+  width: min(500px, 94vw);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -1547,10 +1547,10 @@ a:hover { color: var(--primary); }
 }
 
 .login-brand .brand-mark {
-  width: 44px;
-  height: 44px;
-  border-radius: 16px;
-  font-size: 16px;
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    font-size: 12px;
 }
 
 .login-brand .brand-title {
@@ -1704,3 +1704,71 @@ a:hover { color: var(--primary); }
 .side ul + .section-title{
   margin-top: 14px;
 }
+
+/* Right side area (main + footer) */
+.content-wrap{
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* main takes remaining height, footer stays bottom */
+.content-wrap .main{
+  flex: 1;
+  min-height: 0;
+}
+
+/* footer full width of content only */
+.content-wrap .footer{
+  width: 100%;
+}
+
+.footer-inner.footer-center{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:6px;
+}
+
+.footer-line{
+  font-size:12.5px;
+  font-weight:600;
+  color: var(--muted);
+}
+
+.footer-line b{
+  color: var(--text);
+}
+
+.footer-line .dot{
+  margin: 0 8px;
+  opacity: .6;
+}
+
+.footer-inner.footer-center{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  gap:6px;
+}
+
+.footer-line{
+  font-size:12.5px;
+  font-weight:600;
+  color: var(--muted);
+}
+
+.footer-line b{
+  color: var(--text);
+}
+
+.footer-line .dot{
+  margin: 0 8px;
+  opacity: .6;
+}
+

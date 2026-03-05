@@ -53,7 +53,7 @@
         <%@ include file="/WEB-INF/jspf/common_head.jspf" %>
     </head>
     <body>
-        <div class="app">
+        <div class="app layout">
 
             <!-- TOPBAR -->
             <div class="top">
@@ -72,11 +72,13 @@
                 <div class="top-right">
                     <details class="top-user">
                         <summary class="top-user-summary" title="Account">
+                            <div><%= roleName %></div>
                             <span class="top-avatar">
                                 <img src="<%=avatarUrl%>?v=<%=v%>" alt="avatar"
                                      onerror="this.style.display='none'; this.parentNode.textContent='<%= initials %>';">
+                            
                             </span>
-                            <span class="caret">▾</span>
+                            
                         </summary>
 
                         <div class="top-user-menu">
@@ -105,36 +107,37 @@
 
                     <!-- Profile pinned bottom -->
                     <div class="side-footer">
-                     
-                        <a class="side-user-link" href="<%=ctx%>/home?p=my-profile">
-  <div class="side-avatar">
-    <img src="<%= avatarUrl %>?v=<%= v %>"
-         alt="avatar"
-         onerror="this.style.display='none'; this.parentNode.textContent='<%= initials %>';">
-  </div>
-  <div class="user-meta">
-    <div class="user-name"><%= fullName %></div>
-    <div class="user-role"><%= roleName %></div>
-  </div>
-</a>
-                            
 
-                        
-                           
-     
+                        <a class="side-user-link" href="<%=ctx%>/home?p=my-profile">
+                            <div class="side-avatar">
+                                <img src="<%= avatarUrl %>?v=<%= v %>"
+                                     alt="avatar"
+                                     onerror="this.style.display='none'; this.parentNode.textContent='<%= initials %>';">
+                            </div>
+                            <div class="user-meta">
+                                <div class="user-name"><%= fullName %></div>
+                                <div class="user-role"><%= roleName %></div>
+                            </div>
+                        </a>
+
+
+
+
+
                     </div>
                 </aside>
-
+                            <div class="content-wrap">
                 <!-- MAIN -->
                 <main class="main">
                     <jsp:include page="<%= contentPage %>" />
                 </main>
-
-            </div>
+                
+            
 
             <!-- FOOTER -->
             <%@ include file="/WEB-INF/jspf/footer.jspf" %>
-
+            </div>
         </div>
-    </body>
+    
+        </body>
 </html>

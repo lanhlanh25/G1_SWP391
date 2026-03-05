@@ -28,7 +28,6 @@
   <link rel="stylesheet" href="<%=request.getContextPath()%>/css/style.css"/>
 </head>
 <body>
-<div class="top"></div>
 <div class="layout">
   <div class="main">
     <div class="page-wrap">
