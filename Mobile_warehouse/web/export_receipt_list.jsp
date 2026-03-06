@@ -29,15 +29,7 @@
             <label class="label">Search</label>
             <input class="input" type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Export code..."/>
           </div>
-          <div>
-            <label class="label">Status</label>
-            <select class="select" name="status">
-              <option value="ALL"      ${status=='ALL'       || empty status ? 'selected' : ''}>ALL</option>
-              <option value="DRAFT"     ${status=='DRAFT'     ? 'selected' : ''}>DRAFT</option>
-              <option value="CONFIRMED" ${status=='CONFIRMED' ? 'selected' : ''}>CONFIRMED</option>
-              <option value="CANCELLED" ${status=='CANCELLED' ? 'selected' : ''}>CANCELLED</option>
-            </select>
-          </div>
+          
           <div>
             <label class="label">From</label>
             <input class="input" type="date" name="from" value="${fn:escapeXml(from)}"/>
@@ -69,7 +61,7 @@
             <th>Created By</th>
             <th>Export Date</th>
             <th style="width:100px; text-align:center;">Total Qty</th>
-            <th style="width:120px;">Status</th>
+            
             <th style="width:220px;">Action</th>
           </tr>
         </thead>
@@ -92,7 +84,7 @@
               <td><c:out value="${r.createdByName}"/></td>
               <td><c:out value="${r.exportDateUi}"/></td>
               <td style="text-align:center;"><c:out value="${r.totalQty}"/></td>
-              <td><c:out value="${r.status}"/></td>
+              
               <td>
                 <div style="display:flex; gap:6px;">
                   <a class="btn btn-sm" href="${ctx}/home?p=export-receipt-detail&id=${r.exportId}">View</a>

@@ -99,7 +99,7 @@ public class RequestDeleteImportReceiptList extends HttpServlet {
             
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect(req.getContextPath() + "/import-receipt-list?err=Error+loading+requests");
+            resp.sendRedirect(req.getContextPath() + "/home?p=import-receipt-list?err=Error+loading+requests");
         }
     }
     
