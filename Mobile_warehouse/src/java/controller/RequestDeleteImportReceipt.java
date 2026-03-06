@@ -36,38 +36,30 @@ public class RequestDeleteImportReceipt extends HttpServlet {
         User user = (User) session.getAttribute("authUser");
         String role = getRoleName(session, user);
 
-        
         if (!"STAFF".equalsIgnoreCase(role)) {
             resp.sendError(403, "Only staff can create delete requests");
             return;
         }
 
-       
         String importIdStr = req.getParameter("id");
-        if (importIdStr == null || importIdStr.trim().isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/import-receipt-list?err=Missing+import+ID");
-            return;
-        }
-
         long importId;
+
         try {
-            importId = Long.parseLong(importIdStr.trim());
-        } catch (NumberFormatException e) {
-            resp.sendRedirect(req.getContextPath() + "/import-receipt-list?err=Invalid+import+ID");
+            importId = Long.parseLong(importIdStr);
+        } catch (Exception e) {
+            redirectToImportList(req, resp, "err", "Invalid import ID");
             return;
         }
 
-     
         ImportReceiptDeleteRequestDAO dao = new ImportReceiptDeleteRequestDAO();
+
         try {
             ImportReceiptDeleteRequest importInfo = dao.getImportInfoForRequest(importId);
-
             if (importInfo == null) {
-                resp.sendRedirect(req.getContextPath() + "/import-receipt-list?err=Import+receipt+not+found");
+                redirectToImportList(req, resp, "err", "Import receipt not found");
                 return;
             }
 
-         
             req.setAttribute("role", role);
             req.setAttribute("username", user.getUsername());
             req.setAttribute("importInfo", importInfo);
@@ -77,7 +69,7 @@ public class RequestDeleteImportReceipt extends HttpServlet {
 
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect(req.getContextPath() + "/import-receipt-list?err=Error+loading+request+form");
+            redirectToImportList(req, resp, "err", "Error loading request form");
         }
     }
 
@@ -99,46 +91,61 @@ public class RequestDeleteImportReceipt extends HttpServlet {
             return;
         }
 
-     
         String importIdStr = req.getParameter("importId");
         String importCode = req.getParameter("importCode");
         String note = req.getParameter("note");
 
-        if (importIdStr == null || importCode == null || note == null || note.trim().isEmpty()) {
-            resp.sendRedirect(req.getContextPath() + "/request-delete-import-receipt?id=" + importIdStr
-                    + "&err=" + URLEncoder.encode("Please provide reason for deletion", StandardCharsets.UTF_8));
+        long importId;
+        try {
+            importId = Long.parseLong(importIdStr);
+        } catch (Exception e) {
+            redirectToImportList(req, resp, "err", "Invalid import ID");
             return;
         }
 
-        long importId = Long.parseLong(importIdStr);
+        if (note == null || note.trim().isEmpty()) {
+            // quay lại form đúng URL mà STAFF đang vào từ /home?p=...
+            String back = req.getContextPath()
+                    + "/home?p=request-delete-import-receipt&id=" + importId
+                    + "&err=" + url("Please provide reason for deletion");
+            resp.sendRedirect(back);
+            return;
+        }
 
-      
         ImportReceiptDeleteRequestDAO dao = new ImportReceiptDeleteRequestDAO();
+
         try {
             boolean success = dao.createRequest(importId, importCode, note.trim(), user.getUserId());
 
             if (success) {
-                resp.sendRedirect(req.getContextPath() + "/import-receipt-list?msg="
-                        + URLEncoder.encode("Delete request sent successfully", StandardCharsets.UTF_8));
+                // ✅ FIX 404: redirect về đúng route list
+                redirectToImportList(req, resp, "msg", "Delete request sent successfully");
             } else {
-                resp.sendRedirect(req.getContextPath() + "/import-receipt-list?err="
-                        + URLEncoder.encode("Failed to send delete request", StandardCharsets.UTF_8));
+                redirectToImportList(req, resp, "err", "Failed to send delete request");
             }
 
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect(req.getContextPath() + "/import-receipt-list?err="
-                    + URLEncoder.encode("Error: " + e.getMessage(), StandardCharsets.UTF_8));
+            redirectToImportList(req, resp, "err", "Error: " + e.getMessage());
         }
+    }
+
+    private void redirectToImportList(HttpServletRequest req, HttpServletResponse resp,
+                                      String key, String message) throws IOException {
+        String url = req.getContextPath()
+                + "/home?p=import-receipt-list&" + key + "=" + url(message);
+        resp.sendRedirect(url);
+    }
+
+    private String url(String s) {
+        return URLEncoder.encode(s, StandardCharsets.UTF_8);
     }
 
     private String getRoleName(HttpSession session, User user) {
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
             role = UserDAO.getRoleNameByUserId(user.getUserId());
-            if (role == null) {
-                role = "STAFF";
-            }
+            if (role == null) role = "STAFF";
             session.setAttribute("roleName", role);
         }
         return role.toUpperCase();

@@ -250,8 +250,8 @@
                         <div class="row">
                             <label>Supplier (Optional)</label>
                             <div class="col">
-                                <select name="supplierId" id="supplierId">
-                                    <option value="">-- Select Supplier --</option>
+                                <select name="supplierId" id="supplierId"  required>
+  <option value="" selected disabled>-- Select Supplier --</option>
                                     <c:forEach var="s" items="${suppliers}">
                                         <option value="${s.id}">${fn:escapeXml(s.name)}</option>
                                     </c:forEach>

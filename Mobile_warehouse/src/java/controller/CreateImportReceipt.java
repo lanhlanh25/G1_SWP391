@@ -52,6 +52,17 @@ public class CreateImportReceipt extends HttpServlet {
             req.setAttribute("importCode", importCode);
             req.setAttribute("receiptDateDefault", receiptDateDefault);
             req.setAttribute("createdByName", getFullName(req));
+            HttpSession ss = req.getSession();
+Object ferr = ss.getAttribute("flash_err");
+Object fmode = ss.getAttribute("flash_mode");
+if (ferr != null) {
+    req.setAttribute("err", ferr);
+    ss.removeAttribute("flash_err");
+}
+if (fmode != null) {
+    req.setAttribute("mode", String.valueOf(fmode));
+    ss.removeAttribute("flash_mode");
+}
 
             if (req.getAttribute("mode") == null) {
                 req.setAttribute("mode", "manual");
@@ -88,22 +99,24 @@ public class CreateImportReceipt extends HttpServlet {
             } else {
                 createByManual(con, req, status);
             }
-
+String supplierIdStr = req.getParameter("supplierId");
+if (supplierIdStr == null || supplierIdStr.trim().isEmpty()) {
+    throw new IllegalArgumentException("Supplier is required");
+}
+int supplierId = Integer.parseInt(supplierIdStr);
             con.commit();
             resp.sendRedirect(
     req.getContextPath() + "/home?p=import-receipt-list&msg=Created"
 );
         } catch (Exception e) {
-            e.printStackTrace();
-            if (con != null) try {
-                con.rollback();
-            } catch (Exception ignored) {
-            }
+          e.printStackTrace();
+    if (con != null) try { con.rollback(); } catch (Exception ignored) {}
 
-            req.setAttribute("err", "Create failed: " + e.getMessage());
-            req.setAttribute("mode", mode);
+    // flash error
+    req.getSession().setAttribute("flash_err", "Create failed: " + e.getMessage());
+    req.getSession().setAttribute("flash_mode", mode);
 
-            doGet(req, resp);
+    resp.sendRedirect(req.getContextPath() + "/home?p=create-import-receipt");
         } finally {
             if (con != null) try {
                 con.close();

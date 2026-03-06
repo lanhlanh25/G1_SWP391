@@ -1,4 +1,4 @@
-ư<%-- 
+<%-- 
     Document   : conduct_inventory_count
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>

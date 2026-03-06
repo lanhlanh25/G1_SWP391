@@ -22,69 +22,53 @@ import java.util.List;
 
 @WebServlet(name = "RequestDeleteImportReceiptList", urlPatterns = {"/request-delete-import-receipt-list"})
 public class RequestDeleteImportReceiptList extends HttpServlet {
-    
+
     @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) 
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        
+
         HttpSession session = req.getSession(false);
         if (session == null || session.getAttribute("authUser") == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
             return;
         }
-        
+
         User user = (User) session.getAttribute("authUser");
         String role = getRoleName(session, user);
-        
-        
+
         if (!"MANAGER".equalsIgnoreCase(role)) {
             resp.sendError(403, "Only managers can view delete requests");
             return;
         }
-        
-        
+
         String importCodeSearch = req.getParameter("q");
         String transactionTimeStr = req.getParameter("transactionTime");
-        
+
         java.sql.Date searchDate = null;
         if (transactionTimeStr != null && !transactionTimeStr.trim().isEmpty()) {
             try {
-               
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 sdf.setLenient(false);
                 java.util.Date utilDate = sdf.parse(transactionTimeStr.trim());
-                
-            
                 searchDate = new java.sql.Date(utilDate.getTime());
-                
-                System.out.println("DEBUG Controller: Searching with date = " + searchDate);
-            } catch (Exception e) {
-                System.err.println("ERROR: Failed to parse date: " + transactionTimeStr);
-                e.printStackTrace();
-                
-            }
+            } catch (Exception ignore) {}
         }
-        
-      
+
         int page = parseInt(req.getParameter("page"), 1);
         if (page < 1) page = 1;
         int pageSize = 10;
-        
+
         ImportReceiptDeleteRequestDAO dao = new ImportReceiptDeleteRequestDAO();
-        
+
         try {
             int totalItems = dao.countRequests(importCodeSearch, searchDate);
             int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
             if (totalPages < 1) totalPages = 1;
             if (page > totalPages) page = totalPages;
-            
-            List<ImportReceiptDeleteRequest> requests = dao.listRequests(
-                importCodeSearch, searchDate, page, pageSize
-            );
-            
-            System.out.println("DEBUG: Found " + requests.size() + " requests (total: " + totalItems + ")");
-            
-        
+
+            List<ImportReceiptDeleteRequest> requests =
+                    dao.listRequests(importCodeSearch, searchDate, page, pageSize);
+
             req.setAttribute("role", role);
             req.setAttribute("username", user.getUsername());
             req.setAttribute("requests", requests);
@@ -94,15 +78,19 @@ public class RequestDeleteImportReceiptList extends HttpServlet {
             req.setAttribute("pageSize", pageSize);
             req.setAttribute("totalPages", totalPages);
             req.setAttribute("totalItems", totalItems);
-            
+
             req.getRequestDispatcher("/request_delete_import_receipt_list.jsp").forward(req, resp);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
-            resp.sendRedirect(req.getContextPath() + "/home?p=import-receipt-list?err=Error+loading+requests");
+
+         
+            resp.sendRedirect(req.getContextPath()
+                    + "/home?p=import-receipt-list&err=Error+loading+requests");
+  
         }
     }
-    
+
     private int parseInt(String raw, int def) {
         try {
             if (raw == null || raw.isBlank()) return def;
@@ -111,7 +99,7 @@ public class RequestDeleteImportReceiptList extends HttpServlet {
             return def;
         }
     }
-    
+
     private String getRoleName(HttpSession session, User user) {
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {

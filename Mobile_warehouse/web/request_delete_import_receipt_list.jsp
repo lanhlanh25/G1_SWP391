@@ -4,197 +4,126 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="page-wrap">
-
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Request Delete Import Receipt List</title>
+<head>
+    <meta charset="UTF-8">
+    <title>Request Delete Import Receipt List</title>
+    <style>
+        :root { --blue:#3a7bd5; --line:#2e3f95; --bg:#f4f4f4; }
 
-        <style>
-            :root {
-                --blue: #3a7bd5;
-                --line: #2e3f95;
-                --bg: #f4f4f4;
+        /* Layout offsets (match your app's sidebar + top header) */
+        :root{ --sidebar-w:240px; --header-h:70px; }
+
+        body{ font-family:Arial; background:var(--bg); margin:0; }
+
+        /* Shift content away from sidebar/header, then center the panel */
+        .page{ padding:20px; box-sizing:border-box; }
+        @media (min-width: 900px){
+            .page{
+                padding-left: calc(20px + var(--sidebar-w));
+                padding-top: calc(20px + var(--header-h));
             }
+        }
 
-            body {
-                font-family: Arial, Helvetica, sans-serif;
-                background: var(--bg);
-                margin: 0;
-                padding: 20px;
-            }
+        .container{ max-width:1200px; width:100%; margin:0 auto; background:#fff; border:2px solid var(--line); border-radius:8px; padding:20px; box-sizing:border-box; }
+        .topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+        .title{ font-size:22px; font-weight:700; }
+        .btn{ padding:8px 16px; border:1px solid #333; background:#f6f6f6; cursor:pointer; font-size:13px; text-decoration:none; color:#111; display:inline-block; }
+        .search-bar{ display:flex; gap:10px; margin-bottom:20px; align-items:center; }
+        .search-bar input[type="text"], .search-bar input[type="date"]{ padding:8px; border:1px solid #333; font-size:13px; }
+        .search-bar input[type="text"]{ width:250px; }
+        table{ width:100%; border-collapse:collapse; }
+        th,td{ border:1px solid #cfcfcf; padding:8px; font-size:13px; vertical-align:top; }
+        th{ background:#efefef; text-align:left; }
+        .center{ text-align:center; }
+        .pager{ display:flex; justify-content:center; gap:6px; margin-top:15px; align-items:center; }
+        .pill{ display:inline-block; min-width:26px; text-align:center; padding:4px 8px; border:1px solid #aaa; background:#f6f6f6; }
+        .pill.active{ background:var(--blue); color:#fff; border-color:var(--blue); }
+    </style>
+</head>
+<body  class="page-request-delete">
 
-            .container {
-                max-width: 1200px;
-                margin: 0 auto;
-                background: #fff;
-                border: 2px solid var(--line);
-                border-radius: 8px;
-                padding: 20px;
-            }
+<div class="page">
+<div class="container">
+    <div class="topbar">
+        <div class="title">Request Delete Import Receipt List</div>
+        <a href="${ctx}/home?p=import-receipt-list">← Back</a>
+    </div>
 
-            .topbar {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 20px;
-            }
+    <!-- ✅ FIX: submit/search qua /home?p=request-delete-import-receipt-list -->
+    <form method="get" action="${ctx}/home" class="search-bar">
+        <input type="hidden" name="p" value="request-delete-import-receipt-list"/>
+        <input type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Search by import code"/>
+        <input type="date" name="transactionTime" value="${fn:escapeXml(transactionTime)}"/>
+        <button type="submit" class="btn">Search</button>
+        <a href="${ctx}/home?p=request-delete-import-receipt-list" class="btn">Reset</a>
+    </form>
 
-            .title {
-                font-size: 22px;
-                font-weight: 700;
-            }
-
-            .btn {
-                padding: 8px 16px;
-                border: 1px solid #333;
-                background: #f6f6f6;
-                cursor: pointer;
-                font-size: 13px;
-                text-decoration: none;
-                color: #111;
-                display: inline-block;
-            }
-
-            .search-bar {
-                display: flex;
-                gap: 10px;
-                margin-bottom: 20px;
-                align-items: center;
-            }
-
-            .search-bar input[type="text"],
-            .search-bar input[type="date"] {
-                padding: 8px;
-                border: 1px solid #333;
-                font-size: 13px;
-            }
-
-            .search-bar input[type="text"] {
-                width: 250px;
-            }
-
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            th, td {
-                border: 1px solid #cfcfcf;
-                padding: 8px;
-                font-size: 13px;
-                vertical-align: top;
-            }
-
-            th {
-                background: #efefef;
-                text-align: left;
-            }
-
-            .center {
-                text-align: center;
-            }
-
-            .pager {
-                display: flex;
-                justify-content: center;
-                gap: 6px;
-                margin-top: 15px;
-                align-items: center;
-            }
-
-            .pill {
-                display: inline-block;
-                min-width: 26px;
-                text-align: center;
-                padding: 4px 8px;
-                border: 1px solid #aaa;
-                background: #f6f6f6;
-            }
-
-            .pill.active {
-                background: var(--blue);
-                color: #fff;
-                border-color: var(--blue);
-            }
-        </style>
-    </head>
-    <body>
-
-        <div class="container">
-            <div class="topbar">
-                <div class="title">Request Delete Import Receipt List</div>
-                <a href="${ctx}/home?p=import-receipt-list">← Back</a>
-            </div>
-
-            <form method="get" action="${ctx}/request-delete-import-receipt-list" class="search-bar">
-                <input type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Search by import code"/>
-                <input type="date" name="transactionTime" value="${fn:escapeXml(transactionTime)}" placeholder="mm/dd/yyyy"/>
-                <button type="submit" class="btn">Search</button>
-                <a href="${ctx}/home?p=request-delete-import-receipt-list" class="btn">Reset</a>
-            </form>
-
-            <table>
-                <thead>
+    <table>
+        <thead>
+        <tr>
+            <th style="width:60px;" class="center">#</th>
+            <th style="width:150px;">Import Code</th>
+            <th>Note</th>
+            <th style="width:130px;">Create By</th>
+            <th style="width:160px;">Transaction time</th>
+        </tr>
+        </thead>
+        <tbody>
+        <c:choose>
+            <c:when test="${empty requests}">
+                <tr>
+                    <td colspan="5" class="center" style="color:#999;">No pending delete requests</td>
+                </tr>
+            </c:when>
+            <c:otherwise>
+                <c:forEach var="req" items="${requests}" varStatus="st">
                     <tr>
-                        <th style="width:60px;" class="center">#</th>
-                        <th style="width:150px;">Import Code</th>
-                        <th>Note</th>
-                        <th style="width:130px;">Create By</th>
-                        <th style="width:160px;">Transaction time</th>
+                        <td class="center">${st.index + 1}</td>
+                        <td>${fn:escapeXml(req.importCode)}</td>
+                        <td>${fn:escapeXml(req.note)}</td>
+                        <td>${fn:escapeXml(req.requestedByName)}</td>
+                        <td><fmt:formatDate value="${req.transactionTime}" pattern="MM/dd/yyyy h:mm a"/></td>
                     </tr>
-                </thead>
-                <tbody>
-                    <c:choose>
-                        <c:when test="${empty requests}">
-                            <tr>
-                                <td colspan="5" class="center" style="color:#999;">No pending delete requests</td>
-                            </tr>
-                        </c:when>
-                        <c:otherwise>
-                            <c:forEach var="req" items="${requests}" varStatus="st">
-                                <tr>
-                                    <td class="center">${st.index + 1}</td>
-                                    <td>${fn:escapeXml(req.importCode)}</td>
-                                    <td>${fn:escapeXml(req.note)}</td>
-                                    <td>${fn:escapeXml(req.requestedByName)}</td>
-                                    <td>
-                                        <fmt:formatDate value="${req.transactionTime}" pattern="MM/dd/yyyy h:mm a"/>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </c:otherwise>
-                    </c:choose>
-                </tbody>
-            </table>
+                </c:forEach>
+            </c:otherwise>
+        </c:choose>
+        </tbody>
+    </table>
 
-            <c:if test="${totalPages > 1}">
-                <div class="pager">
-                    <c:choose>
-                        <c:when test="${page <= 1}">
-                            <span class="btn" style="opacity:.5; pointer-events:none;">Prev</span>
-                        </c:when>
-                        <c:otherwise>
-                            <a class="btn" href="${ctx}/request-delete-import-receipt-list?page=${page-1}&q=${fn:escapeXml(q)}&transactionTime=${fn:escapeXml(transactionTime)}">Prev</a>
-                        </c:otherwise>
-                    </c:choose>
+    <c:if test="${totalPages > 1}">
+        <div class="pager">
+            <c:choose>
+                <c:when test="${page <= 1}">
+                    <span class="btn" style="opacity:.5; pointer-events:none;">Prev</span>
+                </c:when>
+                <c:otherwise>
+                    <a class="btn"
+                       href="${ctx}/home?p=request-delete-import-receipt-list&page=${page-1}&q=${fn:escapeXml(q)}&transactionTime=${fn:escapeXml(transactionTime)}">
+                        Prev
+                    </a>
+                </c:otherwise>
+            </c:choose>
 
-                    <span class="pill active">${page}</span>
+            <span class="pill active">${page}</span>
 
-                    <c:choose>
-                        <c:when test="${page >= totalPages}">
-                            <span class="btn" style="opacity:.5; pointer-events:none;">Next</span>
-                        </c:when>
-                        <c:otherwise>
-                            <a class="btn" href="${ctx}/request-delete-import-receipt-list?page=${page+1}&q=${fn:escapeXml(q)}&transactionTime=${fn:escapeXml(transactionTime)}">Next</a>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </c:if>
+            <c:choose>
+                <c:when test="${page >= totalPages}">
+                    <span class="btn" style="opacity:.5; pointer-events:none;">Next</span>
+                </c:when>
+                <c:otherwise>
+                    <a class="btn"
+                       href="${ctx}/home?p=request-delete-import-receipt-list&page=${page+1}&q=${fn:escapeXml(q)}&transactionTime=${fn:escapeXml(transactionTime)}">
+                        Next
+                    </a>
+                </c:otherwise>
+            </c:choose>
         </div>
+    </c:if>
 
-    </body>
+</div>
+</div>
+
+</body>
 </html>
-

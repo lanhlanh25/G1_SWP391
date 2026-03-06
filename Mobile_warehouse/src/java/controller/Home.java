@@ -82,6 +82,120 @@ public class Home extends HttpServlet {
 
         request.getRequestDispatcher("homepage.jsp").forward(request, response);
     }
+    
+    // ✅ ADD THIS: handle POST actions (Delete import receipt)
+@Override
+protected void doPost(HttpServletRequest request, HttpServletResponse response)
+        throws ServletException, IOException {
+
+    HttpSession session = request.getSession(false);
+    User u = (session == null) ? null : (User) session.getAttribute("authUser");
+    if (u == null) {
+        response.sendRedirect(request.getContextPath() + "/login");
+        return;
+    }
+
+    // load role
+    String role = (String) session.getAttribute("roleName");
+    if (role == null || role.isBlank()) {
+        role = UserDAO.getRoleNameByUserId(u.getUserId());
+        if (role == null || role.isBlank()) role = "STAFF";
+        session.setAttribute("roleName", role);
+    }
+    role = role.toUpperCase();
+
+    String p = request.getParameter("p");
+    if (p != null) p = p.trim();
+    if (p == null || p.isBlank()) p = "dashboard";
+
+    String action = request.getParameter("action");
+    if (action != null) action = action.trim();
+
+    // ✅ only handle delete for import-receipt-list here
+    if ("import-receipt-list".equalsIgnoreCase(p) && "delete".equalsIgnoreCase(action)) {
+
+        // only MANAGER can delete directly
+        if (!"MANAGER".equalsIgnoreCase(role)) {
+            response.sendRedirect(buildBackImportListUrl(request, "err", "Forbidden"));
+            return;
+        }
+
+        long importId;
+        try {
+            importId = Long.parseLong(request.getParameter("id"));
+        } catch (Exception e) {
+            response.sendRedirect(buildBackImportListUrl(request, "err", "Invalid id"));
+            return;
+        }
+
+        try {
+            ImportReceiptListDAO dao = new ImportReceiptListDAO();
+
+            // ✅ deleteDraft() already allows DRAFT/PENDING only
+            boolean ok = dao.deleteDraft(importId);
+
+            if (ok) {
+    String ctx = request.getContextPath();
+    String status = nvl(request.getParameter("status"));
+    String from   = nvl(request.getParameter("from"));
+    String to     = nvl(request.getParameter("to"));
+
+   response.sendRedirect(request.getContextPath()
+        + "/home?p=import-receipt-list"
+        + "&q="
+        + "&status=all"
+        + "&from="
+        + "&to="
+        + "&page=1"
+        + "&msg=Deleted+successfully");
+return;
+} else {
+                response.sendRedirect(buildBackImportListUrl(request, "err",
+                        "Cannot delete (only PENDING/DRAFT receipts can be deleted)"));
+            }
+            return;
+
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "Delete import receipt failed", ex);
+            response.sendRedirect(buildBackImportListUrl(request, "err", "Delete failed: " + ex.getMessage()));
+            return;
+        }
+    }
+
+    // If POST not supported for other pages -> go back to GET
+    response.sendRedirect(request.getContextPath() + "/home?p=" + url(p));
+}
+
+// ✅ helper: keep filter when redirect back to list
+private String buildBackImportListUrl(HttpServletRequest request, String key, String msg) {
+    String ctx = request.getContextPath();
+
+    String q = nvl(request.getParameter("q"));
+    String status = nvl(request.getParameter("status"));
+    String from = nvl(request.getParameter("from"));
+    String to = nvl(request.getParameter("to"));
+    String page = nvl(request.getParameter("page"));
+
+    return ctx + "/home?p=import-receipt-list"
+            + "&q=" + url(q)
+            + "&status=" + url(status)
+            + "&from=" + url(from)
+            + "&to=" + url(to)
+            + "&page=" + url(page)
+            + "&" + key + "=" + url(msg);
+}
+
+private String nvl(String s) {
+    return s == null ? "" : s;
+}
+
+private String url(String s) {
+    try {
+        return java.net.URLEncoder.encode(s == null ? "" : s, java.nio.charset.StandardCharsets.UTF_8);
+    } catch (Exception e) {
+        return "";
+    }
+}
 
     private void prepareData(String p, HttpServletRequest request, HttpServletResponse response, User authUser)
             throws Exception {
