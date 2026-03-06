@@ -64,6 +64,7 @@
               <td style="text-align:center;">${r.totalItems}</td>
               <td style="text-align:center;">${r.totalQty}</td>
               <td style="text-align:center;">
+                <a class="btn btn-sm" href="${ctx}/home?p=create-export-receipt&id=${r.requestId}">Create</a>
                 <a class="btn btn-sm" href="${ctx}/home?p=export-request-detail&id=${r.requestId}">View</a>
               </td>
             </tr>
