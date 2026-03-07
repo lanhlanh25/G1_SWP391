@@ -20,7 +20,7 @@ import model.ExportReceiptListItem;
 import model.ExportReceiptReportSummary;
 import model.User;
 
-@WebServlet(name = "ExportReceiptReport", urlPatterns = {"/export-receipt-report"})
+@WebServlet(name="ExportReceiptReport", urlPatterns={"/export-receipt-report"})
 public class ExportReceiptReport extends HttpServlet {
 
     private static int parseInt(String raw, int def) {
@@ -56,7 +56,6 @@ public class ExportReceiptReport extends HttpServlet {
             return;
         }
 
-        // role check
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
             role = UserDAO.getRoleNameByUserId(u.getUserId());
@@ -70,13 +69,14 @@ public class ExportReceiptReport extends HttpServlet {
         }
 
         String fromRaw = request.getParameter("from");
-        String toRaw = request.getParameter("to");
+        String toRaw   = request.getParameter("to");
 
         Date from = parseDate(fromRaw);
-        Date to = parseDate(toRaw);
+        Date to   = parseDate(toRaw);
 
         int page = parseInt(request.getParameter("page"), 1);
         if (page < 1) page = 1;
+
         final int pageSize = 5;
 
         try {
@@ -106,7 +106,7 @@ public class ExportReceiptReport extends HttpServlet {
             request.setAttribute("err", "Load report failed: " + ex.getMessage());
         }
 
-        // Render inside global layout
+        // render in global layout
         request.setAttribute("sidebarPage", "sidebar_manager.jsp");
         request.setAttribute("contentPage", "export_receipt_report.jsp");
         request.setAttribute("currentPage", "export-receipt-report");
@@ -115,4 +115,3 @@ public class ExportReceiptReport extends HttpServlet {
         request.getRequestDispatcher("homepage.jsp").forward(request, response);
     }
 }
-

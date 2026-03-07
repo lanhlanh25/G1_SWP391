@@ -75,81 +75,79 @@ public class ViewImeiDAO {
         return 0;
     }
 
-    
-public List<ImeiRow> listImeis(long skuId, String q, int page, int pageSize) {
-    List<ImeiRow> list = new ArrayList<>();
-    int offset = (page - 1) * pageSize;
+    /**
+     * ✅ UPDATED: Get latest import date for each IMEI from import_receipt_units
+     * Join with product_units to get export date
+     */
+    public List<ImeiRow> listImeis(long skuId, String q, int page, int pageSize) {
+        List<ImeiRow> list = new ArrayList<>();
+        int offset = (page - 1) * pageSize;
 
-    String sql =
-        "SELECT " +
-        "  pu.imei, " +
-        "  pu.unit_status, " +
-        "  pu.created_at, " +  
-        "  ( " +
-        "    SELECT ir.receipt_date " +
-        "    FROM import_receipt_units iru " +
-        "    JOIN import_receipt_lines irl ON irl.line_id = iru.line_id " +
-        "    JOIN import_receipts ir ON ir.import_id = irl.import_id " +
-        "    WHERE iru.imei = pu.imei AND ir.status = 'CONFIRMED' " +
-        "    ORDER BY ir.receipt_date DESC LIMIT 1 " +
-        "  ) AS latest_import_date, " +
-        "  ( " +
-        "    SELECT er.export_date " +
-        "    FROM export_receipt_units eru " +
-        "    JOIN export_receipt_lines erl ON erl.line_id = eru.line_id " +
-        "    JOIN export_receipts er ON er.export_id = erl.export_id " +
-        "    WHERE eru.imei = pu.imei AND er.status = 'CONFIRMED' " +
-        "    ORDER BY er.export_date DESC LIMIT 1 " +
-        "  ) AS latest_export_date " +
-        "FROM product_units pu " +
-        "WHERE pu.sku_id = ? " +
-        (q != null && !q.trim().isEmpty() ? "  AND pu.imei LIKE ? " : "") +
-        "ORDER BY pu.imei " +
-        "LIMIT ? OFFSET ?";
+        String sql =
+            "SELECT " +
+            "  pu.imei, " +
+            "  pu.unit_status, " +
+            "  ( " +
+            "    SELECT ir.receipt_date " +
+            "    FROM import_receipt_units iru " +
+            "    JOIN import_receipt_lines irl ON irl.line_id = iru.line_id " +
+            "    JOIN import_receipts ir ON ir.import_id = irl.import_id " +
+            "    WHERE iru.imei = pu.imei AND ir.status = 'CONFIRMED' " +
+            "    ORDER BY ir.receipt_date DESC LIMIT 1 " +
+            "  ) AS latest_import_date, " +
+            "  ( " +
+            "    SELECT er.export_date " +
+            "    FROM export_receipt_units eru " +
+            "    JOIN export_receipt_lines erl ON erl.line_id = eru.line_id " +
+            "    JOIN export_receipts er ON er.export_id = erl.export_id " +
+            "    WHERE eru.imei = pu.imei AND er.status = 'CONFIRMED' " +
+            "    ORDER BY er.export_date DESC LIMIT 1 " +
+            "  ) AS latest_export_date " +
+            "FROM product_units pu " +
+            "WHERE pu.sku_id = ? " +
+            (q != null && !q.trim().isEmpty() ? "  AND pu.imei LIKE ? " : "") +
+            "ORDER BY pu.imei " +
+            "LIMIT ? OFFSET ?";
 
-    try (Connection con = getConn();
-         PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = getConn();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        int idx = 1;
-        ps.setLong(idx++, skuId);
-        
-        if (q != null && !q.trim().isEmpty()) {
-            ps.setString(idx++, "%" + q.trim() + "%");
-        }
-        
-        ps.setInt(idx++, pageSize);
-        ps.setInt(idx, offset);
-
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                ImeiRow r = new ImeiRow();
-                r.setImei(rs.getString("imei"));
-                
-             
-                Timestamp importDate = rs.getTimestamp("latest_import_date");
-                if (importDate == null) {
-                   
-                    importDate = rs.getTimestamp("created_at");
-                }
-                r.setImportDate(importDate);
-                
-               
-                String status = rs.getString("unit_status");
-                if ("INACTIVE".equalsIgnoreCase(status)) {
-                    Timestamp exportDate = rs.getTimestamp("latest_export_date");
-                    r.setExportDate(exportDate);
-                } else {
-                    r.setExportDate(null); 
-                }
-                
-                list.add(r);
+            int idx = 1;
+            ps.setLong(idx++, skuId);
+            
+            if (q != null && !q.trim().isEmpty()) {
+                ps.setString(idx++, "%" + q.trim() + "%");
             }
+            
+            ps.setInt(idx++, pageSize);
+            ps.setInt(idx, offset);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ImeiRow r = new ImeiRow();
+                    r.setImei(rs.getString("imei"));
+                    
+                    // ✅ Latest import date
+                    Timestamp importDate = rs.getTimestamp("latest_import_date");
+                    r.setImportDate(importDate);
+                    
+                    // ✅ Latest export date (only if INACTIVE)
+                    String status = rs.getString("unit_status");
+                    if ("INACTIVE".equalsIgnoreCase(status)) {
+                        Timestamp exportDate = rs.getTimestamp("latest_export_date");
+                        r.setExportDate(exportDate);
+                    } else {
+                        r.setExportDate(null); // ACTIVE = not exported yet
+                    }
+                    
+                    list.add(r);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-    } catch (Exception e) {
-        e.printStackTrace();
+        return list;
     }
-
-    return list;
-}
 }

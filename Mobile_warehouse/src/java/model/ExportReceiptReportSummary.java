@@ -15,7 +15,6 @@ public class ExportReceiptReportSummary {
     public int getTotalExportReceipts() {
         return totalExportReceipts;
     }
-
     public void setTotalExportReceipts(int totalExportReceipts) {
         this.totalExportReceipts = totalExportReceipts;
     }
@@ -23,7 +22,6 @@ public class ExportReceiptReportSummary {
     public int getTotalPhoneQuantity() {
         return totalPhoneQuantity;
     }
-
     public void setTotalPhoneQuantity(int totalPhoneQuantity) {
         this.totalPhoneQuantity = totalPhoneQuantity;
     }

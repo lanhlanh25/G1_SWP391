@@ -1,139 +1,29 @@
 package dal;
 
+
 import java.sql.*;
 import java.util.*;
 import model.ImportReceiptDetail;
 import model.ImportReceiptLineDetail;
-import model.ImportReceiptListItem;
 
 public class ImportReceiptDAO {
 
- public int countList(String q, java.sql.Date from, java.sql.Date to) throws Exception {
+    public String generateImportCode(Connection con) throws SQLException {
+        String day = new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
+        String prefix = "IR-" + day + "-";
+        String sql = "SELECT COUNT(*) FROM import_receipts WHERE import_code LIKE ?";
+        int count = 0;
 
-    StringBuilder sql = new StringBuilder(
-        "SELECT COUNT(*) FROM import_receipts WHERE 1=1 "
-    );
-
-    List<Object> params = new ArrayList<>();
-
-    if (q != null && !q.isBlank()) {
-        sql.append(" AND import_code LIKE ? ");
-        params.add("%" + q.trim() + "%");
-    }
-
-    if (from != null) {
-        sql.append(" AND receipt_date >= ? ");
-        params.add(from);
-    }
-
-    if (to != null) {
-        sql.append(" AND receipt_date <= ? ");
-        params.add(to);
-    }
-
-    try (Connection con = DBContext.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql.toString())) {
-
-        int idx = 1;
-        for (Object p : params) {
-            ps.setObject(idx++, p);
-        }
-
-        try (ResultSet rs = ps.executeQuery()) {
-            rs.next();
-            return rs.getInt(1);
-        }
-    }
- }
-
-    public List<ImportReceiptListItem> list(
-        String q,
-        java.sql.Date from,
-        java.sql.Date to,
-        int page,
-        int pageSize) throws Exception {
-
-    StringBuilder sql = new StringBuilder(
-        "SELECT import_id, import_code, receipt_date, created_by "
-      + "FROM import_receipts WHERE 1=1 "
-    );
-
-    List<Object> params = new ArrayList<>();
-
-    if (q != null && !q.isBlank()) {
-        sql.append(" AND import_code LIKE ? ");
-        params.add("%" + q.trim() + "%");
-    }
-
-    if (from != null) {
-        sql.append(" AND receipt_date >= ? ");
-        params.add(from);
-    }
-
-    if (to != null) {
-        sql.append(" AND receipt_date <= ? ");
-        params.add(to);
-    }
-
-    sql.append(" ORDER BY receipt_date DESC LIMIT ? OFFSET ? ");
-    params.add(pageSize);
-    params.add((page - 1) * pageSize);
-
-    try (Connection con = DBContext.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql.toString())) {
-
-        int idx = 1;
-        for (Object p : params) {
-            ps.setObject(idx++, p);
-        }
-
-        try (ResultSet rs = ps.executeQuery()) {
-
-            List<ImportReceiptListItem> list = new ArrayList<>();
-
-            while (rs.next()) {
-                ImportReceiptListItem item = new ImportReceiptListItem();
-                item.setImportId(rs.getLong("import_id"));
-                item.setImportCode(rs.getString("import_code"));
-                item.setReceiptDate(rs.getTimestamp("receipt_date"));
-                item.setCreatedBy(rs.getString("created_by"));
-                list.add(item);
-            }
-
-            return list;
-        }
-    }
-}
-    
-public String generateImportCode(Connection con) throws SQLException {
-    String day = new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-    String prefix = "IR-" + day + "-";
-    
-    int sequence = 1;
-    String code;
-    
-    while (true) {
-        code = prefix + String.format("%04d", sequence);
-        
-        String checkSql = "SELECT COUNT(*) FROM import_receipts WHERE import_code = ?";
-        try (PreparedStatement ps = con.prepareStatement(checkSql)) {
-            ps.setString(1, code);
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, prefix + "%");
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next() && rs.getInt(1) == 0) {
-                    // Code not exists - use it
-                    return code;
+                if (rs.next()) {
+                    count = rs.getInt(1);
                 }
             }
         }
-        
-        sequence++;
-        
-      
-        if (sequence > 9999) {
-            throw new SQLException("Cannot generate import code - sequence overflow");
-        }
+        return prefix + String.format("%04d", count + 1);
     }
-}
 
     public long insertReceipt(Connection con,
             String importCode,
@@ -190,24 +80,29 @@ public String generateImportCode(Connection con) throws SQLException {
         throw new SQLException("Cannot insert import_receipt_lines");
     }
 
-   
-    public String validateImeiForInsert(Connection con, String imei) throws SQLException {
-        String sql = "SELECT unit_status FROM product_units WHERE imei = ? LIMIT 1";
-        
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, imei);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    String status = rs.getString("unit_status");
-                    if ("ACTIVE".equalsIgnoreCase(status)) {
-                        return "IMEI " + imei + " already exists with ACTIVE status";
-                    }
-                    
+    /**
+     * ✅ NEW: Validate IMEI before inserting
+     * Returns: null if OK, error message if blocked
+     */
+   public String validateImeiForInsert(Connection con, long skuId, String imei) throws SQLException {
+    String sql = "SELECT unit_status FROM product_units WHERE sku_id = ? AND imei = ? LIMIT 1";
+
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setLong(1, skuId);
+        ps.setString(2, imei);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                String status = rs.getString("unit_status");
+                if ("ACTIVE".equalsIgnoreCase(status)) {
+                    return "IMEI " + imei + " already exists in stock (ACTIVE) for this SKU. Cannot import again.";
                 }
+                // INACTIVE => allow re-import
             }
         }
-        return null;
     }
+    return null;
+}
 
     public void insertUnits(Connection con, long lineId, List<String> imeis) throws SQLException {
         String sql = "INSERT INTO import_receipt_units(line_id, imei) VALUES(?, ?)";
@@ -258,7 +153,7 @@ public String generateImportCode(Connection con) throws SQLException {
         throw new SQLException("SKU not found: " + skuCode);
     }
 
-    
+    // ===== PDF/DETAIL QUERIES =====
 
     public ImportReceiptDetail getDetailHeader(Connection con, long importId) throws SQLException {
         String sql = """

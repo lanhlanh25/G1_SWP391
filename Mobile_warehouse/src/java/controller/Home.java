@@ -243,7 +243,22 @@ private String url(String s) {
                 request.setAttribute("suppliers", sdao.listActive());
                 request.setAttribute("products", pdao.listActive());
                 request.setAttribute("skus", skdao.listActive());
-
+HttpSession ss = request.getSession(false);
+if (ss != null) {
+    Object ferr = ss.getAttribute("flash_err");
+    Object fmode = ss.getAttribute("flash_mode");
+    if (ferr != null) {
+        request.setAttribute("err", String.valueOf(ferr));
+        ss.removeAttribute("flash_err");
+    }
+    if (fmode != null) {
+        request.setAttribute("mode", String.valueOf(fmode));
+        ss.removeAttribute("flash_mode");
+    }
+}
+if (request.getAttribute("mode") == null) {
+    request.setAttribute("mode", "manual");
+}
                 try (Connection con = DBContext.getConnection()) {
                     String importCode = irDao.generateImportCode(con);
                     request.setAttribute("importCode", importCode);
@@ -776,38 +791,41 @@ private String url(String s) {
                 }
                 break;
             }
-            case "import-receipt-list": {
+ case "import-receipt-list": {
 
-                String action = request.getParameter("action");
+    String action = request.getParameter("action");
 
-                if ("export".equalsIgnoreCase(action)) {
-                    response.setContentType("text/csv");
-                    response.setHeader("Content-Disposition", "attachment; filename=import_receipts.csv");
+    if ("export".equalsIgnoreCase(action)) {
+        response.setContentType("text/csv");
+        response.setHeader("Content-Disposition", "attachment; filename=import_receipts.csv");
 
-                    PrintWriter out = response.getWriter();
+        PrintWriter out = response.getWriter();
 
-                    ImportReceiptDAO dao = new ImportReceiptDAO();
-                    List<ImportReceiptListItem> list
-                            = dao.list(null, null, null, 1, 1000);
+        // ✅ FIX: Declare dao before using it
+        ImportReceiptListDAO dao = new ImportReceiptListDAO();
+        
+        // ✅ FIX: Add 'status' parameter (required by ImportReceiptListDAO.list())
+        List<ImportReceiptListItem> list = dao.list(null, "all", null, null, 1, 1000);
 
-                    out.println("Import Code,Supplier,Created By,Created Date,Total Qty,Status");
+        out.println("Import Code,Supplier,Created By,Created Date,Total Qty,Status");
 
-                    for (ImportReceiptListItem r : list) {
-                        out.println(r.getImportCode() + ","
-                                + r.getSupplierName() + ","
-                                + r.getCreatedByName() + ","
-                                + r.getReceiptDate() + ","
-                                + r.getTotalQuantity() + ","
-                                + r.getStatus());
-                    }
+        for (ImportReceiptListItem r : list) {
+            out.println(r.getImportCode() + ","
+                    + (r.getSupplierName() != null ? r.getSupplierName() : "") + ","
+                    + (r.getCreatedByName() != null ? r.getCreatedByName() : "") + ","
+                    + (r.getReceiptDate() != null ? r.getReceiptDate() : "") + ","
+                    + r.getTotalQuantity() + ","
+                    + (r.getStatus() != null ? r.getStatus() : ""));
+        }
 
-                    out.flush();
-                    return;
-                }
+        out.flush();
+        return;
+    }
 
-                ImportReceiptList.handle(request);
-                break;
-            }
+    // ✅ Use ImportReceiptList handler for normal list view
+    ImportReceiptList.handle(request);
+    break;
+}
             case "supplier_detail": {
                 String idRaw = request.getParameter("id");
                 if (idRaw == null || idRaw.isBlank()) {
