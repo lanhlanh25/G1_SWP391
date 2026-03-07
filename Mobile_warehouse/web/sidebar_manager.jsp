@@ -13,12 +13,15 @@
 
     <li style="list-style:none;">
         <details open>
-            <summary style="cursor:pointer;">Import Receipt</summary>
-            <ul style="margin-top:6px;">
-                <li><a href="${pageContext.request.contextPath}/home?p=import-receipt-list">View Import Receipt List</a></li>
-                <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
-            </ul>
-        </details>
+  <summary style="cursor:pointer;">Import Receipt</summary>
+  <ul style="margin-top:6px;">
+    <li><a href="${pageContext.request.contextPath}/home?p=import-receipt-list">View Import Receipt List</a></li>
+    <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
+
+    <!-- ✅ THÊM DÒNG NÀY -->
+    <li><a href="<%=ctx%>/import-receipt-report">Import Receipt Report</a></li>
+  </ul>
+</details>
     </li>
 
 
@@ -27,6 +30,7 @@
             <summary style="cursor:pointer;">Export Receipt</summary>
             <ul style="margin-top:6px;">
                 <li><a href="<%=ctx%>/home?p=export-receipt-list">View Export Receipt List</a></li>
+                <li><a href="<%=ctx%>/export-receipt-report">Export Receipt Report</a></li>
                 
             </ul>
         </details>

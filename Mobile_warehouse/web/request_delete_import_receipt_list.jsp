@@ -2,199 +2,133 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="page-wrap">
+<!--
+  This JSP is included inside homepage.jsp (layout).
+  DO NOT use <html><head><body> here.
+-->
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Request Delete Import Receipt List</title>
+<div class="container">
+  <div class="card">
 
-        <style>
-            :root {
-                --blue: #3a7bd5;
-                --line: #2e3f95;
-                --bg: #f4f4f4;
-            }
+    <div class="card-header">
+      <div>
+        <div class="h2">Request Delete Import Receipt List</div>
+        <div class="small" style="margin-top:4px;">
+          Pending requests for deleting import receipts
+        </div>
+      </div>
 
-            body {
-                font-family: Arial, Helvetica, sans-serif;
-                background: var(--bg);
-                margin: 0;
-                padding: 20px;
-            }
+      <a class="btn btn-outline" href="${ctx}/home?p=import-receipt-list">Back</a>
+    </div>
 
-            .container {
-                max-width: 1200px;
-                margin: 0 auto;
-                background: #fff;
-                border: 2px solid var(--line);
-                border-radius: 8px;
-                padding: 20px;
-            }
+    <div class="card-body">
 
-            .topbar {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 20px;
-            }
+      <!-- Filters -->
+      <form method="get" action="${ctx}/home" class="filters" style="grid-template-columns: 2fr 1fr auto auto;">
+        <input type="hidden" name="p" value="request-delete-import-receipt-list"/>
 
-            .title {
-                font-size: 22px;
-                font-weight: 700;
-            }
-
-            .btn {
-                padding: 8px 16px;
-                border: 1px solid #333;
-                background: #f6f6f6;
-                cursor: pointer;
-                font-size: 13px;
-                text-decoration: none;
-                color: #111;
-                display: inline-block;
-            }
-
-            .search-bar {
-                display: flex;
-                gap: 10px;
-                margin-bottom: 20px;
-                align-items: center;
-            }
-
-            .search-bar input[type="text"],
-            .search-bar input[type="date"] {
-                padding: 8px;
-                border: 1px solid #333;
-                font-size: 13px;
-            }
-
-            .search-bar input[type="text"] {
-                width: 250px;
-            }
-
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            th, td {
-                border: 1px solid #cfcfcf;
-                padding: 8px;
-                font-size: 13px;
-                vertical-align: top;
-            }
-
-            th {
-                background: #efefef;
-                text-align: left;
-            }
-
-            .center {
-                text-align: center;
-            }
-
-            .pager {
-                display: flex;
-                justify-content: center;
-                gap: 6px;
-                margin-top: 15px;
-                align-items: center;
-            }
-
-            .pill {
-                display: inline-block;
-                min-width: 26px;
-                text-align: center;
-                padding: 4px 8px;
-                border: 1px solid #aaa;
-                background: #f6f6f6;
-            }
-
-            .pill.active {
-                background: var(--blue);
-                color: #fff;
-                border-color: var(--blue);
-            }
-        </style>
-    </head>
-    <body>
-
-        <div class="container">
-            <div class="topbar">
-                <div class="title">Request Delete Import Receipt List</div>
-                <a href="${ctx}/home?p=import-receipt-list">← Back</a>
-            </div>
-
-            <form method="get" action="${ctx}/request-delete-import-receipt-list" class="search-bar">
-                <input type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Search by import code"/>
-                <input type="date" name="transactionTime" value="${fn:escapeXml(transactionTime)}" placeholder="mm/dd/yyyy"/>
-                <button type="submit" class="btn">Search</button>
-                <a href="${ctx}/home?p=request-delete-import-receipt-list" class="btn">Reset</a>
-            </form>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:60px;" class="center">#</th>
-                        <th style="width:150px;">Import Code</th>
-                        <th>Note</th>
-                        <th style="width:130px;">Create By</th>
-                        <th style="width:160px;">Transaction time</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:choose>
-                        <c:when test="${empty requests}">
-                            <tr>
-                                <td colspan="5" class="center" style="color:#999;">No pending delete requests</td>
-                            </tr>
-                        </c:when>
-                        <c:otherwise>
-                            <c:forEach var="req" items="${requests}" varStatus="st">
-                                <tr>
-                                    <td class="center">${st.index + 1}</td>
-                                    <td>${fn:escapeXml(req.importCode)}</td>
-                                    <td>${fn:escapeXml(req.note)}</td>
-                                    <td>${fn:escapeXml(req.requestedByName)}</td>
-                                    <td>
-                                        <fmt:formatDate value="${req.transactionTime}" pattern="MM/dd/yyyy h:mm a"/>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                        </c:otherwise>
-                    </c:choose>
-                </tbody>
-            </table>
-
-            <c:if test="${totalPages > 1}">
-                <div class="pager">
-                    <c:choose>
-                        <c:when test="${page <= 1}">
-                            <span class="btn" style="opacity:.5; pointer-events:none;">Prev</span>
-                        </c:when>
-                        <c:otherwise>
-                            <a class="btn" href="${ctx}/request-delete-import-receipt-list?page=${page-1}&q=${fn:escapeXml(q)}&transactionTime=${fn:escapeXml(transactionTime)}">Prev</a>
-                        </c:otherwise>
-                    </c:choose>
-
-                    <span class="pill active">${page}</span>
-
-                    <c:choose>
-                        <c:when test="${page >= totalPages}">
-                            <span class="btn" style="opacity:.5; pointer-events:none;">Next</span>
-                        </c:when>
-                        <c:otherwise>
-                            <a class="btn" href="${ctx}/request-delete-import-receipt-list?page=${page+1}&q=${fn:escapeXml(q)}&transactionTime=${fn:escapeXml(transactionTime)}">Next</a>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </c:if>
+        <div class="field">
+          <label>Search</label>
+          <input class="input" type="text" name="q"
+                 value="${fn:escapeXml(q)}"
+                 placeholder="Search by import code"/>
         </div>
 
-    </body>
-</html>
+        <div class="field">
+          <label>Transaction Date</label>
+          <input class="input" type="date" name="transactionTime"
+                 value="${fn:escapeXml(transactionTime)}"/>
+        </div>
 
+        <div class="field" style="display:flex; align-items:end;">
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+
+        <div class="field" style="display:flex; align-items:end;">
+          <a class="btn" href="${ctx}/home?p=request-delete-import-receipt-list">Reset</a>
+        </div>
+      </form>
+
+      <!-- Table -->
+      <table class="table">
+        <thead>
+          <tr>
+            <th style="width:70px;">NO</th>
+            <th style="width:180px;">IMPORT CODE</th>
+            <th>NOTE</th>
+            <th style="width:180px;">CREATE BY</th>
+            <th style="width:220px;">TRANSACTION TIME</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <c:choose>
+            <c:when test="${empty requests}">
+              <tr>
+                <td colspan="5" style="text-align:center; color:#64748b; font-weight:700;">
+                  No pending delete requests
+                </td>
+              </tr>
+            </c:when>
+
+            <c:otherwise>
+              <c:forEach var="r" items="${requests}" varStatus="st">
+                <tr>
+                  <!-- nếu bạn có offset (page-1)*pageSize thì thay vào cho chuẩn -->
+                  <td>${st.index + 1}</td>
+                  <td>${fn:escapeXml(r.importCode)}</td>
+                  <td>${fn:escapeXml(r.note)}</td>
+                  <td>${fn:escapeXml(r.requestedByName)}</td>
+                  <td>
+                    <fmt:formatDate value="${r.transactionTime}" pattern="MM/dd/yyyy h:mm a"/>
+                  </td>
+                </tr>
+              </c:forEach>
+            </c:otherwise>
+          </c:choose>
+        </tbody>
+      </table>
+
+      <!-- Paging -->
+      <c:if test="${totalPages > 1}">
+        <div class="paging">
+          <c:set var="qsBase"
+                 value="p=request-delete-import-receipt-list&q=${fn:escapeXml(q)}&transactionTime=${fn:escapeXml(transactionTime)}" />
+
+          <c:choose>
+            <c:when test="${page > 1}">
+              <a class="paging-btn" href="${ctx}/home?${qsBase}&page=${page-1}">Prev</a>
+            </c:when>
+            <c:otherwise>
+              <span class="paging-btn disabled">Prev</span>
+            </c:otherwise>
+          </c:choose>
+
+          <c:forEach var="p" begin="1" end="${totalPages}">
+            <c:choose>
+              <c:when test="${p == page}">
+                <b>${p}</b>
+              </c:when>
+              <c:otherwise>
+                <a href="${ctx}/home?${qsBase}&page=${p}">${p}</a>
+              </c:otherwise>
+            </c:choose>
+          </c:forEach>
+
+          <c:choose>
+            <c:when test="${page < totalPages}">
+              <a class="paging-btn" href="${ctx}/home?${qsBase}&page=${page+1}">Next</a>
+            </c:when>
+            <c:otherwise>
+              <span class="paging-btn disabled">Next</span>
+            </c:otherwise>
+          </c:choose>
+        </div>
+      </c:if>
+
+    </div>
+  </div>
+</div>

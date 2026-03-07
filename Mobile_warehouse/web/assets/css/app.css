@@ -40,6 +40,8 @@
 
   /* Transition */
   --transition: 0.18s ease;
+  
+  --side-w: 272px;
 }
 
 /* ===========================
@@ -1771,4 +1773,8 @@ a:hover { color: var(--primary); }
   margin: 0 8px;
   opacity: .6;
 }
-
+.page-request-delete .main .container{
+  max-width: 1240px;
+  margin: 0 auto;
+  transform: translateX(calc(var(--side-w) / -2));
+}

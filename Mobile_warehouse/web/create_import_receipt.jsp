@@ -1,615 +1,459 @@
 <%--
-    Document   : create_import_receipt - WORKING VERSION
+    Document   : create_import_receipt
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
-
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8" />
-        <title>Create Import Receipt</title>
+<style>
+  :root{
+    --line:#2e3f95;
+    --bg:#f4f4f4;
+    --th:#d9d9d9;
+  }
 
-        <style>
-            :root{
-                --line:#2e3f95;
-                --bg:#f4f4f4;
-                --th:#d9d9d9;
-            }
-            body{
-                font-family: Arial, Helvetica, sans-serif;
-                background:#eee;
-                margin:0;
-            }
-            .wrap{
-                padding:14px;
-                background:var(--bg);
-            }
-            .frame{
-                border:2px solid var(--line);
-                background:#fff;
-                padding:12px;
-            }
-            .title{
-                font-size:20px;
-                font-weight:700;
-            }
-            .sectionTitle{
-                font-weight:700;
-                margin:8px 0 6px;
-            }
-            .row{
-                display:flex;
-                gap:10px;
-                margin-bottom:8px;
-                align-items:center;
-            }
-            .row label{
-                min-width:140px;
-                font-size:13px;
-            }
-            input[type="text"], input[type="number"], input[type="datetime-local"], select, textarea{
-                width:100%;
-                padding:6px 8px;
-                border:1px solid #333;
-                box-sizing:border-box;
-            }
-            textarea{
-                height:56px;
-                resize:vertical;
-            }
-            .col{
-                flex:1;
-            }
+  /* ✅ IMPORTANT: do not set body margin/padding/background here
+     because homepage.jsp already controls global layout */
+  .wrap{
+    padding:14px;
+    background:transparent;
+  }
+  .frame{
+    border:2px solid var(--line);
+    background:#fff;
+    padding:12px;
+  }
+  .title{ font-size:20px; font-weight:700; }
+  .sectionTitle{ font-weight:700; margin:8px 0 6px; }
 
-            .tabs{
-                display:flex;
-                gap:6px;
-                margin-bottom:10px;
-            }
-            .tabBtn{
-                border:1px solid #333;
-                background:#f6f6f6;
-                padding:6px 10px;
-                cursor:pointer;
-                font-size:13px;
-            }
-            .tabBtn.active{
-                background:#fff;
-                font-weight:700;
-            }
-            .tabPanel{
-                display:none;
-            }
-            .tabPanel.active{
-                display:block;
-            }
+  .row{
+    display:flex;
+    gap:10px;
+    margin-bottom:8px;
+    align-items:center;
+  }
+  .row label{ min-width:140px; font-size:13px; }
 
-            table{
-                border-collapse:collapse;
-                width:100%;
-                table-layout:auto;
-            }
-            th, td{
-                border:1px solid #333;
-                padding:6px;
-                vertical-align:top;
-                font-size:12px;
-            }
-            th{
-                background:var(--th);
-                text-align:left;
-                white-space:nowrap;
-            }
+  input[type="text"], input[type="number"], input[type="datetime-local"], select, textarea{
+    width:100%;
+    padding:6px 8px;
+    border:1px solid #333;
+    box-sizing:border-box;
+  }
+  textarea{ height:56px; resize:vertical; }
+  .col{ flex:1; }
 
-            .small{
-                font-size:12px;
-                color:#333;
-            }
-            .btn{
-                border:1px solid #333;
-                background:#f6f6f6;
-                padding:6px 12px;
-                cursor:pointer;
-                display:inline-block;
-                text-decoration:none;
-                color:#111;
-                font-size:13px;
-            }
-            .btn.danger{
-                background:#fff0f0;
-            }
-            .btnRow{
-                display:flex;
-                gap:8px;
-                margin-top:10px;
-            }
-            .hint{
-                background:#c9f2ff;
-                border:1px solid #333;
-                padding:8px;
-                margin:8px 0;
-                font-size:12px;
-            }
-            .err{
-                border:1px solid #b00020;
-                background:#ffe9ee;
-                padding:8px;
-                margin-bottom:10px;
-                color:#b00020;
-                font-size:13px;
-            }
-            .ok{
-                border:1px solid #0a7f3f;
-                background:#e9fff1;
-                padding:8px;
-                margin-bottom:10px;
-                color:#0a7f3f;
-                font-size:13px;
-            }
+  .tabs{ display:flex; gap:6px; margin-bottom:10px; }
+  .tabBtn{
+    border:1px solid #333;
+    background:#f6f6f6;
+    padding:6px 10px;
+    cursor:pointer;
+    font-size:13px;
+  }
+  .tabBtn.active{ background:#fff; font-weight:700; }
+  .tabPanel{ display:none; }
+  .tabPanel.active{ display:block; }
 
-            .w60{
-                min-width:60px;
-            }
-            .w90{
-                min-width:90px;
-            }
-            .w120{
-                min-width:120px;
-            }
-            .w160{
-                min-width:160px;
-            }
-            .w200{
-                min-width:200px;
-            }
-            .w260{
-                min-width:260px;
-            }
-            .center{
-                text-align:center;
-            }
+  table{
+    border-collapse:collapse;
+    width:100%;
+    table-layout:fixed;
+  }
+  th, td{
+    border:1px solid #333;
+    padding:6px;
+    vertical-align:top;
+    font-size:12px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  th{
+    background:var(--th);
+    text-align:left;
+    white-space:nowrap;
+  }
 
-            .imeiBox{
-                display:flex;
-                flex-direction:column;
-                gap:4px;
-                min-width:280px;
-            }
-            .imeiRow{
-                display:flex;
-                gap:6px;
-                align-items:center;
-            }
-            .imeiRow span{
-                min-width:50px;
-                font-size:11px;
-                white-space:nowrap;
-            }
-            .imeiRow input{
-                flex:1;
-                min-width:200px;
-                padding:4px 6px;
-                font-size:12px;
-            }
-            .imeiRow input.valid{
-                border-color:#0a7f3f;
-                background:#f0fff4;
-            }
-            .imeiRow input.invalid{
-                border-color:#b00020;
-                background:#fff5f5;
-            }
-        </style>
-    </head>
+  .btn{
+    border:1px solid #333;
+    background:#f6f6f6;
+    padding:6px 12px;
+    cursor:pointer;
+    display:inline-block;
+    text-decoration:none;
+    color:#111;
+    font-size:13px;
+  }
+  .btn.danger{ background:#fff0f0; }
+  .btnRow{ display:flex; gap:8px; margin-top:10px; }
 
-    <body>
-        <div class="wrap">
-            <div class="frame">
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
-                    <div class="title">Create Import Receipt</div>
-                </div>
+  .hint{
+    background:#c9f2ff;
+    border:1px solid #333;
+    padding:8px;
+    margin:8px 0;
+    font-size:12px;
+  }
+  .err{
+    border:1px solid #b00020;
+    background:#ffe9ee;
+    padding:8px;
+    margin:10px 0;
+    color:#b00020;
+    font-size:13px;
+  }
+  .ok{
+    border:1px solid #0a7f3f;
+    background:#e9fff1;
+    padding:8px;
+    margin:10px 0;
+    color:#0a7f3f;
+    font-size:13px;
+  }
+  .center{ text-align:center; }
 
-                <c:if test="${not empty err}">
-                    <div class="err">${fn:escapeXml(err)}</div>
-                </c:if>
-                <c:if test="${not empty msg}">
-                    <div class="ok">${fn:escapeXml(msg)}</div>
-                </c:if>
+  td.imeiCell{ overflow:auto; }
+  .imeiBox{ display:flex; flex-direction:column; gap:4px; min-width:240px; }
+  .imeiRow{ display:flex; gap:6px; align-items:center; }
+  .imeiRow span{ min-width:50px; font-size:11px; white-space:nowrap; }
+  .imeiRow input{ flex:1; min-width:160px; padding:4px 6px; font-size:12px; }
+  .imeiRow input.valid{ border-color:#0a7f3f; background:#f0fff4; }
+  .imeiRow input.invalid{ border-color:#b00020; background:#fff5f5; }
+</style>
 
-                <div class="sectionTitle">Import Form</div>
+<div class="wrap">
+  <div class="frame">
+    <div style="display:flex; gap:10px; align-items:center;">
+      <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
+      <div class="title">Create Import Receipt</div>
+    </div>
 
-                <div class="tabs">
-                    <button type="button" class="tabBtn active" data-tab="manual">Manual Entry</button>
-                    <button type="button" class="tabBtn" data-tab="excel">Upload Excel With Imei</button>
-                </div>
+    <!-- ✅ show backend errors (from Home.java flash) -->
+    <c:if test="${not empty err}">
+      <div class="err">${fn:escapeXml(err)}</div>
+    </c:if>
+    <c:if test="${not empty msg}">
+      <div class="ok">${fn:escapeXml(msg)}</div>
+    </c:if>
 
-                <div id="tab-manual" class="tabPanel active">
-                    <form id="manualForm" method="post" action="${ctx}/create-import-receipt">
-                        <input type="hidden" name="mode" value="manual"/>
+    <div class="sectionTitle">Import Form</div>
 
-                        <div class="row">
-                            <label>Import Code (auto)</label>
-                            <div class="col">
-                                <input type="text" name="importCode" value="${fn:escapeXml(importCode)}" readonly />
-                                <div class="small">Generated by system</div>
-                            </div>
-                        </div>
+    <c:set var="isExcel" value="${mode == 'excel'}"/>
 
-                        <div class="row">
-                            <label>Transaction time</label>
-                            <div class="col">
-                                <input type="datetime-local" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}" required />
-                            </div>
-                        </div>
+    <div class="tabs">
+      <button type="button" class="tabBtn ${isExcel ? '' : 'active'}" data-tab="manual">Manual Entry</button>
+      <button type="button" class="tabBtn ${isExcel ? 'active' : ''}" data-tab="excel">Upload Excel With Imei</button>
+    </div>
 
-                        <div class="row">
-                            <label>Supplier (Optional)</label>
-                            <div class="col">
-                                <select name="supplierId" id="supplierId">
-                                    <option value="">-- Select Supplier --</option>
-                                    <c:forEach var="s" items="${suppliers}">
-                                        <option value="${s.id}">${fn:escapeXml(s.name)}</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                        </div>
+    <!-- MANUAL -->
+    <div id="tab-manual" class="tabPanel ${isExcel ? '' : 'active'}">
+      <form id="manualForm" method="post" action="${ctx}/create-import-receipt">
+        <input type="hidden" name="mode" value="manual"/>
 
-                        <div class="row">
-                            <label>Note</label>
-                            <div class="col">
-                                <textarea name="note" placeholder="Notes..."></textarea>
-                            </div>
-                        </div>
-
-                        <div class="sectionTitle">Import Items</div>
-
-                        <table id="itemsTable">
-                            <thead>
-                                <tr>
-                                    <th class="w60 center">#</th>
-                                    <th class="w160">Product Code</th>
-                                    <th class="w200">SKU</th>
-                                    <th class="w90">Quantity</th>
-                                    <th class="w260">Imei Numbers</th>
-                                    <th class="w160">Item note</th>
-                                    <th class="w120">Create By</th>
-                                    <th class="w90 center">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="itemsTbody"></tbody>
-                        </table>
-
-                        <div style="margin-top:8px;">
-                            <button type="button" class="btn" id="btnAddRow">+ Add product Line</button>
-                        </div>
-
-                        <div class="btnRow">
-                            <button type="submit" class="btn">Save</button>
-                            <a class="btn" href="${ctx}/home">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-
-                
-                        
-                        
-                       
-                <div id="tab-excel" class="tabPanel">
-                    <form method="post" action="${ctx}/create-import-receipt" enctype="multipart/form-data">
-                        <input type="hidden" name="mode" value="excel"/>
-
-                        <div class="hint">
-                            <b>Excel Format:</b> 3 columns: <b>product_code</b>, <b>sku_code</b>, <b>imei</b> (IMEI 15 digits)
-                        </div>
-
-                        <div class="row">
-                            <label>Import Code (auto)</label>
-                            <div class="col">
-                                <input type="text" name="importCode" value="${fn:escapeXml(importCode)}" readonly />
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <label>Excel File (.xlsx)</label>
-                            <div class="col">
-                                <input type="file" name="excelFile" accept=".xlsx" required />
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <label>Transaction time</label>
-                            <div class="col">
-                                <input type="datetime-local" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}" required />
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <label>Supplier (Optional)</label>
-                            <div class="col">
-                                <select name="supplierId">
-                                    <option value="">-- Select Supplier --</option>
-                                    <c:forEach var="s" items="${suppliers}">
-                                        <option value="${s.id}">${fn:escapeXml(s.name)}</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <label>Note</label>
-                            <div class="col">
-                                <textarea name="note" placeholder="Notes..."></textarea>
-                            </div>
-                        </div>
-
-                        <div class="btnRow">
-                            <button type="submit" class="btn">Import with Excel</button>
-                            <a class="btn" href="${ctx}/home">Cancel</a>
-                        </div>
-                    </form>
-                </div>
-
-            </div>
+        <div class="row">
+          <label>Import Code (auto)</label>
+          <div class="col">
+            <input type="text" name="importCode" value="${fn:escapeXml(importCode)}" readonly />
+            <div style="font-size:12px;color:#333;">Generated by system</div>
+          </div>
         </div>
 
-        <script>
-            (function () {
-                const PRODUCTS = [
-            <c:forEach var="p" items="${products}" varStatus="st">
-                { id: ${p.productId}, code: "${fn:escapeXml(p.productCode)}" }<c:if test="${!st.last}">,</c:if>
-            </c:forEach>
-                ];
+        <div class="row">
+          <label>Transaction time</label>
+          <div class="col">
+            <input type="datetime-local" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}" required />
+          </div>
+        </div>
 
-                const SKUS = [
-            <c:forEach var="k" items="${skus}" varStatus="st">
-                { id: ${k.skuId}, code: "${fn:escapeXml(k.skuCode)}", productId: ${k.productId} }<c:if test="${!st.last}">,</c:if>
-            </c:forEach>
-                ];
+        <div class="row">
+          <label>Supplier <span style="color:red">*</span></label>
+          <div class="col">
+            <select name="supplierId" id="supplierIdManual" required>
+              <option value="" selected disabled>-- Select Supplier --</option>
+              <c:forEach var="s" items="${suppliers}">
+                <option value="${s.id}">${fn:escapeXml(s.name)}</option>
+              </c:forEach>
+            </select>
+          </div>
+        </div>
 
-                const CREATED_BY = "${fn:escapeXml(createdByName)}";
-                const tbody = document.getElementById("itemsTbody");
-                const manualForm = document.getElementById("manualForm");
+        <div class="row">
+          <label>Note</label>
+          <div class="col">
+            <textarea name="note" placeholder="Notes..."></textarea>
+          </div>
+        </div>
 
-                let rowCounter = 0; 
-                
-                function buildProductSelect() {
-                    const sel = document.createElement("select");
-                    sel.name = "productId";
-                    sel.required = true;
-                    sel.innerHTML = '<option value="">-- Select Product Code --</option>';
-                    PRODUCTS.forEach(p => {
-                        sel.innerHTML += '<option value="' + p.id + '">' + p.code + '</option>';
-                    });
-                    return sel;
-                }
+        <div class="sectionTitle">Import Items</div>
 
-                
-                function buildSkuSelect() {
-                    const sel = document.createElement("select");
-                    sel.name = "skuId";
-                    sel.required = true;
-                    sel.innerHTML = '<option value="">-- Select SKU --</option>';
-                    return sel;
-                }
+        <table id="itemsTable">
+          <thead>
+          <tr>
+            <th style="width:50px" class="center">#</th>
+            <th style="width:150px">Product Code</th>
+            <th style="width:170px">SKU</th>
+            <th style="width:80px">Quantity</th>
+            <th style="width:260px">Imei Numbers</th>
+            <th style="width:140px">Item note</th>
+            <th style="width:110px">Create By</th>
+            <th style="width:80px" class="center">Action</th>
+          </tr>
+          </thead>
+          <tbody id="itemsTbody"></tbody>
+        </table>
 
-                
-                function refreshSkuOptions(skuSelect, productId) {
-                    skuSelect.innerHTML = '<option value="">-- Select SKU --</option>';
-                    if (!productId)
-                        return;
+        <div style="margin-top:8px;">
+          <button type="button" class="btn" id="btnAddRow">+ Add product Line</button>
+        </div>
 
-                    SKUS.filter(s => String(s.productId) === String(productId)).forEach(s => {
-                        skuSelect.innerHTML += '<option value="' + s.id + '">' + s.code + '</option>';
-                    });
-                }
+        <div class="btnRow">
+          <button type="submit" class="btn">Save</button>
+          <a class="btn" href="${ctx}/home?p=import-receipt-list">Cancel</a>
+        </div>
+      </form>
+    </div>
 
-                
-                function buildImeiBox(rowIdx, qty) {
-                    const box = document.createElement("div");
-                    box.className = "imeiBox";
+    <!-- EXCEL -->
+    <div id="tab-excel" class="tabPanel ${isExcel ? 'active' : ''}">
+      <form method="post" action="${ctx}/create-import-receipt" enctype="multipart/form-data">
+        <input type="hidden" name="mode" value="excel"/>
 
-                    for (let i = 1; i <= qty; i++) {
-                        const row = document.createElement("div");
-                        row.className = "imeiRow";
+        <div class="hint">
+          <b>Excel Format:</b> 3 columns: <b>product_code</b>, <b>sku_code</b>, <b>imei</b> (IMEI 15 digits)
+        </div>
 
-                        const label = document.createElement("span");
-                        label.textContent = "Imei " + i + ":";
+        <div class="row">
+          <label>Import Code (auto)</label>
+          <div class="col">
+            <input type="text" name="importCode" value="${fn:escapeXml(importCode)}" readonly />
+          </div>
+        </div>
 
-                        const input = document.createElement("input");
-                        input.type = "text";
-                        input.name = "imei_" + rowIdx + "_" + i; 
-                        input.placeholder = "15 digits";
-                        input.required = true;
-                        input.maxLength = 15;
+        <div class="row">
+          <label>Excel File (.xlsx)</label>
+          <div class="col">
+            <input type="file" name="excelFile" accept=".xlsx" required />
+          </div>
+        </div>
 
-                        
-                        input.addEventListener("input", function () {
-                            this.value = this.value.replace(/\D/g, "").slice(0, 15);
+        <div class="row">
+          <label>Transaction time</label>
+          <div class="col">
+            <input type="datetime-local" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}" required />
+          </div>
+        </div>
 
-                            if (this.value.length === 15) {
-                                this.classList.add("valid");
-                                this.classList.remove("invalid");
-                            } else if (this.value.length > 0) {
-                                this.classList.add("invalid");
-                                this.classList.remove("valid");
-                            } else {
-                                this.classList.remove("valid", "invalid");
-                            }
-                        });
+        <div class="row">
+          <label>Supplier <span style="color:red">*</span></label>
+          <div class="col">
+            <select name="supplierId" id="supplierIdExcel" required>
+              <option value="" selected disabled>-- Select Supplier --</option>
+              <c:forEach var="s" items="${suppliers}">
+                <option value="${s.id}">${fn:escapeXml(s.name)}</option>
+              </c:forEach>
+            </select>
+          </div>
+        </div>
 
-                        row.appendChild(label);
-                        row.appendChild(input);
-                        box.appendChild(row);
-                    }
+        <div class="row">
+          <label>Note</label>
+          <div class="col">
+            <textarea name="note" placeholder="Notes..."></textarea>
+          </div>
+        </div>
 
-                    return box;
-                }
+        <div class="btnRow">
+          <button type="submit" class="btn">Import with Excel</button>
+          <a class="btn" href="${ctx}/home?p=import-receipt-list">Cancel</a>
+        </div>
+      </form>
+    </div>
 
-               
-                function addRow() {
-                    rowCounter++; 
-                    const rowIdx = rowCounter;
+  </div>
+</div>
 
-                    const tr = document.createElement("tr");
-                    tr.dataset.rowIdx = rowIdx;
+<script>
+(function () {
+  const PRODUCTS = [
+    <c:forEach var="p" items="${products}" varStatus="st">
+      { id: ${p.productId}, code: "${fn:escapeXml(p.productCode)}" }<c:if test="${!st.last}">,</c:if>
+    </c:forEach>
+  ];
+  const SKUS = [
+    <c:forEach var="k" items="${skus}" varStatus="st">
+      { id: ${k.skuId}, code: "${fn:escapeXml(k.skuCode)}", productId: ${k.productId} }<c:if test="${!st.last}">,</c:if>
+    </c:forEach>
+  ];
 
-                   
-                    const tdNo = document.createElement("td");
-                    tdNo.className = "center cellNo";
-                    tdNo.textContent = tbody.children.length + 1;
+  const CREATED_BY = "${fn:escapeXml(createdByName)}";
+  const tbody = document.getElementById("itemsTbody");
+  const manualForm = document.getElementById("manualForm");
+  let rowCounter = 0;
 
-                    
-                    const tdProd = document.createElement("td");
-                    const selProd = buildProductSelect();
-                    tdProd.appendChild(selProd);
+  function buildProductSelect() {
+    const sel = document.createElement("select");
+    sel.name = "productId";
+    sel.required = true;
+    sel.innerHTML = '<option value="">-- Select Product Code --</option>';
+    PRODUCTS.forEach(p => sel.innerHTML += '<option value="'+p.id+'">'+p.code+'</option>');
+    return sel;
+  }
 
-                  
-                    const tdSku = document.createElement("td");
-                    const selSku = buildSkuSelect();
-                    tdSku.appendChild(selSku);
+  function buildSkuSelect() {
+    const sel = document.createElement("select");
+    sel.name = "skuId";
+    sel.required = true;
+    sel.innerHTML = '<option value="">-- Select SKU --</option>';
+    return sel;
+  }
 
-                    
-                    selProd.addEventListener("change", function () {
-                        refreshSkuOptions(selSku, this.value);
-                    });
+  function refreshSkuOptions(skuSelect, productId) {
+    skuSelect.innerHTML = '<option value="">-- Select SKU --</option>';
+    if (!productId) return;
+    SKUS.filter(s => String(s.productId) === String(productId))
+        .forEach(s => skuSelect.innerHTML += '<option value="'+s.id+'">'+s.code+'</option>');
+  }
 
-                  
-                    const tdQty = document.createElement("td");
-                    const qtyInp = document.createElement("input");
-                    qtyInp.type = "number";
-                    qtyInp.name = "qty";
-                    qtyInp.min = "1";
-                    qtyInp.value = "1";
-                    qtyInp.required = true;
-                    tdQty.appendChild(qtyInp);
+  function buildImeiBox(rowIdx, qty) {
+    const box = document.createElement("div");
+    box.className = "imeiBox";
+    for (let i = 1; i <= qty; i++) {
+      const row = document.createElement("div");
+      row.className = "imeiRow";
 
-                    
-                    const tdImei = document.createElement("td");
-                    let imeiBox = buildImeiBox(rowIdx, 1);
-                    tdImei.appendChild(imeiBox);
+      const label = document.createElement("span");
+      label.textContent = "Imei " + i + ":";
 
-                   
-                    qtyInp.addEventListener("input", function () {
-                        let q = parseInt(this.value) || 1;
-                        if (q < 1)
-                            q = 1;
-                        this.value = q;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.name = "imei_" + rowIdx + "_" + i;
+      input.placeholder = "15 digits";
+      input.required = true;
+      input.maxLength = 15;
 
-                        
-                        tdImei.innerHTML = "";
-                        imeiBox = buildImeiBox(rowIdx, q);
-                        tdImei.appendChild(imeiBox);
-                    });
+      input.addEventListener("input", function () {
+        this.value = this.value.replace(/\\D/g, "").slice(0, 15);
+        if (this.value.length === 15) {
+          this.classList.add("valid");
+          this.classList.remove("invalid");
+        } else if (this.value.length > 0) {
+          this.classList.add("invalid");
+          this.classList.remove("valid");
+        } else {
+          this.classList.remove("valid", "invalid");
+        }
+      });
 
-                   
-                    const tdNote = document.createElement("td");
-                    const noteInp = document.createElement("input");
-                    noteInp.type = "text";
-                    noteInp.name = "itemNote";
-                    noteInp.placeholder = "Notes";
-                    tdNote.appendChild(noteInp);
+      row.appendChild(label);
+      row.appendChild(input);
+      box.appendChild(row);
+    }
+    return box;
+  }
 
-                  
-                    const tdBy = document.createElement("td");
-                    tdBy.textContent = CREATED_BY || "Staff";
+  function addRow() {
+    rowCounter++;
+    const rowIdx = rowCounter;
 
-                    
-                    const tdAct = document.createElement("td");
-                    tdAct.className = "center";
-                    const delBtn = document.createElement("button");
-                    delBtn.type = "button";
-                    delBtn.className = "btn danger";
-                    delBtn.textContent = "Delete";
-                    delBtn.addEventListener("click", function () {
-                        tr.remove();
-                        
-                        Array.from(tbody.children).forEach((row, idx) => {
-                            const noCell = row.querySelector(".cellNo");
-                            if (noCell)
-                                noCell.textContent = idx + 1;
-                        });
-                    });
-                    tdAct.appendChild(delBtn);
+    const tr = document.createElement("tr");
+    tr.dataset.rowIdx = rowIdx;
 
-                    
-                    tr.appendChild(tdNo);
-                    tr.appendChild(tdProd);
-                    tr.appendChild(tdSku);
-                    tr.appendChild(tdQty);
-                    tr.appendChild(tdImei);
-                    tr.appendChild(tdNote);
-                    tr.appendChild(tdBy);
-                    tr.appendChild(tdAct);
+    const tdNo = document.createElement("td");
+    tdNo.className = "center cellNo";
+    tdNo.textContent = tbody.children.length + 1;
 
-                    tbody.appendChild(tr);
-                }
+    const tdProd = document.createElement("td");
+    const selProd = buildProductSelect();
+    tdProd.appendChild(selProd);
 
-               
-                document.getElementById("btnAddRow").addEventListener("click", addRow);
+    const tdSku = document.createElement("td");
+    const selSku = buildSkuSelect();
+    tdSku.appendChild(selSku);
 
-              
-                manualForm.addEventListener("submit", function (e) {
-                    const rows = tbody.children;
+    selProd.addEventListener("change", function () {
+      refreshSkuOptions(selSku, this.value);
+    });
 
-                    if (rows.length === 0) {
-                        e.preventDefault();
-                        alert("Please add at least 1 product line.");
-                        return;
-                    }
+    const tdQty = document.createElement("td");
+    const qtyInp = document.createElement("input");
+    qtyInp.type = "number";
+    qtyInp.name = "qty";
+    qtyInp.min = "1";
+    qtyInp.value = "1";
+    qtyInp.required = true;
+    tdQty.appendChild(qtyInp);
 
-                    for (let i = 0; i < rows.length; i++) {
-                        const row = rows[i];
-                        const productId = row.querySelector('select[name="productId"]').value;
-                        const skuId = row.querySelector('select[name="skuId"]').value;
-                        const qty = parseInt(row.querySelector('input[name="qty"]').value) || 0;
+    const tdImei = document.createElement("td");
+    tdImei.className = "imeiCell";
+    let imeiBox = buildImeiBox(rowIdx, 1);
+    tdImei.appendChild(imeiBox);
 
-                        if (!productId || !skuId || qty < 1) {
-                            e.preventDefault();
-                            alert("Row " + (i + 1) + ": Please fill Product Code, SKU and Quantity");
-                            return;
-                        }
+    qtyInp.addEventListener("input", function () {
+      let q = parseInt(this.value) || 1;
+      if (q < 1) q = 1;
+      this.value = q;
 
-                        const imeiInputs = row.querySelectorAll('.imeiRow input');
-                        for (let j = 0; j < imeiInputs.length; j++) {
-                            const imei = imeiInputs[j].value.trim();
+      tdImei.innerHTML = "";
+      imeiBox = buildImeiBox(rowIdx, q);
+      tdImei.appendChild(imeiBox);
+    });
 
-                            if (!imei) {
-                                e.preventDefault();
-                                alert("Row " + (i + 1) + ", IMEI " + (j + 1) + ": Please enter IMEI");
-                                return;
-                            }
+    const tdNote = document.createElement("td");
+    const noteInp = document.createElement("input");
+    noteInp.type = "text";
+    noteInp.name = "itemNote";
+    noteInp.placeholder = "Notes";
+    tdNote.appendChild(noteInp);
 
-                            if (imei.length !== 15) {
-                                e.preventDefault();
-                                alert("Row " + (i + 1) + ", IMEI " + (j + 1) + ": IMEI must be exactly 15 digits");
-                                return;
-                            }
-                        }
-                    }
-                });
+    const tdBy = document.createElement("td");
+    tdBy.textContent = CREATED_BY || "Staff";
 
-                
-                document.querySelectorAll('.tabBtn').forEach(btn => {
-                    btn.addEventListener('click', function () {
-                        const tab = this.dataset.tab;
+    const tdAct = document.createElement("td");
+    tdAct.className = "center";
+    const delBtn = document.createElement("button");
+    delBtn.type = "button";
+    delBtn.className = "btn danger";
+    delBtn.textContent = "Delete";
+    delBtn.addEventListener("click", function () {
+      tr.remove();
+      Array.from(tbody.children).forEach((row, idx) => {
+        const noCell = row.querySelector(".cellNo");
+        if (noCell) noCell.textContent = idx + 1;
+      });
+    });
+    tdAct.appendChild(delBtn);
 
-                        document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active'));
-                        this.classList.add('active');
+    tr.appendChild(tdNo);
+    tr.appendChild(tdProd);
+    tr.appendChild(tdSku);
+    tr.appendChild(tdQty);
+    tr.appendChild(tdImei);
+    tr.appendChild(tdNote);
+    tr.appendChild(tdBy);
+    tr.appendChild(tdAct);
 
-                        document.querySelectorAll('.tabPanel').forEach(p => p.classList.remove('active'));
-                        document.getElementById('tab-' + tab).classList.add('active');
-                    });
-                });
+    tbody.appendChild(tr);
+  }
 
-               
-                addRow();
-            })();
-        </script>
+  document.getElementById("btnAddRow").addEventListener("click", addRow);
 
-    </body>
-</html>
+  // client validation only (server is source of truth)
+  manualForm.addEventListener("submit", function (e) {
+    const rows = tbody.children;
+    if (rows.length === 0) { e.preventDefault(); alert("Please add at least 1 product line."); }
+  });
+
+  document.querySelectorAll('.tabBtn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const tab = this.dataset.tab;
+      document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      document.querySelectorAll('.tabPanel').forEach(p => p.classList.remove('active'));
+      document.getElementById('tab-' + tab).classList.add('active');
+    });
+  });
+
+  addRow();
+})();
+</script>

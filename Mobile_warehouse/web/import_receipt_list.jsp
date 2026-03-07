@@ -6,124 +6,125 @@
 
 <style>
     :root{
-        --blue:#3a7bd5;
         --line:#2e3f95;
         --bg:#f4f4f4;
         --th:#d9d9d9;
+        --blue:#2f6feb;
     }
+
     .wrap{
         padding:14px;
         background:var(--bg);
-        font-family:Arial, Helvetica, sans-serif;
     }
     .frame{
         border:2px solid var(--line);
         background:#fff;
         padding:12px;
     }
-    .topbar{
+    .toprow{
         display:flex;
         justify-content:space-between;
         align-items:center;
-        gap:12px;
-        margin-bottom:10px;
-    }
-    .title{
-        font-size:22px;
-        font-weight:700;
+        gap:10px;
+        margin-bottom:8px;
     }
     .btn{
-        display:inline-block;
-        padding:6px 12px;
         border:1px solid #333;
         background:#f6f6f6;
+        padding:6px 12px;
+        cursor:pointer;
+        display:inline-block;
         text-decoration:none;
         color:#111;
-        cursor:pointer;
         font-size:13px;
+        border-radius:6px;
     }
     .btn.primary{
-        background:#1f6feb;
+        background:var(--blue);
+        border-color:var(--blue);
         color:#fff;
-        border-color:#1f6feb;
     }
     .btn.danger{
-        background:#ff4d4d;
-        color:#fff;
-        border-color:#ff4d4d;
-    }
-    .btn.warning{
-        background:#ff9800;
-        color:#fff;
-        border-color:#ff9800;
+        background:#fff0f0;
     }
     .btnRow{
         display:flex;
         gap:8px;
         align-items:center;
+        flex-wrap:wrap;
     }
     .filters{
         display:flex;
         justify-content:space-between;
         align-items:center;
-        gap:12px;
-        margin:8px 0 10px;
+        gap:10px;
+        flex-wrap:wrap;
+        margin:10px 0;
     }
-    .leftFilters{
+    .leftFilters, .rightFilters{
         display:flex;
         gap:8px;
         align-items:center;
-    }
-    .rightFilters{
-        display:flex;
-        gap:8px;
-        align-items:center;
+        flex-wrap:wrap;
     }
     input[type="text"], input[type="date"], select{
         padding:6px 8px;
         border:1px solid #333;
         box-sizing:border-box;
         font-size:13px;
+        border-radius:6px;
     }
+
     .tabs{
         display:flex;
         gap:6px;
         margin:10px 0;
+        flex-wrap:wrap;
     }
     .tab{
+        display:inline-flex;
+        gap:6px;
+        align-items:center;
         padding:6px 10px;
-        border:1px solid #999;
+        border:1px solid #333;
         background:#f6f6f6;
-        cursor:pointer;
-        font-size:13px;
         text-decoration:none;
         color:#111;
+        border-radius:6px;
+        font-size:13px;
     }
     .tab.active{
-        background:#1f6feb;
+        background:var(--blue);
         color:#fff;
-        border-color:#1f6feb;
+        border-color:var(--blue);
     }
+
     table{
-        width:100%;
         border-collapse:collapse;
+        width:100%;
     }
     th,td{
         border:1px solid #cfcfcf;
         padding:8px;
         font-size:13px;
-        vertical-align:middle;
+        vertical-align:top;
     }
     th{
         background:#efefef;
         text-align:left;
+        white-space:nowrap;
+    }
+    .muted{
+        color:#999;
+        text-align:center;
     }
     .actions{
         display:flex;
-        gap:6px;
-        flex-wrap:wrap;
+        gap:8px;
         align-items:center;
+        flex-wrap:wrap;
     }
+    .inline{ display:inline; }
     .pager{
         display:flex;
         justify-content:flex-end;
@@ -133,49 +134,41 @@
     }
     .pill{
         display:inline-block;
-        min-width:26px;
+        min-width:28px;
         text-align:center;
-        padding:4px 8px;
+        padding:6px 10px;
         border:1px solid #aaa;
         background:#f6f6f6;
+        border-radius:6px;
     }
     .pill.active{
-        background:#1f6feb;
+        background:var(--blue);
         color:#fff;
-        border-color:#1f6feb;
-    }
-    .muted{
-        color:#666;
-        font-size:12px;
-    }
-    form.inline{
-        display:inline;
+        border-color:var(--blue);
     }
 </style>
 
 <div class="wrap">
     <div class="frame">
 
-        <div class="topbar">
-
+        <div class="toprow">
             <div class="btnRow">
+                <a class="btn" href="${ctx}/home?p=request-delete-import-receipt-list">Request Delete List</a>
 
-                <c:if test="${role == 'MANAGER'}">
-                    <a class="btn warning" href="${ctx}/home?p=request-delete-import-receipt-list">Request Delete List</a>
-                </c:if>
+                <form method="get" action="${ctx}/home" style="display:inline;">
+                    <input type="hidden" name="p" value="import-receipt-list"/>
+                    <input type="hidden" name="action" value="export"/>
+                    <button type="submit" class="btn primary">EXPORT</button>
+                </form>
 
-
-                <a class="btn primary"
-                   href="${ctx}/home?p=import-receipt-list&action=export&q=${fn:escapeXml(q)}&status=${fn:escapeXml(status)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">
-                   
-                    EXPORT
-                </a>
                 <a class="btn" href="${ctx}/home?p=create-import-receipt">CREATE IMPORT RECEIPT</a>
             </div>
         </div>
 
-        <form method="get" action="${pageContext.request.contextPath}/home">
+        <!-- FILTERS -->
+        <form method="get" action="${ctx}/home">
             <input type="hidden" name="p" value="import-receipt-list"/>
+
             <div class="filters">
                 <div class="leftFilters">
                     <input type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Search by Import Code" />
@@ -197,35 +190,59 @@
             </div>
         </form>
 
+        <!-- TABS (FIX: use c:url with value="/home" => no double context) -->
+        <c:url var="tabAllUrl" value="/home">
+            <c:param name="p" value="import-receipt-list"/>
+            <c:param name="page" value="1"/>
+            <c:param name="q" value="${q}"/>
+            <c:param name="status" value="all"/>
+            <c:param name="from" value="${from}"/>
+            <c:param name="to" value="${to}"/>
+        </c:url>
+
+        <c:url var="tabPendingUrl" value="/home">
+            <c:param name="p" value="import-receipt-list"/>
+            <c:param name="page" value="1"/>
+            <c:param name="q" value="${q}"/>
+            <c:param name="status" value="pending"/>
+            <c:param name="from" value="${from}"/>
+            <c:param name="to" value="${to}"/>
+        </c:url>
+
+        <c:url var="tabCompletedUrl" value="/home">
+            <c:param name="p" value="import-receipt-list"/>
+            <c:param name="page" value="1"/>
+            <c:param name="q" value="${q}"/>
+            <c:param name="status" value="completed"/>
+            <c:param name="from" value="${from}"/>
+            <c:param name="to" value="${to}"/>
+        </c:url>
+
+        <c:url var="tabCancelledUrl" value="/home">
+            <c:param name="p" value="import-receipt-list"/>
+            <c:param name="page" value="1"/>
+            <c:param name="q" value="${q}"/>
+            <c:param name="status" value="cancelled"/>
+            <c:param name="from" value="${from}"/>
+            <c:param name="to" value="${to}"/>
+        </c:url>
 
         <div class="tabs">
-
-            <c:set var="base"
-                   value="${ctx}/home?p=import-receipt-list&q=${fn:escapeXml(q)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
-
-            <a class="tab ${status=='all' || empty status ? 'active' : ''}"
-               href="${base}&status=all">
+            <a class="tab ${status=='all' || empty status ? 'active' : ''}" href="${tabAllUrl}">
                 ALL <b><c:out value="${tabCounts['all']}"/></b>
             </a>
-
-            <a class="tab ${status=='pending' ? 'active' : ''}"
-               href="${base}&status=pending">
+            <a class="tab ${status=='pending' ? 'active' : ''}" href="${tabPendingUrl}">
                 Pending <b><c:out value="${tabCounts['pending']}"/></b>
             </a>
-
-            <a class="tab ${status=='completed' ? 'active' : ''}"
-               href="${base}&status=completed">
+            <a class="tab ${status=='completed' ? 'active' : ''}" href="${tabCompletedUrl}">
                 Completed <b><c:out value="${tabCounts['completed']}"/></b>
             </a>
-
-            <a class="tab ${status=='cancelled' ? 'active' : ''}"
-               href="${base}&status=cancelled">
+            <a class="tab ${status=='cancelled' ? 'active' : ''}" href="${tabCancelledUrl}">
                 Cancelled <b><c:out value="${tabCounts['cancelled']}"/></b>
             </a>
-
         </div>
 
-
+        <!-- TABLE -->
         <table>
             <thead>
                 <tr>
@@ -248,7 +265,9 @@
 
                 <c:forEach var="r" items="${rows}" varStatus="st">
                     <tr>
-                        <td><c:out value="${st.index + 1}"/></td>
+                        <!-- correct numbering across pages -->
+                        <td><c:out value="${(page-1) * pageSize + st.index + 1}"/></td>
+
                         <td><c:out value="${r.importCode}"/></td>
                         <td><c:out value="${r.supplierName}"/></td>
                         <td><c:out value="${r.createdByName}"/></td>
@@ -258,16 +277,14 @@
 
                         <td>
                             <div class="actions">
-                                <a href="home?p=import-receipt-detail&id=${r.importId}">
-                                    View
-                                </a>
-                                <a class="btn primary"
-                                   href="${ctx}/import-receipt-pdf?id=${r.importId}">
+                                <a href="${ctx}/home?p=import-receipt-detail&id=${r.importId}">View</a>
+
+                                <a class="btn primary" href="${ctx}/import-receipt-pdf?id=${r.importId}">
                                     Download PDF
                                 </a>
 
-
                                 <c:if test="${role == 'MANAGER' && r.status == 'PENDING'}">
+                                    <!-- keep p in query or hidden input, both ok -->
                                     <form class="inline" method="post" action="${ctx}/home?p=import-receipt-list"
                                           onsubmit="return confirm('Delete this receipt?');">
                                         <input type="hidden" name="action" value="delete"/>
@@ -276,9 +293,10 @@
                                     </form>
                                 </c:if>
 
-
                                 <c:if test="${role == 'STAFF' && r.status == 'PENDING'}">
-                                    <a class="btn warning" href="${ctx}/home?p=request-delete-import-receipt&id=${r.importId}">Send Request Delete</a>
+                                    <a class="btn" href="${ctx}/home?p=request-delete-import-receipt&id=${r.importId}">
+                                        Send Request Delete
+                                    </a>
                                 </c:if>
                             </div>
                         </td>
@@ -287,30 +305,48 @@
             </tbody>
         </table>
 
-        <div class="pager">
-            <c:set var="cur" value="${page}" />
-            <c:set var="tp" value="${totalPages}" />
+        <!-- PAGINATION (FIX: value="/home" NOT "${ctx}/home") -->
+        <c:url var="prevUrl" value="/home">
+            <c:param name="p" value="import-receipt-list"/>
+            <c:param name="page" value="${page-1}"/>
+            <c:param name="q" value="${q}"/>
+            <c:param name="status" value="${empty status ? 'all' : status}"/>
+            <c:param name="from" value="${from}"/>
+            <c:param name="to" value="${to}"/>
+        </c:url>
 
-            <c:choose>
-                <c:when test="${cur <= 1}">
-                    <span class="btn" style="opacity:.5; pointer-events:none;">Prev</span>
-                </c:when>
-                <c:otherwise>
-                    <a class="btn" href="${ctx}/import-receipt-list?page=${cur-1}&q=${fn:escapeXml(q)}&status=${fn:escapeXml(status)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">Prev</a>
-                </c:otherwise>
-            </c:choose>
+        <c:url var="nextUrl" value="/home">
+            <c:param name="p" value="import-receipt-list"/>
+            <c:param name="page" value="${page+1}"/>
+            <c:param name="q" value="${q}"/>
+            <c:param name="status" value="${empty status ? 'all' : status}"/>
+            <c:param name="from" value="${from}"/>
+            <c:param name="to" value="${to}"/>
+        </c:url>
 
-            <span class="pill active"><c:out value="${cur}"/></span>
+        <c:if test="${totalPages > 1}">
+            <div class="pager">
+                <c:choose>
+                    <c:when test="${page <= 1}">
+                        <span class="btn" style="opacity:.5; pointer-events:none;">Prev</span>
+                    </c:when>
+                    <c:otherwise>
+                        <a class="btn" href="${prevUrl}">Prev</a>
+                    </c:otherwise>
+                </c:choose>
 
-            <c:choose>
-                <c:when test="${cur >= tp}">
-                    <span class="btn" style="opacity:.5; pointer-events:none;">Next</span>
-                </c:when>
-                <c:otherwise>
-                    <a class="btn" href="${ctx}/import-receipt-list?page=${cur+1}&q=${fn:escapeXml(q)}&status=${fn:escapeXml(status)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}">Next</a>
-                </c:otherwise>
-            </c:choose>
-        </div>
+                <span class="pill active"><c:out value="${page}"/></span>
+
+                <c:choose>
+                    <c:when test="${page >= totalPages}">
+                        <span class="btn" style="opacity:.5; pointer-events:none;">Next</span>
+                    </c:when>
+                    <c:otherwise>
+                        <a class="btn" href="${nextUrl}">Next</a>
+                    </c:otherwise>
+                </c:choose>
+            </div>
+        </c:if>
 
     </div>
 </div>

@@ -95,18 +95,20 @@ public class ConductInventoryCountDAO {
     }
 
 
-    String sql =
-            "SELECT " +
-            "  s.sku_id, s.sku_code, p.product_name, s.color, s.ram_gb, s.storage_gb, " +
-            "  COALESCE((" +
-            "    SELECT COUNT(*) FROM product_units pu " +
-            "    WHERE pu.sku_id = s.sku_id AND pu.unit_status = 'ACTIVE'" +
-            "  ), 0) AS system_qty " +
-            "FROM product_skus s " +
-            "JOIN products p ON p.product_id = s.product_id " +
-            where +
-            "ORDER BY s.sku_code " +
-            "LIMIT ? OFFSET ?";
+   String sql =
+    "SELECT " +
+    "  s.sku_id, s.sku_code, p.product_name, s.color, s.ram_gb, s.storage_gb, " +
+    "  COALESCE((" +
+    "    SELECT COUNT(*) FROM product_units pu " +
+    "    WHERE pu.sku_id = s.sku_id AND pu.unit_status = 'ACTIVE'" +
+    "  ), 0) AS system_qty, " +
+    "  ib.qty_on_hand AS counted_qty " +
+    "FROM product_skus s " +
+    "JOIN products p ON p.product_id = s.product_id " +
+    "LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id " +
+    where +
+    "ORDER BY s.sku_code " +
+    "LIMIT ? OFFSET ?";
 
     try (Connection con = getConn();
          PreparedStatement ps = con.prepareStatement(sql)) {
@@ -126,8 +128,11 @@ public class ConductInventoryCountDAO {
                 r.setStorageGb(rs.getInt("storage_gb"));
 
                 int sys = rs.getInt("system_qty");
-                r.setSystemQty(sys);
-                r.setCountedQty(sys); 
+r.setSystemQty(sys);
+
+// nếu chưa có row trong inventory_balance thì counted_qty sẽ NULL
+Integer counted = (Integer) rs.getObject("counted_qty");
+r.setCountedQty(counted != null ? counted : sys);
 
                 list.add(r);
             }
