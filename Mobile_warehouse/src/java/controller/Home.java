@@ -233,7 +233,7 @@ private String url(String s) {
                 request.setAttribute("lines", lines);
                 break;
             }
-            
+
             case "create-import-receipt": {
                 SupplierDAO sdao = new SupplierDAO();
                 ProductDAO pdao = new ProductDAO();
@@ -286,13 +286,20 @@ if (request.getAttribute("mode") == null) {
             case "create-export":
             case "create-export-receipt":
             case "upload-export-imeis": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !(roleName.equalsIgnoreCase("MANAGER")
+                        || roleName.equalsIgnoreCase("STAFF"))) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
                 ProductDAO pdao = new ProductDAO();
                 ProductSkuDAO skdao = new ProductSkuDAO();
+                ExportRequestDAO erDao = new ExportRequestDAO();
 
                 request.setAttribute("products", pdao.listActive());
                 request.setAttribute("skus", skdao.listActive());
 
-                // demo code - bạn có thể thay bằng generateExportCode() sau
                 request.setAttribute("exportCode", "EXP-" + System.currentTimeMillis());
 
                 String dt = LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI);
@@ -300,8 +307,33 @@ if (request.getAttribute("mode") == null) {
 
                 String createdByName = (authUser != null && authUser.getFullName() != null)
                         ? authUser.getFullName()
-                        : "Sale";
+                        : "Staff";
                 request.setAttribute("createdByName", createdByName);
+
+                String requestIdRaw = request.getParameter("id");
+                if (requestIdRaw != null && !requestIdRaw.isBlank()) {
+                    long requestId = Long.parseLong(requestIdRaw.trim());
+
+                    ExportRequest erHeader = erDao.getHeader(requestId);
+                    if (erHeader == null) {
+                        response.sendRedirect(request.getContextPath()
+                                + "/home?p=export-request-list&err=Request+not+found");
+                        return;
+                    }
+
+                    if ("COMPLETE".equalsIgnoreCase(erHeader.getStatus())) {
+                        response.sendRedirect(request.getContextPath()
+                                + "/home?p=export-request-list&err=This+request+has+already+been+completed");
+                        return;
+                    }
+
+                    List<ExportRequestItem> erItems = erDao.listItems(requestId);
+
+                    request.setAttribute("sourceRequestId", requestId);
+                    request.setAttribute("erHeader", erHeader);
+                    request.setAttribute("erItems", erItems);
+                }
+
                 break;
             }
 
@@ -1014,6 +1046,7 @@ if (request.getAttribute("mode") == null) {
                 ExportRequestDAO dao = new ExportRequestDAO();
 
                 String q = request.getParameter("q");
+                String status = request.getParameter("status");
                 String reqDateRaw = request.getParameter("reqDate");
                 String expDateRaw = request.getParameter("expDate");
 
@@ -1044,7 +1077,7 @@ if (request.getAttribute("mode") == null) {
                     requestedBy = userId.longValue();
                 }
 
-                int totalItems = dao.count(q, reqDate, expDate, requestedBy);
+                int totalItems = dao.count(q, status, reqDate, expDate, requestedBy);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
                 if (totalPages < 1) {
                     totalPages = 1;
@@ -1059,10 +1092,11 @@ if (request.getAttribute("mode") == null) {
 
                 int offset = (page - 1) * pageSize;
 
-                List<ExportRequest> list = dao.list(q, reqDate, expDate, requestedBy, offset, pageSize);
+                List<ExportRequest> list = dao.list(q, status, reqDate, expDate, requestedBy, offset, pageSize);
 
                 request.setAttribute("erList", list);
                 request.setAttribute("q", q);
+                request.setAttribute("status", status);
                 request.setAttribute("reqDate", reqDateRaw);
                 request.setAttribute("expDate", expDateRaw);
 

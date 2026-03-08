@@ -68,7 +68,7 @@ public class ExportRequestCreateDAO {
                     ps.setNull(3, Types.DATE);
                 }
 
-                ps.setString(4, status);
+                ps.setString(4, (status == null || status.isBlank()) ? "NEW" : status.trim());
 
                 if (note != null && !note.trim().isEmpty()) {
                     ps.setString(5, note.trim());

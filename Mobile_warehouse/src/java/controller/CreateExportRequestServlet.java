@@ -32,7 +32,7 @@ public class CreateExportRequestServlet extends HttpServlet {
             return;
         }
 
-        String status = "PENDING";
+        String status = "NEW";
         Date expected = parseSqlDate(request.getParameter("expected_export_date"));
         String note = request.getParameter("note");
 
