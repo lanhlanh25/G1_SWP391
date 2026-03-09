@@ -242,6 +242,11 @@ public class Home extends HttpServlet {
                 break;
             }
 
+            case "variant-matrix": {
+                ViewVariantMatrix.handle(request, response);
+                break;
+            }
+
             case "create-import-receipt": {
                 SupplierDAO sdao = new SupplierDAO();
                 ProductDAO pdao = new ProductDAO();
@@ -375,6 +380,7 @@ public class Home extends HttpServlet {
             // USERS
             // =========================
             case "user-list":
+
             case "user-toggle": {
                 String q = request.getParameter("q");
                 String st = request.getParameter("status");
@@ -1492,7 +1498,6 @@ public class Home extends HttpServlet {
                         return "view_user_information.jsp";
                     case "sku-add":
                         return "add_sku.jsp";
-
                     case "brand-list":
                         return "brand_list.jsp";
                     case "brand-add":
@@ -1544,7 +1549,8 @@ public class Home extends HttpServlet {
                         return "export_receipt_list.jsp";
                     case "export-receipt-detail":
                         return "export_receipt_detail.jsp";
-
+                    case "variant-matrix":
+                        return "variant_matrix.jsp";
                     case "my-profile":
                     case "profile":
                         return "view_profile.jsp";

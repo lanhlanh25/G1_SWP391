@@ -8,7 +8,7 @@ package dal;
  *
  * @author Lanhlanh
  */
-import java.sql.Statement;  
+import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +18,108 @@ import java.util.List;
 import model.ProductSku;
 
 public class ProductSkuDAO {
+
+    public List<ProductSku> getAllSkus() throws Exception {
+
+        List<ProductSku> list = new ArrayList<>();
+
+        String sql = "SELECT * FROM product_skus";
+
+        PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+
+            ProductSku s = new ProductSku();
+
+            s.setSkuCode(rs.getString("sku_code"));
+            s.setColor(rs.getString("color"));
+            s.setStorageGb(rs.getInt("storage_gb"));
+            s.setRamGb(rs.getInt("ram_gb"));
+            s.setStatus(rs.getString("status"));
+
+            list.add(s);
+        }
+
+        return list;
+    }
+
+    public List<ProductSku> filterVariants(Integer productId, String color, String storage, String ram, String status, String sku) throws Exception {
+
+        List<ProductSku> list = new ArrayList<>();
+
+        String sql = "SELECT * FROM product_skus WHERE 1=1";
+
+        if (productId != null) {
+            sql += " AND product_id = ?";
+        }
+
+        if (color != null && !color.isEmpty()) {
+            sql += " AND color = ?";
+        }
+
+        if (storage != null && !storage.isEmpty()) {
+            sql += " AND storage_gb = ?";
+        }
+
+        if (ram != null && !ram.isEmpty()) {
+            sql += " AND ram_gb = ?";
+        }
+
+        if (status != null && !status.isEmpty()) {
+            sql += " AND status = ?";
+        }
+
+        if (sku != null && !sku.isEmpty()) {
+            sql += " AND sku_code LIKE ?";
+        }
+
+        PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
+
+        int index = 1;
+
+        if (productId != null) {
+            ps.setInt(index++, productId);
+        }
+
+        if (color != null && !color.isEmpty()) {
+            ps.setString(index++, color);
+        }
+
+        if (storage != null && !storage.isEmpty()) {
+            ps.setInt(index++, Integer.parseInt(storage));
+        }
+
+        if (ram != null && !ram.isEmpty()) {
+            ps.setInt(index++, Integer.parseInt(ram));
+        }
+
+        if (status != null && !status.isEmpty()) {
+            ps.setString(index++, status);
+        }
+
+        if (sku != null && !sku.isEmpty()) {
+            ps.setString(index++, "%" + sku + "%");
+        }
+
+        ResultSet rs = ps.executeQuery();
+
+        while (rs.next()) {
+
+            ProductSku s = new ProductSku();
+
+            s.setSkuCode(rs.getString("sku_code"));
+            s.setColor(rs.getString("color"));
+            s.setStorageGb(rs.getInt("storage_gb"));
+            s.setRamGb(rs.getInt("ram_gb"));
+            s.setStatus(rs.getString("status"));
+
+            list.add(s);
+        }
+
+        return list;
+    }
 
     public List<ProductSku> getSkusByProductId(int productId) {
         List<ProductSku> list = new ArrayList<>();
@@ -72,9 +174,7 @@ public class ProductSkuDAO {
 
         // Nếu DB dùng is_active:
         // String sql = "INSERT INTO product_skus(product_id, sku_code, color, ram_gb, storage_gb, is_active) VALUES(?,?,?,?,?,?)";
-
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setLong(1, productId);
             ps.setString(2, skuCode == null ? null : skuCode.trim());
@@ -89,7 +189,9 @@ public class ProductSkuDAO {
 
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) return rs.getLong(1);
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
             }
         }
         return -1;
@@ -97,8 +199,7 @@ public class ProductSkuDAO {
 
     public boolean existsSkuCode(String skuCode) throws Exception {
         String sql = "SELECT 1 FROM product_skus WHERE sku_code=? LIMIT 1";
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, skuCode == null ? "" : skuCode.trim());
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -108,8 +209,7 @@ public class ProductSkuDAO {
 
     public boolean existsVariant(long productId, String color, int ramGb, int storageGb) throws Exception {
         String sql = "SELECT 1 FROM product_skus WHERE product_id=? AND color=? AND ram_gb=? AND storage_gb=? LIMIT 1";
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setLong(1, productId);
             ps.setString(2, color == null ? null : color.trim());
@@ -122,18 +222,16 @@ public class ProductSkuDAO {
         }
     }
 
-     public List<ProductSku> listActive() throws Exception {
+    public List<ProductSku> listActive() throws Exception {
         List<ProductSku> list = new ArrayList<>();
 
         // Nếu DB bạn dùng status ACTIVE/INACTIVE
         String sql = "SELECT sku_id, sku_code, product_id "
-                   + "FROM product_skus "
-                   + "WHERE status = 'ACTIVE' "
-                   + "ORDER BY sku_code";
+                + "FROM product_skus "
+                + "WHERE status = 'ACTIVE' "
+                + "ORDER BY sku_code";
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 ProductSku k = new ProductSku();
@@ -145,4 +243,6 @@ public class ProductSkuDAO {
         }
         return list;
     }
+
+    
 }

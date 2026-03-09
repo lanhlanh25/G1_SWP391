@@ -8,112 +8,117 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 
 <style>
-.wrap {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
+    .wrap {
+        background: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
 
-.top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
+    .top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
 
-.title {
-    font-size: 22px;
-    font-weight: bold;
-}
+    .title {
+        font-size: 22px;
+        font-weight: bold;
+    }
 
-.btn-add {
-    padding: 8px 14px;
-    background: #28a745;
-    color: #fff;
-    border-radius: 6px;
-    text-decoration: none;
-}
+    .btn-add {
+        padding: 8px 14px;
+        background: #28a745;
+        color: #fff;
+        border-radius: 6px;
+        text-decoration: none;
+    }
 
-.filters {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    align-items: center;
-}
+    .filters {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        align-items: center;
+    }
 
-.searchBox input {
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
+    .searchBox input {
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
 
-.searchBox button {
-    padding: 8px 14px;
-    border-radius: 6px;
-    border: none;
-    background: #007bff;
-    color: #fff;
-}
+    .searchBox button {
+        padding: 8px 14px;
+        border-radius: 6px;
+        border: none;
+        background: #007bff;
+        color: #fff;
+    }
 
-.filters select {
-    padding: 8px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-}
+    .filters select {
+        padding: 8px 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
 
-.table-wrap table {
-    width: 100%;
-    border-collapse: collapse;
-}
+    .table-wrap table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-.table-wrap th {
-    background: #f8f9fa;
-    padding: 10px;
-    text-align: left;
-    border-bottom: 2px solid #ddd;
-}
+    .table-wrap th {
+        background: #f8f9fa;
+        padding: 10px;
+        text-align: left;
+        border-bottom: 2px solid #ddd;
+    }
 
-.table-wrap td {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-}
+    .table-wrap td {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+    }
 
-.table-wrap tr:hover {
-    background: #f5f5f5;
-}
+    .table-wrap tr:hover {
+        background: #f5f5f5;
+    }
 
-.action a {
-    margin-right: 6px;
-}
+    .action a {
+        margin-right: 6px;
+    }
 
-.paging {
-    margin-top: 15px;
-    display: flex;
-    justify-content: space-between;
-}
+    .paging {
+        margin-top: 15px;
+        display: flex;
+        justify-content: space-between;
+    }
 
-.page-btns a {
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    text-decoration: none;
-    margin-right: 4px;
-}
+    .page-btns a {
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-decoration: none;
+        margin-right: 4px;
+    }
 
-.page-btns a.active {
-    background: #007bff;
-    color: #fff;
-    border-color: #007bff;
-}
+    .page-btns a.active {
+        background: #007bff;
+        color: #fff;
+        border-color: #007bff;
+    }
 </style>
 
 <div class="wrap">
+
     <div class="top">
         <div class="title">View Product List</div>
         <a class="btn-add" href="${pageContext.request.contextPath}/home?p=product-add">Add product</a>
     </div>
-
+   <c:if test="${not empty param.msg}">
+    <div style="color:green;font-weight:bold;margin-bottom:10px">
+        ${param.msg}
+    </div>
+</c:if>
     <form method="get" action="${pageContext.request.contextPath}/home">
         <input type="hidden" name="p" value="product-list"/>
 
@@ -160,7 +165,7 @@
                         <td>${x.status}</td>
                         <td><fmt:formatDate value="${x.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
                         <td class="action">
-                              <a href="${pageContext.request.contextPath}/home?p=product-detail&id=${x.productId}">
+                            <a href="${pageContext.request.contextPath}/home?p=product-detail&id=${x.productId}">
                                 View
                             </a>
 
@@ -202,3 +207,4 @@
         </div>
     </div>
 </div>
+            
