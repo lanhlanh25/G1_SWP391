@@ -27,6 +27,9 @@
 
         <span class="label">Expected Export Date</span>
         <span><fmt:formatDate value="${erHeader.expectedExportDate}" pattern="yyyy-MM-dd"/></span>
+        
+        <span class="label">Note</span>
+        <span>${erHeader.note}</span>
       </div>
     </div>
   </div>

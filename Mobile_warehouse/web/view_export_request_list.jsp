@@ -86,7 +86,7 @@
                                 </c:choose>
                             </td>
                             <td style="text-align:center;">
-                                <c:if test="${role ne 'SALE'}">
+                                <c:if test="${role eq 'STAFF'}">
                                     <c:choose>
                                         <c:when test="${r.status eq 'COMPLETE'}">
                                             <span class="btn btn-sm" style="pointer-events:none; opacity:.6;">Created</span>

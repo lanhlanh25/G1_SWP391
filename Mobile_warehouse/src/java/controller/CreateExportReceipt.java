@@ -56,7 +56,7 @@ public class CreateExportReceipt extends HttpServlet {
         long createdBy = u.getUserId();
 
         String roleName = String.valueOf(session.getAttribute("roleName"));
-        if (!"MANAGER".equalsIgnoreCase(roleName) && !"STAFF".equalsIgnoreCase(roleName)) {
+        if (!"STAFF".equalsIgnoreCase(roleName)) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
             return;
         }

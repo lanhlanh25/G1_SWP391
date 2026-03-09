@@ -35,7 +35,7 @@ public class ExportRequestDAO {
             sql.append(" AND er.status = ? ");
             params.add(status.trim());
         }
-        
+
         if (reqDate != null) {
             // exact day filter
             sql.append(" AND DATE(er.requested_at) = ? ");
@@ -97,12 +97,12 @@ public class ExportRequestDAO {
             sql.append(" AND er.request_code LIKE ? ");
             params.add("%" + q.trim() + "%");
         }
-        
+
         if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status)) {
             sql.append(" AND er.status = ? ");
             params.add(status.trim());
         }
-        
+
         if (reqDate != null) {
             sql.append(" AND DATE(er.requested_at) = ? ");
             params.add(reqDate);
@@ -188,6 +188,7 @@ public class ExportRequestDAO {
                 r.setCreatedByName(rs.getString("created_by_name"));
                 r.setRequestDate(rs.getTimestamp("requested_at"));
                 r.setExpectedExportDate(rs.getDate("expected_export_date"));
+                r.setNote(rs.getString("note"));
                 r.setStatus(rs.getString("status"));
                 return r;
             }

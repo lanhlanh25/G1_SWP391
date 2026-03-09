@@ -567,7 +567,7 @@
                     selProd.disabled = true;
                     selSku.disabled = true;
                     qtyInp.readOnly = true;
-                    noteInp.readOnly = true;
+                    noteInp.readOnly = false;
                     tdProd.appendChild(selProd);
                     tdProd.appendChild(hiddenProd);
                     tdSku.appendChild(selSku);

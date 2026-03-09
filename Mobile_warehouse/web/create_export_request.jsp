@@ -28,7 +28,7 @@
           <input class="input readonly" type="text" value="${erCreatedByName}" readonly/>
 
           <label class="label">Expected Export Date</label>
-          <input class="input" type="date" name="expected_export_date" value="${param.expected_export_date}"/>
+          <input class="input" type="date" name="expected_export_date" min="${today}" value="${param.expected_export_date}"/>
 
           <label class="label">Note</label>
           <textarea class="textarea" name="note">${fn:escapeXml(param.note)}</textarea>
