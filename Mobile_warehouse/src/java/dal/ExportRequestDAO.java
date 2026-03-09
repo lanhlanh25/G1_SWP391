@@ -17,7 +17,7 @@ public class ExportRequestDAO {
      * @param expDate filter exact date of expected_export_date
      * @param requestedBy if not null => only requests of this user (SALE)
      */
-    public int count(String q, java.sql.Date reqDate, java.sql.Date expDate, Long requestedBy) throws Exception {
+    public int count(String q, String status, java.sql.Date reqDate, java.sql.Date expDate, Long requestedBy) throws Exception {
         StringBuilder sql = new StringBuilder("""
             SELECT COUNT(*)
             FROM export_requests er
@@ -29,6 +29,11 @@ public class ExportRequestDAO {
         if (q != null && !q.trim().isEmpty()) {
             sql.append(" AND er.request_code LIKE ? ");
             params.add("%" + q.trim() + "%");
+        }
+
+        if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status)) {
+            sql.append(" AND er.status = ? ");
+            params.add(status.trim());
         }
 
         if (reqDate != null) {
@@ -60,7 +65,7 @@ public class ExportRequestDAO {
     /**
      * List requests for list page (with total items/qty from lines).
      */
-    public List<ExportRequest> list(String q, java.sql.Date reqDate, java.sql.Date expDate, Long requestedBy,
+    public List<ExportRequest> list(String q, String status, java.sql.Date reqDate, java.sql.Date expDate, Long requestedBy,
             int offset, int limit) throws Exception {
 
         StringBuilder sql = new StringBuilder("""
@@ -91,6 +96,11 @@ public class ExportRequestDAO {
         if (q != null && !q.trim().isEmpty()) {
             sql.append(" AND er.request_code LIKE ? ");
             params.add("%" + q.trim() + "%");
+        }
+
+        if (status != null && !status.trim().isEmpty() && !"ALL".equalsIgnoreCase(status)) {
+            sql.append(" AND er.status = ? ");
+            params.add(status.trim());
         }
 
         if (reqDate != null) {
@@ -178,6 +188,7 @@ public class ExportRequestDAO {
                 r.setCreatedByName(rs.getString("created_by_name"));
                 r.setRequestDate(rs.getTimestamp("requested_at"));
                 r.setExpectedExportDate(rs.getDate("expected_export_date"));
+                r.setNote(rs.getString("note"));
                 r.setStatus(rs.getString("status"));
                 return r;
             }
@@ -211,6 +222,38 @@ public class ExportRequestDAO {
                     it.setNo(no++);
                     it.setProductCode(rs.getString("product_code"));
                     it.setSkuCode(rs.getString("sku_code"));
+                    it.setRequestQty(rs.getInt("qty"));
+                    list.add(it);
+                }
+            }
+        }
+
+        return list;
+    }
+
+    public List<ExportRequestItem> listItemsForValidation(Connection con, long requestId) throws Exception {
+        String sql = """
+        SELECT
+          p.product_id,
+          s.sku_id,
+          erl.qty
+        FROM export_request_lines erl
+        JOIN products p ON p.product_id = erl.product_id
+        LEFT JOIN product_skus s ON s.sku_id = erl.sku_id
+        WHERE erl.request_id = ?
+        ORDER BY erl.line_id ASC
+    """;
+
+        List<ExportRequestItem> list = new ArrayList<>();
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, requestId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ExportRequestItem it = new ExportRequestItem();
+                    it.setProductId(rs.getLong("product_id"));
+                    it.setSkuId(rs.getLong("sku_id"));
                     it.setRequestQty(rs.getInt("qty"));
                     list.add(it);
                 }

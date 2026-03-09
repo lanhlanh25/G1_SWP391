@@ -32,8 +32,9 @@ public class CreateExportRequestServlet extends HttpServlet {
             return;
         }
 
-        String status = "PENDING";
+        String status = "NEW";
         Date expected = parseSqlDate(request.getParameter("expected_export_date"));
+        Date today = Date.valueOf(java.time.LocalDate.now());
         String note = request.getParameter("note");
 
         String[] productIds = request.getParameterValues("productId");
@@ -45,8 +46,9 @@ public class CreateExportRequestServlet extends HttpServlet {
 
         if (expected == null) {
             errs.add("Expected Export Date is required.");
+        } else if (expected.before(today)) {
+            errs.add("Expected Export Date cannot be in the past.");
         }
-
         if (productIds == null || qtys == null || productIds.length == 0) {
             errs.add("Please add at least 1 item.");
         } else {

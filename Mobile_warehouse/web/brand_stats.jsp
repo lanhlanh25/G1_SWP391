@@ -119,10 +119,6 @@
             <div class="field">
                 <label>Search</label>
                 <input class="input" type="text" name="q" id="searchInput" value="${q}" placeholder="brand name"/>
-                <div class="field">
-                    <label>Search</label>
-                    <input class="input" type="text" name="q" id="searchInput" value="${q}" placeholder="brand name"/>
-                </div>
             </div>
         </div>
 

@@ -251,70 +251,78 @@ public class ExportReceiptDAO {
     // CREATE EXPORT RECEIPT (manual)
     // =========================
     public long createReceipt(Connection con,
-        Long requestId,
-        long createdBy,
-        Timestamp exportDate,
-        String note,
-        String status) throws SQLException {
+            Long requestId,
+            long createdBy,
+            Timestamp exportDate,
+            String note,
+            String status) throws SQLException {
 
-    String sql = """
+        String sql = """
         INSERT INTO export_receipts(request_id, export_code, created_by, export_date, note, status)
         VALUES (?, ?, ?, ?, ?, ?)
     """;
 
-    int attempts = 0;
-    while (attempts < 8) {
-        attempts++;
+        int attempts = 0;
+        while (attempts < 8) {
+            attempts++;
 
-        String exportCode = generateExportCode(con);
+            String exportCode = generateExportCode(con);
 
-        try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            if (requestId == null) ps.setNull(1, Types.BIGINT);
-            else ps.setLong(1, requestId);
+            try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                if (requestId == null) {
+                    ps.setNull(1, Types.BIGINT);
+                } else {
+                    ps.setLong(1, requestId);
+                }
 
-            ps.setString(2, exportCode);
-            ps.setLong(3, createdBy);
-            ps.setTimestamp(4, exportDate); // vẫn lưu export_date theo user chọn
-            ps.setString(5, note == null ? "" : note);
-            ps.setString(6, (status == null || status.isBlank()) ? "DRAFT" : status);
+                ps.setString(2, exportCode);
+                ps.setLong(3, createdBy);
+                ps.setTimestamp(4, exportDate); // vẫn lưu export_date theo user chọn
+                ps.setString(5, note == null ? "" : note);
+                ps.setString(6, (status == null || status.isBlank()) ? "DRAFT" : status);
 
-            ps.executeUpdate();
+                ps.executeUpdate();
 
-            try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) return rs.getLong(1);
+                try (ResultSet rs = ps.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        return rs.getLong(1);
+                    }
+                }
+                throw new SQLException("No generated key");
+
+            } catch (SQLException ex) {
+                // MySQL duplicate key
+                if (ex.getErrorCode() == 1062) {
+                    continue;
+                }
+                throw ex;
             }
-            throw new SQLException("No generated key");
-
-        } catch (SQLException ex) {
-            // MySQL duplicate key
-            if (ex.getErrorCode() == 1062) continue;
-            throw ex;
         }
+
+        throw new SQLException("Cannot create export receipt: export_code duplicated too many times");
     }
 
-    throw new SQLException("Cannot create export receipt: export_code duplicated too many times");
-}
-
     public String generateExportCode(Connection con) throws SQLException {
-    String sql = """
+        String sql = """
         SELECT COUNT(*)
         FROM export_receipts
         WHERE DATE(created_at) = CURDATE()
         FOR UPDATE
     """;
 
-    int count = 0;
-    try (PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
-        if (rs.next()) count = rs.getInt(1);
+        int count = 0;
+        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                count = rs.getInt(1);
+            }
+        }
+
+        String ymd = java.time.LocalDate.now()
+                .format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
+
+        String seq = String.format("%03d", count + 1);
+        return "EX-" + ymd + "-" + seq;
     }
-
-    String ymd = java.time.LocalDate.now()
-            .format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
-
-    String seq = String.format("%03d", count + 1);
-    return "EX-" + ymd + "-" + seq;
-}
 
     public long createLine(Connection con,
             long exportId,
@@ -448,6 +456,54 @@ public class ExportReceiptDAO {
             ps.setLong(1, skuId);
             ps.setString(2, imei);
             return ps.executeUpdate() == 1;
+        }
+    }
+
+    public String getExportRequestStatus(Connection con, long requestId) throws SQLException {
+        String sql = """
+        SELECT status
+        FROM export_requests
+        WHERE request_id = ?
+    """;
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, requestId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("status");
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean existsReceiptByRequestId(Connection con, long requestId) throws SQLException {
+        String sql = """
+        SELECT 1
+        FROM export_receipts
+        WHERE request_id = ?
+        LIMIT 1
+    """;
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, requestId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public void updateExportRequestStatus(Connection con, long requestId, String status) throws SQLException {
+        String sql = """
+        UPDATE export_requests
+        SET status = ?
+        WHERE request_id = ?
+    """;
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setLong(2, requestId);
+            ps.executeUpdate();
         }
     }
 }

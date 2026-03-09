@@ -21,6 +21,15 @@ public class ExportRequest {
     private int totalItems;
     private int totalQty;
     private String status;
+    private String note;
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
 
     public long getRequestId() {
         return requestId;

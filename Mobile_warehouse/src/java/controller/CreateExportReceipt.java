@@ -10,6 +10,7 @@ package controller;
 
 import dal.DBContext;
 import dal.ExportReceiptDAO;
+import dal.ExportRequestDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
@@ -54,6 +55,12 @@ public class CreateExportReceipt extends HttpServlet {
         model.User u = (model.User) session.getAttribute("authUser");
         long createdBy = u.getUserId();
 
+        String roleName = String.valueOf(session.getAttribute("roleName"));
+        if (!"STAFF".equalsIgnoreCase(roleName)) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden");
+            return;
+        }
+
         // receiptDate: datetime-local => "yyyy-MM-ddTHH:mm"
         Timestamp exportDate;
         try {
@@ -67,10 +74,21 @@ public class CreateExportReceipt extends HttpServlet {
 
         ExportReceiptDAO dao = new ExportReceiptDAO();
 
+        Long requestId = null;
+        String requestIdRaw = nvl(req.getParameter("requestId")).trim();
+        if (!requestIdRaw.isEmpty()) {
+            try {
+                requestId = Long.parseLong(requestIdRaw);
+            } catch (Exception e) {
+                resp.sendRedirect(req.getContextPath() + "/home?p=export-request-list&err=Invalid+request+id");
+                return;
+            }
+        }
+
         if (mode.equals("manual")) {
-            handleManual(req, resp, dao, createdBy, exportDate, note);
+            handleManual(req, resp, dao, requestId, createdBy, exportDate, note);
         } else {
-            handleExcel(req, resp, dao, createdBy, exportDate, note);
+            handleExcel(req, resp, dao, requestId, createdBy, exportDate, note);
         }
     }
 
@@ -78,8 +96,9 @@ public class CreateExportReceipt extends HttpServlet {
     // MANUAL MODE (dropdown IMEI)
     // =========================
     private void handleManual(HttpServletRequest req, HttpServletResponse resp,
-                              ExportReceiptDAO dao,
-                              long createdBy, Timestamp exportDate, String note)
+            ExportReceiptDAO dao,
+            Long requestId,
+            long createdBy, Timestamp exportDate, String note)
             throws IOException {
 
         String[] rowKeys = req.getParameterValues("rowKey");
@@ -92,7 +111,9 @@ public class CreateExportReceipt extends HttpServlet {
 
         for (String rk : rowKeys) {
             String rowIdx = nvl(rk).trim();
-            if (rowIdx.isEmpty()) continue;
+            if (rowIdx.isEmpty()) {
+                continue;
+            }
 
             long productId = parseLong(req.getParameter("productId_" + rowIdx), -1);
             long skuId = parseLong(req.getParameter("skuId_" + rowIdx), -1);
@@ -142,7 +163,26 @@ public class CreateExportReceipt extends HttpServlet {
             con = DBContext.getConnection();
             con.setAutoCommit(false);
 
-            long exportId = dao.createReceipt(con, null, createdBy, exportDate, note, "CONFIRMED");
+            if (requestId != null) {
+                ExportRequestDAO erDao = new ExportRequestDAO();
+                List<model.ExportRequestItem> requestItems = erDao.listItemsForValidation(con, requestId);
+                validateRowsMatchRequest(rows, requestItems);
+            }
+
+            if (requestId != null) {
+                String reqStatus = dao.getExportRequestStatus(con, requestId);
+                if (reqStatus == null) {
+                    throw new RuntimeException("Export request not found");
+                }
+                if ("COMPLETE".equalsIgnoreCase(reqStatus)) {
+                    throw new RuntimeException("This export request is already complete");
+                }
+                if (dao.existsReceiptByRequestId(con, requestId)) {
+                    throw new RuntimeException("Export receipt already exists for this request");
+                }
+            }
+
+            long exportId = dao.createReceipt(con, requestId, createdBy, exportDate, note, "CONFIRMED");
 
             for (ManualRowInput r : rows) {
                 long lineId = dao.createLine(con, exportId, r.productId, r.skuId, r.qty, r.itemNote);
@@ -159,18 +199,32 @@ public class CreateExportReceipt extends HttpServlet {
                 dao.insertUnitImeis(con, lineId, r.imeis);
             }
 
+            if (requestId != null) {
+                dao.updateExportRequestStatus(con, requestId, "COMPLETE");
+            }
+
             con.commit();
             resp.sendRedirect(req.getContextPath() + "/home?p=export-receipt-list&msg=Created+export+receipt");
 
         } catch (Exception e) {
             e.printStackTrace();
-            try { if (con != null) con.rollback(); } catch (Exception ignore) {}
+            try {
+                if (con != null) {
+                    con.rollback();
+                }
+            } catch (Exception ignore) {
+            }
 
             String msg = e.getMessage() == null ? "" : e.getMessage();
             resp.sendRedirect(req.getContextPath()
                     + "/home?p=create-export-receipt&err=" + url("Create failed: " + msg));
         } finally {
-            try { if (con != null) con.close(); } catch (Exception ignore) {}
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (Exception ignore) {
+            }
         }
     }
 
@@ -179,8 +233,9 @@ public class CreateExportReceipt extends HttpServlet {
     // Excel format: 4 columns: product_code, sku_code, imei, item_note
     // =========================
     private void handleExcel(HttpServletRequest req, HttpServletResponse resp,
-                             ExportReceiptDAO dao,
-                             long createdBy, Timestamp exportDate, String note)
+            ExportReceiptDAO dao,
+            Long requestId,
+            long createdBy, Timestamp exportDate, String note)
             throws IOException, ServletException {
 
         Part part;
@@ -201,7 +256,9 @@ public class CreateExportReceipt extends HttpServlet {
         try (InputStream is = part.getInputStream()) {
 
             List<String[]> rawRows = read4ColsFromXlsx(is); // [productCode, skuCode, imei, item_note]
-            if (rawRows.isEmpty()) throw new ExcelFormatException("Excel has no valid data rows");
+            if (rawRows.isEmpty()) {
+                throw new ExcelFormatException("Excel has no valid data rows");
+            }
 
             // group: key = productCode|skuCode|itemNote -> list imeis
             Map<String, List<String>> grouped = new LinkedHashMap<>();
@@ -233,7 +290,20 @@ public class CreateExportReceipt extends HttpServlet {
             con = DBContext.getConnection();
             con.setAutoCommit(false);
 
-            long exportId = dao.createReceipt(con, null, createdBy, exportDate, note, "CONFIRMED");
+            if (requestId != null) {
+                String reqStatus = dao.getExportRequestStatus(con, requestId);
+                if (reqStatus == null) {
+                    throw new ExcelFormatException("Export request not found");
+                }
+                if ("COMPLETE".equalsIgnoreCase(reqStatus)) {
+                    throw new ExcelFormatException("This export request is already complete");
+                }
+                if (dao.existsReceiptByRequestId(con, requestId)) {
+                    throw new ExcelFormatException("Export receipt already exists for this request");
+                }
+            }
+
+            long exportId = dao.createReceipt(con, requestId, createdBy, exportDate, note, "CONFIRMED");
 
             Map<String, Long> productCache = new HashMap<>();
             Map<String, Long> skuCache = new HashMap<>();
@@ -250,14 +320,18 @@ public class CreateExportReceipt extends HttpServlet {
                 Long productId = productCache.get(productCode);
                 if (productId == null) {
                     productId = dao.findProductIdByCode(con, productCode);
-                    if (productId == null) throw new ExcelFormatException("Product not found: " + productCode);
+                    if (productId == null) {
+                        throw new ExcelFormatException("Product not found: " + productCode);
+                    }
                     productCache.put(productCode, productId);
                 }
 
                 Long skuId = skuCache.get(skuCode);
                 if (skuId == null) {
                     skuId = dao.findSkuIdByCode(con, skuCode);
-                    if (skuId == null) throw new ExcelFormatException("SKU not found: " + skuCode);
+                    if (skuId == null) {
+                        throw new ExcelFormatException("SKU not found: " + skuCode);
+                    }
                     skuCache.put(skuCode, skuId);
                 }
 
@@ -268,7 +342,9 @@ public class CreateExportReceipt extends HttpServlet {
                 // ✅ Mark INACTIVE before insert export units
                 for (String imei : imeis) {
                     boolean ok = dao.markUnitInactive(con, skuId, imei);
-                    if (!ok) throw new ExcelFormatException("IMEI not available: " + imei);
+                    if (!ok) {
+                        throw new ExcelFormatException("IMEI not available: " + imei);
+                    }
                 }
 
                 int qty = imeis.size();
@@ -276,20 +352,39 @@ public class CreateExportReceipt extends HttpServlet {
                 dao.insertUnitImeis(con, lineId, imeis);
             }
 
+            if (requestId != null) {
+                dao.updateExportRequestStatus(con, requestId, "COMPLETE");
+            }
+
             con.commit();
             resp.sendRedirect(req.getContextPath() + "/home?p=export-receipt-list&msg=Created+export+receipt+from+Excel");
 
         } catch (ExcelFormatException ex) {
-            try { if (con != null) con.rollback(); } catch (Exception ignore) {}
+            try {
+                if (con != null) {
+                    con.rollback();
+                }
+            } catch (Exception ignore) {
+            }
             resp.sendRedirect(req.getContextPath()
                     + "/home?p=create-export-receipt&err=" + url(ex.getMessage()));
         } catch (Exception e) {
             e.printStackTrace();
-            try { if (con != null) con.rollback(); } catch (Exception ignore) {}
+            try {
+                if (con != null) {
+                    con.rollback();
+                }
+            } catch (Exception ignore) {
+            }
             resp.sendRedirect(req.getContextPath()
                     + "/home?p=create-export-receipt&err=" + url("Create failed: " + (e.getMessage() == null ? "" : e.getMessage())));
         } finally {
-            try { if (con != null) con.close(); } catch (Exception ignore) {}
+            try {
+                if (con != null) {
+                    con.close();
+                }
+            } catch (Exception ignore) {
+            }
         }
     }
 
@@ -301,7 +396,9 @@ public class CreateExportReceipt extends HttpServlet {
 
         try (Workbook wb = new XSSFWorkbook(is)) {
             Sheet sheet = wb.getNumberOfSheets() > 0 ? wb.getSheetAt(0) : null;
-            if (sheet == null) return out;
+            if (sheet == null) {
+                return out;
+            }
 
             DataFormatter fmt = new DataFormatter();
             boolean firstRowChecked = false;
@@ -312,7 +409,9 @@ public class CreateExportReceipt extends HttpServlet {
                 String c2 = fmt.formatCellValue(row.getCell(2)).trim();
                 String c3 = fmt.formatCellValue(row.getCell(3)).trim();
 
-                if (c0.isEmpty() && c1.isEmpty() && c2.isEmpty() && c3.isEmpty()) continue;
+                if (c0.isEmpty() && c1.isEmpty() && c2.isEmpty() && c3.isEmpty()) {
+                    continue;
+                }
 
                 if (!firstRowChecked) {
                     firstRowChecked = true;
@@ -331,11 +430,15 @@ public class CreateExportReceipt extends HttpServlet {
     // =========================
     // HELPERS
     // =========================
-    private static String nvl(String s) { return s == null ? "" : s; }
+    private static String nvl(String s) {
+        return s == null ? "" : s;
+    }
 
     private static int parseInt(String raw, int def) {
         try {
-            if (raw == null || raw.isBlank()) return def;
+            if (raw == null || raw.isBlank()) {
+                return def;
+            }
             return Integer.parseInt(raw.trim());
         } catch (Exception e) {
             return def;
@@ -344,7 +447,9 @@ public class CreateExportReceipt extends HttpServlet {
 
     private static long parseLong(String raw, long def) {
         try {
-            if (raw == null || raw.isBlank()) return def;
+            if (raw == null || raw.isBlank()) {
+                return def;
+            }
             return Long.parseLong(raw.trim());
         } catch (Exception e) {
             return def;
@@ -352,20 +457,27 @@ public class CreateExportReceipt extends HttpServlet {
     }
 
     private static Timestamp parseDatetimeLocalToTs(String raw) {
-        if (raw == null || raw.isBlank()) throw new IllegalArgumentException("empty");
+        if (raw == null || raw.isBlank()) {
+            throw new IllegalArgumentException("empty");
+        }
         LocalDateTime ldt = LocalDateTime.parse(raw.trim());
         return Timestamp.valueOf(ldt);
     }
 
     private static boolean isValidImei15(String imei) {
-        if (imei == null || imei.length() != 15) return false;
+        if (imei == null || imei.length() != 15) {
+            return false;
+        }
         for (int i = 0; i < imei.length(); i++) {
-            if (!Character.isDigit(imei.charAt(i))) return false;
+            if (!Character.isDigit(imei.charAt(i))) {
+                return false;
+            }
         }
         return true;
     }
 
     private static class ManualRowInput {
+
         long productId;
         long skuId;
         int qty;
@@ -382,7 +494,10 @@ public class CreateExportReceipt extends HttpServlet {
     }
 
     private static class ExcelFormatException extends Exception {
-        ExcelFormatException(String msg) { super(msg); }
+
+        ExcelFormatException(String msg) {
+            super(msg);
+        }
     }
 
     private static String url(String s) {
@@ -392,4 +507,26 @@ public class CreateExportReceipt extends HttpServlet {
             return "Invalid+data";
         }
     }
+
+    private void validateRowsMatchRequest(List<ManualRowInput> rows, List<model.ExportRequestItem> requestItems) {
+        if (rows == null || requestItems == null) {
+            throw new RuntimeException("Invalid request data");
+        }
+
+        if (rows.size() != requestItems.size()) {
+            throw new RuntimeException("Export lines do not match request lines");
+        }
+
+        for (int i = 0; i < rows.size(); i++) {
+            ManualRowInput r = rows.get(i);
+            model.ExportRequestItem reqItem = requestItems.get(i);
+
+            if (r.productId != reqItem.getProductId()
+                    || r.skuId != reqItem.getSkuId()
+                    || r.qty != reqItem.getRequestQty()) {
+                throw new RuntimeException("Export lines do not match request data at line " + (i + 1));
+            }
+        }
+    }
+
 }

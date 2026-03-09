@@ -82,120 +82,128 @@ public class Home extends HttpServlet {
 
         request.getRequestDispatcher("homepage.jsp").forward(request, response);
     }
-    
+
     // ✅ ADD THIS: handle POST actions (Delete import receipt)
-@Override
-protected void doPost(HttpServletRequest request, HttpServletResponse response)
-        throws ServletException, IOException {
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
 
-    HttpSession session = request.getSession(false);
-    User u = (session == null) ? null : (User) session.getAttribute("authUser");
-    if (u == null) {
-        response.sendRedirect(request.getContextPath() + "/login");
-        return;
-    }
-
-    // load role
-    String role = (String) session.getAttribute("roleName");
-    if (role == null || role.isBlank()) {
-        role = UserDAO.getRoleNameByUserId(u.getUserId());
-        if (role == null || role.isBlank()) role = "STAFF";
-        session.setAttribute("roleName", role);
-    }
-    role = role.toUpperCase();
-
-    String p = request.getParameter("p");
-    if (p != null) p = p.trim();
-    if (p == null || p.isBlank()) p = "dashboard";
-
-    String action = request.getParameter("action");
-    if (action != null) action = action.trim();
-
-    // ✅ only handle delete for import-receipt-list here
-    if ("import-receipt-list".equalsIgnoreCase(p) && "delete".equalsIgnoreCase(action)) {
-
-        // only MANAGER can delete directly
-        if (!"MANAGER".equalsIgnoreCase(role)) {
-            response.sendRedirect(buildBackImportListUrl(request, "err", "Forbidden"));
+        HttpSession session = request.getSession(false);
+        User u = (session == null) ? null : (User) session.getAttribute("authUser");
+        if (u == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        long importId;
-        try {
-            importId = Long.parseLong(request.getParameter("id"));
-        } catch (Exception e) {
-            response.sendRedirect(buildBackImportListUrl(request, "err", "Invalid id"));
-            return;
-        }
-
-        try {
-            ImportReceiptListDAO dao = new ImportReceiptListDAO();
-
-            // ✅ deleteDraft() already allows DRAFT/PENDING only
-            boolean ok = dao.deleteDraft(importId);
-
-            if (ok) {
-    String ctx = request.getContextPath();
-    String status = nvl(request.getParameter("status"));
-    String from   = nvl(request.getParameter("from"));
-    String to     = nvl(request.getParameter("to"));
-
-   response.sendRedirect(request.getContextPath()
-        + "/home?p=import-receipt-list"
-        + "&q="
-        + "&status=all"
-        + "&from="
-        + "&to="
-        + "&page=1"
-        + "&msg=Deleted+successfully");
-return;
-} else {
-                response.sendRedirect(buildBackImportListUrl(request, "err",
-                        "Cannot delete (only PENDING/DRAFT receipts can be deleted)"));
+        // load role
+        String role = (String) session.getAttribute("roleName");
+        if (role == null || role.isBlank()) {
+            role = UserDAO.getRoleNameByUserId(u.getUserId());
+            if (role == null || role.isBlank()) {
+                role = "STAFF";
             }
-            return;
-
-        } catch (Exception ex) {
-            LOG.log(Level.SEVERE, "Delete import receipt failed", ex);
-            response.sendRedirect(buildBackImportListUrl(request, "err", "Delete failed: " + ex.getMessage()));
-            return;
+            session.setAttribute("roleName", role);
         }
-    }
+        role = role.toUpperCase();
 
-    // If POST not supported for other pages -> go back to GET
-    response.sendRedirect(request.getContextPath() + "/home?p=" + url(p));
-}
+        String p = request.getParameter("p");
+        if (p != null) {
+            p = p.trim();
+        }
+        if (p == null || p.isBlank()) {
+            p = "dashboard";
+        }
+
+        String action = request.getParameter("action");
+        if (action != null) {
+            action = action.trim();
+        }
+
+        // ✅ only handle delete for import-receipt-list here
+        if ("import-receipt-list".equalsIgnoreCase(p) && "delete".equalsIgnoreCase(action)) {
+
+            // only MANAGER can delete directly
+            if (!"MANAGER".equalsIgnoreCase(role)) {
+                response.sendRedirect(buildBackImportListUrl(request, "err", "Forbidden"));
+                return;
+            }
+
+            long importId;
+            try {
+                importId = Long.parseLong(request.getParameter("id"));
+            } catch (Exception e) {
+                response.sendRedirect(buildBackImportListUrl(request, "err", "Invalid id"));
+                return;
+            }
+
+            try {
+                ImportReceiptListDAO dao = new ImportReceiptListDAO();
+
+                // ✅ deleteDraft() already allows DRAFT/PENDING only
+                boolean ok = dao.deleteDraft(importId);
+
+                if (ok) {
+                    String ctx = request.getContextPath();
+                    String status = nvl(request.getParameter("status"));
+                    String from = nvl(request.getParameter("from"));
+                    String to = nvl(request.getParameter("to"));
+
+                    response.sendRedirect(request.getContextPath()
+                            + "/home?p=import-receipt-list"
+                            + "&q="
+                            + "&status=all"
+                            + "&from="
+                            + "&to="
+                            + "&page=1"
+                            + "&msg=Deleted+successfully");
+                    return;
+                } else {
+                    response.sendRedirect(buildBackImportListUrl(request, "err",
+                            "Cannot delete (only PENDING/DRAFT receipts can be deleted)"));
+                }
+                return;
+
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, "Delete import receipt failed", ex);
+                response.sendRedirect(buildBackImportListUrl(request, "err", "Delete failed: " + ex.getMessage()));
+                return;
+            }
+        }
+
+        // If POST not supported for other pages -> go back to GET
+        response.sendRedirect(request.getContextPath() + "/home?p=" + url(p));
+    }
 
 // ✅ helper: keep filter when redirect back to list
-private String buildBackImportListUrl(HttpServletRequest request, String key, String msg) {
-    String ctx = request.getContextPath();
+    private String buildBackImportListUrl(HttpServletRequest request, String key, String msg) {
+        String ctx = request.getContextPath();
 
-    String q = nvl(request.getParameter("q"));
-    String status = nvl(request.getParameter("status"));
-    String from = nvl(request.getParameter("from"));
-    String to = nvl(request.getParameter("to"));
-    String page = nvl(request.getParameter("page"));
+        String q = nvl(request.getParameter("q"));
+        String status = nvl(request.getParameter("status"));
+        String from = nvl(request.getParameter("from"));
+        String to = nvl(request.getParameter("to"));
+        String page = nvl(request.getParameter("page"));
 
-    return ctx + "/home?p=import-receipt-list"
-            + "&q=" + url(q)
-            + "&status=" + url(status)
-            + "&from=" + url(from)
-            + "&to=" + url(to)
-            + "&page=" + url(page)
-            + "&" + key + "=" + url(msg);
-}
-
-private String nvl(String s) {
-    return s == null ? "" : s;
-}
-
-private String url(String s) {
-    try {
-        return java.net.URLEncoder.encode(s == null ? "" : s, java.nio.charset.StandardCharsets.UTF_8);
-    } catch (Exception e) {
-        return "";
+        return ctx + "/home?p=import-receipt-list"
+                + "&q=" + url(q)
+                + "&status=" + url(status)
+                + "&from=" + url(from)
+                + "&to=" + url(to)
+                + "&page=" + url(page)
+                + "&" + key + "=" + url(msg);
     }
-}
+
+    private String nvl(String s) {
+        return s == null ? "" : s;
+    }
+
+    private String url(String s) {
+        try {
+            return java.net.URLEncoder.encode(s == null ? "" : s, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return "";
+        }
+    }
 
     private void prepareData(String p, HttpServletRequest request, HttpServletResponse response, User authUser)
             throws Exception {
@@ -233,7 +241,7 @@ private String url(String s) {
                 request.setAttribute("lines", lines);
                 break;
             }
-            
+
             case "create-import-receipt": {
                 SupplierDAO sdao = new SupplierDAO();
                 ProductDAO pdao = new ProductDAO();
@@ -243,22 +251,22 @@ private String url(String s) {
                 request.setAttribute("suppliers", sdao.listActive());
                 request.setAttribute("products", pdao.listActive());
                 request.setAttribute("skus", skdao.listActive());
-HttpSession ss = request.getSession(false);
-if (ss != null) {
-    Object ferr = ss.getAttribute("flash_err");
-    Object fmode = ss.getAttribute("flash_mode");
-    if (ferr != null) {
-        request.setAttribute("err", String.valueOf(ferr));
-        ss.removeAttribute("flash_err");
-    }
-    if (fmode != null) {
-        request.setAttribute("mode", String.valueOf(fmode));
-        ss.removeAttribute("flash_mode");
-    }
-}
-if (request.getAttribute("mode") == null) {
-    request.setAttribute("mode", "manual");
-}
+                HttpSession ss = request.getSession(false);
+                if (ss != null) {
+                    Object ferr = ss.getAttribute("flash_err");
+                    Object fmode = ss.getAttribute("flash_mode");
+                    if (ferr != null) {
+                        request.setAttribute("err", String.valueOf(ferr));
+                        ss.removeAttribute("flash_err");
+                    }
+                    if (fmode != null) {
+                        request.setAttribute("mode", String.valueOf(fmode));
+                        ss.removeAttribute("flash_mode");
+                    }
+                }
+                if (request.getAttribute("mode") == null) {
+                    request.setAttribute("mode", "manual");
+                }
                 try (Connection con = DBContext.getConnection()) {
                     String importCode = irDao.generateImportCode(con);
                     request.setAttribute("importCode", importCode);
@@ -286,13 +294,19 @@ if (request.getAttribute("mode") == null) {
             case "create-export":
             case "create-export-receipt":
             case "upload-export-imeis": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !roleName.equalsIgnoreCase("STAFF")) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
                 ProductDAO pdao = new ProductDAO();
                 ProductSkuDAO skdao = new ProductSkuDAO();
+                ExportRequestDAO erDao = new ExportRequestDAO();
 
                 request.setAttribute("products", pdao.listActive());
                 request.setAttribute("skus", skdao.listActive());
 
-                // demo code - bạn có thể thay bằng generateExportCode() sau
                 request.setAttribute("exportCode", "EXP-" + System.currentTimeMillis());
 
                 String dt = LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI);
@@ -300,8 +314,33 @@ if (request.getAttribute("mode") == null) {
 
                 String createdByName = (authUser != null && authUser.getFullName() != null)
                         ? authUser.getFullName()
-                        : "Sale";
+                        : "Staff";
                 request.setAttribute("createdByName", createdByName);
+
+                String requestIdRaw = request.getParameter("id");
+                if (requestIdRaw != null && !requestIdRaw.isBlank()) {
+                    long requestId = Long.parseLong(requestIdRaw.trim());
+
+                    ExportRequest erHeader = erDao.getHeader(requestId);
+                    if (erHeader == null) {
+                        response.sendRedirect(request.getContextPath()
+                                + "/home?p=export-request-list&err=Request+not+found");
+                        return;
+                    }
+
+                    if ("COMPLETE".equalsIgnoreCase(erHeader.getStatus())) {
+                        response.sendRedirect(request.getContextPath()
+                                + "/home?p=export-request-list&err=This+request+has+already+been+completed");
+                        return;
+                    }
+
+                    List<ExportRequestItem> erItems = erDao.listItems(requestId);
+
+                    request.setAttribute("sourceRequestId", requestId);
+                    request.setAttribute("erHeader", erHeader);
+                    request.setAttribute("erItems", erItems);
+                }
+
                 break;
             }
 
@@ -791,41 +830,41 @@ if (request.getAttribute("mode") == null) {
                 }
                 break;
             }
- case "import-receipt-list": {
+            case "import-receipt-list": {
 
-    String action = request.getParameter("action");
+                String action = request.getParameter("action");
 
-    if ("export".equalsIgnoreCase(action)) {
-        response.setContentType("text/csv");
-        response.setHeader("Content-Disposition", "attachment; filename=import_receipts.csv");
+                if ("export".equalsIgnoreCase(action)) {
+                    response.setContentType("text/csv");
+                    response.setHeader("Content-Disposition", "attachment; filename=import_receipts.csv");
 
-        PrintWriter out = response.getWriter();
+                    PrintWriter out = response.getWriter();
 
-        // ✅ FIX: Declare dao before using it
-        ImportReceiptListDAO dao = new ImportReceiptListDAO();
-        
-        // ✅ FIX: Add 'status' parameter (required by ImportReceiptListDAO.list())
-        List<ImportReceiptListItem> list = dao.list(null, "all", null, null, 1, 1000);
+                    // ✅ FIX: Declare dao before using it
+                    ImportReceiptListDAO dao = new ImportReceiptListDAO();
 
-        out.println("Import Code,Supplier,Created By,Created Date,Total Qty,Status");
+                    // ✅ FIX: Add 'status' parameter (required by ImportReceiptListDAO.list())
+                    List<ImportReceiptListItem> list = dao.list(null, "all", null, null, 1, 1000);
 
-        for (ImportReceiptListItem r : list) {
-            out.println(r.getImportCode() + ","
-                    + (r.getSupplierName() != null ? r.getSupplierName() : "") + ","
-                    + (r.getCreatedByName() != null ? r.getCreatedByName() : "") + ","
-                    + (r.getReceiptDate() != null ? r.getReceiptDate() : "") + ","
-                    + r.getTotalQuantity() + ","
-                    + (r.getStatus() != null ? r.getStatus() : ""));
-        }
+                    out.println("Import Code,Supplier,Created By,Created Date,Total Qty,Status");
 
-        out.flush();
-        return;
-    }
+                    for (ImportReceiptListItem r : list) {
+                        out.println(r.getImportCode() + ","
+                                + (r.getSupplierName() != null ? r.getSupplierName() : "") + ","
+                                + (r.getCreatedByName() != null ? r.getCreatedByName() : "") + ","
+                                + (r.getReceiptDate() != null ? r.getReceiptDate() : "") + ","
+                                + r.getTotalQuantity() + ","
+                                + (r.getStatus() != null ? r.getStatus() : ""));
+                    }
 
-    // ✅ Use ImportReceiptList handler for normal list view
-    ImportReceiptList.handle(request);
-    break;
-}
+                    out.flush();
+                    return;
+                }
+
+                // ✅ Use ImportReceiptList handler for normal list view
+                ImportReceiptList.handle(request);
+                break;
+            }
             case "supplier_detail": {
                 String idRaw = request.getParameter("id");
                 if (idRaw == null || idRaw.isBlank()) {
@@ -1014,6 +1053,7 @@ if (request.getAttribute("mode") == null) {
                 ExportRequestDAO dao = new ExportRequestDAO();
 
                 String q = request.getParameter("q");
+                String status = request.getParameter("status");
                 String reqDateRaw = request.getParameter("reqDate");
                 String expDateRaw = request.getParameter("expDate");
 
@@ -1044,7 +1084,7 @@ if (request.getAttribute("mode") == null) {
                     requestedBy = userId.longValue();
                 }
 
-                int totalItems = dao.count(q, reqDate, expDate, requestedBy);
+                int totalItems = dao.count(q, status, reqDate, expDate, requestedBy);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
                 if (totalPages < 1) {
                     totalPages = 1;
@@ -1059,10 +1099,11 @@ if (request.getAttribute("mode") == null) {
 
                 int offset = (page - 1) * pageSize;
 
-                List<ExportRequest> list = dao.list(q, reqDate, expDate, requestedBy, offset, pageSize);
+                List<ExportRequest> list = dao.list(q, status, reqDate, expDate, requestedBy, offset, pageSize);
 
                 request.setAttribute("erList", list);
                 request.setAttribute("q", q);
+                request.setAttribute("status", status);
                 request.setAttribute("reqDate", reqDateRaw);
                 request.setAttribute("expDate", expDateRaw);
 
@@ -1138,6 +1179,7 @@ if (request.getAttribute("mode") == null) {
                 request.setAttribute("erCreatedByName", createdByName);
 
                 request.setAttribute("erRequestDateDefault", LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
+                request.setAttribute("today", LocalDate.now().toString());
                 break;
             }
             case "create-import-request": {

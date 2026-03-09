@@ -14,7 +14,25 @@ public class ExportRequestItem {
     private String productCode;
     private String skuCode;   // optional
     private int requestQty;
+    private long productId;
+    private long skuId;
 
+    public long getProductId() {
+        return productId;
+    }
+
+    public void setProductId(long productId) {
+        this.productId = productId;
+    }
+
+    public long getSkuId() {
+        return skuId;
+    }
+
+    public void setSkuId(long skuId) {
+        this.skuId = skuId;
+    }
+    
     public int getNo() {
         return no;
     }
