@@ -7,7 +7,7 @@
 <div class="page-wrap">
 
   <div class="topbar">
-    <div class="title">Export Receipt List</div>
+    <div class="title">View Export Receipt List</div>
     <div style="display:flex; gap:8px;">
       <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
       <c:if test="${role == 'STAFF' || role == 'SALE'}">
@@ -88,7 +88,7 @@
               <td>
                 <div style="display:flex; gap:6px;">
                   <a class="btn btn-sm" href="${ctx}/home?p=export-receipt-detail&id=${r.exportId}">View</a>
-                  <a class="btn btn-primary btn-sm" href="${ctx}/export-receipt-pdf?id=${r.exportId}" target="_blank">PDF</a>
+                  <a class="btn btn-primary btn-sm" href="${ctx}/export-receipt-pdf?id=${r.exportId}" target="_blank">Download PDF</a>
                 </div>
               </td>
             </tr>
