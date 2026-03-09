@@ -7,24 +7,37 @@
 
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%
-    String ctx = request.getContextPath();
-%>
+<% String ctx = request.getContextPath(); %>
 
-<h3>SALE MENU</h3>
+<div class="section-title">Overview</div>
 <ul>
-    <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
-
-    <li><a href="${pageContext.request.contextPath}/inventory">Inventory Management</a></li>
-
-    <li> <a href="<%=ctx%>/home?p=create-export-request">Create Export Request</a></li>
-    <li><a href="<%=ctx%>/home?p=export-request-list">View Export Request Lists</a></li>
-    <li><a href="<%=ctx%>/home?p=create-import-request">Create Import Request</a></li>
-    <li><a href="<%=ctx%>/home?p=import-request-list">View Import Request List</a></li>
-
-
-    <li><a href="<%=ctx%>/home?p=profile">My Profile</a></li>
-    <li><a href="<%=ctx%>/home?p=change_password">Change Password</a></li>
-
+  <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
 </ul>
 
+<div class="section-title">Inventory</div>
+<ul>
+  <li><a href="<%=ctx%>/inventory">Inventory Management</a></li>
+</ul>
+
+<div class="section-title">Requests</div>
+<ul>
+  <li>
+    <details open>
+      <summary>Export Requests</summary>
+      <ul>
+        <li><a href="<%=ctx%>/home?p=create-export-request">Create Export Request</a></li>
+        <li><a href="<%=ctx%>/home?p=export-request-list">Export Request List</a></li>
+      </ul>
+    </details>
+  </li>
+
+  <li>
+    <details open>
+      <summary>Import Requests</summary>
+      <ul>
+        <li><a href="<%=ctx%>/home?p=create-import-request">Create Import Request</a></li>
+        <li><a href="<%=ctx%>/home?p=import-request-list">Import Request List</a></li>
+      </ul>
+    </details>
+  </li>
+</ul>

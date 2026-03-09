@@ -5,13 +5,16 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
-    </head>
-    <body>
-        <h1>Hello World!</h1>
-    </body>
-</html>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+
+<div class="page-wrap">
+  <div class="topbar">
+    <div class="title">Manager Dashboard</div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <p class="small muted">Dashboard content coming soon.</p>
+    </div>
+  </div>
+</div>
