@@ -1,4 +1,3 @@
-
 package controller;
 
 import dal.ProductDAO;
@@ -89,7 +88,7 @@ public class ManagerAddSku extends HttpServlet {
             ProductSkuDAO skuDAO = new ProductSkuDAO();
 
             if (skuDAO.existsSkuCode(skuCode)) {
-                errors.put("skuCode", "SKU Code already exists");
+                errors.put("skuCode", "SKU Code already exists for this product");
             }
 
             if (skuDAO.existsVariant(productId, color, ramGb, storageGb)) {
@@ -99,7 +98,11 @@ public class ManagerAddSku extends HttpServlet {
             if (!errors.isEmpty()) {
                 request.setAttribute("errors", errors);
                 request.setAttribute("products", new ProductDAO().listForSkuSelect());
-                request.getRequestDispatcher("/add_sku.jsp").forward(request, response);
+
+                request.getSession().setAttribute("flash_errors", errors);
+                request.getSession().setAttribute("flash_products", new ProductDAO().listForSkuSelect());
+
+                response.sendRedirect(request.getContextPath() + "/home?p=sku-add");
                 return;
             }
 

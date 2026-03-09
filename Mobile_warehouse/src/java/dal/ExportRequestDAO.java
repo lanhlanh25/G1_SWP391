@@ -9,15 +9,9 @@ import java.util.List;
 
 public class ExportRequestDAO {
 
-    /**
-     * Count requests for list page.
-     *
-     * @param q request_code search (LIKE)
-     * @param reqDate filter exact date of requested_at (DATE)
-     * @param expDate filter exact date of expected_export_date
-     * @param requestedBy if not null => only requests of this user (SALE)
-     */
+
     public int count(String q, String status, java.sql.Date reqDate, java.sql.Date expDate, Long requestedBy) throws Exception {
+
         StringBuilder sql = new StringBuilder("""
             SELECT COUNT(*)
             FROM export_requests er
@@ -62,11 +56,8 @@ public class ExportRequestDAO {
         }
     }
 
-    /**
-     * List requests for list page (with total items/qty from lines).
-     */
-    public List<ExportRequest> list(String q, String status, java.sql.Date reqDate, java.sql.Date expDate, Long requestedBy,
-            int offset, int limit) throws Exception {
+
+    public List<ExportRequest> list(String q, String status, java.sql.Date reqDate, java.sql.Date expDate, Long requestedBy, int offset, int limit) throws Exception {
 
         StringBuilder sql = new StringBuilder("""
             SELECT
@@ -138,7 +129,6 @@ public class ExportRequestDAO {
                     r.setCreatedBy(rs.getLong("requested_by"));
                     r.setCreatedByName(rs.getString("created_by_name"));
 
-                    // requested_at is DATETIME
                     r.setRequestDate(rs.getTimestamp("requested_at"));
 
                     r.setExpectedExportDate(rs.getDate("expected_export_date"));
@@ -155,7 +145,6 @@ public class ExportRequestDAO {
         return list;
     }
 
-    // ========= DETAIL HEADER =========
     public ExportRequest getHeader(long requestId) throws Exception {
         String sql = """
             SELECT
@@ -195,7 +184,6 @@ public class ExportRequestDAO {
         }
     }
 
-    // ========= DETAIL ITEMS =========
     public List<ExportRequestItem> listItems(long requestId) throws Exception {
         String sql = """
             SELECT
@@ -231,6 +219,7 @@ public class ExportRequestDAO {
         return list;
     }
 
+
     public List<ExportRequestItem> listItemsForValidation(Connection con, long requestId) throws Exception {
         String sql = """
         SELECT
@@ -262,8 +251,6 @@ public class ExportRequestDAO {
 
         return list;
     }
-
-    // ========= helper bind params =========
     private void bindParams(PreparedStatement ps, List<Object> params) throws SQLException {
         for (int i = 0; i < params.size(); i++) {
             Object v = params.get(i);

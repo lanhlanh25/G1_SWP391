@@ -169,11 +169,8 @@ public class ProductSkuDAO {
     public long insertSku(long productId, String skuCode, String color, int ramGb, int storageGb, String status) throws Exception {
         String st = "INACTIVE".equalsIgnoreCase(status) ? "INACTIVE" : "ACTIVE";
 
-        // Nếu DB dùng status:
         String sql = "INSERT INTO product_skus(product_id, sku_code, color, ram_gb, storage_gb, status) VALUES(?,?,?,?,?,?)";
 
-        // Nếu DB dùng is_active:
-        // String sql = "INSERT INTO product_skus(product_id, sku_code, color, ram_gb, storage_gb, is_active) VALUES(?,?,?,?,?,?)";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             ps.setLong(1, productId);
@@ -182,10 +179,7 @@ public class ProductSkuDAO {
             ps.setInt(4, ramGb);
             ps.setInt(5, storageGb);
 
-            // status
             ps.setString(6, st);
-            // is_active (nếu dùng is_active):
-            // ps.setInt(6, "ACTIVE".equals(st) ? 1 : 0);
 
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
@@ -225,7 +219,6 @@ public class ProductSkuDAO {
     public List<ProductSku> listActive() throws Exception {
         List<ProductSku> list = new ArrayList<>();
 
-        // Nếu DB bạn dùng status ACTIVE/INACTIVE
         String sql = "SELECT sku_id, sku_code, product_id "
                 + "FROM product_skus "
                 + "WHERE status = 'ACTIVE' "
@@ -244,5 +237,4 @@ public class ProductSkuDAO {
         return list;
     }
 
-    
 }

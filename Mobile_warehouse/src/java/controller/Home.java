@@ -508,13 +508,33 @@ public class Home extends HttpServlet {
             // SKU / PRODUCT
             // =========================
             case "sku-add": {
+
                 ProductDAO dao = new ProductDAO();
-                request.setAttribute("products", dao.getAll());
+                request.setAttribute("products", dao.listForSkuSelect());
+
+                HttpSession ss = request.getSession(false);
+
+                if (ss != null) {
+
+                    Object ferr = ss.getAttribute("flash_errors");
+
+                    if (ferr != null) {
+                        request.setAttribute("errors", ferr);
+                        ss.removeAttribute("flash_errors");
+                    }
+
+                }
+
                 break;
             }
 
             case "product-add": {
-                request.setAttribute("brands", brandDAO.list(null, "active", "name", "ASC", 1, 1000));
+
+                if (request.getAttribute("brands") == null) {
+                    request.setAttribute("brands",
+                            brandDAO.list(null, "active", "name", "ASC", 1, 1000));
+                }
+
                 break;
             }
 

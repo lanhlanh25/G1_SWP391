@@ -114,11 +114,11 @@
         <div class="title">View Product List</div>
         <a class="btn-add" href="${pageContext.request.contextPath}/home?p=product-add">Add product</a>
     </div>
-   <c:if test="${not empty param.msg}">
-    <div style="color:green;font-weight:bold;margin-bottom:10px">
-        ${param.msg}
-    </div>
-</c:if>
+    <c:if test="${not empty param.msg}">
+        <div style="color:green;font-weight:bold;margin-bottom:10px">
+            ${param.msg}
+        </div>
+    </c:if>
     <form method="get" action="${pageContext.request.contextPath}/home">
         <input type="hidden" name="p" value="product-list"/>
 
@@ -207,4 +207,3 @@
         </div>
     </div>
 </div>
-            

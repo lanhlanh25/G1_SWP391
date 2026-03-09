@@ -20,11 +20,11 @@
     <c:if test="${not empty msg}"><p class="msg-ok"><c:out value="${msg}"/></p></c:if>
     <c:if test="${not empty err}"><p class="msg-err"><c:out value="${err}"/></p></c:if>
 
-    <div class="card" style="margin-bottom:14px;">
-        <div class="card-body">
-            <form method="get" action="${ctx}/home">
+        <div class="card" style="margin-bottom:14px;">
+            <div class="card-body">
+                <form method="get" action="${ctx}/home">
                 <input type="hidden" name="p" value="import-receipt-list"/>
-                
+
                 <div class="filters" style="grid-template-columns: 2fr 1fr 1fr 1fr auto auto;">
                     <div>
                         <label class="label">Search</label>
@@ -58,7 +58,7 @@
 
             <div style="display:flex; gap:8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #eaeaea;">
                 <c:set var="base" value="${ctx}/home?p=import-receipt-list&q=${fn:escapeXml(q)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
-                
+
                 <a class="btn ${status=='all' || empty status ? 'btn-primary' : ''}" style="${status=='all' || empty status ? '' : 'background:#f6f6f6;'}" href="${base}&status=all">
                     ALL <b><c:out value="${tabCounts['all']}"/></b>
                 </a>
@@ -94,7 +94,7 @@
                     <c:if test="${empty rows}">
                         <tr><td colspan="8" class="small muted" style="padding:20px;">No data</td></tr>
                     </c:if>
-                    
+
                     <c:forEach var="r" items="${rows}" varStatus="st">
                         <tr>
                             <td><c:out value="${st.index + 1}"/></td>
@@ -104,7 +104,7 @@
                             <td><c:out value="${r.receiptDate}"/></td>
                             <td style="text-align:center;"><c:out value="${r.totalQuantity}"/> Phone</td>
                             <td><c:out value="${r.statusUi}"/></td>
-                            
+
                             <td>
                                 <div style="display:flex; gap:6px; flex-wrap: wrap;">
                                     <a class="btn btn-sm" href="${ctx}/home?p=import-receipt-detail&id=${r.importId}">View</a>
