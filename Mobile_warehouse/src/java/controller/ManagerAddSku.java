@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
 
-/**
- *
- * @author Lanhlanh
- */
 import dal.ProductDAO;
 import dal.ProductSkuDAO;
 import jakarta.servlet.ServletException;
@@ -22,7 +14,8 @@ import java.util.Map;
 public class ManagerAddSku extends HttpServlet {
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
         response.sendRedirect(request.getContextPath() + "/home?p=sku-add");
     }
 
@@ -32,13 +25,14 @@ public class ManagerAddSku extends HttpServlet {
 
         HttpSession session = request.getSession();
         String roleName = (String) session.getAttribute("roleName");
+
         if (roleName == null || !"MANAGER".equalsIgnoreCase(roleName)) {
             response.sendError(403, "Forbidden");
             return;
         }
-        request.setAttribute("message", "Add SKU successfully");
-        request.getRequestDispatcher("/add_sku.jsp").forward(request, response);
+
         Map<String, String> errors = new HashMap<>();
+
         String productIdRaw = request.getParameter("productId");
         String color = request.getParameter("color");
         String storageRaw = request.getParameter("storageGb");
@@ -51,6 +45,7 @@ public class ManagerAddSku extends HttpServlet {
         int ramGb = -1;
 
         try {
+
             if (productIdRaw == null || productIdRaw.isBlank()) {
                 errors.put("productId", "Please select product");
             } else {
@@ -66,7 +61,7 @@ public class ManagerAddSku extends HttpServlet {
             } else {
                 storageGb = Integer.parseInt(storageRaw);
                 if (storageGb <= 0) {
-                    errors.put("storageGb", "Storage must be > 0");
+                    errors.put("storageGb", "Storage must be greater than 0");
                 }
             }
 
@@ -75,7 +70,7 @@ public class ManagerAddSku extends HttpServlet {
             } else {
                 ramGb = Integer.parseInt(ramRaw);
                 if (ramGb <= 0) {
-                    errors.put("ramGb", "RAM must be > 0");
+                    errors.put("ramGb", "RAM must be greater than 0");
                 }
             }
 
@@ -93,25 +88,38 @@ public class ManagerAddSku extends HttpServlet {
             ProductSkuDAO skuDAO = new ProductSkuDAO();
 
             if (skuDAO.existsSkuCode(skuCode)) {
-                errors.put("skuCode", "SKU Code already exists");
+                errors.put("skuCode", "SKU Code already exists for this product");
             }
+
             if (skuDAO.existsVariant(productId, color, ramGb, storageGb)) {
-                errors.put("variant", "This variant (color/ram/storage) already exists for this product");
+                errors.put("variant", "This variant already exists for this product");
             }
 
             if (!errors.isEmpty()) {
                 request.setAttribute("errors", errors);
                 request.setAttribute("products", new ProductDAO().listForSkuSelect());
-                request.getRequestDispatcher("/add_sku.jsp").forward(request, response);
+
+                request.getSession().setAttribute("flash_errors", errors);
+                request.getSession().setAttribute("flash_products", new ProductDAO().listForSkuSelect());
+
+                response.sendRedirect(request.getContextPath() + "/home?p=sku-add");
                 return;
             }
 
             skuDAO.insertSku(productId, skuCode, color, ramGb, storageGb, status);
 
-            response.sendRedirect(request.getContextPath() + "/home?p=sku-add&msg=Create SKU successfully");
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/home?p=product-list&msg=Add+SKU+successfully"
+            );
+
         } catch (Exception e) {
             e.printStackTrace();
-            response.sendRedirect(request.getContextPath() + "/home?p=sku-add&err=Database error");
+
+            response.sendRedirect(
+                    request.getContextPath()
+                    + "/home?p=sku-add&err=Database+error"
+            );
         }
     }
 }

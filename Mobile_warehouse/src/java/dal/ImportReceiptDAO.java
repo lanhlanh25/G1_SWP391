@@ -80,10 +80,6 @@ public class ImportReceiptDAO {
         throw new SQLException("Cannot insert import_receipt_lines");
     }
 
-    /**
-     * ✅ NEW: Validate IMEI before inserting
-     * Returns: null if OK, error message if blocked
-     */
    public String validateImeiForInsert(Connection con, long skuId, String imei) throws SQLException {
     String sql = "SELECT unit_status FROM product_units WHERE sku_id = ? AND imei = ? LIMIT 1";
 
@@ -97,7 +93,7 @@ public class ImportReceiptDAO {
                 if ("ACTIVE".equalsIgnoreCase(status)) {
                     return "IMEI " + imei + " already exists in stock (ACTIVE) for this SKU. Cannot import again.";
                 }
-                // INACTIVE => allow re-import
+        
             }
         }
     }
@@ -153,7 +149,6 @@ public class ImportReceiptDAO {
         throw new SQLException("SKU not found: " + skuCode);
     }
 
-    // ===== PDF/DETAIL QUERIES =====
 
     public ImportReceiptDetail getDetailHeader(Connection con, long importId) throws SQLException {
         String sql = """

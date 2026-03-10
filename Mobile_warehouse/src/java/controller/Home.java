@@ -242,6 +242,11 @@ public class Home extends HttpServlet {
                 break;
             }
 
+            case "variant-matrix": {
+                ViewVariantMatrix.handle(request, response);
+                break;
+            }
+
             case "create-import-receipt": {
                 SupplierDAO sdao = new SupplierDAO();
                 ProductDAO pdao = new ProductDAO();
@@ -375,6 +380,7 @@ public class Home extends HttpServlet {
             // USERS
             // =========================
             case "user-list":
+
             case "user-toggle": {
                 String q = request.getParameter("q");
                 String st = request.getParameter("status");
@@ -502,13 +508,33 @@ public class Home extends HttpServlet {
             // SKU / PRODUCT
             // =========================
             case "sku-add": {
+
                 ProductDAO dao = new ProductDAO();
-                request.setAttribute("products", dao.getAll());
+                request.setAttribute("products", dao.listForSkuSelect());
+
+                HttpSession ss = request.getSession(false);
+
+                if (ss != null) {
+
+                    Object ferr = ss.getAttribute("flash_errors");
+
+                    if (ferr != null) {
+                        request.setAttribute("errors", ferr);
+                        ss.removeAttribute("flash_errors");
+                    }
+
+                }
+
                 break;
             }
 
             case "product-add": {
-                request.setAttribute("brands", brandDAO.list(null, "active", "name", "ASC", 1, 1000));
+
+                if (request.getAttribute("brands") == null) {
+                    request.setAttribute("brands",
+                            brandDAO.list(null, "active", "name", "ASC", 1, 1000));
+                }
+
                 break;
             }
 
@@ -1492,7 +1518,6 @@ public class Home extends HttpServlet {
                         return "view_user_information.jsp";
                     case "sku-add":
                         return "add_sku.jsp";
-
                     case "brand-list":
                         return "brand_list.jsp";
                     case "brand-add":
@@ -1544,7 +1569,8 @@ public class Home extends HttpServlet {
                         return "export_receipt_list.jsp";
                     case "export-receipt-detail":
                         return "export_receipt_detail.jsp";
-
+                    case "variant-matrix":
+                        return "variant_matrix.jsp";
                     case "my-profile":
                     case "profile":
                         return "view_profile.jsp";

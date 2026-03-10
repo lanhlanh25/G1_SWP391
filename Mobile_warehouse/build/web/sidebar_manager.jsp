@@ -11,16 +11,17 @@
     <li><a href="<%=ctx%>/inventory">Inventory Management</a></li>
     <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
 
-    <!-- ✅ IMPORT RECEIPT -->
     <li style="list-style:none;">
         <details open>
-            <summary style="cursor:pointer;">Import Receipt</summary>
-            <ul style="margin-top:6px;">
-                <li><a href="<%=ctx%>/import-receipt-list">View Import Receipt List</a></li>
+  <summary style="cursor:pointer;">Import Receipt</summary>
+  <ul style="margin-top:6px;">
+    <li><a href="${pageContext.request.contextPath}/home?p=import-receipt-list">View Import Receipt List</a></li>
+    <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
 
-                <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
-            </ul>
-        </details>
+    <!-- ✅ THÊM DÒNG NÀY -->
+    <li><a href="<%=ctx%>/import-receipt-report">Import Receipt Report</a></li>
+  </ul>
+</details>
     </li>
 
 
@@ -29,11 +30,13 @@
             <summary style="cursor:pointer;">Export Receipt</summary>
             <ul style="margin-top:6px;">
                 <li><a href="<%=ctx%>/home?p=export-receipt-list">View Export Receipt List</a></li>
+                <li><a href="<%=ctx%>/export-receipt-report">Export Receipt Report</a></li>
                 
             </ul>
         </details>
     </li>
 
+  
     <li style="list-style:none;">
         <details open>
             <summary style="cursor:pointer;">Brand Management</summary>
@@ -66,6 +69,7 @@
         </details>
     </li>
 
+
     <li style="list-style:none;">
         <details open>
             <summary style="cursor:pointer;">Export Request Management</summary>
@@ -79,4 +83,3 @@
 </li>
 <li><a href="<%=ctx%>/home?p=my-profile">My Profile</a></li>
 <li><a href="<%=ctx%>/home?p=change-password">Change Password</a></li>
-</ul>
