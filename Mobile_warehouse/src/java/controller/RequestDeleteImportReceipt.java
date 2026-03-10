@@ -104,7 +104,7 @@ public class RequestDeleteImportReceipt extends HttpServlet {
         }
 
         if (note == null || note.trim().isEmpty()) {
-            // quay lại form đúng URL mà STAFF đang vào từ /home?p=...
+            
             String back = req.getContextPath()
                     + "/home?p=request-delete-import-receipt&id=" + importId
                     + "&err=" + url("Please provide reason for deletion");
@@ -118,7 +118,7 @@ public class RequestDeleteImportReceipt extends HttpServlet {
             boolean success = dao.createRequest(importId, importCode, note.trim(), user.getUserId());
 
             if (success) {
-                // ✅ FIX 404: redirect về đúng route list
+               
                 redirectToImportList(req, resp, "msg", "Delete request sent successfully");
             } else {
                 redirectToImportList(req, resp, "err", "Failed to send delete request");

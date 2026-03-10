@@ -39,7 +39,6 @@ public class ImportReceiptDeleteRequestDAO {
         }
     }
 
-    // Get import receipt info for request form
     public ImportReceiptDeleteRequest getImportInfoForRequest(long importId) throws SQLException {
         String sql = "SELECT ir.import_id, ir.import_code, ir.receipt_date, u.full_name "
                 + "FROM import_receipts ir "

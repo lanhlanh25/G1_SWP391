@@ -40,7 +40,7 @@ public class ImportReceiptReport extends HttpServlet {
             if (raw == null) return null;
             raw = raw.trim();
             if (raw.isEmpty()) return null;
-            return Date.valueOf(raw); // yyyy-MM-dd
+            return Date.valueOf(raw); 
         } catch (Exception e) {
             return null;
         }
@@ -69,7 +69,7 @@ public class ImportReceiptReport extends HttpServlet {
             return;
         }
 
-        // ---- Read filters
+        
         String fromRaw = request.getParameter("from");
         String toRaw = request.getParameter("to");
         String supplierIdRaw = request.getParameter("supplierId");
@@ -78,7 +78,7 @@ public class ImportReceiptReport extends HttpServlet {
         Date from = parseDate(fromRaw);
         Date to = parseDate(toRaw);
 
-        // All suppliers = null
+       
         Long supplierId = null;
         if (supplierIdRaw != null) {
             supplierIdRaw = supplierIdRaw.trim();
@@ -90,7 +90,7 @@ public class ImportReceiptReport extends HttpServlet {
             }
         }
 
-        // All status = null
+        
         String status = null;
         if (statusRaw != null) {
             statusRaw = statusRaw.trim();
@@ -106,7 +106,7 @@ public class ImportReceiptReport extends HttpServlet {
 
         try {
             SupplierDAO sdao = new SupplierDAO();
-            request.setAttribute("suppliers", sdao.listActive()); // List<IdName>
+            request.setAttribute("suppliers", sdao.listActive()); 
 
             ImportReceiptReportDAO dao = new ImportReceiptReportDAO();
 
@@ -118,17 +118,17 @@ public class ImportReceiptReport extends HttpServlet {
             ImportReceiptReportSummary summary = dao.getSummary(from, to, supplierId, status);
             List<ImportReceiptListItem> rows = dao.list(from, to, supplierId, status, page, pageSize);
 
-            // data
+            
             request.setAttribute("reportSummary", summary);
             request.setAttribute("rows", rows);
 
-            // keep input values
+            
             request.setAttribute("from", fromRaw == null ? "" : fromRaw);
             request.setAttribute("to", toRaw == null ? "" : toRaw);
-            request.setAttribute("supplierId", supplierId);                // Long or null
+            request.setAttribute("supplierId", supplierId);            
             request.setAttribute("status", statusRaw == null ? "all" : statusRaw);
 
-            // paging
+          
             request.setAttribute("page", page);
             request.setAttribute("pageSize", pageSize);
             request.setAttribute("totalItems", totalItems);
@@ -139,7 +139,7 @@ public class ImportReceiptReport extends HttpServlet {
             request.setAttribute("err", "Load report failed: " + ex.getMessage());
         }
 
-        // Render inside global layout
+        
         request.setAttribute("sidebarPage", "sidebar_manager.jsp");
         request.setAttribute("contentPage", "import_receipt_report.jsp");
         request.setAttribute("currentPage", "import-receipt-report");

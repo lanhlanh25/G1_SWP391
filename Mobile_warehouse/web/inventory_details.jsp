@@ -94,7 +94,7 @@
 
     <div class="box">
 
-      <%-- back link to return from IMEI page if you choose to use it later --%>
+     
       <c:url var="backToDetails" value="/inventory-details">
         <c:param name="productCode" value="${productCode}"/>
         <c:param name="page" value="${pageNumber}"/>
@@ -137,7 +137,7 @@
                   <c:param name="skuId" value="${s.skuId}"/>
                   <c:param name="page" value="1"/>
                   <c:param name="pageSize" value="10"/>
-                  <%-- Optional: pass back link so IMEI page can return here if you later support it --%>
+                 
                   <c:param name="back" value="${backToDetails}"/>
                 </c:url>
 

@@ -5,10 +5,6 @@
 
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<!--
-  This JSP is included inside homepage.jsp (layout).
-  DO NOT use <html><head><body> here.
--->
 
 <div class="container">
   <div class="card">
@@ -26,7 +22,7 @@
 
     <div class="card-body">
 
-      <!-- Filters -->
+   
       <form method="get" action="${ctx}/home" class="filters" style="grid-template-columns: 2fr 1fr auto auto;">
         <input type="hidden" name="p" value="request-delete-import-receipt-list"/>
 
@@ -52,7 +48,6 @@
         </div>
       </form>
 
-      <!-- Table -->
       <table class="table">
         <thead>
           <tr>
@@ -77,7 +72,7 @@
             <c:otherwise>
               <c:forEach var="r" items="${requests}" varStatus="st">
                 <tr>
-                  <!-- nếu bạn có offset (page-1)*pageSize thì thay vào cho chuẩn -->
+             
                   <td>${st.index + 1}</td>
                   <td>${fn:escapeXml(r.importCode)}</td>
                   <td>${fn:escapeXml(r.note)}</td>
@@ -92,7 +87,7 @@
         </tbody>
       </table>
 
-      <!-- Paging -->
+    
       <c:if test="${totalPages > 1}">
         <div class="paging">
           <c:set var="qsBase"

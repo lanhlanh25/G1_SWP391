@@ -1,6 +1,5 @@
 package dal;
 
-
 import java.sql.*;
 import java.util.*;
 import model.ImportReceiptDetail;
@@ -80,25 +79,29 @@ public class ImportReceiptDAO {
         throw new SQLException("Cannot insert import_receipt_lines");
     }
 
-   public String validateImeiForInsert(Connection con, long skuId, String imei) throws SQLException {
-    String sql = "SELECT unit_status FROM product_units WHERE sku_id = ? AND imei = ? LIMIT 1";
 
-    try (PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setLong(1, skuId);
-        ps.setString(2, imei);
 
-        try (ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                String status = rs.getString("unit_status");
-                if ("ACTIVE".equalsIgnoreCase(status)) {
-                    return "IMEI " + imei + " already exists in stock (ACTIVE) for this SKU. Cannot import again.";
+    public String validateImeiForInsert(Connection con, long skuId, String imei) throws SQLException {
+        String sql = "SELECT unit_status FROM product_units WHERE sku_id = ? AND imei = ? LIMIT 1";
+
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, skuId);
+            ps.setString(2, imei);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String status = rs.getString("unit_status");
+                    if ("ACTIVE".equalsIgnoreCase(status)) {
+                        return "IMEI " + imei + " already exists in stock (ACTIVE) for this SKU. Cannot import again.";
+                    }
+
                 }
-        
+
             }
         }
+        return null;
     }
-    return null;
-}
 
     public void insertUnits(Connection con, long lineId, List<String> imeis) throws SQLException {
         String sql = "INSERT INTO import_receipt_units(line_id, imei) VALUES(?, ?)";
