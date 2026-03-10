@@ -267,4 +267,73 @@ public class ExportRequestDAO {
             }
         }
     }
+    //DASHBOARD
+    public int countByStatus(String status) throws Exception {
+    String sql = """
+        SELECT COUNT(*)
+        FROM export_requests
+        WHERE status = ?
+    """;
+
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setString(1, status);
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
+}
+
+public List<ExportRequest> listByStatus(String status, int limit) throws Exception {
+    String sql = """
+        SELECT
+          er.request_id,
+          er.request_code,
+          er.requested_by,
+          u.full_name AS created_by_name,
+          er.requested_at,
+          er.expected_export_date,
+          COALESCE(x.total_items, 0) AS total_items,
+          COALESCE(x.total_qty, 0)   AS total_qty,
+          er.status
+        FROM export_requests er
+        LEFT JOIN users u ON u.user_id = er.requested_by
+        LEFT JOIN (
+            SELECT request_id,
+                   COUNT(*) AS total_items,
+                   COALESCE(SUM(qty),0) AS total_qty
+            FROM export_request_lines
+            GROUP BY request_id
+        ) x ON x.request_id = er.request_id
+        WHERE er.status = ?
+        ORDER BY er.requested_at DESC, er.request_id DESC
+        LIMIT ?
+    """;
+
+    List<ExportRequest> list = new ArrayList<>();
+
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setString(1, status);
+        ps.setInt(2, limit);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ExportRequest r = new ExportRequest();
+                r.setRequestId(rs.getLong("request_id"));
+                r.setRequestCode(rs.getString("request_code"));
+                r.setCreatedBy(rs.getLong("requested_by"));
+                r.setCreatedByName(rs.getString("created_by_name"));
+                r.setRequestDate(rs.getTimestamp("requested_at"));
+                r.setExpectedExportDate(rs.getDate("expected_export_date"));
+                r.setTotalItems(rs.getInt("total_items"));
+                r.setTotalQty(rs.getInt("total_qty"));
+                r.setStatus(rs.getString("status"));
+                list.add(r);
+            }
+        }
+    }
+
+    return list;
+}
 }

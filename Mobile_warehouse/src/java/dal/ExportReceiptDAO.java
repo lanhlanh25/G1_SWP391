@@ -234,6 +234,7 @@ public class ExportReceiptDAO {
                     it.setTotalQty(rs.getInt("total_qty"));
 
                     Timestamp ts = rs.getTimestamp("export_date");
+                    it.setExportDate(ts);
                     it.setExportDateUi(ts == null ? "" : sdf.format(ts));
 
                     out.add(it);
