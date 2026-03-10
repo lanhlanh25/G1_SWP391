@@ -6,7 +6,6 @@
 <h3>MANAGER MENU</h3>
 <ul>
     <li><a href="<%=ctx%>/home?p=dashboard">Dashboard</a></li>
-    <li><a href="<%=ctx%>/home?p=reports">Weekly Reports</a></li>
 
     <li><a href="<%=ctx%>/inventory">Inventory Management</a></li>
     <li><a href="<%=ctx%>/inventory-count">Conduct Inventory Count</a></li>
@@ -16,8 +15,7 @@
   <summary style="cursor:pointer;">Import Receipt</summary>
   <ul style="margin-top:6px;">
     <li><a href="${pageContext.request.contextPath}/home?p=import-receipt-list">View Import Receipt List</a></li>
-    
-
+    <li><a href="<%=ctx%>/home?p=create-import-receipt">Create Import Receipt</a></li>
     
     <li><a href="<%=ctx%>/import-receipt-report">Import Receipt Report</a></li>
   </ul>

@@ -182,4 +182,72 @@ public class ImportRequestDAO {
             }
         }
     }
+//DASHBOARD
+public int countByStatus(String status) throws Exception {
+    String sql = """
+        SELECT COUNT(*)
+        FROM import_requests
+        WHERE status = ?
+    """;
+
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setString(1, status);
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+    }
 }
+
+public List<ImportRequest> listByStatus(String status, int limit) throws Exception {
+    String sql = """
+        SELECT
+          ir.request_id,
+          ir.request_code,
+          ir.requested_by,
+          u.full_name AS created_by_name,
+          ir.requested_at,
+          ir.expected_import_date,
+          COALESCE(x.total_items,0) AS total_items,
+          COALESCE(x.total_qty,0) AS total_qty,
+          ir.status
+        FROM import_requests ir
+        LEFT JOIN users u ON u.user_id = ir.requested_by
+        LEFT JOIN (
+          SELECT request_id, COUNT(*) total_items, COALESCE(SUM(qty),0) total_qty
+          FROM import_request_lines
+          GROUP BY request_id
+        ) x ON x.request_id = ir.request_id
+        WHERE ir.status = ?
+        ORDER BY ir.requested_at DESC, ir.request_id DESC
+        LIMIT ?
+    """;
+
+    List<ImportRequest> list = new ArrayList<>();
+
+    try (Connection con = DBContext.getConnection();
+         PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setString(1, status);
+        ps.setInt(2, limit);
+
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                ImportRequest r = new ImportRequest();
+                r.setRequestId(rs.getLong("request_id"));
+                r.setRequestCode(rs.getString("request_code"));
+                r.setCreatedBy(rs.getLong("requested_by"));
+                r.setCreatedByName(rs.getString("created_by_name"));
+                r.setRequestDate(rs.getTimestamp("requested_at"));
+                r.setExpectedImportDate(rs.getDate("expected_import_date"));
+                r.setTotalItems(rs.getInt("total_items"));
+                r.setTotalQty(rs.getInt("total_qty"));
+                r.setStatus(rs.getString("status"));
+                list.add(r);
+            }
+        }
+    }
+
+    return list;
+}
+}
+

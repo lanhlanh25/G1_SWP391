@@ -377,6 +377,194 @@ public class Home extends HttpServlet {
                 break;
             }
             // =========================
+            //  DASHBOARD
+            // =========================
+            case "dashboard": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+
+                if (roleName != null && roleName.equalsIgnoreCase("MANAGER")) {
+                    String approvalType = request.getParameter("approvalType");
+                    if (approvalType == null || approvalType.isBlank()) {
+                        approvalType = "import";
+                    }
+
+                    ImportRequestDAO importRequestDAO = new ImportRequestDAO();
+                    ExportRequestDAO exportRequestDAO = new ExportRequestDAO();
+                    ImportReceiptDeleteRequestDAO deleteDAO = new ImportReceiptDeleteRequestDAO();
+                    ImportReceiptListDAO importReceiptListDAO = new ImportReceiptListDAO();
+                    ExportReceiptDAO exportReceiptDAO = new ExportReceiptDAO();
+
+                    // =========================
+                    // APPROVAL COUNTS
+                    // =========================
+                    int pendingImportCount = importRequestDAO.countByStatus("PENDING");
+                    int pendingExportCount = exportRequestDAO.countByStatus("PENDING");
+                    int pendingDeleteCount = deleteDAO.countRequests(null, null);
+
+                    int pendingApprovals = pendingImportCount + pendingExportCount + pendingDeleteCount;
+                    int overdueApprovals = 0;
+
+                    List<DashboardApprovalRow> dashboardImportRequests = new ArrayList<>();
+                    List<DashboardApprovalRow> dashboardExportRequests = new ArrayList<>();
+                    List<DashboardApprovalRow> dashboardDeleteRequests = new ArrayList<>();
+
+                    // =========================
+                    // IMPORT REQUESTS
+                    // =========================
+                    List<ImportRequest> importRequests = importRequestDAO.listByStatus("PENDING", 5);
+                    for (ImportRequest r : importRequests) {
+                        String waiting = calcWaitingTime(r.getRequestDate());
+                        String priority = calcPriorityByWaiting(r.getRequestDate());
+
+                        long diffMs = System.currentTimeMillis() - r.getRequestDate().getTime();
+                        long hours = diffMs / (1000L * 60 * 60);
+                        if (hours >= 24) {
+                            overdueApprovals++;
+                        }
+
+                        dashboardImportRequests.add(new DashboardApprovalRow(
+                                r.getRequestId(),
+                                r.getRequestCode(),
+                                r.getCreatedByName(),
+                                formatDateTime(r.getRequestDate()),
+                                waiting,
+                                priority,
+                                r.getStatus()
+                        ));
+                    }
+
+                    // =========================
+                    // EXPORT REQUESTS
+                    // =========================
+                    List<ExportRequest> exportRequests = exportRequestDAO.listByStatus("PENDING", 5);
+                    for (ExportRequest r : exportRequests) {
+                        String waiting = calcWaitingTime(r.getRequestDate());
+                        String priority = calcPriorityByWaiting(r.getRequestDate());
+
+                        long diffMs = System.currentTimeMillis() - r.getRequestDate().getTime();
+                        long hours = diffMs / (1000L * 60 * 60);
+                        if (hours >= 24) {
+                            overdueApprovals++;
+                        }
+
+                        dashboardExportRequests.add(new DashboardApprovalRow(
+                                r.getRequestId(),
+                                r.getRequestCode(),
+                                r.getCreatedByName(),
+                                formatDateTime(r.getRequestDate()),
+                                waiting,
+                                priority,
+                                r.getStatus()
+                        ));
+                    }
+
+                    // =========================
+                    // DELETE REQUESTS
+                    // =========================
+                    List<ImportReceiptDeleteRequest> deleteRequests = deleteDAO.listRequests(null, null, 1, 5);
+                    for (ImportReceiptDeleteRequest r : deleteRequests) {
+                        String waiting = calcWaitingTime(r.getRequestedAt());
+                        String priority = calcPriorityByWaiting(r.getRequestedAt());
+
+                        long diffMs = System.currentTimeMillis() - r.getRequestedAt().getTime();
+                        long hours = diffMs / (1000L * 60 * 60);
+                        if (hours >= 24) {
+                            overdueApprovals++;
+                        }
+
+                        dashboardDeleteRequests.add(new DashboardApprovalRow(
+                                r.getRequestId(),
+                                r.getImportCode(),
+                                r.getRequestedByName(),
+                                formatDateTime(r.getRequestedAt()),
+                                waiting,
+                                priority,
+                                r.getStatus()
+                        ));
+                    }
+
+                    // =========================
+                    // TODAY IMPORTED UNITS
+                    // =========================
+                    LocalDate today = LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
+
+                    List<ImportReceiptListItem> todayImports = importReceiptListDAO.list(null, "all", today, today, 1, 200);
+                    int todayImportedUnits = 0;
+                    for (ImportReceiptListItem item : todayImports) {
+                        todayImportedUnits += item.getTotalQuantity();
+                    }
+
+                    // =========================
+                    // TODAY EXPORTED UNITS
+                    // =========================
+                    List<ExportReceiptListItem> todayExports = exportReceiptDAO.list(null, "ALL",
+                            java.sql.Date.valueOf(today), java.sql.Date.valueOf(today), 1, 200);
+
+                    int todayExportedUnits = 0;
+                    for (ExportReceiptListItem item : todayExports) {
+                        todayExportedUnits += item.getTotalQty();
+                    }
+
+                    // =========================
+                    // RECENT ACTIVITIES
+                    // =========================
+                    List<DashboardActivityRow> dashboardRecentActivities = new ArrayList<>();
+
+                    // recent imports
+                    List<ImportReceiptListItem> recentImports = importReceiptListDAO.list(null, "all", null, null, 1, 5);
+                    for (ImportReceiptListItem item : recentImports) {
+                        if (item.getReceiptDate() != null) {
+                            dashboardRecentActivities.add(new DashboardActivityRow(
+                                    item.getReceiptDate(),
+                                    formatTimeOnly(item.getReceiptDate()),
+                                    "Import Receipt",
+                                    item.getImportCode(),
+                                    item.getTotalQuantity()
+                            ));
+                        }
+                    }
+
+                    // recent exports
+                    List<ExportReceiptListItem> recentExports = exportReceiptDAO.list(null, "ALL", null, null, 1, 5);
+                    for (ExportReceiptListItem item : recentExports) {
+                        if (item.getExportDate() != null) {
+                            dashboardRecentActivities.add(new DashboardActivityRow(
+                                    item.getExportDate(),
+                                    formatTimeOnly(item.getExportDate()),
+                                    "Export Receipt",
+                                    item.getExportCode(),
+                                    item.getTotalQty()
+                            ));
+                        }
+                    }
+
+                    dashboardRecentActivities.sort((a, b) -> b.getSortTime().compareTo(a.getSortTime()));
+
+                    if (dashboardRecentActivities.size() > 6) {
+                        dashboardRecentActivities = new ArrayList<>(dashboardRecentActivities.subList(0, 6));
+                    }
+
+                    // =========================
+                    // SET ATTRIBUTES
+                    // =========================
+                    request.setAttribute("pendingApprovals", pendingApprovals);
+                    request.setAttribute("overdueApprovals", overdueApprovals);
+                    request.setAttribute("todayImportedUnits", todayImportedUnits);
+                    request.setAttribute("todayExportedUnits", todayExportedUnits);
+
+                    request.setAttribute("dashboardImportRequests", dashboardImportRequests);
+                    request.setAttribute("dashboardExportRequests", dashboardExportRequests);
+                    request.setAttribute("dashboardDeleteRequests", dashboardDeleteRequests);
+                    request.setAttribute("dashboardRecentActivities", dashboardRecentActivities);
+
+                    // not implemented yet
+                    request.setAttribute("lowStockProducts", "—");
+                    request.setAttribute("alertsComingSoon", true);
+                    request.setAttribute("lowStockComingSoon", true);
+                }
+                break;
+            }
+            // =========================
             // USERS
             // =========================
             case "user-list":
@@ -1423,7 +1611,7 @@ public class Home extends HttpServlet {
                 break;
             }
             case "admin/reset-requests": {
-                // Kiểm tra thêm một lần nữa nếu cần (hoặc để resolveContent lo)
+
                 List<ResetRequest> pending = userDAO.getPendingResetRequests();
                 request.setAttribute("pendingRequests", pending);
                 break;
@@ -1555,6 +1743,7 @@ public class Home extends HttpServlet {
                         return "import_receipt_list.jsp";
                     case "request-delete-import-receipt-list":
                         return "request_delete_import_receipt_list.jsp";
+                    
 
                     case "import-request-list":
                         return "view_import_request_list.jsp";
@@ -1666,4 +1855,134 @@ public class Home extends HttpServlet {
                 }
         }
     }
+
+    private String formatDateTime(java.util.Date date) {
+        if (date == null) {
+            return "";
+        }
+        return new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm").format(date);
+    }
+
+    private String formatTimeOnly(java.util.Date date) {
+        if (date == null) {
+            return "";
+        }
+        return new java.text.SimpleDateFormat("HH:mm").format(date);
+    }
+
+    private String calcWaitingTime(java.util.Date createdAt) {
+        if (createdAt == null) {
+            return "";
+        }
+        long diffMs = System.currentTimeMillis() - createdAt.getTime();
+        long hours = diffMs / (1000L * 60 * 60);
+        long days = hours / 24;
+        long remainHours = hours % 24;
+
+        if (days > 0) {
+            return days + "d " + remainHours + "h";
+        }
+        return hours + "h";
+    }
+
+    private String calcPriorityByWaiting(java.util.Date createdAt) {
+        if (createdAt == null) {
+            return "Medium";
+        }
+        long diffMs = System.currentTimeMillis() - createdAt.getTime();
+        long hours = diffMs / (1000L * 60 * 60);
+
+        if (hours >= 24) {
+            return "High";
+        }
+        return "Medium";
+    }
+
+    public static class DashboardApprovalRow {
+
+        private long id;
+        private String code;
+        private String requestedBy;
+        private String requestedTime;
+        private String waitingTime;
+        private String priority;
+        private String status;
+
+        public DashboardApprovalRow(long id, String code, String requestedBy, String requestedTime,
+                String waitingTime, String priority, String status) {
+            this.id = id;
+            this.code = code;
+            this.requestedBy = requestedBy;
+            this.requestedTime = requestedTime;
+            this.waitingTime = waitingTime;
+            this.priority = priority;
+            this.status = status;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getRequestedBy() {
+            return requestedBy;
+        }
+
+        public String getRequestedTime() {
+            return requestedTime;
+        }
+
+        public String getWaitingTime() {
+            return waitingTime;
+        }
+
+        public String getPriority() {
+            return priority;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+    }
+
+    public static class DashboardActivityRow {
+
+        private java.util.Date sortTime;
+        private String time;
+        private String type;
+        private String referenceCode;
+        private int units;
+
+        public DashboardActivityRow(java.util.Date sortTime, String time, String type, String referenceCode, int units) {
+            this.sortTime = sortTime;
+            this.time = time;
+            this.type = type;
+            this.referenceCode = referenceCode;
+            this.units = units;
+        }
+
+        public java.util.Date getSortTime() {
+            return sortTime;
+        }
+
+        public String getTime() {
+            return time;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public String getReferenceCode() {
+            return referenceCode;
+        }
+
+        public int getUnits() {
+            return units;
+        }
+    }
+
 }
