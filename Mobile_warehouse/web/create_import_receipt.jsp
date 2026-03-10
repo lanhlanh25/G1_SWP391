@@ -13,8 +13,7 @@
     --th:#d9d9d9;
   }
 
-  /* ✅ IMPORTANT: do not set body margin/padding/background here
-     because homepage.jsp already controls global layout */
+ 
   .wrap{
     padding:14px;
     background:transparent;
@@ -129,7 +128,7 @@
       <div class="title">Create Import Receipt</div>
     </div>
 
-    <!-- ✅ show backend errors (from Home.java flash) -->
+    
     <c:if test="${not empty err}">
       <div class="err">${fn:escapeXml(err)}</div>
     </c:if>
@@ -146,7 +145,7 @@
       <button type="button" class="tabBtn ${isExcel ? 'active' : ''}" data-tab="excel">Upload Excel With Imei</button>
     </div>
 
-    <!-- MANUAL -->
+  
     <div id="tab-manual" class="tabPanel ${isExcel ? '' : 'active'}">
       <form id="manualForm" method="post" action="${ctx}/create-import-receipt">
         <input type="hidden" name="mode" value="manual"/>
@@ -214,7 +213,7 @@
       </form>
     </div>
 
-    <!-- EXCEL -->
+   
     <div id="tab-excel" class="tabPanel ${isExcel ? 'active' : ''}">
       <form method="post" action="${ctx}/create-import-receipt" enctype="multipart/form-data">
         <input type="hidden" name="mode" value="excel"/>
@@ -438,7 +437,7 @@
 
   document.getElementById("btnAddRow").addEventListener("click", addRow);
 
-  // client validation only (server is source of truth)
+  
   manualForm.addEventListener("submit", function (e) {
     const rows = tbody.children;
     if (rows.length === 0) { e.preventDefault(); alert("Please add at least 1 product line."); }

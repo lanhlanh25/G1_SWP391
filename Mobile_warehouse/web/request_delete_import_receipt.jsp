@@ -11,10 +11,7 @@
 
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<!-- NOTE:
-  File này được include vào homepage.jsp (layout chung).
-  Không dùng <html><head><body> để tránh lệch margin/padding.
--->
+
 
 <div class="container">
   <div class="card">

@@ -63,7 +63,7 @@
         <button class="btn" type="submit">Save</button>
       </div>
 
-      <%-- link back để IMEI list quay về đúng inventory-count + giữ filter/page --%>
+      
       <c:url var="backToCount" value="/inventory-count">
         <c:param name="q" value="${q}"/>
         <c:param name="brandId" value="${brandId}"/>

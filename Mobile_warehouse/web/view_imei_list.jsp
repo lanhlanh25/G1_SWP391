@@ -48,7 +48,7 @@
 <div class="wrap">
 
   <div class="topbar">
-    <%-- Back thông minh: nếu có param.back thì quay về đó --%>
+    
     <c:choose>
       <c:when test="${not empty param.back}">
         <a class="btn" href="${param.back}">Back</a>
@@ -132,7 +132,7 @@
       </tbody>
     </table>
 
-    <%-- Paging window --%>
+    
     <c:choose>
       <c:when test="${totalPages <= 3}">
         <c:set var="startPage" value="1"/>

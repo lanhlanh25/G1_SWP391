@@ -13,7 +13,7 @@ public class ImportReceiptLineDetail {
     private String productCode;
     private String skuCode;
     private int qty;
-    private String imeiText;       // already formatted with new lines
+    private String imeiText;       
     private String itemNote;
     private String createdByName;
     private int inStock;

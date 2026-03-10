@@ -12,7 +12,7 @@
   <c:if test="${not empty param.msg}"><p class="msg-ok">${fn:escapeXml(param.msg)}</p></c:if>
   <c:if test="${not empty param.err}"><p class="msg-err">${fn:escapeXml(param.err)}</p></c:if>
 
-  <%-- Stats --%>
+ 
   <div class="stat-cards" style="margin-bottom:14px;">
     <div class="card stat-card-item">
       <div class="small muted">Total Products</div>
@@ -32,7 +32,7 @@
     </div>
   </div>
 
-  <%-- Filters --%>
+ 
   <div class="card" style="margin-bottom:14px;">
     <div class="card-body">
       <form method="get" action="${pageContext.request.contextPath}/inventory">
@@ -72,7 +72,7 @@
     </div>
   </div>
 
-  <%-- Table --%>
+ 
   <div class="card">
     <div class="card-body" style="padding:0;">
       <table class="table">

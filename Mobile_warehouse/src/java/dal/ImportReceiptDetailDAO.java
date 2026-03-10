@@ -9,7 +9,7 @@ import model.ImportReceiptLineDetail;
 
 public class ImportReceiptDetailDAO {
 
-    // ✅ FIX: Remove throws SQLException, handle internally
+    
     public ImportReceiptDetail getReceipt(long importId) {
         String sql = """
             SELECT ir.import_id, ir.import_code, ir.receipt_date, ir.note, ir.status,
@@ -45,7 +45,7 @@ public class ImportReceiptDetailDAO {
         }
     }
 
-    // ✅ FIX: Remove throws SQLException
+    
     public List<ImportReceiptLineDetail> getLines(long importId) {
         String sql = """
             SELECT irl.line_id, irl.qty, irl.item_note,
@@ -121,17 +121,14 @@ public class ImportReceiptDetailDAO {
         return sb.toString();
     }
 
-    /**
-     * ✅ APPROVE: Update status + handle IMEI re-import logic
-     * Returns: true if successful, false if receipt cannot be approved
-     */
+   
     public boolean approve(long importId) {
         Connection con = null;
         try {
             con = DBContext.getConnection();
             con.setAutoCommit(false);
 
-            // Check current status
+           
             String checkSql = "SELECT status FROM import_receipts WHERE import_id = ?";
             String currentStatus;
             
@@ -146,20 +143,20 @@ public class ImportReceiptDetailDAO {
                 }
             }
 
-            // Only PENDING or DRAFT can be approved
+           
             if (!"PENDING".equalsIgnoreCase(currentStatus) && !"DRAFT".equalsIgnoreCase(currentStatus)) {
                 con.rollback();
                 return false;
             }
 
-            // Update receipt status to CONFIRMED
+           
             String updateSql = "UPDATE import_receipts SET status = 'CONFIRMED' WHERE import_id = ?";
             try (PreparedStatement ps = con.prepareStatement(updateSql)) {
                 ps.setLong(1, importId);
                 ps.executeUpdate();
             }
 
-            // ✅ Handle IMEI logic: INSERT new or UPDATE existing INACTIVE
+           
             handleImeiApproval(con, importId);
 
             con.commit();
@@ -182,13 +179,9 @@ public class ImportReceiptDetailDAO {
         }
     }
 
-    /**
-     * ✅ Handle IMEI approval logic
-     * - If IMEI not exists: INSERT into product_units
-     * - If IMEI exists + INACTIVE: UPDATE to ACTIVE
-     */
+   
     private void handleImeiApproval(Connection con, long importId) throws SQLException {
-        // Get all IMEIs from this import with SKU info
+        
         String sql = """
             SELECT iru.imei, irl.sku_id
             FROM import_receipt_units iru
@@ -210,17 +203,17 @@ public class ImportReceiptDetailDAO {
             }
         }
 
-        // Process each IMEI
+       
         for (ImeiToProcess item : list) {
             processImei(con, item.imei, item.skuId);
         }
 
-        // Update inventory balance
+        
         updateInventoryBalance(con, importId);
     }
 
     private void processImei(Connection con, String imei, long skuId) throws SQLException {
-    // Check if IMEI exists for THIS SKU
+    
     String checkSql = "SELECT unit_id, unit_status FROM product_units WHERE sku_id = ? AND imei = ?";
 
     try (PreparedStatement ps = con.prepareStatement(checkSql)) {
@@ -232,7 +225,7 @@ public class ImportReceiptDetailDAO {
                 String status = rs.getString("unit_status");
 
                 if ("INACTIVE".equalsIgnoreCase(status)) {
-                    // Re-import => UPDATE to ACTIVE (only for this SKU)
+                   
                     String updateSql = "UPDATE product_units "
                             + "SET unit_status = 'ACTIVE', updated_at = CURRENT_TIMESTAMP "
                             + "WHERE sku_id = ? AND imei = ?";
@@ -244,9 +237,9 @@ public class ImportReceiptDetailDAO {
                     }
                 }
 
-                // If ACTIVE => should have been blocked at create stage
+               
             } else {
-                // Not exists for this SKU => INSERT new
+              
                 String insertSql = "INSERT INTO product_units(sku_id, imei, unit_status) VALUES(?, ?, 'ACTIVE')";
                 try (PreparedStatement psInsert = con.prepareStatement(insertSql)) {
                     psInsert.setLong(1, skuId);
@@ -273,7 +266,7 @@ public class ImportReceiptDetailDAO {
                     long skuId = rs.getLong("sku_id");
                     int qty = rs.getInt("total_qty");
 
-                    // Insert or update inventory_balance
+                    
                     String upsertSql = """
                         INSERT INTO inventory_balance(sku_id, qty_on_hand)
                         VALUES(?, ?)
@@ -290,9 +283,7 @@ public class ImportReceiptDetailDAO {
         }
     }
 
-    /**
-     * ✅ CANCEL: Update status to CANCELED
-     */
+   
     public boolean cancel(long importId) {
         String sql = """
             UPDATE import_receipts
@@ -313,7 +304,7 @@ public class ImportReceiptDetailDAO {
         }
     }
 
-    // ✅ Inner class for IMEI processing
+    
     private static class ImeiToProcess {
         String imei;
         long skuId;

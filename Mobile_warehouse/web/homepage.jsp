@@ -28,7 +28,7 @@
             ? (ctx + "/assets/default-avatar.jpg")
             : (ctx + "/" + avatarPath);
 
-    long v = System.currentTimeMillis(); // chống cache
+    long v = System.currentTimeMillis(); 
 
     String fullName = u.getFullName() == null ? "User" : u.getFullName().trim();
     String initials = "U";
@@ -49,7 +49,7 @@
 <body>
 <div class="app">
 
-    <!-- TOPBAR -->
+   
     <div class="top">
         <div class="top-left">
             <a class="brand" href="<%=ctx%>/home?p=dashboard">
@@ -84,10 +84,10 @@
         </div>
     </div>
 
-    <!-- BODY -->
+  
     <div class="layout">
 
-        <!-- SIDEBAR -->
+      
         <aside class="side">
             <div class="side-header">
                 <div class="section-title">Navigation</div>
@@ -112,7 +112,7 @@
             </div>
         </aside>
 
-        <!-- CONTENT -->
+     
         <div class="content-wrap">
             <main class="main">
                 <jsp:include page="<%= contentPage %>" />

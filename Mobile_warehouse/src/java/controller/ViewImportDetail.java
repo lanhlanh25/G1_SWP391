@@ -144,10 +144,10 @@ public class ViewImportDetail extends HttpServlet {
                 return;
             }
 
-            // unknown action -> just reload
+            
             resp.sendRedirect(req.getContextPath() + "/import-receipt-detail?id=" + id);
         } catch (Exception ex) {
-            // ✅ Catch ALL (including SQLException if your DAO throws it)
+            
             ex.printStackTrace();
             resp.sendRedirect(req.getContextPath()
                     + "/import-receipt-detail?id=" + id

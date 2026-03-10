@@ -1625,6 +1625,8 @@ public class Home extends HttpServlet {
                         return "import_receipt_list.jsp";
                     case "request-delete-import-receipt":
                         return "request_delete_import_receipt.jsp";
+                         case "request-delete-import-receipt-list":
+                        return "request_delete_import_receipt_list.jsp";
                     case "create-export-request":
                         return "create_export_request.jsp";
                     case "export-request-list":

@@ -33,8 +33,14 @@ public class CreateImportReceipt extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+
         Connection con = null;
+
         try {
+            if (isManager(req)) {
+                resp.sendRedirect(req.getContextPath() + "/home?p=import-receipt-list&err=Manager+cannot+create+import+receipt");
+                return;
+            }
             con = DBContext.getConnection();
 
             SupplierDAO sdao = new SupplierDAO();
@@ -53,17 +59,28 @@ public class CreateImportReceipt extends HttpServlet {
             req.setAttribute("receiptDateDefault", receiptDateDefault);
             req.setAttribute("createdByName", getFullName(req));
 
-            // flash messages
+          
             HttpSession ss = req.getSession();
             Object ferr = ss.getAttribute("flash_err");
             Object fmsg = ss.getAttribute("flash_msg");
             Object fmode = ss.getAttribute("flash_mode");
 
-            if (ferr != null) { req.setAttribute("err", ferr); ss.removeAttribute("flash_err"); }
-            if (fmsg != null) { req.setAttribute("msg", fmsg); ss.removeAttribute("flash_msg"); }
-            if (fmode != null) { req.setAttribute("mode", String.valueOf(fmode)); ss.removeAttribute("flash_mode"); }
+            if (ferr != null) {
+                req.setAttribute("err", ferr);
+                ss.removeAttribute("flash_err");
+            }
+            if (fmsg != null) {
+                req.setAttribute("msg", fmsg);
+                ss.removeAttribute("flash_msg");
+            }
+            if (fmode != null) {
+                req.setAttribute("mode", String.valueOf(fmode));
+                ss.removeAttribute("flash_mode");
+            }
 
-            if (req.getAttribute("mode") == null) req.setAttribute("mode", "manual");
+            if (req.getAttribute("mode") == null) {
+                req.setAttribute("mode", "manual");
+            }
 
             req.getRequestDispatcher("/create_import_receipt.jsp").forward(req, resp);
 
@@ -73,12 +90,19 @@ public class CreateImportReceipt extends HttpServlet {
             req.setAttribute("mode", "manual");
             req.getRequestDispatcher("/create_import_receipt.jsp").forward(req, resp);
         } finally {
-            if (con != null) try { con.close(); } catch (Exception ignored) {}
+            if (con != null) try {
+                con.close();
+            } catch (Exception ignored) {
+            }
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        if (isManager(req)) {
+            resp.sendRedirect(req.getContextPath() + "/home?p=import-receipt-list&err=Manager+cannot+create+import+receipt");
+            return;
+        }
         String mode = Optional.ofNullable(req.getParameter("mode")).orElse("manual");
         String status = "PENDING";
 
@@ -98,15 +122,21 @@ public class CreateImportReceipt extends HttpServlet {
             resp.sendRedirect(req.getContextPath() + "/home?p=import-receipt-list");
         } catch (Exception e) {
             e.printStackTrace();
-            if (con != null) try { con.rollback(); } catch (Exception ignored) {}
+            if (con != null) try {
+                con.rollback();
+            } catch (Exception ignored) {
+            }
 
             req.getSession().setAttribute("flash_err", e.getMessage());
             req.getSession().setAttribute("flash_mode", mode);
 
-            // ✅ IMPORTANT: redirect back to /home to keep header/menu/footer
+          
             resp.sendRedirect(req.getContextPath() + "/home?p=create-import-receipt");
         } finally {
-            if (con != null) try { con.close(); } catch (Exception ignored) {}
+            if (con != null) try {
+                con.close();
+            } catch (Exception ignored) {
+            }
         }
     }
 
@@ -115,13 +145,17 @@ public class CreateImportReceipt extends HttpServlet {
 
         String importCode = req.getParameter("importCode");
         Long supplierId = parseLongNullable(req.getParameter("supplierId"));
-        if (supplierId == null) throw new IllegalArgumentException("Supplier is required");
+        if (supplierId == null) {
+            throw new IllegalArgumentException("Supplier is required");
+        }
 
         Timestamp receiptDate = Timestamp.valueOf(parseDT(req.getParameter("receiptDate")));
         String note = req.getParameter("note");
 
         int createdBy = getUserId(req);
-        if (createdBy <= 0) throw new IllegalArgumentException("Missing session userId.");
+        if (createdBy <= 0) {
+            throw new IllegalArgumentException("Missing session userId.");
+        }
 
         String[] productIds = req.getParameterValues("productId");
         String[] skuIds = req.getParameterValues("skuId");
@@ -137,21 +171,25 @@ public class CreateImportReceipt extends HttpServlet {
             throw new IllegalArgumentException("Invalid data: array length mismatch");
         }
 
-        // validate all imeis first
-        Set<String> allImeisSameSku = new HashSet<>(); // prevent duplicate within request for same sku
+      
+        Set<String> allImeisSameSku = new HashSet<>(); 
 
         for (int i = 0; i < n; i++) {
             String productIdRaw = productIds[i];
             String skuIdRaw = skuIds[i];
             String qtyRaw = qtys[i];
 
-            if (isBlank(productIdRaw) && isBlank(skuIdRaw) && isBlank(qtyRaw)) continue;
+            if (isBlank(productIdRaw) && isBlank(skuIdRaw) && isBlank(qtyRaw)) {
+                continue;
+            }
 
             long productId = parseLongRequired(productIdRaw, "Line " + (i + 1) + ": product required");
             long skuId = parseLongRequired(skuIdRaw, "Line " + (i + 1) + ": sku required");
             int qty = parseInt(qtyRaw, 0);
 
-            if (qty <= 0) throw new IllegalArgumentException("Line " + (i + 1) + ": qty must be > 0");
+            if (qty <= 0) {
+                throw new IllegalArgumentException("Line " + (i + 1) + ": qty must be > 0");
+            }
             if (!dao.skuBelongsToProduct(con, skuId, productId)) {
                 throw new IllegalArgumentException("Line " + (i + 1) + ": SKU not belong to Product");
             }
@@ -169,11 +207,13 @@ public class CreateImportReceipt extends HttpServlet {
                     throw new IllegalArgumentException("Line " + (i + 1) + ", IMEI " + k + ": must be 15 digits. Got: " + imei);
                 }
 
-                // ✅ validate PER SKU + IMEI
+                
                 String err = dao.validateImeiForInsert(con, skuId, imei);
-                if (err != null) throw new IllegalArgumentException(err);
+                if (err != null) {
+                    throw new IllegalArgumentException(err);
+                }
 
-                // ✅ prevent duplicate in same request (per sku)
+               
                 String key = skuId + "|" + imei;
                 if (!allImeisSameSku.add(key)) {
                     throw new IllegalArgumentException("Duplicate IMEI in this receipt (same SKU): " + imei);
@@ -189,12 +229,16 @@ public class CreateImportReceipt extends HttpServlet {
             String skuIdRaw = skuIds[i];
             String qtyRaw = qtys[i];
 
-            if (isBlank(productIdRaw) && isBlank(skuIdRaw) && isBlank(qtyRaw)) continue;
+            if (isBlank(productIdRaw) && isBlank(skuIdRaw) && isBlank(qtyRaw)) {
+                continue;
+            }
 
             long productId = parseLongRequired(productIdRaw, "Line " + (i + 1) + ": product required");
             long skuId = parseLongRequired(skuIdRaw, "Line " + (i + 1) + ": sku required");
             int qty = parseInt(qtyRaw, 0);
-            if (qty <= 0) continue;
+            if (qty <= 0) {
+                continue;
+            }
 
             String itemNote = (itemNotes != null && i < itemNotes.length) ? itemNotes[i] : null;
 
@@ -210,7 +254,9 @@ public class CreateImportReceipt extends HttpServlet {
             insertedLines++;
         }
 
-        if (insertedLines == 0) throw new IllegalArgumentException("Please add at least 1 valid product line.");
+        if (insertedLines == 0) {
+            throw new IllegalArgumentException("Please add at least 1 valid product line.");
+        }
     }
 
     private void createByExcel(Connection con, HttpServletRequest req, String status) throws Exception {
@@ -219,20 +265,30 @@ public class CreateImportReceipt extends HttpServlet {
         String importCode = req.getParameter("importCode");
 
         Long supplierId = parseLongNullable(req.getParameter("supplierId"));
-        if (supplierId == null) throw new IllegalArgumentException("Supplier is required");
+        if (supplierId == null) {
+            throw new IllegalArgumentException("Supplier is required");
+        }
 
         Timestamp receiptDate = Timestamp.valueOf(parseDT(req.getParameter("receiptDate")));
         String note = req.getParameter("note");
 
         int createdBy = getUserId(req);
-        if (createdBy <= 0) throw new IllegalArgumentException("Missing session userId.");
+        if (createdBy <= 0) {
+            throw new IllegalArgumentException("Missing session userId.");
+        }
 
         Part filePart = req.getPart("excelFile");
-        if (filePart == null || filePart.getSize() == 0) throw new IllegalArgumentException("Excel file required.");
+        if (filePart == null || filePart.getSize() == 0) {
+            throw new IllegalArgumentException("Excel file required.");
+        }
 
         List<ExcelRow> rows;
-        try (InputStream is = filePart.getInputStream()) { rows = parseExcel(is); }
-        if (rows.isEmpty()) throw new IllegalArgumentException("Excel has no data.");
+        try (InputStream is = filePart.getInputStream()) {
+            rows = parseExcel(is);
+        }
+        if (rows.isEmpty()) {
+            throw new IllegalArgumentException("Excel has no data.");
+        }
 
         Set<String> allImeisSameSku = new HashSet<>();
         Map<String, List<String>> grouped = new LinkedHashMap<>();
@@ -249,9 +305,11 @@ public class CreateImportReceipt extends HttpServlet {
                 throw new IllegalArgumentException("Invalid IMEI (15 digits): " + r.imei);
             }
 
-            // ✅ validate PER SKU + IMEI
+           
             String err = dao.validateImeiForInsert(con, skuId, r.imei);
-            if (err != null) throw new IllegalArgumentException(err);
+            if (err != null) {
+                throw new IllegalArgumentException(err);
+            }
 
             String keyDup = skuId + "|" + r.imei;
             if (!allImeisSameSku.add(keyDup)) {
@@ -279,10 +337,14 @@ public class CreateImportReceipt extends HttpServlet {
         List<ExcelRow> out = new ArrayList<>();
         try (Workbook wb = new XSSFWorkbook(is)) {
             Sheet sh = wb.getSheetAt(0);
-            if (sh == null) return out;
+            if (sh == null) {
+                return out;
+            }
 
             Iterator<Row> it = sh.rowIterator();
-            if (!it.hasNext()) return out;
+            if (!it.hasNext()) {
+                return out;
+            }
 
             Row header = it.next();
             Map<String, Integer> col = new HashMap<>();
@@ -304,8 +366,12 @@ public class CreateImportReceipt extends HttpServlet {
                 String s = cellStr(r.getCell(col.get("sku_code")));
                 String imei = cellStr(r.getCell(col.get("imei"))).replaceAll("\\D", "");
 
-                if (isBlank(p) && isBlank(s) && isBlank(imei)) continue;
-                if (isBlank(p) || isBlank(s) || isBlank(imei)) throw new IllegalArgumentException("Row " + rowNum + " missing data");
+                if (isBlank(p) && isBlank(s) && isBlank(imei)) {
+                    continue;
+                }
+                if (isBlank(p) || isBlank(s) || isBlank(imei)) {
+                    throw new IllegalArgumentException("Row " + rowNum + " missing data");
+                }
 
                 out.add(new ExcelRow(p.trim(), s.trim(), imei.trim()));
             }
@@ -314,56 +380,94 @@ public class CreateImportReceipt extends HttpServlet {
     }
 
     private String cellStr(Cell c) {
-        if (c == null) return "";
+        if (c == null) {
+            return "";
+        }
         c.setCellType(CellType.STRING);
         return c.getStringCellValue() == null ? "" : c.getStringCellValue();
     }
 
     private static class ExcelRow {
+
         String productCode, skuCode, imei;
-        ExcelRow(String p, String s, String i) { productCode = p; skuCode = s; imei = i; }
+
+        ExcelRow(String p, String s, String i) {
+            productCode = p;
+            skuCode = s;
+            imei = i;
+        }
     }
 
     private LocalDateTime parseDT(String raw) {
-        if (isBlank(raw)) return LocalDateTime.now().withSecond(0).withNano(0);
+        if (isBlank(raw)) {
+            return LocalDateTime.now().withSecond(0).withNano(0);
+        }
         return LocalDateTime.parse(raw, DTF_UI);
     }
 
     private String getFullName(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
-        if (session == null) return "Staff";
+        if (session == null) {
+            return "Staff";
+        }
         Object fullName = session.getAttribute("fullName");
         return fullName == null ? "Staff" : String.valueOf(fullName);
     }
 
     private int getUserId(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
-        if (session == null) return -1;
+        if (session == null) {
+            return -1;
+        }
 
         Object uid = session.getAttribute("userId");
-        if (uid instanceof Integer) return (Integer) uid;
-        if (uid instanceof Long) return ((Long) uid).intValue();
+        if (uid instanceof Integer) {
+            return (Integer) uid;
+        }
+        if (uid instanceof Long) {
+            return ((Long) uid).intValue();
+        }
         if (uid instanceof String) {
-            try { return Integer.parseInt((String) uid); } catch (Exception ignored) {}
+            try {
+                return Integer.parseInt((String) uid);
+            } catch (Exception ignored) {
+            }
         }
         return -1;
     }
 
     private int parseInt(String s, int def) {
-        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
+        try {
+            return Integer.parseInt(s);
+        } catch (Exception e) {
+            return def;
+        }
     }
 
     private long parseLongRequired(String s, String msg) {
-        if (isBlank(s)) throw new IllegalArgumentException(msg);
+        if (isBlank(s)) {
+            throw new IllegalArgumentException(msg);
+        }
         return Long.parseLong(s.trim());
     }
 
     private Long parseLongNullable(String s) {
-        if (isBlank(s)) return null;
+        if (isBlank(s)) {
+            return null;
+        }
         return Long.parseLong(s.trim());
     }
 
     private boolean isBlank(String s) {
         return s == null || s.trim().isEmpty();
+    }
+
+    private boolean isManager(HttpServletRequest req) {
+        HttpSession ss = req.getSession(false);
+        if (ss == null) {
+            return false;
+        }
+        String role = (String) ss.getAttribute("roleName");
+        return role != null && role.equalsIgnoreCase("MANAGER");
     }
 }
