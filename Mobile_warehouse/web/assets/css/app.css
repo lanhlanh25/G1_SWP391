@@ -77,25 +77,17 @@ a:hover { color: var(--primary); }
   gap: 12px;
   flex-wrap: wrap;
   box-shadow: 0 1px 4px rgba(16, 24, 40, .04);
+    position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
-.layout {
-  display: flex;
-  min-height: calc(100vh - 66px);
-}
+
 
 /* ===========================
    Sidebar
    =========================== */
-.side {
-  width: 272px;
-  background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-2) 100%);
-  border-right: 1px solid rgba(255, 255, 255, .05);
-  padding: 0px 10px;
-  color: var(--sidebar-text);
-  overflow: auto;
-  flex-shrink: 0;
-}
+
 
 .side .logo {
   display: flex;
@@ -108,7 +100,7 @@ a:hover { color: var(--primary); }
 }
 
 .side .section-title {
-  margin: 18px 12px 8px;
+  margin: 16px 12px 8px;
   font-size: 10.5px;
   color: var(--sidebar-muted);
   text-transform: uppercase;
@@ -751,66 +743,7 @@ a:hover { color: var(--primary); }
   letter-spacing: -.02em;
 }
 
-/* ===========================
-   Brand Stats page
-   =========================== */
-.brand-stats .cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-  margin: 14px 0 18px;
-}
-@media (max-width: 1100px) { .brand-stats .cards { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 650px)  { .brand-stats .cards { grid-template-columns: 1fr; } }
 
-.brand-stats .cards .stat-card {
-  padding: 16px 18px;
-  min-height: 90px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-  box-shadow: 0 4px 14px rgba(16, 24, 40, .05);
-}
-.brand-stats .cards .stat-card .label {
-  font-size: 11.5px;
-  color: var(--muted);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-.brand-stats .cards .stat-card .value {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -.02em;
-}
-
-.brand-stats .filters {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 14px 18px;
-  align-items: end;
-  margin-bottom: 12px;
-}
-.brand-stats .filters .field label {
-  display: block;
-  font-size: 11.5px;
-  margin-bottom: 6px;
-  color: var(--text-2);
-  font-weight: 600;
-}
-@media (max-width: 980px) { .brand-stats .filters { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 560px) { .brand-stats .filters { grid-template-columns: 1fr; } }
-
-.brand-stats .sort-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr auto auto;
-  gap: 14px;
-  align-items: end;
-  margin: 10px 0 16px;
-}
-@media (max-width: 900px) { .brand-stats .sort-row { grid-template-columns: 1fr 1fr; } }
 
 /* ===========================
    Brand Stats Detail
@@ -1044,11 +977,7 @@ a:hover { color: var(--primary); }
 /* ===========================
    Topbar (improved)
    =========================== */
-.top {
-  position: sticky;
-  top: 0;
-  z-index: 50;
-}
+
 
 .top-left, .top-right {
   display: flex;
@@ -1114,15 +1043,12 @@ a:hover { color: var(--primary); }
 /* ===========================
    App wrapper + Footer
    =========================== */
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
+
 
 .layout {
   flex: 1;
-  min-height: 0; /* IMPORTANT for scrolling areas */
+    display: flex;
+  min-height: calc(100vh - 66px);
 }
 
 .footer {
@@ -1150,6 +1076,13 @@ a:hover { color: var(--primary); }
   display: flex;
   flex-direction: column;
   overflow: hidden; /* allow inner scroll */
+    width: 272px;
+  background: linear-gradient(180deg, var(--sidebar) 0%, var(--sidebar-2) 100%);
+  border-right: 1px solid rgba(255, 255, 255, .05);
+  padding: 0px 10px;
+  color: var(--sidebar-text);
+  overflow: auto;
+  flex-shrink: 0;
 }
 
 .side-header {
@@ -1275,10 +1208,11 @@ a:hover { color: var(--primary); }
    Public Home (landing)
    =========================== */
 .public-wrap {
-  max-width: 1100px;
+  max-width: 1180px;
   margin: 0 auto;
-  padding: 44px 24px 56px;
+  padding: 28px 24px 56px;
 }
+
 
 .public-hero {
   display: grid;
@@ -1346,11 +1280,7 @@ a:hover { color: var(--primary); }
 /* ===========================
    Landing page sections
    =========================== */
-.public-wrap {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 28px 24px 56px;
-}
+
 
 .landing-hero {
   display: grid;
@@ -1700,9 +1630,7 @@ a:hover { color: var(--primary); }
   background: rgba(239,68,68,.14);
 }
 
-.side .section-title{
-  margin: 16px 12px 8px;
-}
+
 .side ul + .section-title{
   margin-top: 14px;
 }
@@ -1726,29 +1654,7 @@ a:hover { color: var(--primary); }
   width: 100%;
 }
 
-.footer-inner.footer-center{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  text-align:center;
-  gap:6px;
-}
 
-.footer-line{
-  font-size:12.5px;
-  font-weight:600;
-  color: var(--muted);
-}
-
-.footer-line b{
-  color: var(--text);
-}
-
-.footer-line .dot{
-  margin: 0 8px;
-  opacity: .6;
-}
 
 .footer-inner.footer-center{
   display:flex;
@@ -1911,11 +1817,6 @@ a:hover { color: var(--primary); }
   border-color: #cbd5e1;
 }
 
-.empty-state {
-  text-align: center;
-  color: var(--muted);
-  padding: 20px 12px;
-}
 
 @media (max-width: 1200px) {
   .kpi-grid {
@@ -1944,4 +1845,254 @@ a:hover { color: var(--primary); }
   color: var(--muted);
   padding: 20px 12px;
   font-weight: 600;
+}
+/* ===========================
+   Brand Statistics Page
+   =========================== */
+.brand-stats-page {
+  display: grid;
+  gap: 14px;
+}
+
+.brand-stats-topbar {
+  margin-bottom: 0;
+}
+
+/* Summary cards */
+.brand-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.brand-summary-card {
+  padding: 18px 20px;
+  min-height: 108px;
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, .05);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.brand-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(16, 24, 40, .08);
+}
+
+.brand-summary-label {
+  font-size: 11.5px;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  line-height: 1.5;
+}
+
+.brand-summary-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.02em;
+  line-height: 1.2;
+}
+
+/* Filter panel */
+.brand-filter-panel {
+  padding: 18px 20px;
+  margin-bottom: 14px;
+  border-radius: 18px;
+  box-shadow: 0 6px 20px rgba(16, 24, 40, .05);
+}
+
+.filter-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-panel-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -.01em;
+}
+
+.filter-panel-sub {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.brand-filter-form {
+  display: grid;
+  gap: 14px;
+}
+
+.brand-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px 16px;
+  align-items: start;
+}
+
+.brand-filter-grid .field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-filter-grid .field label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-2);
+  min-height: 18px;
+}
+
+.brand-filter-grid .select,
+.brand-filter-grid .input {
+  height: 46px;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.field-span-2 {
+  grid-column: span 2;
+}
+
+.field-span-4 {
+  grid-column: span 4;
+}
+
+.filter-note-row {
+  margin-top: -4px;
+  margin-bottom: 2px;
+}
+
+.field-note {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.brand-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+  flex-wrap: wrap;
+}
+
+/* Applied filters */
+.applied-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: -2px 0 0;
+}
+
+.applied-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  margin-right: 2px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-size: 12.5px;
+  color: var(--text-2);
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, .03);
+}
+
+.filter-chip b {
+  color: var(--text);
+  font-weight: 800;
+}
+
+/* Table */
+.brand-table-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.brand-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.brand-name-text {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.empty-row {
+  text-align: center;
+  color: #666;
+  padding: 24px 12px !important;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .brand-summary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .brand-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .field-span-2,
+  .field-span-4 {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 680px) {
+  .brand-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-filter-panel {
+    padding: 16px;
+  }
+
+  .brand-filter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .field-span-2,
+  .field-span-4 {
+    grid-column: span 1;
+  }
+
+  .brand-filter-actions {
+    justify-content: stretch;
+  }
+
+  .brand-filter-actions .btn {
+    width: 100%;
+  }
 }

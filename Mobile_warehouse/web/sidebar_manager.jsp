@@ -41,7 +41,7 @@
             <ul style="margin-top:6px;">
                 <li><a href="<%=ctx%>/home?p=brand-add">Add New Brand</a></li>
                 <li><a href="<%=ctx%>/home?p=brand-list">Brand List</a></li>
-                <li><a href="<%=ctx%>/home?p=brand-stats">Product Statistics By Brand</a></li>
+                <li><a href="<%=ctx%>/home?p=brand-stats">Brand Statistics</a></li>
             </ul>
         </details>
     </li>
