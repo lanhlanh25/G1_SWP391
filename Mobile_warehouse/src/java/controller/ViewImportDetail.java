@@ -100,6 +100,7 @@ public class ViewImportDetail extends HttpServlet {
         req.getRequestDispatcher("homepage.jsp").forward(req, resp);
     }
 
+    // doPost is now view-only — no approve/cancel actions needed
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         HttpSession session = req.getSession(false);
@@ -109,49 +110,13 @@ public class ViewImportDetail extends HttpServlet {
             return;
         }
 
-        String role = ensureRole(session, u);
-        if (!"MANAGER".equalsIgnoreCase(role)) {
-            resp.sendError(403, "Forbidden");
-            return;
-        }
-
         long id = parseId(req);
         if (id <= 0) {
-            resp.sendRedirect(req.getContextPath() + "/home?p=import-receipt-list&err=" + enc("Invalid id"));
+            resp.sendRedirect(req.getContextPath() + "/home?p=import-receipt-list");
             return;
         }
 
-        String action = req.getParameter("action");
-        if (action == null) action = "";
-
-        ImportReceiptDetailDAO dao = new ImportReceiptDetailDAO();
-
-        try {
-            boolean ok;
-            String msg;
-
-            if ("approve".equalsIgnoreCase(action)) {
-                ok = dao.approve(id);
-                msg = ok ? "Approved successfully" : "Only PENDING/DRAFT receipt can be approved";
-                resp.sendRedirect(req.getContextPath() + "/import-receipt-detail?id=" + id + "&msg=" + enc(msg));
-                return;
-            }
-
-            if ("cancel".equalsIgnoreCase(action)) {
-                ok = dao.cancel(id);
-                msg = ok ? "Cancelled successfully" : "Only PENDING/DRAFT receipt can be cancelled";
-                resp.sendRedirect(req.getContextPath() + "/import-receipt-detail?id=" + id + "&msg=" + enc(msg));
-                return;
-            }
-
-            
-            resp.sendRedirect(req.getContextPath() + "/import-receipt-detail?id=" + id);
-        } catch (Exception ex) {
-            
-            ex.printStackTrace();
-            resp.sendRedirect(req.getContextPath()
-                    + "/import-receipt-detail?id=" + id
-                    + "&err=" + enc("Action failed: " + ex.getMessage()));
-        }
+        // No approve/cancel actions — redirect back to detail view
+        resp.sendRedirect(req.getContextPath() + "/import-receipt-detail?id=" + id);
     }
 }

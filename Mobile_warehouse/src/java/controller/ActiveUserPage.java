@@ -16,18 +16,25 @@ import java.io.IOException;
  *
  * @author Admin
  */
+
+
 @WebServlet("/admin/users/active-page")
 public class ActiveUserPage extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
+        // ✅ Redirect về home controller để có layout đầy đủ (sidebar, header, footer)
         String q = req.getParameter("q");
+        String msg = req.getParameter("msg");
 
-        UserDAO dao = new UserDAO();
-        req.setAttribute("users", dao.getAllUsersWithRole(q));
-
-        req.getRequestDispatcher("/active_user.jsp").forward(req, resp);
+        StringBuilder url = new StringBuilder(req.getContextPath() + "/home?p=user-toggle");
+        if (q != null && !q.isBlank()) {
+            url.append("&q=").append(java.net.URLEncoder.encode(q, "UTF-8"));
+        }
+        if (msg != null && !msg.isBlank()) {
+            url.append("&msg=").append(java.net.URLEncoder.encode(msg, "UTF-8"));
+        }
+        resp.sendRedirect(url.toString());
     }
 }

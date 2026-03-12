@@ -19,8 +19,11 @@ public class RolePermissionDAO {
     public Set<Integer> getPermissionIdsByRole(int roleId) {
         Set<Integer> set = new HashSet<>();
         String sql = "SELECT permission_id FROM role_permissions WHERE role_id = ?";
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setInt(1, roleId);
+
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     set.add(rs.getInt(1));
@@ -49,11 +52,13 @@ public class RolePermissionDAO {
                     for (int pid : permIds) {
                         ps.setInt(1, roleId);
                         ps.setInt(2, pid);
+
                         if (grantedBy == null) {
                             ps.setNull(3, java.sql.Types.INTEGER);
                         } else {
                             ps.setInt(3, grantedBy);
                         }
+
                         ps.addBatch();
                     }
                     ps.executeBatch();
@@ -75,26 +80,59 @@ public class RolePermissionDAO {
     public List<Permission> getPermissionsByRoleId(int roleId) {
         List<Permission> list = new ArrayList<>();
 
-        String sql
-                = "SELECT p.permission_id, p.name "
-                + "FROM role_permissions rp "
-                + "JOIN permissions p ON p.permission_id = rp.permission_id "
-                + "WHERE rp.role_id = ? "
-                + "ORDER BY p.name ASC";
+        String sql =
+                "SELECT p.permission_id, p.name, p.code " +
+                "FROM role_permissions rp " +
+                "JOIN permissions p ON p.permission_id = rp.permission_id " +
+                "WHERE rp.role_id = ? " +
+                "ORDER BY p.name ASC";
 
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, roleId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Permission p = new Permission();
-
                     p.setPermissionId(rs.getInt("permission_id"));
                     p.setName(rs.getString("name"));
 
+                    try {
+                        p.setCode(rs.getString("code"));
+                    } catch (Exception ignore) {
+                    }
+
                     list.add(p);
                 }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    public List<Permission> getAllPermissions() {
+        List<Permission> list = new ArrayList<>();
+
+        String sql = "SELECT permission_id, name, code FROM permissions ORDER BY name ASC";
+
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                Permission p = new Permission();
+                p.setPermissionId(rs.getInt("permission_id"));
+                p.setName(rs.getString("name"));
+
+                try {
+                    p.setCode(rs.getString("code"));
+                } catch (Exception ignore) {
+                }
+
+                list.add(p);
             }
         } catch (Exception e) {
             e.printStackTrace();

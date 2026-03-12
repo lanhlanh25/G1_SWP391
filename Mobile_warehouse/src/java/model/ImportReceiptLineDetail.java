@@ -11,27 +11,25 @@ package model;
 public class ImportReceiptLineDetail {
     private long lineId;
     private String productCode;
+    private String productName;   // NEW: product name
     private String skuCode;
     private int qty;
-    private String imeiText;       
+    private String imeiText;
     private String itemNote;
     private String createdByName;
     private int inStock;
 
-    public int getInStock() {
-        return inStock;
-    }
-
-    public void setInStock(int inStock) {
-        this.inStock = inStock;
-    }
-
+    public int getInStock() { return inStock; }
+    public void setInStock(int inStock) { this.inStock = inStock; }
 
     public long getLineId() { return lineId; }
     public void setLineId(long lineId) { this.lineId = lineId; }
 
     public String getProductCode() { return productCode; }
     public void setProductCode(String productCode) { this.productCode = productCode; }
+
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
 
     public String getSkuCode() { return skuCode; }
     public void setSkuCode(String skuCode) { this.skuCode = skuCode; }

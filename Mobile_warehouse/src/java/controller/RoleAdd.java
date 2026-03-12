@@ -17,12 +17,13 @@ import java.io.IOException;
 @WebServlet("/role_add")
 public class RoleAdd extends HttpServlet {
 
-    private String n(String s){ return s == null ? "" : s.trim(); }
+    private String n(String s) { return s == null ? "" : s.trim(); }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.getRequestDispatcher("/role_add.jsp").forward(req, resp);
+        // ✅ Redirect về home controller để có layout đầy đủ
+        resp.sendRedirect(req.getContextPath() + "/home?p=role-add");
     }
 
     @Override
@@ -30,42 +31,39 @@ public class RoleAdd extends HttpServlet {
             throws ServletException, IOException {
 
         String roleName = n(req.getParameter("role_name"));
-        String desc = n(req.getParameter("description"));
+        String desc     = n(req.getParameter("description"));
+        int isActive    = 0; // luôn tạo mới với inactive
 
-        
-        int userCount = 1;
-        int isActive = 0; 
+        HttpSession session = req.getSession();
 
         if (roleName.isEmpty()) {
-            req.setAttribute("error", "Role Name is required.");
-            req.setAttribute("v_role_name", roleName);
-            req.setAttribute("v_description", desc);
-            req.getRequestDispatcher("/role_add.jsp").forward(req, resp);
+            session.setAttribute("flash_role_error",   "Role Name is required.");
+            session.setAttribute("flash_v_role_name",  roleName);
+            session.setAttribute("flash_v_description", desc);
+            resp.sendRedirect(req.getContextPath() + "/home?p=role-add");
             return;
         }
 
         RoleDAO dao = new RoleDAO();
 
-        
         if (dao.existsRoleName(roleName)) {
-            req.setAttribute("error", "Role name already exists!");
-            req.setAttribute("v_role_name", roleName);
-            req.setAttribute("v_description", desc);
-            req.getRequestDispatcher("/role_add.jsp").forward(req, resp);
+            session.setAttribute("flash_role_error",   "Role name already exists!");
+            session.setAttribute("flash_v_role_name",  roleName);
+            session.setAttribute("flash_v_description", desc);
+            resp.sendRedirect(req.getContextPath() + "/home?p=role-add");
             return;
         }
 
         boolean ok = dao.createRole(roleName, desc, isActive);
-
         if (!ok) {
-            req.setAttribute("error", "Create role failed!");
-            req.setAttribute("v_role_name", roleName);
-            req.setAttribute("v_description", desc);
-            req.getRequestDispatcher("/role_add.jsp").forward(req, resp);
+            session.setAttribute("flash_role_error",   "Create role failed!");
+            session.setAttribute("flash_v_role_name",  roleName);
+            session.setAttribute("flash_v_description", desc);
+            resp.sendRedirect(req.getContextPath() + "/home?p=role-add");
             return;
         }
 
-      
-        resp.sendRedirect(req.getContextPath() + "/role_list?msg=created");
+        // ✅ Redirect về home?p=role-list với layout đầy đủ
+        resp.sendRedirect(req.getContextPath() + "/home?p=role-list&msg=Role+created+successfully");
     }
 }

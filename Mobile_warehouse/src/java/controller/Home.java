@@ -249,47 +249,71 @@ public class Home extends HttpServlet {
 
             case "create-import-receipt": {
                 SupplierDAO sdao = new SupplierDAO();
-                ProductDAO pdao = new ProductDAO();
-                ProductSkuDAO skdao = new ProductSkuDAO();
                 ImportReceiptDAO irDao = new ImportReceiptDAO();
 
                 request.setAttribute("suppliers", sdao.listActive());
-                request.setAttribute("products", pdao.listActive());
-                request.setAttribute("skus", skdao.listActive());
+
+                // Flash messages (from failed POST redirect)
                 HttpSession ss = request.getSession(false);
                 if (ss != null) {
-                    Object ferr = ss.getAttribute("flash_err");
+                    Object ferr  = ss.getAttribute("flash_err");
+                    Object fmsg  = ss.getAttribute("flash_msg");
                     Object fmode = ss.getAttribute("flash_mode");
-                    if (ferr != null) {
-                        request.setAttribute("err", String.valueOf(ferr));
-                        ss.removeAttribute("flash_err");
-                    }
-                    if (fmode != null) {
-                        request.setAttribute("mode", String.valueOf(fmode));
-                        ss.removeAttribute("flash_mode");
-                    }
-                }
-                if (request.getAttribute("mode") == null) {
-                    request.setAttribute("mode", "manual");
-                }
-                try (Connection con = DBContext.getConnection()) {
-                    String importCode = irDao.generateImportCode(con);
-                    request.setAttribute("importCode", importCode);
+                    if (ferr  != null) { request.setAttribute("err",  String.valueOf(ferr));  ss.removeAttribute("flash_err"); }
+                    if (fmsg  != null) { request.setAttribute("msg",  String.valueOf(fmsg));  ss.removeAttribute("flash_msg"); }
+                    if (fmode != null) { request.setAttribute("mode", String.valueOf(fmode)); ss.removeAttribute("flash_mode"); }
                 }
 
-                String receiptDateDefault = LocalDateTime.now()
-                        .withSecond(0).withNano(0)
-                        .format(DTF_UI);
-                request.setAttribute("receiptDateDefault", receiptDateDefault);
+                try (Connection con = DBContext.getConnection()) {
+                    request.setAttribute("importCode", irDao.generateImportCode(con));
+                }
+                request.setAttribute("receiptDateDefault",
+                        LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
 
                 String createdByName = "Staff";
-                HttpSession session = request.getSession(false);
-                if (session != null && session.getAttribute("fullName") != null) {
-                    createdByName = String.valueOf(session.getAttribute("fullName"));
+                HttpSession ssName = request.getSession(false);
+                if (ssName != null && ssName.getAttribute("fullName") != null) {
+                    createdByName = String.valueOf(ssName.getAttribute("fullName"));
                 } else if (authUser != null && authUser.getFullName() != null) {
                     createdByName = authUser.getFullName();
                 }
                 request.setAttribute("createdByName", createdByName);
+
+                // ── Request mode: pre-fill from Import Request ──────────────
+                String requestIdRaw = request.getParameter("requestId");
+                if (requestIdRaw != null && !requestIdRaw.isBlank()) {
+                    try {
+                        long requestId = Long.parseLong(requestIdRaw.trim());
+                        ImportRequestDAO irReqDao = new ImportRequestDAO();
+                        ImportRequest irHeader = irReqDao.getHeader(requestId);
+
+                        if (irHeader == null) {
+                            request.setAttribute("err", "Import request not found.");
+                        } else if ("COMPLETE".equalsIgnoreCase(irHeader.getStatus())) {
+                            request.setAttribute("err", "This request has already been completed.");
+                        } else {
+                            List<ImportRequestItem> requestItems = irReqDao.listItemsForReceipt(requestId);
+                            request.setAttribute("irHeader", irHeader);
+                            request.setAttribute("requestItems", requestItems);
+                            request.setAttribute("requestId", requestId);
+                        }
+                    } catch (NumberFormatException e) {
+                        request.setAttribute("err", "Invalid request ID.");
+                    }
+                    // In request mode products/skus not needed (rows are readonly)
+                    request.setAttribute("products", java.util.Collections.emptyList());
+                    request.setAttribute("skus",     java.util.Collections.emptyList());
+                } else {
+                    // ── Manual mode: load products + skus for dropdowns ──────
+                    ProductDAO pdao = new ProductDAO();
+                    ProductSkuDAO skdao = new ProductSkuDAO();
+                    request.setAttribute("products", pdao.listActive());
+                    request.setAttribute("skus",     skdao.listActive());
+                }
+
+                if (request.getAttribute("mode") == null) {
+                    request.setAttribute("mode", "manual");
+                }
                 break;
             }
 
@@ -620,7 +644,27 @@ public class Home extends HttpServlet {
                 request.setAttribute("roles", roles);
                 break;
             }
+case "user-view": {
+    String idRaw = request.getParameter("id");
+    if (idRaw == null || idRaw.isBlank()) {
+        response.sendRedirect(request.getContextPath() + "/home?p=user-list&msg=Please select a user first");
+        return;
+    }
 
+    int userId = Integer.parseInt(idRaw.trim());
+    User user = userDAO.getById(userId);
+    if (user == null) {
+        response.sendRedirect(request.getContextPath() + "/home?p=user-list&msg=User not found");
+        return;
+    }
+
+    String roleName = roleDAO.getRoleNameById(user.getRoleId());
+
+    request.setAttribute("user", user);
+    request.setAttribute("roleName", roleName);
+    request.setAttribute("now", new java.util.Date());
+    break;
+}
             case "user-add": {
                 request.setAttribute("roles", roleDAO.searchRoles(null, 1));
                 break;
@@ -657,7 +701,35 @@ public class Home extends HttpServlet {
                 request.setAttribute("status", st);
                 break;
             }
+case "role-detail": {
+    String ridRaw = request.getParameter("roleId");
+    if (ridRaw == null || ridRaw.isBlank()) {
+        response.sendRedirect(request.getContextPath() + "/home?p=role-list&msg=Please select a role first");
+        return;
+    }
 
+    int roleId = Integer.parseInt(ridRaw.trim());
+
+    request.setAttribute("roleId", roleId);
+    request.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
+    request.setAttribute("rolePerms", rpDAO.getPermissionsByRoleId(roleId));
+    break;
+}
+case "role-permissions": {
+    String ridRaw = request.getParameter("roleId");
+    if (ridRaw == null || ridRaw.isBlank()) {
+        response.sendRedirect(request.getContextPath() + "/home?p=role-list&msg=Please select a role first");
+        return;
+    }
+
+    int roleId = Integer.parseInt(ridRaw.trim());
+
+    request.setAttribute("roleId", roleId);
+    request.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
+    request.setAttribute("allPerms", rpDAO.getAllPermissions());
+    request.setAttribute("checked", rpDAO.getPermissionIdsByRole(roleId));
+    break;
+}
             case "role-toggle": {
                 String keyword = request.getParameter("q");
                 String st = request.getParameter("status");
@@ -1660,34 +1732,44 @@ public class Home extends HttpServlet {
         switch (role) {
             case "ADMIN":
                 switch (p) {
-                    case "dashboard":
-                        return "admin_dashboard.jsp";
-                    case "user-list":
-                        return "user_list.jsp";
-                    case "user-add":
-                        return "user_add.jsp";
-                    case "user-update":
-                        return "update_user_information.jsp";
-                    case "user-toggle":
-                        return "active_user.jsp";
-                    case "role-list":
-                        return "view_role_list.jsp";
-                    case "role-update":
-                        return "edit_role_permissions.jsp";
-                    case "role-toggle":
-                        return "active_role.jsp";
-                    case "role-perm-view":
-                        return "role_detail.jsp";
-                    case "my-profile":
-                    case "profile":
-                        return "view_profile.jsp";
-                    case "admin/reset-requests":
-                        return "admin_reset_requests.jsp";
-                    case "change-password":
-                    case "change_password":
-                        return "change_password.jsp";
-                    default:
-                        return null;
+                  case "dashboard":
+            return "admin_dashboard.jsp";
+
+        case "user-list":
+            return "user_list.jsp";
+        case "user-add":
+            return "user_add.jsp";
+        case "user-update":
+            return "update_user_information.jsp";
+        case "user-toggle":
+            return "active_user.jsp";
+        case "user-view":
+            return "view_user_information.jsp";
+
+        case "role-list":
+            return "view_role_list.jsp";
+        case "role-add":
+            return "role_add.jsp";
+        case "role-toggle":
+            return "active_role.jsp";
+        case "role-detail":
+            return "role_detail.jsp";
+        case "role-permissions":
+            return "edit_role_permissions.jsp";
+
+        case "my-profile":
+        case "profile":
+            return "view_profile.jsp";
+
+        case "admin/reset-requests":
+            return "admin_reset_requests.jsp";
+
+        case "change-password":
+        case "change_password":
+            return "change_password.jsp";
+
+        default:
+            return null;
                 }
 
             case "MANAGER":

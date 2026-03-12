@@ -8,6 +8,7 @@ package controller;
  *
  * @author Admin
  */
+
 import dal.RoleDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -18,23 +19,27 @@ import java.io.IOException;
 public class RoleToggle extends HttpServlet {
 
     private int toInt(String s, int def) {
-        try { return Integer.parseInt(s); } catch (Exception e) { return def; }
+        try { return Integer.parseInt(s == null ? "" : s.trim()); }
+        catch (Exception e) { return def; }
     }
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
-        int roleId = toInt(req.getParameter("roleId"), -1);
+        int roleId    = toInt(req.getParameter("role_id"),    -1);
+        int curStatus = toInt(req.getParameter("cur_status"),  0);
+
         if (roleId <= 0) {
-            resp.sendRedirect(req.getContextPath() + "/admin/role/active-page?msg=invalid");
+            resp.sendRedirect(req.getContextPath() + "/home?p=role-toggle&msg=Invalid+role+ID");
             return;
         }
 
         RoleDAO dao = new RoleDAO();
         dao.toggleRoleStatus(roleId);
 
-       
-        resp.sendRedirect(req.getContextPath() + "/admin/role/active-page");
+        // ✅ Luôn redirect về home?p=role-toggle để có layout đầy đủ
+        resp.sendRedirect(req.getContextPath() + "/home?p=role-toggle&msg=ok");
     }
 }
+

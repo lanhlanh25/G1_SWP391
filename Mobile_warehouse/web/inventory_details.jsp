@@ -1,224 +1,201 @@
-<%-- 
-    Document   : inventory_details
---%>
-
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c"  uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <style>
-  :root{
-    --blue:#3a7bd5;
-    --blue2:#1d4f91;
-    --line:#2e3f95;
-    --bg:#f4f4f4;
-    --th:#d9d9d9;
+  .invd-wrap { padding: 24px; }
+  .invd-topbar { display:flex; align-items:center; gap:14px; margin-bottom:22px; flex-wrap:wrap; }
+  .invd-title  { font-size:22px; font-weight:800; color:var(--text); letter-spacing:-.02em; margin:0; }
+
+  /* chips */
+  .invd-chips { display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap; }
+  .invd-chip {
+    background:var(--primary); border-radius:var(--radius-sm);
+    padding:14px 20px; color:#fff; min-width:150px; flex:1;
   }
+  .invd-chip .chip-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; opacity:.8; margin-bottom:6px; }
+  .invd-chip .chip-val   { font-size:20px; font-weight:800; }
 
-  .wrap { padding:10px; background:var(--bg); font-family:Arial, Helvetica, sans-serif; }
+  /* table */
+  .invd-card  { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+  .invd-tbl   { width:100%; border-collapse:collapse; font-size:13.5px; }
+  .invd-tbl th { padding:11px 16px; background:#f8fafd; font-weight:700; font-size:12px; color:var(--text-2); text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid var(--border); white-space:nowrap; }
+  .invd-tbl td { padding:12px 16px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+  .invd-tbl tbody tr:last-child td { border-bottom:none; }
+  .invd-tbl tbody tr:hover td      { background:#f7f9ff; }
+  .tc { text-align:center; }
+  .tr { text-align:right; font-weight:700; }
 
-  .frame{
-    border:2px solid var(--line);
-    background:#fff;
-    padding:10px;
+  /* status badges */
+  .stbadge { display:inline-flex; align-items:center; padding:5px 14px; border-radius:999px; font-size:12.5px; font-weight:700; border:1px solid transparent; }
+  .st-ok  { background:#dcfce7; color:#15803d; border-color:#bbf7d0; }
+  .st-low { background:#fef3c7; color:#92400e; border-color:#fde68a; }
+  .st-out { background:#fee2e2; color:#b91c1c; border-color:#fecaca; }
+
+  /* paging */
+  .inv-paging { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-top:1px solid var(--border); background:var(--surface-2); flex-wrap:wrap; gap:10px; }
+  .inv-paging-info { font-size:13px; color:var(--muted); }
+  .inv-paging-btns { display:flex; gap:6px; align-items:center; }
+  .inv-paging-btns a, .inv-paging-btns span {
+    display:inline-flex; align-items:center; padding:7px 13px;
+    border:1px solid var(--border); border-radius:var(--radius-xs);
+    background:var(--surface); font-size:13px; font-weight:600; color:var(--text); text-decoration:none;
   }
-
-  .topbar { display:flex; gap:10px; align-items:center; margin-bottom:6px; }
-  .btn {
-    padding:6px 14px; border:1px solid #333; background:#eee; cursor:pointer;
-    text-decoration:none; color:#000; display:inline-block; font-size:12px;
-  }
-  .title { margin:0 0 0 8px; font-weight:700; font-size:14px; }
-
-  .cards { margin-top:10px; display:flex; align-items:flex-start; gap:18px; flex-wrap:wrap; }
-  .card {
-    width:200px; height:70px; background:var(--blue); border:2px solid var(--blue2);
-    padding:8px 10px; font-size:12px; box-sizing:border-box;
-  }
-  .card .v { font-weight:800; font-size:16px; margin-top:6px; }
-
-  .box { margin-top:10px; border:2px solid var(--line); background:#fff; padding:10px; }
-
-  table { width:100%; border-collapse:collapse; margin-top:10px; }
-  th, td { border:1px solid var(--line); padding:6px; font-size:12px; }
-  th { background:var(--th); text-align:left; }
-  td.center { text-align:center; }
-
-  .pill{
-    display:inline-block; padding:2px 10px; border:1px solid #333; font-weight:700; font-size:11px;
-  }
-  .pill-ok { background:#00ff4c; }
-  .pill-low { background:#ffd400; }
-  .pill-out { background:#ff3b30; color:#000; }
-
-  .pagerbar{ display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:10px; flex-wrap:wrap; }
-  .paging { display:flex; justify-content:center; align-items:center; gap:8px; flex-wrap:wrap; }
-  .pg{
-    display:inline-block; padding:6px 16px;
-    border:2px solid var(--blue2); background:#eee; color:#000;
-    text-decoration:none; font-weight:600; font-size:12px;
-  }
-  .pg.active{ background:var(--blue); color:#000; }
-  .pg.disabled{ pointer-events:none; opacity:0.5; }
+  .inv-paging-btns a:hover  { background:var(--surface-2); }
+  .pg-active   { background:var(--primary) !important; border-color:var(--primary) !important; color:#fff !important; pointer-events:none; }
+  .pg-disabled { opacity:.4; pointer-events:none; }
+  .psz-wrap { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
+  .psz-wrap select { padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-xs); font-size:13px; font-family:inherit; background:var(--surface); }
+  .empty-row { text-align:center; padding:40px; color:var(--muted); font-size:14px; }
 </style>
 
-<div class="wrap">
-  <div class="frame">
+<div class="invd-wrap">
 
-    <div class="topbar">
-      <a class="btn" href="${pageContext.request.contextPath}/inventory">Back</a>
-      <a class="btn" href="${pageContext.request.contextPath}/home">Home</a>
-      <h3 class="title">Inventory Details</h3>
+  <div class="invd-topbar">
+    <a href="${ctx}/inventory" class="btn btn-sm">← Back</a>
+    <a href="${ctx}/home"      class="btn btn-sm">Home</a>
+    <h1 class="invd-title">Inventory Details</h1>
+  </div>
+
+  <%-- attrs from servlet: totalQty, productCode, productModel --%>
+  <div class="invd-chips">
+    <div class="invd-chip">
+      <div class="chip-label">Quantity</div>
+      <div class="chip-val">${totalQty} Phone</div>
     </div>
-
-    <c:if test="${not empty param.msg}">
-      <div style="color:green; font-weight:700; margin-top:6px;">${param.msg}</div>
-    </c:if>
-    <c:if test="${not empty param.err}">
-      <div style="color:red; font-weight:700; margin-top:6px;">${param.err}</div>
-    </c:if>
-
-    <div class="cards">
-      <div class="card">
-        <div>Quantity</div>
-        <div class="v">${totalQty} Phone</div>
-      </div>
-      <div class="card">
-        <div>Product Code</div>
-        <div class="v">${productCode}</div>
-      </div>
-      <div class="card">
-        <div>Product model</div>
-        <div class="v">${productModel}</div>
-      </div>
+    <div class="invd-chip">
+      <div class="chip-label">Product Code</div>
+      <div class="chip-val">${fn:escapeXml(productCode)}</div>
     </div>
+    <div class="invd-chip">
+      <div class="chip-label">Product Model</div>
+      <div class="chip-val">${fn:escapeXml(productModel)}</div>
+    </div>
+  </div>
 
-    <div class="box">
+  <%-- build back URL for IMEI list --%>
+  <c:url var="backToDetails" value="/inventory-details">
+    <c:param name="productCode" value="${productCode}"/>
+    <c:param name="page"        value="${pageNumber}"/>
+    <c:param name="pageSize"    value="${pageSize}"/>
+  </c:url>
 
-     
-      <c:url var="backToDetails" value="/inventory-details">
-        <c:param name="productCode" value="${productCode}"/>
-        <c:param name="page" value="${pageNumber}"/>
-        <c:param name="pageSize" value="${pageSize}"/>
-      </c:url>
-
-      <table>
+  <%-- attr: skuRows = List<SkuInventoryRow>
+       fields: skuId, skuCode, color, ramGb, storageGb, qty, stockStatus (OK/LOW/OUT) --%>
+  <div class="invd-card">
+    <div style="overflow-x:auto;">
+      <table class="invd-tbl">
         <thead>
           <tr>
-            <th style="width:170px;">SKU</th>
-            <th style="width:120px;">Color</th>
-            <th style="width:90px;">RAM</th>
-            <th style="width:110px;">Storage</th>
-            <th style="width:140px;">Inventory Status</th>
-            <th style="width:130px;">Quantity</th>
-            <th style="width:130px;">Action</th>
+            <th>SKU</th>
+            <th class="tc">Color</th>
+            <th class="tc">RAM</th>
+            <th class="tc">Storage</th>
+            <th class="tc">Inventory Status</th>
+            <th class="tr">Quantity</th>
+            <th class="tc">Action</th>
           </tr>
         </thead>
-
         <tbody>
+          <c:if test="${empty skuRows}">
+            <tr><td colspan="7" class="empty-row">No SKU variants found.</td></tr>
+          </c:if>
           <c:forEach var="s" items="${skuRows}">
             <tr>
-              <td>${s.skuCode}</td>
-              <td>${s.color}</td>
-              <td class="center">${s.ramGb} GB</td>
-              <td class="center">${s.storageGb} GB</td>
-
-              <td class="center">
+              <td style="font-weight:700;">${fn:escapeXml(s.skuCode)}</td>
+              <td class="tc">${fn:escapeXml(s.color)}</td>
+              <td class="tc">${s.ramGb} GB</td>
+              <td class="tc">${s.storageGb} GB</td>
+              <td class="tc">
                 <c:choose>
-                  <c:when test="${s.stockStatus == 'OK'}"><span class="pill pill-ok">In Stock</span></c:when>
-                  <c:when test="${s.stockStatus == 'LOW'}"><span class="pill pill-low">Low Stock</span></c:when>
-                  <c:otherwise><span class="pill pill-out">Out of Stock</span></c:otherwise>
+                  <c:when test="${s.stockStatus == 'OK'}">
+                    <span class="stbadge st-ok">In Stock</span>
+                  </c:when>
+                  <c:when test="${s.stockStatus == 'LOW'}">
+                    <span class="stbadge st-low">Low Stock</span>
+                  </c:when>
+                  <c:otherwise>
+                    <span class="stbadge st-out">Out of Stock</span>
+                  </c:otherwise>
                 </c:choose>
               </td>
-
-              <td class="center">${s.qty} Phone</td>
-
-              <td class="center">
+              <td class="tr">
+                ${s.qty}
+                <span style="font-size:11px;color:var(--muted);margin-left:2px;">Phone</span>
+              </td>
+              <td class="tc">
                 <c:url var="imeiUrl" value="/imei-list">
-                  <c:param name="skuId" value="${s.skuId}"/>
-                  <c:param name="page" value="1"/>
+                  <c:param name="skuId"    value="${s.skuId}"/>
+                  <c:param name="page"     value="1"/>
                   <c:param name="pageSize" value="10"/>
-                 
-                  <c:param name="back" value="${backToDetails}"/>
+                  <c:param name="back"     value="${backToDetails}"/>
                 </c:url>
-
-                <a href="${imeiUrl}" style="color:#0b39b8; text-decoration:underline;">
-                  View List IMEI
-                </a>
+                <a class="btn btn-sm btn-outline" href="${imeiUrl}">View List IMEI</a>
               </td>
             </tr>
           </c:forEach>
-
-          <c:if test="${empty skuRows}">
-            <tr><td colspan="7" class="center">No SKU found</td></tr>
-          </c:if>
         </tbody>
       </table>
+    </div>
 
-      <c:choose>
-        <c:when test="${totalPages <= 3}">
-          <c:set var="startPage" value="1"/>
-          <c:set var="endPage" value="${totalPages}"/>
-        </c:when>
-        <c:when test="${pageNumber <= 1}">
-          <c:set var="startPage" value="1"/>
-          <c:set var="endPage" value="3"/>
-        </c:when>
-        <c:when test="${pageNumber >= totalPages}">
-          <c:set var="startPage" value="${totalPages-2}"/>
-          <c:set var="endPage" value="${totalPages}"/>
-        </c:when>
-        <c:otherwise>
-          <c:set var="startPage" value="${pageNumber-1}"/>
-          <c:set var="endPage" value="${pageNumber+1}"/>
-        </c:otherwise>
-      </c:choose>
+    <%-- attrs: pageNumber, pageSize, totalPages --%>
+    <div class="inv-paging">
+      <span class="inv-paging-info">Page ${pageNumber} / ${totalPages}</span>
 
-      <div class="pagerbar">
-        <div>Page ${pageNumber}</div>
+      <div class="inv-paging-btns">
+        <c:url var="prevUrl" value="/inventory-details">
+          <c:param name="productCode" value="${productCode}"/>
+          <c:param name="page"        value="${pageNumber - 1}"/>
+          <c:param name="pageSize"    value="${pageSize}"/>
+        </c:url>
+        <a class="${pageNumber <= 1 ? 'pg-disabled' : ''}" href="${prevUrl}">← Prev</a>
 
-        <div class="paging">
-          <c:url var="prevUrl" value="/inventory-details">
+        <c:choose>
+          <c:when test="${totalPages <= 5}">
+            <c:set var="pgStart" value="1"/><c:set var="pgEnd" value="${totalPages}"/>
+          </c:when>
+          <c:when test="${pageNumber <= 3}">
+            <c:set var="pgStart" value="1"/><c:set var="pgEnd" value="5"/>
+          </c:when>
+          <c:when test="${pageNumber >= totalPages - 2}">
+            <c:set var="pgStart" value="${totalPages - 4}"/><c:set var="pgEnd" value="${totalPages}"/>
+          </c:when>
+          <c:otherwise>
+            <c:set var="pgStart" value="${pageNumber - 2}"/><c:set var="pgEnd" value="${pageNumber + 2}"/>
+          </c:otherwise>
+        </c:choose>
+
+        <c:forEach begin="${pgStart}" end="${pgEnd}" var="pg">
+          <c:url var="pgUrl" value="/inventory-details">
             <c:param name="productCode" value="${productCode}"/>
-            <c:param name="pageSize" value="${pageSize}"/>
-            <c:param name="page" value="${pageNumber-1}"/>
+            <c:param name="page"        value="${pg}"/>
+            <c:param name="pageSize"    value="${pageSize}"/>
           </c:url>
-          <a class="pg ${pageNumber<=1 ? 'disabled' : ''}" href="${prevUrl}">Prev</a>
+          <c:choose>
+            <c:when test="${pg == pageNumber}"><span class="pg-active">${pg}</span></c:when>
+            <c:otherwise><a href="${pgUrl}">${pg}</a></c:otherwise>
+          </c:choose>
+        </c:forEach>
 
-          <c:forEach var="i" begin="${startPage}" end="${endPage}">
-            <c:choose>
-              <c:when test="${i == pageNumber}">
-                <span class="pg active">${i}</span>
-              </c:when>
-              <c:otherwise>
-                <c:url var="pageUrl" value="/inventory-details">
-                  <c:param name="productCode" value="${productCode}"/>
-                  <c:param name="pageSize" value="${pageSize}"/>
-                  <c:param name="page" value="${i}"/>
-                </c:url>
-                <a class="pg" href="${pageUrl}">${i}</a>
-              </c:otherwise>
-            </c:choose>
-          </c:forEach>
-
-          <c:url var="nextUrl" value="/inventory-details">
-            <c:param name="productCode" value="${productCode}"/>
-            <c:param name="pageSize" value="${pageSize}"/>
-            <c:param name="page" value="${pageNumber+1}"/>
-          </c:url>
-          <a class="pg ${pageNumber>=totalPages ? 'disabled' : ''}" href="${nextUrl}">Next</a>
-        </div>
-
-        <div>
-          Show
-          <select onchange="location.href='${pageContext.request.contextPath}/inventory-details?productCode=${productCode}&page=1&pageSize='+this.value;">
-            <option value="5"  ${pageSize==5 ? "selected" : ""}>5</option>
-            <option value="10" ${pageSize==10 ? "selected" : ""}>10</option>
-            <option value="20" ${pageSize==20 ? "selected" : ""}>20</option>
-          </select>
-          Row
-        </div>
+        <c:url var="nextUrl" value="/inventory-details">
+          <c:param name="productCode" value="${productCode}"/>
+          <c:param name="page"        value="${pageNumber + 1}"/>
+          <c:param name="pageSize"    value="${pageSize}"/>
+        </c:url>
+        <a class="${pageNumber >= totalPages ? 'pg-disabled' : ''}" href="${nextUrl}">Next →</a>
       </div>
 
+      <div class="psz-wrap">
+        Show
+        <select onchange="location.href='${ctx}/inventory-details?productCode=${fn:escapeXml(productCode)}&page=1&pageSize='+this.value">
+          <option value="5"  ${pageSize == 5  ? 'selected' : ''}>5</option>
+          <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+          <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+        </select>
+        Row
+      </div>
     </div>
   </div>
+
 </div>
