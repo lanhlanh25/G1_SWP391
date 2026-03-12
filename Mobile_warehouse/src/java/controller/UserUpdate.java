@@ -33,7 +33,10 @@ public class UserUpdate extends HttpServlet {
             return def;
         }
     }
-    private String n(String s) { return s == null ? "" : s.trim(); }
+
+    private String n(String s) {
+        return s == null ? "" : s.trim();
+    }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -41,14 +44,14 @@ public class UserUpdate extends HttpServlet {
 
         int id = toInt(req.getParameter("id"), -1);
         if (id <= 0) {
-            resp.sendRedirect(req.getContextPath() + "/admin/users?msg=invalid");
+            resp.sendRedirect(req.getContextPath() + "/home?p=user-list&msg=invalid");
             return;
         }
 
         UserDAO udao = new UserDAO();
         User u = udao.getById(id);
         if (u == null) {
-            resp.sendRedirect(req.getContextPath() + "/admin/users?msg=notfound");
+            resp.sendRedirect(req.getContextPath() + "/home?p=user-list&msg=notfound");
             return;
         }
 
@@ -67,30 +70,24 @@ public class UserUpdate extends HttpServlet {
         int roleId = toInt(req.getParameter("role_id"), -1);
 
         String fullName = n(req.getParameter("full_name"));
-
-        String email    = n(req.getParameter("email"));
-        String phone    = n(req.getParameter("phone"));
-        String address  = n(req.getParameter("address"));
-        int status      = toInt(req.getParameter("status"), 1);
-
-
-
+        String email = n(req.getParameter("email"));
+        String phone = n(req.getParameter("phone"));
+        String address = n(req.getParameter("address"));
+        int status = toInt(req.getParameter("status"), 1);
 
         if (userId <= 0 || roleId <= 0 || fullName.isEmpty()) {
             req.setAttribute("error", "Invalid input! (Full Name and Role are required)");
             doGet(req, resp);
             return;
         }
-        
-      
+
         if (phone.isEmpty() || !phone.matches("^0\\d{9}$")) {
             req.setAttribute("error", "Phone must be 10 digits and start with 0 (e.g. 0912345678).");
-            doGet(req, resp); 
+            doGet(req, resp);
             return;
         }
 
-      
-        String avatarPath = n(req.getParameter("current_avatar")); 
+        String avatarPath = n(req.getParameter("current_avatar"));
         Part filePart = req.getPart("avatarFile");
         if (filePart != null && filePart.getSize() > 0) {
             String savedPath = saveAvatarToUploads(req, filePart, userId);
@@ -99,11 +96,9 @@ public class UserUpdate extends HttpServlet {
             }
         }
 
-
         UserDAO dao = new UserDAO();
         boolean ok = dao.updateUserInfo(userId, fullName, email, phone, roleId, status, avatarPath, address);
 
-        
         HttpSession session = req.getSession(false);
         if (session != null) {
             User auth = (User) session.getAttribute("authUser");
@@ -112,8 +107,11 @@ public class UserUpdate extends HttpServlet {
             }
         }
 
-
-        resp.sendRedirect(req.getContextPath() + "/admin/users?msg=" + (ok ? "updated" : "failed"));
+        if (ok) {
+            resp.sendRedirect(req.getContextPath() + "/home?p=user-list&msg=updated");
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/home?p=user-update&id=" + userId + "&msg=failed");
+        }
     }
 
     private String saveAvatarToUploads(HttpServletRequest req, Part filePart, int userId) throws IOException {
@@ -137,7 +135,6 @@ public class UserUpdate extends HttpServlet {
             in.transferTo(out);
         }
 
-        
         return "uploads/avatars/" + fileName;
     }
 }

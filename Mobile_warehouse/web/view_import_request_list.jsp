@@ -13,10 +13,19 @@
     <div class="card-body">
       <form method="get" action="${ctx}/home">
         <input type="hidden" name="p" value="import-request-list"/>
-        <div class="filters" style="grid-template-columns: 2fr 1fr 1fr auto auto;">
+        <div class="filters" style="grid-template-columns: 2fr 1fr 1fr 1fr auto auto;">
           <div>
             <label class="label">Search</label>
             <input class="input" type="text" name="q" placeholder="request code" value="${fn:escapeXml(q)}"/>
+          </div>
+          <div>
+            <label class="label">Status</label>
+            <select class="input" name="status">
+              <option value="">All</option>
+              <option value="PENDING" ${status eq 'PENDING' ? 'selected' : ''}>Pending</option>
+              <option value="NEW" ${status eq 'NEW' ? 'selected' : ''}>New</option>
+              <option value="COMPLETE" ${status eq 'COMPLETE' ? 'selected' : ''}>Complete</option>
+            </select>
           </div>
           <div>
             <label class="label">Request Date</label>
@@ -48,13 +57,15 @@
             <th>Expected Import Date</th>
             <th style="width:100px; text-align:center;">Total Items</th>
             <th style="width:100px; text-align:center;">Total Qty</th>
-            <th style="width:100px; text-align:center;">Action</th>
+            <th style="width:120px; text-align:center;">Status</th>
+            <th style="width:160px; text-align:center;">Action</th>
           </tr>
         </thead>
         <tbody>
           <c:if test="${empty irList}">
-            <tr><td colspan="7" class="small muted" style="padding:20px; text-align:center;">No requests found.</td></tr>
+            <tr><td colspan="8" class="small muted" style="padding:20px; text-align:center;">No requests found.</td></tr>
           </c:if>
+
           <c:forEach var="r" items="${irList}">
             <tr>
               <td>${fn:escapeXml(r.requestCode)}</td>
@@ -64,6 +75,27 @@
               <td style="text-align:center;">${r.totalItems}</td>
               <td style="text-align:center;">${r.totalQty}</td>
               <td style="text-align:center;">
+                <c:choose>
+                  <c:when test="${r.status eq 'COMPLETE'}">
+                    <span>Complete</span>
+                  </c:when>
+                  <c:otherwise>
+                    <span>New</span>
+                  </c:otherwise>
+                </c:choose>
+              </td>
+              <td style="text-align:center;">
+                <%-- STAFF sees Create button for NEW requests --%>
+                <c:if test="${role eq 'STAFF'}">
+                  <c:choose>
+                    <c:when test="${r.status eq 'COMPLETE'}">
+                      <span class="btn btn-sm" style="pointer-events:none; opacity:.6;">Created</span>
+                    </c:when>
+                    <c:otherwise>
+                      <a class="btn btn-sm" href="${ctx}/home?p=create-import-receipt&requestId=${r.requestId}">Create</a>
+                    </c:otherwise>
+                  </c:choose>
+                </c:if>
                 <a class="btn btn-sm" href="${ctx}/home?p=import-request-detail&id=${r.requestId}">View</a>
               </td>
             </tr>
@@ -76,6 +108,7 @@
   <c:url var="baseUrl" value="/home">
     <c:param name="p" value="import-request-list"/>
     <c:param name="q" value="${q}"/>
+    <c:param name="status" value="${status}"/>
     <c:param name="reqDate" value="${reqDate}"/>
     <c:param name="expDate" value="${expDate}"/>
   </c:url>

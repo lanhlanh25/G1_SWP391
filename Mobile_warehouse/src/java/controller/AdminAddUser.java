@@ -8,6 +8,7 @@ package controller;
  *
  * @author Admin
  */
+
 import dal.RoleDAO;
 import dal.UserDAO;
 import jakarta.servlet.ServletException;
@@ -42,9 +43,8 @@ public class AdminAddUser extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        RoleDAO roleDAO = new RoleDAO();
-        req.setAttribute("roles", roleDAO.searchRoles(null, 1));
-        req.getRequestDispatcher("/user_add.jsp").forward(req, resp);
+        // Redirect về home controller để có layout đầy đủ
+        resp.sendRedirect(req.getContextPath() + "/home?p=user-add");
     }
 
     @Override
@@ -54,33 +54,48 @@ public class AdminAddUser extends HttpServlet {
         String username = n(req.getParameter("username"));
         String password = n(req.getParameter("password"));
         String fullName = n(req.getParameter("full_name"));
-        String email = n(req.getParameter("email"));
-        String phone = n(req.getParameter("phone"));
-        String address = n(req.getParameter("address"));
-        int roleId = parseInt(req.getParameter("role_id"), 0);
+        String email    = n(req.getParameter("email"));
+        String phone    = n(req.getParameter("phone"));
+        String address  = n(req.getParameter("address"));
+        int roleId      = parseInt(req.getParameter("role_id"), 0);
 
-        req.setAttribute("v_username", username);
-        req.setAttribute("v_full_name", fullName);
-        req.setAttribute("v_email", email);
-        req.setAttribute("v_phone", phone);
-        req.setAttribute("v_address", address);
-        req.setAttribute("v_role_id", roleId);
+        // Validation - dùng session flash để truyền lỗi về home controller
+        HttpSession session = req.getSession();
 
         if (username.isEmpty() || password.isEmpty() || fullName.isEmpty() || roleId <= 0) {
-            req.setAttribute("error", "Required!!");
-            doGet(req, resp);
+            // Flash lỗi vào session rồi redirect về home?p=user-add
+            session.setAttribute("flash_error",   "Required!!");
+            session.setAttribute("flash_v_username",  username);
+            session.setAttribute("flash_v_full_name", fullName);
+            session.setAttribute("flash_v_email",     email);
+            session.setAttribute("flash_v_phone",     phone);
+            session.setAttribute("flash_v_address",   address);
+            session.setAttribute("flash_v_role_id",   roleId);
+            resp.sendRedirect(req.getContextPath() + "/home?p=user-add");
             return;
         }
 
         UserDAO dao = new UserDAO();
         if (dao.getUserByUsername(username) != null) {
-            req.setAttribute("errorU", "Username already exists!");
-            doGet(req, resp);
+            session.setAttribute("flash_errorU",      "Username already exists!");
+            session.setAttribute("flash_v_username",  username);
+            session.setAttribute("flash_v_full_name", fullName);
+            session.setAttribute("flash_v_email",     email);
+            session.setAttribute("flash_v_phone",     phone);
+            session.setAttribute("flash_v_address",   address);
+            session.setAttribute("flash_v_role_id",   roleId);
+            resp.sendRedirect(req.getContextPath() + "/home?p=user-add");
             return;
         }
-        if (dao.getUserByEmail(email) != null) {
-            req.setAttribute("errorE", "Email already exists!");
-            doGet(req, resp);
+        if (!email.isEmpty() && dao.getUserByEmail(email) != null) {
+            session.setAttribute("flash_errorE",      "Email already exists!");
+            session.setAttribute("flash_v_username",  username);
+            session.setAttribute("flash_v_full_name", fullName);
+            session.setAttribute("flash_v_email",     email);
+            session.setAttribute("flash_v_phone",     phone);
+            session.setAttribute("flash_v_address",   address);
+            session.setAttribute("flash_v_role_id",   roleId);
+            resp.sendRedirect(req.getContextPath() + "/home?p=user-add");
             return;
         }
 
@@ -106,12 +121,19 @@ public class AdminAddUser extends HttpServlet {
 
         boolean ok = dao.createUser(u);
         if (!ok) {
-            req.setAttribute("error", "Create user failed!");
-            doGet(req, resp);
+            session.setAttribute("flash_error", "Create user failed!");
+            session.setAttribute("flash_v_username",  username);
+            session.setAttribute("flash_v_full_name", fullName);
+            session.setAttribute("flash_v_email",     email);
+            session.setAttribute("flash_v_phone",     phone);
+            session.setAttribute("flash_v_address",   address);
+            session.setAttribute("flash_v_role_id",   roleId);
+            resp.sendRedirect(req.getContextPath() + "/home?p=user-add");
             return;
         }
 
-        resp.sendRedirect(req.getContextPath() + "/admin/users?msg=created");
+        // ✅ Redirect về home controller với layout đầy đủ
+        resp.sendRedirect(req.getContextPath() + "/home?p=user-list&msg=User+created+successfully");
     }
 
     private String saveAvatarToUploads(HttpServletRequest req, Part filePart, String username) throws IOException {
@@ -143,3 +165,4 @@ public class AdminAddUser extends HttpServlet {
         return "uploads/avatars/" + fileName;
     }
 }
+

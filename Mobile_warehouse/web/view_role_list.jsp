@@ -1,111 +1,102 @@
-<%-- 
-    Document   : view_role_list
-    Created on : Jan 11, 2026, 10:51:23 PM
-    Author     : Admin
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@page import="java.util.List"%>
 <%@page import="model.Role"%>
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <title>Role List</title>
-</head>
-<body>
 
-<a href="<%=request.getContextPath()%>/home"
-   style="display:inline-block; padding:6px 10px; border:1px solid #000; text-decoration:none; color:#000;">
-   ← Back
-</a>
-<br><br>
+<%
+    List<Role> roles = (List<Role>) request.getAttribute("roles");
+    String q = request.getParameter("q") != null ? request.getParameter("q") : "";
+    String statusParam = request.getParameter("status");
+    if (statusParam == null) statusParam = "";
+%>
 
-<h1>Role List</h1>
-<h4>Manage roles and permissions</h4>
+<div class="page-wrap">
+    <div class="topbar">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <a class="btn" href="<%=request.getContextPath()%>/home?p=dashboard">← Back</a>
+            <h1 class="h1">Role List</h1>
+        </div>
 
-<form action="<%=request.getContextPath()%>/home" method="get">
-    <input type="hidden" name="p" value="role-list"/>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a class="btn btn-outline" href="<%=request.getContextPath()%>/home?p=role-toggle">Active/Deactive</a>
+            <a class="btn btn-primary" href="<%=request.getContextPath()%>/home?p=role-add">Add Role</a>
+        </div>
+    </div>
 
-    Search Role Name:
-    <input type="text" name="q"
-           value="<%= request.getParameter("q") != null ? request.getParameter("q") : "" %>"
-           placeholder="e.g. ADMIN">
+    <div class="card">
+        <div class="card-body">
+            <div class="h2" style="margin-bottom:6px;">Manage roles and permissions</div>
+            <div class="muted" style="margin-bottom:14px;">Filter roles by name and status.</div>
 
-    Status:
-    <%
-        String statusParam = request.getParameter("status");
-        if (statusParam == null) statusParam = "";
-    %>
-    <select name="status">
-        <option value=""  <%= statusParam.isEmpty() ? "selected" : "" %>>All</option>
-        <option value="1" <%= "1".equals(statusParam) ? "selected" : "" %>>Active</option>
-        <option value="0" <%= "0".equals(statusParam) ? "selected" : "" %>>Inactive</option>
-    </select>
+            <form action="<%=request.getContextPath()%>/home" method="get" class="filters" style="grid-template-columns:2fr 1fr auto;">
+                <input type="hidden" name="p" value="role-list"/>
 
-    <button type="submit">Filter</button>
-</form>
+                <div>
+                    <label>Search Role Name</label>
+                    <input class="input" type="text" name="q" value="<%= q %>" placeholder="e.g. ADMIN">
+                </div>
 
+                <div>
+                    <label>Status</label>
+                    <select class="select" name="status">
+                        <option value=""  <%= statusParam.isEmpty() ? "selected" : "" %>>All</option>
+                        <option value="1" <%= "1".equals(statusParam) ? "selected" : "" %>>Active</option>
+                        <option value="0" <%= "0".equals(statusParam) ? "selected" : "" %>>Inactive</option>
+                    </select>
+                </div>
 
-<br>
+                <div style="display:flex; gap:8px;">
+                    <button class="btn btn-primary" type="submit">Filter</button>
+                    <a class="btn" href="<%=request.getContextPath()%>/home?p=role-list">Reset</a>
+                </div>
+            </form>
 
-
-<div style="width:900px; text-align:right; margin-bottom:8px;">
-    <a href="<%=request.getContextPath()%>/admin/role/active-page"
-   style="display:inline-block; padding:6px 14px; border:2px solid #1f4aa8; background:#4a86d4;
-          color:#000; text-decoration:none; font-weight:600;">
-    Active/Deactive
-</a>
-
-
-
-   <a href="<%=request.getContextPath()%>/role_add"
-   style="display:inline-block; padding:6px 14px; border:2px solid #1f4aa8; background:#4a86d4;
-          color:#000; text-decoration:none; font-weight:600; margin-left:8px;">
-    Add Role
-</a>
-
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Role ID</th>
+                        <th>Role Name</th>
+                        <th>Description</th>
+                        <th>Users</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%
+                        if (roles == null || roles.isEmpty()) {
+                    %>
+                    <tr>
+                        <td colspan="6" style="text-align:center;">No roles found.</td>
+                    </tr>
+                    <%
+                        } else {
+                            for (Role r : roles) {
+                    %>
+                    <tr>
+                        <td><%= r.getRoleId() %></td>
+                        <td><b><%= r.getRoleName() %></b></td>
+                        <td><%= r.getDescription() == null ? "" : r.getDescription() %></td>
+                        <td><%= r.getUserCount() %></td>
+                        <td>
+                            <% if (r.getStatus() == 1) { %>
+                                <span class="badge badge-active">ACTIVE</span>
+                            <% } else { %>
+                                <span class="badge badge-inactive">INACTIVE</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <a class="btn btn-sm btn-outline"
+                               href="<%=request.getContextPath()%>/home?p=role-detail&roleId=<%=r.getRoleId()%>">
+                                View Role Detail
+                            </a>
+                        </td>
+                    </tr>
+                    <%
+                            }
+                        }
+                    %>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
-
-<table border="1" cellpadding="8" cellspacing="0" style="min-width:900px;">
-    <tr>
-        <th>Role ID</th>
-        <th>Role Name</th>
-        <th>Description</th>
-        <th>Users</th>
-        <th>Status</th>
-        <th>Actions</th>
-    </tr>
-
-    <%
-        List<Role> roles = (List<Role>) request.getAttribute("roles");
-        if (roles == null || roles.isEmpty()) {
-    %>
-        <tr>
-            <td colspan="6">No roles found.</td>
-        </tr>
-    <%
-        } else {
-            for (Role r : roles) {
-    %>
-        <tr>
-            <td><%= r.getRoleId() %></td>
-            <td><%= r.getRoleName() %></td>
-            <td><%= r.getDescription() == null ? "" : r.getDescription() %></td>
-            <td><%= r.getUserCount() %></td>
-            <td><%= (r.getStatus() == 1 ? "ACTIVE" : "INACTIVE") %></td>
-          <td>
-    <a href="<%=request.getContextPath()%>/admin/role-detail?roleId=<%=r.getRoleId()%>">
-        View Role Detail
-    </a>
-</td>
-
-        </tr>
-    <%
-            }
-        }
-    %>
-</table>
-
-</body>
-</html>

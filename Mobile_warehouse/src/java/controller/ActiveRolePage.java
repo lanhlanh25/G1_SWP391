@@ -16,13 +16,16 @@ import java.io.IOException;
 
 @WebServlet("/admin/role/active-page")
 public class ActiveRolePage extends HttpServlet {
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-
-        RoleDAO dao = new RoleDAO();
-        req.setAttribute("roles", dao.searchRoles(null, null)); 
-
-        req.getRequestDispatcher("/active_role.jsp").forward(req, resp);
+        // ✅ Redirect về home controller để có layout đầy đủ
+        String msg = req.getParameter("msg");
+        StringBuilder url = new StringBuilder(req.getContextPath() + "/home?p=role-toggle");
+        if (msg != null && !msg.isBlank()) {
+            url.append("&msg=").append(java.net.URLEncoder.encode(msg, "UTF-8"));
+        }
+        resp.sendRedirect(url.toString());
     }
 }

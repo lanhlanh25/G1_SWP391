@@ -12,54 +12,37 @@ public class ImportReceiptDAO {
         String prefix = "IR-" + day + "-";
         String sql = "SELECT COUNT(*) FROM import_receipts WHERE import_code LIKE ?";
         int count = 0;
-
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, prefix + "%");
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    count = rs.getInt(1);
-                }
+                if (rs.next()) count = rs.getInt(1);
             }
         }
         return prefix + String.format("%04d", count + 1);
     }
 
-    public long insertReceipt(Connection con,
-            String importCode,
-            Long supplierId,
-            Timestamp receiptDate,
-            String note,
-            int createdBy,
-            String status) throws Exception {
-
+    public long insertReceipt(Connection con, String importCode, Long supplierId,
+            Timestamp receiptDate, String note, int createdBy, String status) throws Exception {
         String sql = "INSERT INTO import_receipts(import_code, supplier_id, status, receipt_date, note, created_by) "
                 + "VALUES(?, ?, ?, ?, ?, ?)";
-
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, importCode);
-
-            if (supplierId == null) {
-                ps.setNull(2, java.sql.Types.BIGINT);
-            } else {
-                ps.setLong(2, supplierId);
-            }
-
+            if (supplierId == null) ps.setNull(2, Types.BIGINT);
+            else ps.setLong(2, supplierId);
             ps.setString(3, status);
             ps.setTimestamp(4, receiptDate);
             ps.setString(5, (note == null || note.isBlank()) ? null : note.trim());
             ps.setInt(6, createdBy);
-
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getLong(1);
-                }
+                if (rs.next()) return rs.getLong(1);
             }
         }
         throw new Exception("Cannot insert import_receipts");
     }
 
-    public long insertLine(Connection con, long importId, long productId, long skuId, int qty, String itemNote) throws SQLException {
+    public long insertLine(Connection con, long importId, long productId, long skuId,
+            int qty, String itemNote) throws SQLException {
         String sql = "INSERT INTO import_receipt_lines(import_id, product_id, sku_id, qty, unit_price, item_note) "
                 + "VALUES(?, ?, ?, ?, 0, ?)";
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -68,36 +51,26 @@ public class ImportReceiptDAO {
             ps.setLong(3, skuId);
             ps.setInt(4, qty);
             ps.setString(5, (itemNote == null || itemNote.isBlank()) ? null : itemNote.trim());
-
             ps.executeUpdate();
             try (ResultSet rs = ps.getGeneratedKeys()) {
-                if (rs.next()) {
-                    return rs.getLong(1);
-                }
+                if (rs.next()) return rs.getLong(1);
             }
         }
         throw new SQLException("Cannot insert import_receipt_lines");
     }
 
-
-
     public String validateImeiForInsert(Connection con, long skuId, String imei) throws SQLException {
         String sql = "SELECT unit_status FROM product_units WHERE sku_id = ? AND imei = ? LIMIT 1";
-
-
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, skuId);
             ps.setString(2, imei);
-
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     String status = rs.getString("unit_status");
                     if ("ACTIVE".equalsIgnoreCase(status)) {
                         return "IMEI " + imei + " already exists in stock (ACTIVE) for this SKU. Cannot import again.";
                     }
-
                 }
-
             }
         }
         return null;
@@ -115,14 +88,59 @@ public class ImportReceiptDAO {
         }
     }
 
+    /**
+     * Insert new ACTIVE unit or reactivate INACTIVE unit.
+     * Called when status=CONFIRMED at creation time.
+     */
+    public void insertOrActivateUnit(Connection con, long skuId, String imei) throws SQLException {
+        String check = "SELECT unit_id, unit_status FROM product_units WHERE sku_id = ? AND imei = ? LIMIT 1";
+        try (PreparedStatement ps = con.prepareStatement(check)) {
+            ps.setLong(1, skuId);
+            ps.setString(2, imei);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    String status = rs.getString("unit_status");
+                    if ("INACTIVE".equalsIgnoreCase(status)) {
+                        String upd = "UPDATE product_units SET unit_status='ACTIVE', updated_at=CURRENT_TIMESTAMP "
+                                + "WHERE sku_id=? AND imei=?";
+                        try (PreparedStatement p2 = con.prepareStatement(upd)) {
+                            p2.setLong(1, skuId);
+                            p2.setString(2, imei);
+                            p2.executeUpdate();
+                        }
+                    }
+                    // If already ACTIVE, leave as-is (validated before insertion)
+                } else {
+                    String ins = "INSERT INTO product_units(sku_id, imei, unit_status) VALUES(?, ?, 'ACTIVE')";
+                    try (PreparedStatement p2 = con.prepareStatement(ins)) {
+                        p2.setLong(1, skuId);
+                        p2.setString(2, imei);
+                        p2.executeUpdate();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Upsert inventory_balance for a SKU.
+     */
+    public void upsertInventoryBalance(Connection con, long skuId, int qty) throws SQLException {
+        String sql = "INSERT INTO inventory_balance(sku_id, qty_on_hand) VALUES(?, ?) "
+                + "ON DUPLICATE KEY UPDATE qty_on_hand = qty_on_hand + VALUES(qty_on_hand)";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, skuId);
+            ps.setInt(2, qty);
+            ps.executeUpdate();
+        }
+    }
+
     public boolean skuBelongsToProduct(Connection con, long skuId, long productId) throws SQLException {
         String sql = "SELECT 1 FROM product_skus WHERE sku_id=? AND product_id=? LIMIT 1";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, skuId);
             ps.setLong(2, productId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
+            try (ResultSet rs = ps.executeQuery()) { return rs.next(); }
         }
     }
 
@@ -131,9 +149,7 @@ public class ImportReceiptDAO {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, productCode);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getLong(1);
-                }
+                if (rs.next()) return rs.getLong(1);
             }
         }
         throw new SQLException("Product not found: " + productCode);
@@ -144,33 +160,30 @@ public class ImportReceiptDAO {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, skuCode);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getLong(1);
-                }
+                if (rs.next()) return rs.getLong(1);
             }
         }
         throw new SQLException("SKU not found: " + skuCode);
     }
 
+    // -------------------------------------------------------
+    // Detail queries (used by ViewImportDetail)
+    // -------------------------------------------------------
 
     public ImportReceiptDetail getDetailHeader(Connection con, long importId) throws SQLException {
         String sql = """
-        SELECT ir.import_id, ir.import_code, ir.receipt_date, ir.note, ir.status,
-               s.supplier_name,
-               u.full_name AS created_by_name
-        FROM import_receipts ir
-        JOIN suppliers s ON s.supplier_id = ir.supplier_id
-        JOIN users u ON u.user_id = ir.created_by
-        WHERE ir.import_id = ?
-    """;
-
+            SELECT ir.import_id, ir.import_code, ir.receipt_date, ir.note, ir.status,
+                   s.supplier_name,
+                   u.full_name AS created_by_name
+            FROM import_receipts ir
+            JOIN suppliers s ON s.supplier_id = ir.supplier_id
+            JOIN users u ON u.user_id = ir.created_by
+            WHERE ir.import_id = ?
+        """;
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, importId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    return null;
-                }
-
+                if (!rs.next()) return null;
                 ImportReceiptDetail d = new ImportReceiptDetail();
                 d.setImportId(rs.getLong("import_id"));
                 d.setImportCode(rs.getString("import_code"));
@@ -186,19 +199,16 @@ public class ImportReceiptDAO {
 
     public List<ImportReceiptLineDetail> getDetailLines(Connection con, long importId) throws SQLException {
         String sql = """
-        SELECT irl.line_id, irl.qty, irl.item_note,
-               p.product_code,
-               sk.sku_code,
-               sk.sku_id
-        FROM import_receipt_lines irl
-        JOIN products p ON p.product_id = irl.product_id
-        JOIN product_skus sk ON sk.sku_id = irl.sku_id
-        WHERE irl.import_id = ?
-        ORDER BY irl.line_id ASC
-    """;
-
+            SELECT irl.line_id, irl.qty, irl.item_note,
+                   p.product_code, p.product_name,
+                   sk.sku_code, sk.sku_id
+            FROM import_receipt_lines irl
+            JOIN products p ON p.product_id = irl.product_id
+            JOIN product_skus sk ON sk.sku_id = irl.sku_id
+            WHERE irl.import_id = ?
+            ORDER BY irl.line_id ASC
+        """;
         List<ImportReceiptLineDetail> out = new ArrayList<>();
-
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, importId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -211,13 +221,11 @@ public class ImportReceiptDAO {
                     it.setQty(rs.getInt("qty"));
                     it.setItemNote(rs.getString("item_note"));
                     it.setProductCode(rs.getString("product_code"));
+                    it.setProductName(rs.getString("product_name"));
                     it.setSkuCode(rs.getString("sku_code"));
-
                     it.setInStock(getInStockBySku(con, skuId));
-
                     List<String> imeis = getImeisByLine(con, lineId);
                     it.setImeiText(formatImeis(imeis, 2));
-
                     out.add(it);
                 }
             }
@@ -230,58 +238,37 @@ public class ImportReceiptDAO {
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, skuId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("qty_on_hand");
-                }
+                if (rs.next()) return rs.getInt("qty_on_hand");
             }
         }
         return 0;
     }
 
     private List<String> getImeisByLine(Connection con, long lineId) throws SQLException {
-        String sql = """
-        SELECT imei
-        FROM import_receipt_units
-        WHERE line_id = ?
-        ORDER BY iru_id ASC
-    """;
+        String sql = "SELECT imei FROM import_receipt_units WHERE line_id = ? ORDER BY iru_id ASC";
         List<String> out = new ArrayList<>();
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, lineId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    out.add(rs.getString("imei"));
-                }
+                while (rs.next()) out.add(rs.getString("imei"));
             }
         }
         return out;
     }
 
     private static String formatImeis(List<String> imeis, int perLine) {
-        if (imeis == null || imeis.isEmpty()) {
-            return "";
-        }
-
+        if (imeis == null || imeis.isEmpty()) return "";
         List<String> cleaned = new ArrayList<>();
         for (String s : imeis) {
-            if (s == null) {
-                continue;
-            }
+            if (s == null) continue;
             s = s.trim();
-            if (!s.isEmpty()) {
-                cleaned.add(s);
-            }
+            if (!s.isEmpty()) cleaned.add(s);
         }
-        if (cleaned.isEmpty()) {
-            return "";
-        }
-
+        if (cleaned.isEmpty()) return "";
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < cleaned.size(); i += perLine) {
             int end = Math.min(i + perLine, cleaned.size());
-            if (sb.length() > 0) {
-                sb.append("\n");
-            }
+            if (sb.length() > 0) sb.append("\n");
             sb.append(String.join(", ", cleaned.subList(i, end)));
         }
         return sb.toString();

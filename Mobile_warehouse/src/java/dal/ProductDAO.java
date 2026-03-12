@@ -237,11 +237,10 @@ public class ProductDAO {
     public List<ProductLite> listActive() throws Exception {
         List<ProductLite> list = new ArrayList<>();
 
-        // tuỳ schema: nếu products cũng dùng status
-        String sql = "SELECT product_id, product_code "
+        String sql = "SELECT product_id, product_code, product_name "
                 + "FROM products "
                 + "WHERE status = 'ACTIVE' "
-                + "ORDER BY product_code";
+                + "ORDER BY product_name";
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
@@ -249,6 +248,7 @@ public class ProductDAO {
                 ProductLite p = new ProductLite();
                 p.setProductId(rs.getLong("product_id"));
                 p.setProductCode(rs.getString("product_code"));
+                p.setProductName(rs.getString("product_name"));
                 list.add(p);
             }
         }
