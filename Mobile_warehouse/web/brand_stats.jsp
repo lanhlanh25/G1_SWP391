@@ -57,7 +57,7 @@
     </div>
 
     <div class="card brand-summary-card">
-        <div class="brand-summary-label">Total Products</div>
+        <div class="brand-summary-label">Products types</div>
         <div class="brand-summary-value">${summary.totalProducts}</div>
     </div>
 
@@ -153,7 +153,7 @@
                     <label>Sort By</label>
                     <select class="select" name="sortBy">
                         <option value="stock"    ${sortBy=='stock' ? 'selected' : ''}>Total Stock</option>
-                        <option value="products" ${sortBy=='products' ? 'selected' : ''}>Total Product</option>
+                        <option value="products" ${sortBy=='products' ? 'selected' : ''}>Product Types</option>
                         <option value="low"      ${sortBy=='low' ? 'selected' : ''}>Low Stock</option>
                         <option value="import"   ${sortBy=='import' ? 'selected' : ''}>Imported Units</option>
                         <option value="export"   ${sortBy=='export' ? 'selected' : ''}>Exported Units</option>
@@ -234,8 +234,7 @@
                         <th style="width:60px;">#</th>
                         <th>Brand Name</th>
                         <th style="width:140px;">
-                            #Product<br/>
-                            <span class="muted">(Number of products)</span>
+                            #Product Types<br/>
                         </th>
                         <th style="width:120px;">Total Stock</th>
                         <th style="width:140px;">Low Stock Count</th>
