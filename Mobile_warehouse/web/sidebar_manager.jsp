@@ -16,8 +16,6 @@
     boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
 %>
 
-
-
 <div>
 
     <div class="section-title">Overview</div>
@@ -33,10 +31,16 @@
     <div class="section-title">Warehouse</div>
     <ul>
         <li>
-            <a href="<%=ctx%>/inventory">Inventory Overview</a>
+            <a class="<%= inventoryOverviewActive ? "active" : "" %>"
+               href="<%=ctx%>/inventory">
+                Inventory Overview
+            </a>
         </li>
         <li>
-            <a href="<%=ctx%>/inventory-count">Inventory Count</a>
+            <a class="<%= inventoryCountActive ? "active" : "" %>"
+               href="<%=ctx%>/inventory-count">
+                Inventory Count
+            </a>
         </li>
         <li>
             <a class="<%= "variant-matrix".equals(currentPage) ? "active" : "" %>"
@@ -49,12 +53,12 @@
     <div class="section-title">Transactions</div>
 
     <details <%= (
-    "import-receipt-list".equals(currentPage) ||
-    "create-import-receipt".equals(currentPage) ||
-    "import-receipt-detail".equals(currentPage) ||
-    "request-delete-import-receipt-list".equals(currentPage) ||
-    importReportActive
-) ? "open" : "" %>>
+        "import-receipt-list".equals(currentPage) ||
+        "create-import-receipt".equals(currentPage) ||
+        "import-receipt-detail".equals(currentPage) ||
+        "request-delete-import-receipt-list".equals(currentPage) ||
+        importReportActive
+    ) ? "open" : "" %>>
         <summary>Import Receipts</summary>
         <ul>
             <li>
@@ -85,10 +89,10 @@
     </details>
 
     <details <%= (
-    "export-receipt-list".equals(currentPage) ||
-    "export-receipt-detail".equals(currentPage) ||
-    exportReportActive
-) ? "open" : "" %>>
+        "export-receipt-list".equals(currentPage) ||
+        "export-receipt-detail".equals(currentPage) ||
+        exportReportActive
+    ) ? "open" : "" %>>
         <summary>Export Receipts</summary>
         <ul>
             <li>
@@ -164,7 +168,7 @@
                 </a>
             </li>
             <li>
-                <a class="<%= "brand-stats".equals(currentPage) || "brand-stats-detail".equals(currentPage) ? "active" : "" %>"
+                <a class="<%= ("brand-stats".equals(currentPage) || "brand-stats-detail".equals(currentPage)) ? "active" : "" %>"
                    href="<%=ctx%>/home?p=brand-stats">
                     Brand Statistics
                 </a>
@@ -189,7 +193,7 @@
                 </a>
             </li>
             <li>
-                <a class="<%= "view_supplier".equals(currentPage) || "supplier_detail".equals(currentPage) ? "active" : "" %>"
+                <a class="<%= ("view_supplier".equals(currentPage) || "supplier_detail".equals(currentPage)) ? "active" : "" %>"
                    href="<%=ctx%>/home?p=view_supplier">
                     Supplier List
                 </a>
@@ -218,7 +222,7 @@
                 </a>
             </li>
             <li>
-                <a class="<%= "product-list".equals(currentPage) || "product-detail".equals(currentPage) ? "active" : "" %>"
+                <a class="<%= ("product-list".equals(currentPage) || "product-detail".equals(currentPage)) ? "active" : "" %>"
                    href="<%=ctx%>/home?p=product-list">
                     Product List
                 </a>
@@ -227,4 +231,3 @@
     </details>
 
 </div>
-
