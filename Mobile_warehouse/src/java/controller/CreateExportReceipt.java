@@ -185,9 +185,12 @@ public class CreateExportReceipt extends HttpServlet {
             long exportId = dao.createReceipt(con, requestId, createdBy, exportDate, note, "CONFIRMED");
 
             for (ManualRowInput r : rows) {
+                if (!dao.skuBelongsToProduct(con, r.skuId, r.productId)) {
+                    throw new RuntimeException("SKU does not belong to selected product");
+                }
+
                 long lineId = dao.createLine(con, exportId, r.productId, r.skuId, r.qty, r.itemNote);
 
-                // ✅ Mark IMEI out of stock FIRST (ACTIVE -> INACTIVE)
                 for (String imei : r.imeis) {
                     boolean ok = dao.markUnitInactive(con, r.skuId, imei);
                     if (!ok) {
@@ -195,7 +198,6 @@ public class CreateExportReceipt extends HttpServlet {
                     }
                 }
 
-                // ✅ Insert export units
                 dao.insertUnitImeis(con, lineId, r.imeis);
             }
 

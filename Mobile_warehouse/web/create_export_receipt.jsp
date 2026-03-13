@@ -1,6 +1,6 @@
 <%-- 
     Document   : create_export_receipt
-    Created on : Feb 12, 2026, 12:47:26 PM
+    Created on : Feb 12, 2026, 12:47:26 PM
     Author     : Admin
 --%>
 
@@ -12,240 +12,49 @@
 
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" />
-        <title>Create Export Receipt</title>
+<head>
+    <meta charset="UTF-8" />
+    <title>Create Export Receipt</title>
+</head>
 
-        <style>
-            :root{
-                --line:#2e3f95;
-                --bg:#f4f4f4;
-                --th:#d9d9d9;
-            }
-            body{
-                font-family: Arial, Helvetica, sans-serif;
-                background:#eee;
-                margin:0;
-            }
-            .wrap{
-                padding:14px;
-                background:var(--bg);
-            }
-            .frame{
-                border:2px solid var(--line);
-                background:#fff;
-                padding:12px;
-            }
-            .title{
-                font-size:20px;
-                font-weight:700;
-            }
-            .sectionTitle{
-                font-weight:700;
-                margin:8px 0 6px;
-            }
-            .row{
-                display:flex;
-                gap:10px;
-                margin-bottom:8px;
-                align-items:center;
-            }
-            .row label{
-                min-width:140px;
-                font-size:13px;
-            }
-            input[type="text"], input[type="number"], input[type="datetime-local"], select, textarea{
-                width:100%;
-                padding:6px 8px;
-                border:1px solid #333;
-                box-sizing:border-box;
-            }
-            textarea{
-                height:56px;
-                resize:vertical;
-            }
-            .col{
-                flex:1;
-            }
+<body>
+<div class="page-wrap">
+    <div class="container">
+        <div class="card">
+            <div class="card-body">
 
-            .tabs{
-                display:flex;
-                gap:6px;
-                margin-bottom:10px;
-            }
-            .tabBtn{
-                border:1px solid #333;
-                background:#f6f6f6;
-                padding:6px 10px;
-                cursor:pointer;
-                font-size:13px;
-            }
-            .tabBtn.active{
-                background:#fff;
-                font-weight:700;
-            }
-            .tabPanel{
-                display:none;
-            }
-            .tabPanel.active{
-                display:block;
-            }
-
-            table{
-                border-collapse:collapse;
-                width:100%;
-                table-layout:auto;
-            }
-            th, td{
-                border:1px solid #333;
-                padding:6px;
-                vertical-align:top;
-                font-size:12px;
-            }
-            th{
-                background:var(--th);
-                text-align:left;
-                white-space:nowrap;
-            }
-
-            .small{
-                font-size:12px;
-                color:#333;
-            }
-            .btn{
-                border:1px solid #333;
-                background:#f6f6f6;
-                padding:6px 12px;
-                cursor:pointer;
-                display:inline-block;
-                text-decoration:none;
-                color:#111;
-                font-size:13px;
-            }
-            .btn.danger{
-                background:#fff0f0;
-            }
-            .btnRow{
-                display:flex;
-                gap:8px;
-                margin-top:10px;
-            }
-            .hint{
-                background:#c9f2ff;
-                border:1px solid #333;
-                padding:8px;
-                margin:8px 0;
-                font-size:12px;
-            }
-            .err{
-                border:1px solid #b00020;
-                background:#ffe9ee;
-                padding:8px;
-                margin-bottom:10px;
-                color:#b00020;
-                font-size:13px;
-            }
-            .ok{
-                border:1px solid #0a7f3f;
-                background:#e9fff1;
-                padding:8px;
-                margin-bottom:10px;
-                color:#0a7f3f;
-                font-size:13px;
-            }
-
-            .w60{
-                min-width:60px;
-            }
-            .w90{
-                min-width:90px;
-            }
-            .w120{
-                min-width:120px;
-            }
-            .w160{
-                min-width:160px;
-            }
-            .w200{
-                min-width:200px;
-            }
-            .w260{
-                min-width:260px;
-            }
-            .center{
-                text-align:center;
-            }
-
-            .imeiBox{
-                display:flex;
-                flex-direction:column;
-                gap:4px;
-                min-width:280px;
-            }
-            .imeiRow{
-                display:flex;
-                gap:6px;
-                align-items:center;
-            }
-            .imeiRow select{
-                flex:1;
-                min-width:200px;
-                padding:4px 6px;
-                font-size:12px;
-            }
-            .imeiRow span{
-                min-width:50px;
-                font-size:11px;
-                white-space:nowrap;
-            }
-            .imeiRow input{
-                flex:1;
-                min-width:200px;
-                padding:4px 6px;
-                font-size:12px;
-            }
-            .imeiRow input.valid{
-                border-color:#0a7f3f;
-                background:#f0fff4;
-            }
-            .imeiRow input.invalid{
-                border-color:#b00020;
-                background:#fff5f5;
-            }
-        </style>
-    </head>
-
-    <body>
-        <div class="wrap">
-            <div class="frame">
-                <div style="display:flex; gap:10px; align-items:center;">
-                    <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
-                    <div class="title">Create Export Receipt</div>
+                <div class="topbar" style="margin-bottom:18px;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <a class="btn btn-outline" href="${ctx}/home?p=dashboard">← Back</a>
+                        <div class="title">Create Export Receipt</div>
+                    </div>
                 </div>
 
                 <c:if test="${not empty param.err}">
-                    <div class="err">${fn:escapeXml(param.err)}</div>
+                    <div class="msg-err">${fn:escapeXml(param.err)}</div>
                 </c:if>
                 <c:if test="${not empty param.msg}">
-                    <div class="ok">${fn:escapeXml(param.msg)}</div>
+                    <div class="msg-ok">${fn:escapeXml(param.msg)}</div>
                 </c:if>
 
-                <div class="sectionTitle">Export Form</div>
+                <h2 class="h2" style="margin:0 0 14px;">Export Form</h2>
 
                 <c:if test="${not empty erHeader}">
-                    <div class="hint">
-                        <b>Source Request:</b> ${fn:escapeXml(erHeader.requestCode)}
-                        &nbsp; | &nbsp;
-                        <b>Status:</b> ${fn:escapeXml(erHeader.status)}
-                        &nbsp; | &nbsp;
-                        <b>Expected Export Date:</b> <c:out value="${erHeader.expectedExportDate}"/>
+                    <div class="card" style="background:var(--primary-light); border-color:var(--primary-border); margin-bottom:16px;">
+                        <div class="card-body" style="padding:12px 16px; font-size:13px;">
+                            <b>Source Request:</b> ${fn:escapeXml(erHeader.requestCode)}
+                            &nbsp; | &nbsp;
+                            <b>Status:</b> ${fn:escapeXml(erHeader.status)}
+                            &nbsp; | &nbsp;
+                            <b>Expected Export Date:</b> <c:out value="${erHeader.expectedExportDate}"/>
+                        </div>
                     </div>
                 </c:if>
 
-                <div class="tabs">
-                    <button type="button" class="tabBtn active" data-tab="manual">Manual Entry</button>
+                <div class="tab-group" style="margin-bottom:18px;">
+                    <button type="button" class="tab-btn active" data-tab="manual">Manual Entry</button>
                     <c:if test="${empty sourceRequestId}">
-                        <button type="button" class="tabBtn" data-tab="excel">Upload Excel With Imei</button>
+                        <button type="button" class="tab-btn" data-tab="excel">Upload Excel With IMEI</button>
                     </c:if>
                 </div>
 
@@ -257,517 +66,657 @@
                             <input type="hidden" name="requestId" value="${sourceRequestId}"/>
                         </c:if>
 
-                        <div class="row">
-                            <label>Export Code (auto)</label>
-                            <div class="col">
-                                <input type="text" name="exportCode" value="${fn:escapeXml(exportCode)}" readonly />
-                                <div class="small">Generated by system</div>
+                        <div class="form-grid">
+                            <div class="label">Export Code (auto)</div>
+                            <div>
+                                <input class="input readonly" type="text" name="exportCode"
+                                       value="${fn:escapeXml(exportCode)}" readonly />
+                                <div class="field-hint">Generated by system</div>
+                            </div>
+
+                            <div class="label">Transaction time</div>
+                            <div>
+                                <input class="input" type="datetime-local" name="receiptDate"
+                                       value="${fn:escapeXml(receiptDateDefault)}" required />
+                            </div>
+
+                            <div class="label">Created by (Sale)</div>
+                            <div>
+                                <input class="input readonly" type="text"
+                                       value="${fn:escapeXml(createdByName)}" readonly />
+                            </div>
+
+                            <div class="label">Note</div>
+                            <div>
+                                <textarea class="textarea" name="note"
+                                          placeholder="Optional note for warehouse staff..."></textarea>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <label>Transaction time</label>
-                            <div class="col">
-                                <input type="datetime-local" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}" required />
-                            </div>
-                        </div>
+                        <h2 class="h2" style="margin:22px 0 12px;">Export Items</h2>
 
-                        <div class="row">
-                            <label>Created by (Sale)</label>
-                            <div class="col">
-                                <input type="text" value="${fn:escapeXml(createdByName)}" readonly />
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <label>Note</label>
-                            <div class="col">
-                                <textarea name="note" placeholder="Optional note for warehouse staff..."></textarea>
-                            </div>
-                        </div>
-
-                        <div class="sectionTitle">Export Items</div>
-
-                        <table id="itemsTable">
-                            <thead>
+                        <div style="overflow-x:auto;">
+                            <table id="itemsTable" class="table">
+                                <thead>
                                 <tr>
-                                    <th class="w60 center">#</th>
-                                    <th class="w160">Product Code</th>
-                                    <th class="w200">SKU</th>
-                                    <th class="w90">Quantity</th>
-                                    <th class="w260">Imei Numbers</th>
-                                    <th class="w160">Item note</th>
-                                    <th class="w120 center">Action</th>
+                                    <th class="center" style="width:60px;">#</th>
+                                    <th style="width:220px;">Product Name</th>
+                                    <th style="width:180px;">Product Code</th>
+                                    <th style="width:200px;">SKU</th>
+                                    <th style="width:110px;">Quantity</th>
+                                    <th style="width:280px;">IMEI Numbers</th>
+                                    <th style="width:180px;">Item Note</th>
+                                    <th class="center" style="width:120px;">Action</th>
                                 </tr>
-                            </thead>
-                            <tbody id="itemsTbody"></tbody>
-                        </table>
+                                </thead>
+                                <tbody id="itemsTbody"></tbody>
+                            </table>
+                        </div>
 
                         <c:if test="${empty sourceRequestId}">
-                            <div style="margin-top:8px;">
-                                <button type="button" class="btn" id="btnAddRow">+ Add product Line</button>
+                            <div style="margin-top:10px;">
+                                <button type="button" class="btn btn-outline" id="btnAddRow">+ Add Product Line</button>
                             </div>
                         </c:if>
 
-                        <div class="btnRow">
-                            <button type="submit" class="btn">Create Receipt</button>
-                            <a class="btn" href="${ctx}/home">Cancel</a>
+                        <div class="form-actions" style="justify-content:flex-start; margin-top:16px;">
+                            <button type="submit" class="btn btn-primary">Create Receipt</button>
+                            <a class="btn" href="${ctx}/home?p=export-receipt-list">Cancel</a>
                         </div>
                     </form>
                 </div>
 
                 <!-- ================= Excel ================= -->
                 <c:if test="${empty sourceRequestId}">
-                    <div id="tab-excel" class="tabPanel">
+                    <div id="tab-excel" class="tabPanel" style="display:none;">
                         <form method="post" action="${ctx}/create-export-receipt" enctype="multipart/form-data">
                             <input type="hidden" name="mode" value="excel"/>
-                            <c:if test="${not empty sourceRequestId}">
-                                <input type="hidden" name="requestId" value="${sourceRequestId}"/>
-                            </c:if>
 
-                            <div class="hint">
-                                <b>Excel Format:</b> 4 columns:
-                                <b>product_code</b>, <b>sku_code</b>, <b>imei</b> (15 digits), <b>item_note</b> (optional)
-                            </div>
-
-                            <div class="row">
-                                <label>Export Code (auto)</label>
-                                <div class="col">
-                                    <input type="text" name="exportCode" value="${fn:escapeXml(exportCode)}" readonly />
+                            <div class="card" style="background:var(--primary-light); border-color:var(--primary-border); margin-bottom:16px;">
+                                <div class="card-body" style="padding:12px 16px; font-size:13px;">
+                                    <b>Excel Format:</b> 4 columns:
+                                    <b>product_code</b>, <b>sku_code</b>, <b>imei</b> (15 digits), <b>item_note</b> (optional)
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <label>Excel File (.xlsx)</label>
-                                <div class="col">
-                                    <input type="file" name="excelFile" accept=".xlsx" required />
+                            <div class="form-grid">
+                                <div class="label">Export Code (auto)</div>
+                                <div>
+                                    <input class="input readonly" type="text" name="exportCode"
+                                           value="${fn:escapeXml(exportCode)}" readonly />
+                                </div>
+
+                                <div class="label">Excel File (.xlsx)</div>
+                                <div>
+                                    <input class="input" type="file" name="excelFile" accept=".xlsx" required />
+                                </div>
+
+                                <div class="label">Transaction time</div>
+                                <div>
+                                    <input class="input" type="datetime-local" name="receiptDate"
+                                           value="${fn:escapeXml(receiptDateDefault)}" required />
+                                </div>
+
+                                <div class="label">Created by (Sale)</div>
+                                <div>
+                                    <input class="input readonly" type="text"
+                                           value="${fn:escapeXml(createdByName)}" readonly />
+                                </div>
+
+                                <div class="label">Note</div>
+                                <div>
+                                    <textarea class="textarea" name="note"
+                                              placeholder="Optional note for warehouse staff..."></textarea>
                                 </div>
                             </div>
 
-                            <div class="row">
-                                <label>Transaction time</label>
-                                <div class="col">
-                                    <input type="datetime-local" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}" required />
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <label>Created by (Sale)</label>
-                                <div class="col">
-                                    <input type="text" value="${fn:escapeXml(createdByName)}" readonly />
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <label>Note</label>
-                                <div class="col">
-                                    <textarea name="note" placeholder="Optional note for warehouse staff..."></textarea>
-                                </div>
-                            </div>
-
-                            <div class="btnRow">
-                                <button type="submit" class="btn">Create  with Excel</button>
+                            <div class="form-actions" style="justify-content:flex-start; margin-top:16px;">
+                                <button type="submit" class="btn btn-primary">Create with Excel</button>
                                 <a class="btn" href="${ctx}/home?p=export-receipt-list">Cancel</a>
-
                             </div>
                         </form>
                     </div>
                 </c:if>
+
             </div>
         </div>
+    </div>
+</div>
 
-        <script>
-            (function () {
-            const PRODUCTS = [
-            <c:forEach var="p" items="${products}" varStatus="st">
-            { id: ${p.productId}, code: "${fn:escapeXml(p.productCode)}" }<c:if test="${!st.last}">,</c:if>
-            </c:forEach>
-            ];
-                    const SKUS = [
-            <c:forEach var="k" items="${skus}" varStatus="st">
-                    { id: ${k.skuId}, code: "${fn:escapeXml(k.skuCode)}", productId: ${k.productId} }<c:if test="${!st.last}">,</c:if>
-            </c:forEach>
-                    ];
-                    const REQUEST_ITEMS = [
-            <c:forEach var="it" items="${erItems}" varStatus="st">
-                    {
-                    productCode: "${fn:escapeXml(it.productCode)}",
-                            skuCode: "${fn:escapeXml(it.skuCode)}",
-                            qty: ${it.requestQty}
-                    }<c:if test="${!st.last}">,</c:if>
-            </c:forEach>
-                    ];
-                    const IS_FROM_REQUEST = ${not empty sourceRequestId ? 'true' : 'false'};
-                    const tbody = document.getElementById("itemsTbody");
-                    const manualForm = document.getElementById("manualForm");
-                    const btnAddRow = document.getElementById("btnAddRow");
-                    let rowCounter = 0;
-                    async function fetchImeisBySku(skuId) {
-                    try {
-                    const res = await fetch("${ctx}/api/available-imeis?skuId=" + encodeURIComponent(skuId));
-                            if (!res.ok) return [];
-                            const data = await res.json();
-                            return Array.isArray(data) ? data : [];
-                    } catch (e) {
-                    return [];
-                    }
-                    }
+<script>
+(function () {
+    const PRODUCTS = [
+        <c:forEach var="p" items="${products}" varStatus="st">
+        {
+            id: ${p.productId},
+            code: "${fn:escapeXml(p.productCode)}",
+            name: "${fn:escapeXml(p.productName)}"
+        }<c:if test="${!st.last}">,</c:if>
+        </c:forEach>
+    ];
 
-            async function loadImeisForLockedOrPrefillRow(skuId, rowIdx, qtyInp, tdImei) {
-            const currentImeiOptions = skuId ? await fetchImeisBySku(skuId) : [];
-                    tdImei.innerHTML = "";
-                    const imeiBox = buildImeiBox(rowIdx, parseInt(qtyInp.value) || 1, currentImeiOptions);
-                    tdImei.appendChild(imeiBox);
-                    syncImeiDisabledOptions();
-                    if (skuId && currentImeiOptions.length === 0) {
+    const SKUS = [
+        <c:forEach var="k" items="${skus}" varStatus="st">
+        {
+            id: ${k.skuId},
+            code: "${fn:escapeXml(k.skuCode)}",
+            productId: ${k.productId}
+        }<c:if test="${!st.last}">,</c:if>
+        </c:forEach>
+    ];
+
+    const REQUEST_ITEMS = [
+        <c:forEach var="it" items="${erItems}" varStatus="st">
+        {
+            productId: ${it.productId},
+            productName: "${fn:escapeXml(it.productName)}",
+            productCode: "${fn:escapeXml(it.productCode)}",
+            skuId: ${it.skuId},
+            skuCode: "${fn:escapeXml(it.skuCode)}",
+            qty: ${it.requestQty}
+        }<c:if test="${!st.last}">,</c:if>
+        </c:forEach>
+    ];
+
+    const IS_FROM_REQUEST = ${not empty sourceRequestId};
+    const tbody = document.getElementById("itemsTbody");
+    const manualForm = document.getElementById("manualForm");
+    const btnAddRow = document.getElementById("btnAddRow");
+    let rowCounter = 0;
+
+    async function fetchImeisBySku(skuId) {
+        try {
+            const res = await fetch("${ctx}/api/available-imeis?skuId=" + encodeURIComponent(skuId));
+            if (!res.ok) return [];
+            const data = await res.json();
+            return Array.isArray(data) ? data : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    async function loadImeisForLockedOrPrefillRow(skuId, rowIdx, qtyInp, tdImei) {
+        const currentImeiOptions = skuId ? await fetchImeisBySku(skuId) : [];
+        tdImei.innerHTML = "";
+        const imeiBox = buildImeiBox(rowIdx, parseInt(qtyInp.value) || 1, currentImeiOptions);
+        tdImei.appendChild(imeiBox);
+        syncImeiDisabledOptions();
+
+        if (skuId && currentImeiOptions.length === 0) {
             alert("No available IMEIs in stock for this SKU.");
-            }
-            }
+        }
+    }
 
-            function buildProductSelect() {
-            const sel = document.createElement("select");
-                    sel.required = true;
-                    sel.innerHTML = '<option value="">-- Select Product Code --</option>';
-                    PRODUCTS.forEach(p => {
-                    sel.innerHTML += '<option value="' + p.id + '">' + p.code + '</option>';
-                    });
-                    return sel;
-            }
+    function buildProductNameSelect() {
+        const sel = document.createElement("select");
+        sel.required = true;
+        sel.className = "select";
+        sel.innerHTML = '<option value="">-- Select Product Name --</option>';
 
-            function buildSkuSelect() {
-            const sel = document.createElement("select");
-                    sel.required = true;
-                    sel.innerHTML = '<option value="">-- Select SKU --</option>';
-                    return sel;
-            }
-
-            function refreshSkuOptions(skuSelect, productId) {
-            skuSelect.innerHTML = '<option value="">-- Select SKU --</option>';
-                    if (!productId) return;
-                    SKUS.filter(s => String(s.productId) === String(productId)).forEach(s => {
-            skuSelect.innerHTML += '<option value="' + s.id + '">' + s.code + '</option>';
-            });
-            }
-
-            function buildImeiBox(rowIdx, qty, imeiOptions) {
-            const box = document.createElement("div");
-                    box.className = "imeiBox";
-                    for (let i = 1; i <= qty; i++) {
-            const row = document.createElement("div");
-                    row.className = "imeiRow";
-                    const label = document.createElement("span");
-                    label.textContent = "Imei " + i + ":";
-                    const sel = document.createElement("select");
-                    sel.name = "imei_" + rowIdx + "_" + i;
-                    sel.required = true;
-                    sel.innerHTML = '<option value="">-- Select IMEI --</option>';
-                    sel.addEventListener("change", syncImeiDisabledOptions);
-                    (imeiOptions || []).forEach(v => {
+        PRODUCTS.forEach(p => {
             const opt = document.createElement("option");
-                    opt.value = v;
-                    opt.textContent = v;
-                    sel.appendChild(opt);
+            opt.value = p.id;
+            opt.textContent = p.name;
+            opt.dataset.code = p.code;
+            sel.appendChild(opt);
+        });
+
+        return sel;
+    }
+
+    function buildProductCodeDisplay(initialCode) {
+        const div = document.createElement("div");
+        div.style.padding = "10px 14px";
+        div.style.border = "1px solid var(--border)";
+        div.style.borderRadius = "10px";
+        div.style.minHeight = "42px";
+        div.style.display = "flex";
+        div.style.alignItems = "center";
+        div.style.background = "var(--surface-2)";
+        div.style.color = "var(--muted)";
+        div.style.fontSize = "14px";
+        div.style.fontWeight = "600";
+        div.textContent = initialCode || "—";
+        return div;
+    }
+
+    function buildSkuSelect() {
+        const sel = document.createElement("select");
+        sel.required = true;
+        sel.className = "select";
+        sel.innerHTML = '<option value="">-- Select SKU --</option>';
+        return sel;
+    }
+
+    function refreshSkuOptions(skuSelect, productId) {
+        skuSelect.innerHTML = '<option value="">-- Select SKU --</option>';
+        if (!productId) return;
+
+        SKUS.filter(s => String(s.productId) === String(productId)).forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s.id;
+            opt.textContent = s.code;
+            skuSelect.appendChild(opt);
+        });
+    }
+
+    function buildImeiBox(rowIdx, qty, imeiOptions) {
+        const box = document.createElement("div");
+        box.style.display = "flex";
+        box.style.flexDirection = "column";
+        box.style.gap = "6px";
+        box.style.minWidth = "220px";
+
+        for (let i = 1; i <= qty; i++) {
+            const row = document.createElement("div");
+            row.style.display = "flex";
+            row.style.gap = "6px";
+            row.style.alignItems = "center";
+
+            const label = document.createElement("span");
+            label.textContent = "IMEI " + i + ":";
+            label.style.minWidth = "56px";
+            label.style.fontSize = "12px";
+            label.style.color = "var(--muted)";
+            label.style.fontWeight = "600";
+
+            const sel = document.createElement("select");
+            sel.className = "select";
+            sel.name = "imei_" + rowIdx + "_" + i;
+            sel.required = true;
+            sel.innerHTML = '<option value="">-- Select IMEI --</option>';
+            sel.addEventListener("change", syncImeiDisabledOptions);
+
+            (imeiOptions || []).forEach(v => {
+                const opt = document.createElement("option");
+                opt.value = v;
+                opt.textContent = v;
+                sel.appendChild(opt);
             });
-                    row.appendChild(label);
-                    row.appendChild(sel);
-                    box.appendChild(row);
-            }
 
-            return box;
-            }
+            row.appendChild(label);
+            row.appendChild(sel);
+            box.appendChild(row);
+        }
 
-            function renumber() {
-            Array.from(tbody.children).forEach((row, idx) => {
+        return box;
+    }
+
+    function renumber() {
+        Array.from(tbody.children).forEach((row, idx) => {
             const noCell = row.querySelector(".cellNo");
-                    if (noCell) noCell.textContent = idx + 1;
-            });
+            if (noCell) noCell.textContent = idx + 1;
+        });
+    }
+
+    function addRow(prefill) {
+        rowCounter++;
+        const rowIdx = rowCounter;
+        const isLocked = !!prefill && IS_FROM_REQUEST;
+
+        const tr = document.createElement("tr");
+        tr.dataset.rowIdx = rowIdx;
+
+        const hiddenRowKey = document.createElement("input");
+        hiddenRowKey.type = "hidden";
+        hiddenRowKey.name = "rowKey";
+        hiddenRowKey.value = String(rowIdx);
+        tr.appendChild(hiddenRowKey);
+
+        const tdNo = document.createElement("td");
+        tdNo.className = "center cellNo";
+        tdNo.textContent = tbody.children.length + 1;
+
+        const tdProdName = document.createElement("td");
+        const selProd = buildProductNameSelect();
+        selProd.name = "productId_" + rowIdx;
+
+        const tdProdCode = document.createElement("td");
+        const productCodeBox = buildProductCodeDisplay("");
+
+        const tdSku = document.createElement("td");
+        const selSku = buildSkuSelect();
+        selSku.name = "skuId_" + rowIdx;
+        selSku.disabled = true;
+
+        const tdQty = document.createElement("td");
+        const qtyInp = document.createElement("input");
+        qtyInp.type = "number";
+        qtyInp.min = "1";
+        qtyInp.value = "1";
+        qtyInp.required = true;
+        qtyInp.name = "qty_" + rowIdx;
+        qtyInp.className = "input";
+
+        const tdImei = document.createElement("td");
+        let currentImeiOptions = [];
+        let imeiBox = buildImeiBox(rowIdx, 1, currentImeiOptions);
+        tdImei.appendChild(imeiBox);
+
+        const tdNote = document.createElement("td");
+        const noteInp = document.createElement("input");
+        noteInp.type = "text";
+        noteInp.name = "itemNote_" + rowIdx;
+        noteInp.placeholder = "Notes";
+        noteInp.className = "input";
+        tdNote.appendChild(noteInp);
+
+        const tdAct = document.createElement("td");
+        tdAct.className = "center";
+
+        const delBtn = document.createElement("button");
+        delBtn.type = "button";
+        delBtn.className = "btn btn-danger btn-sm";
+        delBtn.textContent = "Delete";
+        delBtn.addEventListener("click", function () {
+            tr.remove();
+            renumber();
+            syncImeiDisabledOptions();
+        });
+
+        if (prefill) {
+            let matchedProduct = null;
+
+            if (prefill.productId) {
+                matchedProduct = PRODUCTS.find(p => String(p.id) === String(prefill.productId));
+            }
+            if (!matchedProduct && prefill.productCode) {
+                matchedProduct = PRODUCTS.find(p => p.code === prefill.productCode);
             }
 
-            function addRow(prefill) {
-            rowCounter++;
-                    const rowIdx = rowCounter;
-                    const isLocked = !!prefill && IS_FROM_REQUEST;
-                    const tr = document.createElement("tr");
-                    tr.dataset.rowIdx = rowIdx;
-                    const hiddenRowKey = document.createElement("input");
-                    hiddenRowKey.type = "hidden";
-                    hiddenRowKey.name = "rowKey";
-                    hiddenRowKey.value = String(rowIdx);
-                    tr.appendChild(hiddenRowKey);
-                    const tdNo = document.createElement("td");
-                    tdNo.className = "center cellNo";
-                    tdNo.textContent = tbody.children.length + 1;
-                    const tdProd = document.createElement("td");
-                    const selProd = buildProductSelect();
-                    selProd.name = "productId_" + rowIdx;
-                    const tdSku = document.createElement("td");
-                    const selSku = buildSkuSelect();
-                    selSku.name = "skuId_" + rowIdx;
-                    const tdQty = document.createElement("td");
-                    const qtyInp = document.createElement("input");
-                    qtyInp.type = "number";
-                    qtyInp.min = "1";
-                    qtyInp.value = "1";
-                    qtyInp.required = true;
-                    qtyInp.name = "qty_" + rowIdx;
-                    const tdImei = document.createElement("td");
-                    let currentImeiOptions = [];
-                    let imeiBox = buildImeiBox(rowIdx, 1, currentImeiOptions);
-                    tdImei.appendChild(imeiBox);
-                    const tdNote = document.createElement("td");
-                    const noteInp = document.createElement("input");
-                    noteInp.type = "text";
-                    noteInp.name = "itemNote_" + rowIdx;
-                    noteInp.placeholder = "Notes";
-                    tdNote.appendChild(noteInp);
-                    const tdAct = document.createElement("td");
-                    tdAct.className = "center";
-                    const delBtn = document.createElement("button");
-                    delBtn.type = "button";
-                    delBtn.className = "btn danger";
-                    delBtn.textContent = "Delete";
-                    delBtn.addEventListener("click", function () {
-                    tr.remove();
-                            renumber();
-                            syncImeiDisabledOptions();
-                    });
-                    if (prefill) {
-            const matchedProduct = PRODUCTS.find(p => p.code === prefill.productCode);
-                    if (matchedProduct) {
-            selProd.value = String(matchedProduct.id);
-                    refreshSkuOptions(selSku, matchedProduct.id);
-                    const matchedSku = SKUS.find(s =>
-                            String(s.productId) === String(matchedProduct.id) &&
-                            s.code === prefill.skuCode
-                            );
-                    if (matchedSku) {
-            selSku.value = String(matchedSku.id);
-            }
+            if (matchedProduct) {
+                selProd.value = String(matchedProduct.id);
+                productCodeBox.textContent = matchedProduct.code || "—";
+                refreshSkuOptions(selSku, matchedProduct.id);
+                selSku.disabled = false;
+
+                let matchedSku = null;
+                if (prefill.skuId) {
+                    matchedSku = SKUS.find(s => String(s.id) === String(prefill.skuId));
+                }
+                if (!matchedSku && prefill.skuCode) {
+                    matchedSku = SKUS.find(s =>
+                        String(s.productId) === String(matchedProduct.id) &&
+                        s.code === prefill.skuCode
+                    );
+                }
+
+                if (matchedSku) {
+                    selSku.value = String(matchedSku.id);
+                }
             }
 
             qtyInp.value = prefill.qty || 1;
-                    if (prefill.itemNote) {
-            noteInp.value = prefill.itemNote;
+            if (prefill.itemNote) {
+                noteInp.value = prefill.itemNote;
             }
-            }
+        }
 
-            if (isLocked) {
+        if (isLocked) {
             const hiddenProd = document.createElement("input");
-                    hiddenProd.type = "hidden";
-                    hiddenProd.name = "productId_" + rowIdx;
-                    hiddenProd.value = selProd.value;
-                    const hiddenSku = document.createElement("input");
-                    hiddenSku.type = "hidden";
-                    hiddenSku.name = "skuId_" + rowIdx;
-                    hiddenSku.value = selSku.value;
-                    const hiddenQty = document.createElement("input");
-                    hiddenQty.type = "hidden";
-                    hiddenQty.name = "qty_" + rowIdx;
-                    hiddenQty.value = qtyInp.value;
-                    selProd.disabled = true;
-                    selSku.disabled = true;
-                    qtyInp.readOnly = true;
-                    noteInp.readOnly = false;
-                    tdProd.appendChild(selProd);
-                    tdProd.appendChild(hiddenProd);
-                    tdSku.appendChild(selSku);
-                    tdSku.appendChild(hiddenSku);
-                    tdQty.appendChild(qtyInp);
-                    tdQty.appendChild(hiddenQty);
-                    const lockedText = document.createElement("span");
-                    lockedText.textContent = "-";
-                    tdAct.appendChild(lockedText);
-            } else {
-            tdProd.appendChild(selProd);
-                    tdSku.appendChild(selSku);
-                    tdQty.appendChild(qtyInp);
-                    tdAct.appendChild(delBtn);
-                    selProd.addEventListener("change", function () {
-                    refreshSkuOptions(selSku, this.value);
-                            currentImeiOptions = [];
-                            tdImei.innerHTML = "";
-                            imeiBox = buildImeiBox(rowIdx, parseInt(qtyInp.value) || 1, currentImeiOptions);
-                            tdImei.appendChild(imeiBox);
-                            syncImeiDisabledOptions();
-                    });
-                    selSku.addEventListener("change", async function () {
-                    const skuId = this.value;
-                            currentImeiOptions = skuId ? await fetchImeisBySku(skuId) : [];
-                            tdImei.innerHTML = "";
-                            imeiBox = buildImeiBox(rowIdx, parseInt(qtyInp.value) || 1, currentImeiOptions);
-                            tdImei.appendChild(imeiBox);
-                            syncImeiDisabledOptions();
-                            if (skuId && currentImeiOptions.length === 0) {
+            hiddenProd.type = "hidden";
+            hiddenProd.name = "productId_" + rowIdx;
+            hiddenProd.value = selProd.value;
+
+            const hiddenSku = document.createElement("input");
+            hiddenSku.type = "hidden";
+            hiddenSku.name = "skuId_" + rowIdx;
+            hiddenSku.value = selSku.value;
+
+            const hiddenQty = document.createElement("input");
+            hiddenQty.type = "hidden";
+            hiddenQty.name = "qty_" + rowIdx;
+            hiddenQty.value = qtyInp.value;
+
+            selProd.disabled = true;
+            selSku.disabled = true;
+            qtyInp.readOnly = true;
+            noteInp.readOnly = false;
+
+            tdProdName.appendChild(selProd);
+            tdProdName.appendChild(hiddenProd);
+
+            tdProdCode.appendChild(productCodeBox);
+
+            tdSku.appendChild(selSku);
+            tdSku.appendChild(hiddenSku);
+
+            tdQty.appendChild(qtyInp);
+            tdQty.appendChild(hiddenQty);
+
+            tdAct.textContent = "-";
+        } else {
+            tdProdName.appendChild(selProd);
+            tdProdCode.appendChild(productCodeBox);
+            tdSku.appendChild(selSku);
+            tdQty.appendChild(qtyInp);
+            tdAct.appendChild(delBtn);
+
+            selProd.addEventListener("change", function () {
+                const selectedOpt = this.options[this.selectedIndex];
+                const productId = this.value;
+
+                productCodeBox.textContent = selectedOpt && selectedOpt.dataset.code
+                    ? selectedOpt.dataset.code
+                    : "—";
+
+                refreshSkuOptions(selSku, productId);
+                selSku.disabled = !productId;
+                selSku.value = "";
+
+                currentImeiOptions = [];
+                tdImei.innerHTML = "";
+                imeiBox = buildImeiBox(rowIdx, parseInt(qtyInp.value) || 1, currentImeiOptions);
+                tdImei.appendChild(imeiBox);
+                syncImeiDisabledOptions();
+            });
+
+            selSku.addEventListener("change", async function () {
+                const skuId = this.value;
+                currentImeiOptions = skuId ? await fetchImeisBySku(skuId) : [];
+                tdImei.innerHTML = "";
+                imeiBox = buildImeiBox(rowIdx, parseInt(qtyInp.value) || 1, currentImeiOptions);
+                tdImei.appendChild(imeiBox);
+                syncImeiDisabledOptions();
+
+                if (skuId && currentImeiOptions.length === 0) {
                     alert("No available IMEIs in stock for this SKU.");
-                    }
-                    });
-                    qtyInp.addEventListener("input", function () {
-                    let q = parseInt(this.value) || 1;
-                            if (q < 1) q = 1;
-                            this.value = q;
-                            tdImei.innerHTML = "";
-                            imeiBox = buildImeiBox(rowIdx, q, currentImeiOptions);
-                            tdImei.appendChild(imeiBox);
-                            syncImeiDisabledOptions();
-                    });
-            }
+                }
+            });
 
-            if (prefill) {
-            const skuId = selSku.value;
-                    loadImeisForLockedOrPrefillRow(skuId, rowIdx, qtyInp, tdImei);
-            } else {
+            qtyInp.addEventListener("input", function () {
+                let q = parseInt(this.value) || 1;
+                if (q < 1) q = 1;
+                this.value = q;
+
+                tdImei.innerHTML = "";
+                imeiBox = buildImeiBox(rowIdx, q, currentImeiOptions);
+                tdImei.appendChild(imeiBox);
+                syncImeiDisabledOptions();
+            });
+        }
+
+        if (prefill && selSku.value) {
+            loadImeisForLockedOrPrefillRow(selSku.value, rowIdx, qtyInp, tdImei);
+        } else {
             syncImeiDisabledOptions();
-            }
+        }
 
-            tr.appendChild(tdNo);
-                    tr.appendChild(tdProd);
-                    tr.appendChild(tdSku);
-                    tr.appendChild(tdQty);
-                    tr.appendChild(tdImei);
-                    tr.appendChild(tdNote);
-                    tr.appendChild(tdAct);
-                    tbody.appendChild(tr);
-            }
+        tr.appendChild(tdNo);
+        tr.appendChild(tdProdName);
+        tr.appendChild(tdProdCode);
+        tr.appendChild(tdSku);
+        tr.appendChild(tdQty);
+        tr.appendChild(tdImei);
+        tr.appendChild(tdNote);
+        tr.appendChild(tdAct);
 
-            function getSelectedImeisBySku() {
-            const map = new Map();
-                    Array.from(tbody.children).forEach(tr => {
+        tbody.appendChild(tr);
+    }
+
+    function getSelectedImeisBySku() {
+        const map = new Map();
+
+        Array.from(tbody.children).forEach(tr => {
             const rowIdx = tr.dataset.rowIdx;
-                    const skuSel = tr.querySelector(`select[name="skuId_${rowIdx}"]`);
-                    const hiddenSku = tr.querySelector(`input[type="hidden"][name="skuId_${rowIdx}"]`);
-                    const skuId = hiddenSku
-                    ? hiddenSku.value
-                    : (skuSel ? skuSel.value : "");
-                    if (!skuId) return;
-                    const selects = tr.querySelectorAll(`select[name^="imei_${rowIdx}_"]`);
-                    selects.forEach(s => {
-                    const v = (s.value || "").trim();
-                            if (!v) return;
-                            if (!map.has(skuId)) {
+            const skuSel = tr.querySelector(`select[name="skuId_${rowIdx}"]`);
+            const hiddenSku = tr.querySelector(`input[type="hidden"][name="skuId_${rowIdx}"]`);
+            const skuId = hiddenSku ? hiddenSku.value : (skuSel ? skuSel.value : "");
+
+            if (!skuId) return;
+
+            const selects = tr.querySelectorAll(`select[name^="imei_${rowIdx}_"]`);
+            selects.forEach(s => {
+                const v = (s.value || "").trim();
+                if (!v) return;
+
+                if (!map.has(skuId)) {
                     map.set(skuId, new Set());
-                    }
-                    map.get(skuId).add(v);
-                    });
+                }
+                map.get(skuId).add(v);
             });
-                    return map;
-            }
+        });
 
-            function syncImeiDisabledOptions() {
-            const selectedMap = getSelectedImeisBySku();
-                    function countSelectedInSku(skuId, imeiVal) {
-                    let count = 0;
-                            Array.from(tbody.children).forEach(tr2 => {
-                    const rowIdx2 = tr2.dataset.rowIdx;
-                            const skuSel2 = tr2.querySelector(`select[name="skuId_${rowIdx2}"]`);
-                            const hiddenSku2 = tr2.querySelector(`input[type="hidden"][name="skuId_${rowIdx2}"]`);
-                            const skuId2 = hiddenSku2
-                            ? hiddenSku2.value
-                            : (skuSel2 ? skuSel2.value : "");
-                            if (skuId2 !== skuId) return;
-                            const s2 = tr2.querySelectorAll(`select[name^="imei_${rowIdx2}_"]`);
-                            s2.forEach(x => {
-                            if ((x.value || "").trim() === imeiVal) {
-                            count++;
-                            }
-                            });
-                    });
-                            return count;
+        return map;
+    }
+
+    function syncImeiDisabledOptions() {
+        const selectedMap = getSelectedImeisBySku();
+
+        function countSelectedInSku(skuId, imeiVal) {
+            let count = 0;
+
+            Array.from(tbody.children).forEach(tr2 => {
+                const rowIdx2 = tr2.dataset.rowIdx;
+                const skuSel2 = tr2.querySelector(`select[name="skuId_${rowIdx2}"]`);
+                const hiddenSku2 = tr2.querySelector(`input[type="hidden"][name="skuId_${rowIdx2}"]`);
+                const skuId2 = hiddenSku2 ? hiddenSku2.value : (skuSel2 ? skuSel2.value : "");
+
+                if (skuId2 !== skuId) return;
+
+                const s2 = tr2.querySelectorAll(`select[name^="imei_${rowIdx2}_"]`);
+                s2.forEach(x => {
+                    if ((x.value || "").trim() === imeiVal) {
+                        count++;
                     }
+                });
+            });
 
-            Array.from(tbody.children).forEach(tr => {
+            return count;
+        }
+
+        Array.from(tbody.children).forEach(tr => {
             const rowIdx = tr.dataset.rowIdx;
-                    const skuSel = tr.querySelector(`select[name="skuId_${rowIdx}"]`);
-                    const hiddenSku = tr.querySelector(`input[type="hidden"][name="skuId_${rowIdx}"]`);
-                    const skuId = hiddenSku
-                    ? hiddenSku.value
-                    : (skuSel ? skuSel.value : "");
-                    if (!skuId) return;
-                    const chosen = selectedMap.get(skuId) || new Set();
-                    const selects = tr.querySelectorAll(`select[name^="imei_${rowIdx}_"]`);
-                    selects.forEach(sel => {
-                    const myVal = (sel.value || "").trim();
-                            Array.from(sel.options).forEach(opt => {
+            const skuSel = tr.querySelector(`select[name="skuId_${rowIdx}"]`);
+            const hiddenSku = tr.querySelector(`input[type="hidden"][name="skuId_${rowIdx}"]`);
+            const skuId = hiddenSku ? hiddenSku.value : (skuSel ? skuSel.value : "");
+
+            if (!skuId) return;
+
+            const chosen = selectedMap.get(skuId) || new Set();
+            const selects = tr.querySelectorAll(`select[name^="imei_${rowIdx}_"]`);
+
+            selects.forEach(sel => {
+                const myVal = (sel.value || "").trim();
+
+                Array.from(sel.options).forEach(opt => {
                     if (!opt.value) return;
-                            opt.hidden = (chosen.has(opt.value) && opt.value !== myVal);
-                            opt.disabled = false;
-                    });
-                            if (myVal && countSelectedInSku(skuId, myVal) > 1) {
+                    opt.hidden = (chosen.has(opt.value) && opt.value !== myVal);
+                    opt.disabled = false;
+                });
+
+                if (myVal && countSelectedInSku(skuId, myVal) > 1) {
                     sel.value = "";
-                    }
+                }
 
-                    const newVal = (sel.value || "").trim();
-                            Array.from(sel.options).forEach(opt => {
+                const newVal = (sel.value || "").trim();
+                Array.from(sel.options).forEach(opt => {
                     if (!opt.value) return;
-                            opt.hidden = (chosen.has(opt.value) && opt.value !== newVal);
-                    });
-                    });
+                    opt.hidden = (chosen.has(opt.value) && opt.value !== newVal);
+                });
             });
-            }
+        });
+    }
 
-            if (btnAddRow) {
-            btnAddRow.addEventListener("click", addRow);
-            }
+    if (btnAddRow) {
+        btnAddRow.addEventListener("click", function () {
+            addRow();
+        });
+    }
 
-            manualForm.addEventListener("submit", function (e) {
-            const rows = tbody.children;
-                    if (rows.length === 0) {
+    manualForm.addEventListener("submit", function (e) {
+        const rows = tbody.children;
+
+        if (rows.length === 0) {
             e.preventDefault();
-                    alert("Please add at least 1 product line.");
-                    return;
-            }
+            alert("Please add at least 1 product line.");
+            return;
+        }
 
-            const fd = new FormData(manualForm);
-                    for (let i = 0; i < rows.length; i++) {
+        const fd = new FormData(manualForm);
+
+        for (let i = 0; i < rows.length; i++) {
             const row = rows[i];
-                    const rowIdx = row.dataset.rowIdx;
-                    const productId = (fd.get("productId_" + rowIdx) || "").toString().trim();
-                    const skuId = (fd.get("skuId_" + rowIdx) || "").toString().trim();
-                    const qty = parseInt((fd.get("qty_" + rowIdx) || "0").toString(), 10) || 0;
-                    if (!productId || !skuId || qty < 1) {
-            e.preventDefault();
-                    alert("Row " + (i + 1) + ": Please fill Product Code, SKU and Quantity");
-                    return;
+            const rowIdx = row.dataset.rowIdx;
+            const productId = (fd.get("productId_" + rowIdx) || "").toString().trim();
+            const skuId = (fd.get("skuId_" + rowIdx) || "").toString().trim();
+            const qty = parseInt((fd.get("qty_" + rowIdx) || "0").toString(), 10) || 0;
+
+            if (!productId || !skuId || qty < 1) {
+                e.preventDefault();
+                alert("Row " + (i + 1) + ": Please fill Product Name, SKU and Quantity");
+                return;
             }
 
             const imeiSet = new Set();
-                    for (let j = 1; j <= qty; j++) {
-            const sel = row.querySelector('select[name="imei_' + rowIdx + '_' + j + '"]');
-                    const v = sel ? (sel.value || "").trim() : "";
-                    if (!v) {
-            e.preventDefault();
+            for (let j = 1; j <= qty; j++) {
+                const sel = row.querySelector('select[name="imei_' + rowIdx + '_' + j + '"]');
+                const v = sel ? (sel.value || "").trim() : "";
+
+                if (!v) {
+                    e.preventDefault();
                     alert("Row " + (i + 1) + ", IMEI " + j + ": Please select an IMEI");
                     return;
-            }
+                }
 
-            if (imeiSet.has(v)) {
-            e.preventDefault();
+                if (imeiSet.has(v)) {
+                    e.preventDefault();
                     alert("Row " + (i + 1) + ": Duplicate IMEI selected: " + v);
                     return;
-            }
+                }
 
-            imeiSet.add(v);
+                imeiSet.add(v);
             }
-            }
-            });
-                    document.querySelectorAll('.tabBtn').forEach(btn => {
-            btn.addEventListener('click', function () {
+        }
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function () {
             const tab = this.dataset.tab;
-                    document.querySelectorAll('.tabBtn').forEach(b => b.classList.remove('active'));
-                    this.classList.add('active');
-                    document.querySelectorAll('.tabPanel').forEach(p => p.classList.remove('active'));
-                    const target = document.getElementById('tab-' + tab);
-                    if (target) {
-            target.classList.add('active');
-            }
-            });
-            });
-                    if (REQUEST_ITEMS.length > 0) {
-            REQUEST_ITEMS.forEach(item => addRow(item));
-            } else {
-            addRow();
-            }
-            })();
-        </script>
 
-    </body>
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+
+            document.querySelectorAll('.tabPanel').forEach(p => {
+                p.classList.remove('active');
+                p.style.display = 'none';
+            });
+
+            const target = document.getElementById('tab-' + tab);
+            if (target) {
+                target.classList.add('active');
+                target.style.display = 'block';
+            }
+        });
+    });
+
+    if (REQUEST_ITEMS.length > 0) {
+        REQUEST_ITEMS.forEach(item => addRow(item));
+    } else {
+        addRow();
+    }
+})();
+</script>
+
+</body>
 </html>
