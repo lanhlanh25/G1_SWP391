@@ -9,7 +9,6 @@ import java.util.List;
 
 public class ExportRequestDAO {
 
-
     public int count(String q, String status, java.sql.Date reqDate, java.sql.Date expDate, Long requestedBy) throws Exception {
 
         StringBuilder sql = new StringBuilder("""
@@ -55,7 +54,6 @@ public class ExportRequestDAO {
             }
         }
     }
-
 
     public List<ExportRequest> list(String q, String status, java.sql.Date reqDate, java.sql.Date expDate, Long requestedBy, int offset, int limit) throws Exception {
 
@@ -186,16 +184,19 @@ public class ExportRequestDAO {
 
     public List<ExportRequestItem> listItems(long requestId) throws Exception {
         String sql = """
-            SELECT
-              p.product_code,
-              s.sku_code,
-              erl.qty
-            FROM export_request_lines erl
-            JOIN products p ON p.product_id = erl.product_id
-            LEFT JOIN product_skus s ON s.sku_id = erl.sku_id
-            WHERE erl.request_id = ?
-            ORDER BY erl.line_id ASC
-        """;
+        SELECT
+          erl.product_id,
+          p.product_name,
+          p.product_code,
+          erl.sku_id,
+          s.sku_code,
+          erl.qty
+        FROM export_request_lines erl
+        JOIN products p ON p.product_id = erl.product_id
+        LEFT JOIN product_skus s ON s.sku_id = erl.sku_id
+        WHERE erl.request_id = ?
+        ORDER BY erl.line_id ASC
+    """;
 
         List<ExportRequestItem> list = new ArrayList<>();
 
@@ -208,7 +209,10 @@ public class ExportRequestDAO {
                 while (rs.next()) {
                     ExportRequestItem it = new ExportRequestItem();
                     it.setNo(no++);
+                    it.setProductId(rs.getLong("product_id"));
+                    it.setProductName(rs.getString("product_name"));
                     it.setProductCode(rs.getString("product_code"));
+                    it.setSkuId(rs.getLong("sku_id"));
                     it.setSkuCode(rs.getString("sku_code"));
                     it.setRequestQty(rs.getInt("qty"));
                     list.add(it);
@@ -218,7 +222,6 @@ public class ExportRequestDAO {
 
         return list;
     }
-
 
     public List<ExportRequestItem> listItemsForValidation(Connection con, long requestId) throws Exception {
         String sql = """
@@ -251,6 +254,7 @@ public class ExportRequestDAO {
 
         return list;
     }
+
     private void bindParams(PreparedStatement ps, List<Object> params) throws SQLException {
         for (int i = 0; i < params.size(); i++) {
             Object v = params.get(i);
@@ -267,25 +271,25 @@ public class ExportRequestDAO {
             }
         }
     }
+
     //DASHBOARD
     public int countByStatus(String status) throws Exception {
-    String sql = """
+        String sql = """
         SELECT COUNT(*)
         FROM export_requests
         WHERE status = ?
     """;
 
-    try (Connection con = DBContext.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setString(1, status);
-        try (ResultSet rs = ps.executeQuery()) {
-            return rs.next() ? rs.getInt(1) : 0;
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
         }
     }
-}
 
-public List<ExportRequest> listByStatus(String status, int limit) throws Exception {
-    String sql = """
+    public List<ExportRequest> listByStatus(String status, int limit) throws Exception {
+        String sql = """
         SELECT
           er.request_id,
           er.request_code,
@@ -310,30 +314,29 @@ public List<ExportRequest> listByStatus(String status, int limit) throws Excepti
         LIMIT ?
     """;
 
-    List<ExportRequest> list = new ArrayList<>();
+        List<ExportRequest> list = new ArrayList<>();
 
-    try (Connection con = DBContext.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setString(1, status);
-        ps.setInt(2, limit);
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, limit);
 
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                ExportRequest r = new ExportRequest();
-                r.setRequestId(rs.getLong("request_id"));
-                r.setRequestCode(rs.getString("request_code"));
-                r.setCreatedBy(rs.getLong("requested_by"));
-                r.setCreatedByName(rs.getString("created_by_name"));
-                r.setRequestDate(rs.getTimestamp("requested_at"));
-                r.setExpectedExportDate(rs.getDate("expected_export_date"));
-                r.setTotalItems(rs.getInt("total_items"));
-                r.setTotalQty(rs.getInt("total_qty"));
-                r.setStatus(rs.getString("status"));
-                list.add(r);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ExportRequest r = new ExportRequest();
+                    r.setRequestId(rs.getLong("request_id"));
+                    r.setRequestCode(rs.getString("request_code"));
+                    r.setCreatedBy(rs.getLong("requested_by"));
+                    r.setCreatedByName(rs.getString("created_by_name"));
+                    r.setRequestDate(rs.getTimestamp("requested_at"));
+                    r.setExpectedExportDate(rs.getDate("expected_export_date"));
+                    r.setTotalItems(rs.getInt("total_items"));
+                    r.setTotalQty(rs.getInt("total_qty"));
+                    r.setStatus(rs.getString("status"));
+                    list.add(r);
+                }
             }
         }
-    }
 
-    return list;
-}
+        return list;
+    }
 }

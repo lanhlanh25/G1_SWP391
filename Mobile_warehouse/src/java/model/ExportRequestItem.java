@@ -11,11 +11,20 @@ package model;
 public class ExportRequestItem {
 
     private int no;
+    private String productName;
     private String productCode;
     private String skuCode;   // optional
     private int requestQty;
     private long productId;
     private long skuId;
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
 
     public long getProductId() {
         return productId;
