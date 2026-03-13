@@ -339,4 +339,17 @@ public class ExportRequestDAO {
 
         return list;
     }
+    public void updateStatus(Connection con, long requestId, String status) throws SQLException {
+    String sql = """
+        UPDATE export_requests
+        SET status = ?
+        WHERE request_id = ?
+    """;
+
+    try (PreparedStatement ps = con.prepareStatement(sql)) {
+        ps.setString(1, status);
+        ps.setLong(2, requestId);
+        ps.executeUpdate();
+    }
+}
 }

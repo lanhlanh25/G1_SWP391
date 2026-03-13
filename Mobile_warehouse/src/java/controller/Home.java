@@ -341,42 +341,83 @@ public class Home extends HttpServlet {
                 ProductDAO pdao = new ProductDAO();
                 ProductSkuDAO skdao = new ProductSkuDAO();
                 ExportRequestDAO erDao = new ExportRequestDAO();
+                ExportReceiptDAO exDao = new ExportReceiptDAO();
 
-                request.setAttribute("products", pdao.listActive());
-                request.setAttribute("skus", skdao.listActive());
+                // Flash messages like import
+                HttpSession ss = request.getSession(false);
+                if (ss != null) {
+                    Object ferr = ss.getAttribute("flash_err");
+                    Object fmsg = ss.getAttribute("flash_msg");
+                    Object fmode = ss.getAttribute("flash_mode");
 
-                request.setAttribute("exportCode", "EXP-" + System.currentTimeMillis());
+                    if (ferr != null) {
+                        request.setAttribute("err", String.valueOf(ferr));
+                        ss.removeAttribute("flash_err");
+                    }
+                    if (fmsg != null) {
+                        request.setAttribute("msg", String.valueOf(fmsg));
+                        ss.removeAttribute("flash_msg");
+                    }
+                    if (fmode != null) {
+                        request.setAttribute("mode", String.valueOf(fmode));
+                        ss.removeAttribute("flash_mode");
+                    }
+                }
 
-                String dt = LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI);
-                request.setAttribute("receiptDateDefault", dt);
+                try (Connection con = DBContext.getConnection()) {
+                    request.setAttribute("exportCode", exDao.generateExportCode(con));
+                }
 
-                String createdByName = (authUser != null && authUser.getFullName() != null)
-                        ? authUser.getFullName()
-                        : "Staff";
+                request.setAttribute("receiptDateDefault",
+                        LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
+
+                String createdByName = "Staff";
+                HttpSession ssName = request.getSession(false);
+                if (ssName != null && ssName.getAttribute("fullName") != null) {
+                    createdByName = String.valueOf(ssName.getAttribute("fullName"));
+                } else if (authUser != null && authUser.getFullName() != null) {
+                    createdByName = authUser.getFullName();
+                }
                 request.setAttribute("createdByName", createdByName);
 
-                String requestIdRaw = request.getParameter("id");
+                // requestId chuẩn hóa giống import
+                String requestIdRaw = request.getParameter("requestId");
+                if (requestIdRaw == null || requestIdRaw.isBlank()) {
+                    requestIdRaw = request.getParameter("id"); // support link cũ
+                }
+
                 if (requestIdRaw != null && !requestIdRaw.isBlank()) {
-                    long requestId = Long.parseLong(requestIdRaw.trim());
+                    try {
+                        long requestId = Long.parseLong(requestIdRaw.trim());
+                        ExportRequest erHeader = erDao.getHeader(requestId);
 
-                    ExportRequest erHeader = erDao.getHeader(requestId);
-                    if (erHeader == null) {
-                        response.sendRedirect(request.getContextPath()
-                                + "/home?p=export-request-list&err=Request+not+found");
-                        return;
+                        if (erHeader == null) {
+                            request.setAttribute("err", "Export request not found.");
+                        } else if ("COMPLETE".equalsIgnoreCase(erHeader.getStatus())) {
+                            request.setAttribute("err", "This request has already been completed.");
+                        } else {
+                            List<ExportRequestItem> erItems = erDao.listItems(requestId);
+                            request.setAttribute("sourceRequestId", requestId);
+                            request.setAttribute("erHeader", erHeader);
+                            request.setAttribute("erItems", erItems);
+                        }
+
+                        
+                        request.setAttribute("products", pdao.listActive());
+                        request.setAttribute("skus", skdao.listActive());
+
+                    } catch (NumberFormatException e) {
+                        request.setAttribute("err", "Invalid request ID.");
+                        request.setAttribute("products", pdao.listActive());
+                        request.setAttribute("skus", skdao.listActive());
                     }
+                } else {
+                    request.setAttribute("products", pdao.listActive());
+                    request.setAttribute("skus", skdao.listActive());
+                }
 
-                    if ("COMPLETE".equalsIgnoreCase(erHeader.getStatus())) {
-                        response.sendRedirect(request.getContextPath()
-                                + "/home?p=export-request-list&err=This+request+has+already+been+completed");
-                        return;
-                    }
-
-                    List<ExportRequestItem> erItems = erDao.listItems(requestId);
-
-                    request.setAttribute("sourceRequestId", requestId);
-                    request.setAttribute("erHeader", erHeader);
-                    request.setAttribute("erItems", erItems);
+                if (request.getAttribute("mode") == null) {
+                    request.setAttribute("mode", "manual");
                 }
 
                 break;

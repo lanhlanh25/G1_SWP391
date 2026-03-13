@@ -25,7 +25,8 @@ public class ExportReceiptDAO {
             WHERE er.export_id = ?
         """;
 
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setLong(1, exportId);
 
@@ -63,18 +64,18 @@ public class ExportReceiptDAO {
     // =========================
     public List<ExportReceiptDetailLine> getDetailLines(long exportId) {
         String sql = """
-    SELECT erl.line_id, erl.qty, erl.item_note,
-           p.product_code,
-           s.sku_code,
-           u.full_name AS created_by_name
-    FROM export_receipt_lines erl
-    JOIN products p ON p.product_id = erl.product_id
-    JOIN product_skus s ON s.sku_id = erl.sku_id
-    JOIN export_receipts er ON er.export_id = erl.export_id
-    JOIN users u ON u.user_id = er.created_by
-    WHERE erl.export_id = ?
-    ORDER BY erl.line_id ASC
-""";
+            SELECT erl.line_id, erl.qty, erl.item_note,
+                   p.product_code,
+                   s.sku_code,
+                   u.full_name AS created_by_name
+            FROM export_receipt_lines erl
+            JOIN products p ON p.product_id = erl.product_id
+            JOIN product_skus s ON s.sku_id = erl.sku_id
+            JOIN export_receipts er ON er.export_id = erl.export_id
+            JOIN users u ON u.user_id = er.created_by
+            WHERE erl.export_id = ?
+            ORDER BY erl.line_id ASC
+        """;
 
         String sqlImei = """
             SELECT imei
@@ -85,7 +86,9 @@ public class ExportReceiptDAO {
 
         List<ExportReceiptDetailLine> out = new ArrayList<>();
 
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); PreparedStatement psImei = con.prepareStatement(sqlImei)) {
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             PreparedStatement psImei = con.prepareStatement(sqlImei)) {
 
             ps.setLong(1, exportId);
 
@@ -101,7 +104,6 @@ public class ExportReceiptDAO {
                     it.setCreatedByName(rs.getString("created_by_name"));
                     it.setItemNote(rs.getString("item_note"));
 
-                    // IMEIs
                     List<String> imeis = new ArrayList<>();
                     psImei.setLong(1, lineId);
                     try (ResultSet r2 = psImei.executeQuery()) {
@@ -153,7 +155,8 @@ public class ExportReceiptDAO {
             params.add(to);
         }
 
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
@@ -171,7 +174,7 @@ public class ExportReceiptDAO {
     }
 
     public List<ExportReceiptListItem> list(String q, String status, java.sql.Date from, java.sql.Date to,
-            int page, int pageSize) {
+                                            int page, int pageSize) {
 
         StringBuilder sql = new StringBuilder("""
             SELECT er.export_id, er.export_code, er.export_date, er.status,
@@ -215,7 +218,8 @@ public class ExportReceiptDAO {
 
         List<ExportReceiptListItem> out = new ArrayList<>();
 
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
@@ -249,19 +253,19 @@ public class ExportReceiptDAO {
     }
 
     // =========================
-    // CREATE EXPORT RECEIPT (manual)
+    // CREATE EXPORT RECEIPT
     // =========================
     public long createReceipt(Connection con,
-            Long requestId,
-            long createdBy,
-            Timestamp exportDate,
-            String note,
-            String status) throws SQLException {
+                              Long requestId,
+                              long createdBy,
+                              Timestamp exportDate,
+                              String note,
+                              String status) throws SQLException {
 
         String sql = """
-        INSERT INTO export_receipts(request_id, export_code, created_by, export_date, note, status)
-        VALUES (?, ?, ?, ?, ?, ?)
-    """;
+            INSERT INTO export_receipts(request_id, export_code, created_by, export_date, note, status)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """;
 
         int attempts = 0;
         while (attempts < 8) {
@@ -278,7 +282,7 @@ public class ExportReceiptDAO {
 
                 ps.setString(2, exportCode);
                 ps.setLong(3, createdBy);
-                ps.setTimestamp(4, exportDate); // vẫn lưu export_date theo user chọn
+                ps.setTimestamp(4, exportDate);
                 ps.setString(5, note == null ? "" : note);
                 ps.setString(6, (status == null || status.isBlank()) ? "DRAFT" : status);
 
@@ -292,7 +296,6 @@ public class ExportReceiptDAO {
                 throw new SQLException("No generated key");
 
             } catch (SQLException ex) {
-                // MySQL duplicate key
                 if (ex.getErrorCode() == 1062) {
                     continue;
                 }
@@ -304,38 +307,34 @@ public class ExportReceiptDAO {
     }
 
     public String generateExportCode(Connection con) throws SQLException {
-        String sql = """
-        SELECT COUNT(*)
-        FROM export_receipts
-        WHERE DATE(created_at) = CURDATE()
-        FOR UPDATE
-    """;
-
+        String day = new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
+        String prefix = "ER-" + day + "-";
+        String sql = "SELECT COUNT(*) FROM export_receipts WHERE export_code LIKE ?";
         int count = 0;
-        try (PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                count = rs.getInt(1);
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, prefix + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    count = rs.getInt(1);
+                }
             }
         }
 
-        String ymd = java.time.LocalDate.now()
-                .format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE);
-
-        String seq = String.format("%03d", count + 1);
-        return "EX-" + ymd + "-" + seq;
+        return prefix + String.format("%04d", count + 1);
     }
 
     public long createLine(Connection con,
-            long exportId,
-            long productId,
-            long skuId,
-            int qty,
-            String itemNote) throws SQLException {
+                           long exportId,
+                           long productId,
+                           long skuId,
+                           int qty,
+                           String itemNote) throws SQLException {
 
         String sql = """
-    INSERT INTO export_receipt_lines(export_id, product_id, sku_id, qty, item_note)
-    VALUES(?, ?, ?, ?, ?)
-""";
+            INSERT INTO export_receipt_lines(export_id, product_id, sku_id, qty, item_note)
+            VALUES(?, ?, ?, ?, ?)
+        """;
 
         try (PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, exportId);
@@ -386,9 +385,9 @@ public class ExportReceiptDAO {
 
     public Long findProductIdByCode(Connection con, String productCode) throws Exception {
         String sql = "SELECT product_id FROM products WHERE product_code = ?";
-        try (var ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, productCode);
-            try (var rs = ps.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getLong(1);
                 }
@@ -399,9 +398,9 @@ public class ExportReceiptDAO {
 
     public Long findSkuIdByCode(Connection con, String skuCode) throws Exception {
         String sql = "SELECT sku_id FROM product_skus WHERE sku_code = ?";
-        try (var ps = con.prepareStatement(sql)) {
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, skuCode);
-            try (var rs = ps.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getLong(1);
                 }
@@ -410,7 +409,6 @@ public class ExportReceiptDAO {
         return null;
     }
 
-// Optional: verify SKU belongs to Product
     public boolean skuBelongsToProduct(Connection con, long skuId, long productId) throws Exception {
         String sql = "SELECT 1 FROM product_skus WHERE sku_id=? AND product_id=?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -422,16 +420,16 @@ public class ExportReceiptDAO {
         }
     }
 
-    // 1) List IMEIs available in stock for a SKU (ACTIVE only)
     public List<String> listAvailableImeisBySku(Connection con, long skuId) throws SQLException {
         String sql = """
-        SELECT imei
-        FROM product_units
-        WHERE sku_id = ?
-          AND unit_status = 'ACTIVE'
-        ORDER BY imei ASC
-        LIMIT 500
-    """;
+            SELECT imei
+            FROM product_units
+            WHERE sku_id = ?
+              AND unit_status = 'ACTIVE'
+            ORDER BY imei ASC
+            LIMIT 500
+        """;
+
         List<String> out = new ArrayList<>();
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, skuId);
@@ -444,15 +442,15 @@ public class ExportReceiptDAO {
         return out;
     }
 
-// 2) Mark an IMEI as exported (ACTIVE -> INACTIVE). Return true if success.
     public boolean markUnitInactive(Connection con, long skuId, String imei) throws SQLException {
         String sql = """
-        UPDATE product_units
-        SET unit_status = 'INACTIVE', updated_at = CURRENT_TIMESTAMP
-        WHERE sku_id = ?
-          AND imei = ?
-          AND unit_status = 'ACTIVE'
-    """;
+            UPDATE product_units
+            SET unit_status = 'INACTIVE', updated_at = CURRENT_TIMESTAMP
+            WHERE sku_id = ?
+              AND imei = ?
+              AND unit_status = 'ACTIVE'
+        """;
+
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, skuId);
             ps.setString(2, imei);
@@ -462,10 +460,10 @@ public class ExportReceiptDAO {
 
     public String getExportRequestStatus(Connection con, long requestId) throws SQLException {
         String sql = """
-        SELECT status
-        FROM export_requests
-        WHERE request_id = ?
-    """;
+            SELECT status
+            FROM export_requests
+            WHERE request_id = ?
+        """;
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, requestId);
@@ -480,11 +478,11 @@ public class ExportReceiptDAO {
 
     public boolean existsReceiptByRequestId(Connection con, long requestId) throws SQLException {
         String sql = """
-        SELECT 1
-        FROM export_receipts
-        WHERE request_id = ?
-        LIMIT 1
-    """;
+            SELECT 1
+            FROM export_receipts
+            WHERE request_id = ?
+            LIMIT 1
+        """;
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, requestId);
@@ -496,10 +494,10 @@ public class ExportReceiptDAO {
 
     public void updateExportRequestStatus(Connection con, long requestId, String status) throws SQLException {
         String sql = """
-        UPDATE export_requests
-        SET status = ?
-        WHERE request_id = ?
-    """;
+            UPDATE export_requests
+            SET status = ?
+            WHERE request_id = ?
+        """;
 
         try (PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, status);
