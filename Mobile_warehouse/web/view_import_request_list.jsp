@@ -22,7 +22,6 @@
             <label class="label">Status</label>
             <select class="input" name="status">
               <option value="">All</option>
-              <option value="PENDING" ${status eq 'PENDING' ? 'selected' : ''}>Pending</option>
               <option value="NEW" ${status eq 'NEW' ? 'selected' : ''}>New</option>
               <option value="COMPLETE" ${status eq 'COMPLETE' ? 'selected' : ''}>Complete</option>
             </select>

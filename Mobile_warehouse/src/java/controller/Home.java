@@ -256,12 +256,21 @@ public class Home extends HttpServlet {
                 // Flash messages (from failed POST redirect)
                 HttpSession ss = request.getSession(false);
                 if (ss != null) {
-                    Object ferr  = ss.getAttribute("flash_err");
-                    Object fmsg  = ss.getAttribute("flash_msg");
+                    Object ferr = ss.getAttribute("flash_err");
+                    Object fmsg = ss.getAttribute("flash_msg");
                     Object fmode = ss.getAttribute("flash_mode");
-                    if (ferr  != null) { request.setAttribute("err",  String.valueOf(ferr));  ss.removeAttribute("flash_err"); }
-                    if (fmsg  != null) { request.setAttribute("msg",  String.valueOf(fmsg));  ss.removeAttribute("flash_msg"); }
-                    if (fmode != null) { request.setAttribute("mode", String.valueOf(fmode)); ss.removeAttribute("flash_mode"); }
+                    if (ferr != null) {
+                        request.setAttribute("err", String.valueOf(ferr));
+                        ss.removeAttribute("flash_err");
+                    }
+                    if (fmsg != null) {
+                        request.setAttribute("msg", String.valueOf(fmsg));
+                        ss.removeAttribute("flash_msg");
+                    }
+                    if (fmode != null) {
+                        request.setAttribute("mode", String.valueOf(fmode));
+                        ss.removeAttribute("flash_mode");
+                    }
                 }
 
                 try (Connection con = DBContext.getConnection()) {
@@ -302,13 +311,13 @@ public class Home extends HttpServlet {
                     }
                     // In request mode products/skus not needed (rows are readonly)
                     request.setAttribute("products", java.util.Collections.emptyList());
-                    request.setAttribute("skus",     java.util.Collections.emptyList());
+                    request.setAttribute("skus", java.util.Collections.emptyList());
                 } else {
                     // ── Manual mode: load products + skus for dropdowns ──────
                     ProductDAO pdao = new ProductDAO();
                     ProductSkuDAO skdao = new ProductSkuDAO();
                     request.setAttribute("products", pdao.listActive());
-                    request.setAttribute("skus",     skdao.listActive());
+                    request.setAttribute("skus", skdao.listActive());
                 }
 
                 if (request.getAttribute("mode") == null) {
@@ -644,27 +653,27 @@ public class Home extends HttpServlet {
                 request.setAttribute("roles", roles);
                 break;
             }
-case "user-view": {
-    String idRaw = request.getParameter("id");
-    if (idRaw == null || idRaw.isBlank()) {
-        response.sendRedirect(request.getContextPath() + "/home?p=user-list&msg=Please select a user first");
-        return;
-    }
+            case "user-view": {
+                String idRaw = request.getParameter("id");
+                if (idRaw == null || idRaw.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=user-list&msg=Please select a user first");
+                    return;
+                }
 
-    int userId = Integer.parseInt(idRaw.trim());
-    User user = userDAO.getById(userId);
-    if (user == null) {
-        response.sendRedirect(request.getContextPath() + "/home?p=user-list&msg=User not found");
-        return;
-    }
+                int userId = Integer.parseInt(idRaw.trim());
+                User user = userDAO.getById(userId);
+                if (user == null) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=user-list&msg=User not found");
+                    return;
+                }
 
-    String roleName = roleDAO.getRoleNameById(user.getRoleId());
+                String roleName = roleDAO.getRoleNameById(user.getRoleId());
 
-    request.setAttribute("user", user);
-    request.setAttribute("roleName", roleName);
-    request.setAttribute("now", new java.util.Date());
-    break;
-}
+                request.setAttribute("user", user);
+                request.setAttribute("roleName", roleName);
+                request.setAttribute("now", new java.util.Date());
+                break;
+            }
             case "user-add": {
                 request.setAttribute("roles", roleDAO.searchRoles(null, 1));
                 break;
@@ -701,35 +710,35 @@ case "user-view": {
                 request.setAttribute("status", st);
                 break;
             }
-case "role-detail": {
-    String ridRaw = request.getParameter("roleId");
-    if (ridRaw == null || ridRaw.isBlank()) {
-        response.sendRedirect(request.getContextPath() + "/home?p=role-list&msg=Please select a role first");
-        return;
-    }
+            case "role-detail": {
+                String ridRaw = request.getParameter("roleId");
+                if (ridRaw == null || ridRaw.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=role-list&msg=Please select a role first");
+                    return;
+                }
 
-    int roleId = Integer.parseInt(ridRaw.trim());
+                int roleId = Integer.parseInt(ridRaw.trim());
 
-    request.setAttribute("roleId", roleId);
-    request.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
-    request.setAttribute("rolePerms", rpDAO.getPermissionsByRoleId(roleId));
-    break;
-}
-case "role-permissions": {
-    String ridRaw = request.getParameter("roleId");
-    if (ridRaw == null || ridRaw.isBlank()) {
-        response.sendRedirect(request.getContextPath() + "/home?p=role-list&msg=Please select a role first");
-        return;
-    }
+                request.setAttribute("roleId", roleId);
+                request.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
+                request.setAttribute("rolePerms", rpDAO.getPermissionsByRoleId(roleId));
+                break;
+            }
+            case "role-permissions": {
+                String ridRaw = request.getParameter("roleId");
+                if (ridRaw == null || ridRaw.isBlank()) {
+                    response.sendRedirect(request.getContextPath() + "/home?p=role-list&msg=Please select a role first");
+                    return;
+                }
 
-    int roleId = Integer.parseInt(ridRaw.trim());
+                int roleId = Integer.parseInt(ridRaw.trim());
 
-    request.setAttribute("roleId", roleId);
-    request.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
-    request.setAttribute("allPerms", rpDAO.getAllPermissions());
-    request.setAttribute("checked", rpDAO.getPermissionIdsByRole(roleId));
-    break;
-}
+                request.setAttribute("roleId", roleId);
+                request.setAttribute("roleName", roleDAO.getRoleNameById(roleId));
+                request.setAttribute("allPerms", rpDAO.getAllPermissions());
+                request.setAttribute("checked", rpDAO.getPermissionIdsByRole(roleId));
+                break;
+            }
             case "role-toggle": {
                 String keyword = request.getParameter("q");
                 String st = request.getParameter("status");
@@ -1470,7 +1479,7 @@ case "role-permissions": {
             }
             case "create-import-request": {
                 String roleName = (String) request.getSession().getAttribute("roleName");
-                if (roleName == null || !"SALE".equalsIgnoreCase(roleName)) {
+                if (roleName == null || !(roleName.equalsIgnoreCase("SALE") || roleName.equalsIgnoreCase("MANAGER"))) {
                     response.sendError(403, "Forbidden");
                     return;
                 }
@@ -1486,9 +1495,8 @@ case "role-permissions": {
                     request.setAttribute("irCreateCode", dao.generateRequestCode(con));
                 }
 
-                // created by name
                 HttpSession session = request.getSession(false);
-                String createdByName = "Sale User";
+                String createdByName = "User";
                 if (session != null && session.getAttribute("fullName") != null) {
                     String x = String.valueOf(session.getAttribute("fullName")).trim();
                     if (!x.isBlank() && !"null".equalsIgnoreCase(x)) {
@@ -1499,6 +1507,42 @@ case "role-permissions": {
 
                 request.setAttribute("irRequestDateDefault",
                         LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
+                request.setAttribute("today", LocalDate.now().toString());
+
+                String productIdRaw = request.getParameter("productId");
+                if (productIdRaw != null && !productIdRaw.isBlank()) {
+                    try {
+                        long productId = Long.parseLong(productIdRaw.trim());
+
+                        LowStockReportDAO lowStockDao = new LowStockReportDAO();
+                        LowStockReportItem selectedItem = lowStockDao.getLowStockProductById(productId);
+
+                        if (selectedItem == null) {
+                            response.sendRedirect(request.getContextPath() + "/home?p=low-stock-report&err=Product+not+found");
+                            return;
+                        }
+
+                        if ("OK".equalsIgnoreCase(selectedItem.getRopStatus())) {
+                            response.sendRedirect(request.getContextPath() + "/home?p=low-stock-report&err=This+product+does+not+need+restocking");
+                            return;
+                        }
+
+                        if (selectedItem.isHasActiveImportRequest()) {
+                            response.sendRedirect(request.getContextPath() + "/home?p=low-stock-report&err=An+active+import+request+already+exists");
+                            return;
+                        }
+
+                        request.setAttribute("selectedLowStockItem", selectedItem);
+
+                        // NEW: load SKU stock breakdown for selected product
+                        List<ProductSku> selectedProductSkuStocks = skdao.getSkuStockByProductId(productId);
+                        request.setAttribute("selectedProductSkuStocks", selectedProductSkuStocks);
+
+                    } catch (Exception e) {
+                        response.sendRedirect(request.getContextPath() + "/home?p=low-stock-report&err=Invalid+product");
+                        return;
+                    }
+                }
 
                 break;
             }
@@ -1520,6 +1564,7 @@ case "role-permissions": {
                 ImportRequestDAO dao = new ImportRequestDAO();
 
                 String q = request.getParameter("q");
+                String status = request.getParameter("status");
                 String reqDateRaw = request.getParameter("reqDate");
                 String expDateRaw = request.getParameter("expDate");
 
@@ -1559,10 +1604,11 @@ case "role-permissions": {
 
                 int offset = (page - 1) * pageSize;
 
-                List<ImportRequest> list = dao.list(q, reqDate, expDate, requestedBy, offset, pageSize);
+                List<ImportRequest> list = dao.list(q, status, reqDate, expDate, requestedBy, offset, pageSize);
 
                 request.setAttribute("irList", list);
                 request.setAttribute("q", q);
+                request.setAttribute("status", status);
                 request.setAttribute("reqDate", reqDateRaw);
                 request.setAttribute("expDate", expDateRaw);
                 request.setAttribute("page", page);
@@ -1615,6 +1661,92 @@ case "role-permissions": {
 
                 request.setAttribute("irHeader", header);
                 request.setAttribute("irItems", items);
+                break;
+            }
+            case "low-stock-report": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !"MANAGER".equalsIgnoreCase(roleName)) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                LowStockReportDAO dao = new LowStockReportDAO();
+                SupplierDAO supplierDAO = new SupplierDAO();
+
+                String q = request.getParameter("q");
+                String ropStatus = request.getParameter("ropStatus");
+
+                String supplierIdRaw = request.getParameter("supplierId");
+                Long supplierId = null;
+                try {
+                    if (supplierIdRaw != null && !supplierIdRaw.isBlank()) {
+                        supplierId = Long.parseLong(supplierIdRaw.trim());
+                    }
+                } catch (Exception e) {
+                    supplierId = null;
+                }
+
+                String minStockRaw = request.getParameter("minStock");
+                String maxStockRaw = request.getParameter("maxStock");
+
+                Integer minStock = null;
+                Integer maxStock = null;
+
+                try {
+                    if (minStockRaw != null && !minStockRaw.isBlank()) {
+                        minStock = Integer.parseInt(minStockRaw.trim());
+                    }
+                } catch (Exception e) {
+                    minStock = null;
+                }
+
+                try {
+                    if (maxStockRaw != null && !maxStockRaw.isBlank()) {
+                        maxStock = Integer.parseInt(maxStockRaw.trim());
+                    }
+                } catch (Exception e) {
+                    maxStock = null;
+                }
+
+                int page = parseInt(request.getParameter("page"), 1);
+                if (page < 1) {
+                    page = 1;
+                }
+                int pageSize = 10;
+
+                if (minStock != null && maxStock != null && minStock > maxStock) {
+                    request.setAttribute("err", "Min Stock cannot be greater than Max Stock.");
+                    minStock = null;
+                    maxStock = null;
+                }
+
+                int totalItems = dao.countLowStockReport(q, supplierId, ropStatus, minStock, maxStock);
+                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
+
+                List<LowStockReportItem> rows = dao.getLowStockReport(q, supplierId, ropStatus, minStock, maxStock, page, pageSize);
+                LowStockSummaryDTO summary = dao.getSummary();
+                List<IdName> suppliers = supplierDAO.listActive();
+
+                request.setAttribute("rows", rows);
+                request.setAttribute("summary", summary);
+                request.setAttribute("suppliers", suppliers);
+
+                request.setAttribute("q", q);
+                request.setAttribute("ropStatus", ropStatus);
+                request.setAttribute("supplierId", supplierIdRaw);
+                request.setAttribute("minStock", minStockRaw);
+                request.setAttribute("maxStock", maxStockRaw);
+
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                request.setAttribute("totalItems", totalItems);
+                request.setAttribute("totalPages", totalPages);
                 break;
             }
             case "request-delete-import-receipt": {
@@ -1732,44 +1864,44 @@ case "role-permissions": {
         switch (role) {
             case "ADMIN":
                 switch (p) {
-                  case "dashboard":
-            return "admin_dashboard.jsp";
+                    case "dashboard":
+                        return "admin_dashboard.jsp";
 
-        case "user-list":
-            return "user_list.jsp";
-        case "user-add":
-            return "user_add.jsp";
-        case "user-update":
-            return "update_user_information.jsp";
-        case "user-toggle":
-            return "active_user.jsp";
-        case "user-view":
-            return "view_user_information.jsp";
+                    case "user-list":
+                        return "user_list.jsp";
+                    case "user-add":
+                        return "user_add.jsp";
+                    case "user-update":
+                        return "update_user_information.jsp";
+                    case "user-toggle":
+                        return "active_user.jsp";
+                    case "user-view":
+                        return "view_user_information.jsp";
 
-        case "role-list":
-            return "view_role_list.jsp";
-        case "role-add":
-            return "role_add.jsp";
-        case "role-toggle":
-            return "active_role.jsp";
-        case "role-detail":
-            return "role_detail.jsp";
-        case "role-permissions":
-            return "edit_role_permissions.jsp";
+                    case "role-list":
+                        return "view_role_list.jsp";
+                    case "role-add":
+                        return "role_add.jsp";
+                    case "role-toggle":
+                        return "active_role.jsp";
+                    case "role-detail":
+                        return "role_detail.jsp";
+                    case "role-permissions":
+                        return "edit_role_permissions.jsp";
 
-        case "my-profile":
-        case "profile":
-            return "view_profile.jsp";
+                    case "my-profile":
+                    case "profile":
+                        return "view_profile.jsp";
 
-        case "admin/reset-requests":
-            return "admin_reset_requests.jsp";
+                    case "admin/reset-requests":
+                        return "admin_reset_requests.jsp";
 
-        case "change-password":
-        case "change_password":
-            return "change_password.jsp";
+                    case "change-password":
+                    case "change_password":
+                        return "change_password.jsp";
 
-        default:
-            return null;
+                    default:
+                        return null;
                 }
 
             case "MANAGER":
@@ -1825,7 +1957,6 @@ case "role-permissions": {
                         return "import_receipt_list.jsp";
                     case "request-delete-import-receipt-list":
                         return "request_delete_import_receipt_list.jsp";
-                    
 
                     case "import-request-list":
                         return "view_import_request_list.jsp";
@@ -1836,6 +1967,10 @@ case "role-permissions": {
                         return "view_export_request_list.jsp";
                     case "export-request-detail":
                         return "view_export_request_detail.jsp";
+                    case "create-import-request":
+                        return "create_import_request.jsp";
+                    case "low-stock-report":
+                        return "low_stock_report.jsp";
                     case "export-receipt-list":
                         return "export_receipt_list.jsp";
                     case "export-receipt-detail":
@@ -1896,7 +2031,7 @@ case "role-permissions": {
                         return "import_receipt_list.jsp";
                     case "request-delete-import-receipt":
                         return "request_delete_import_receipt.jsp";
-                         case "request-delete-import-receipt-list":
+                    case "request-delete-import-receipt-list":
                         return "request_delete_import_receipt_list.jsp";
                     case "create-export-request":
                         return "create_export_request.jsp";

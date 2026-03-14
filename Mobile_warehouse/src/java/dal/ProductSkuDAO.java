@@ -237,4 +237,69 @@ public class ProductSkuDAO {
         return list;
     }
 
+    public List<ProductSku> getSkuStockByProductId(long productId) throws Exception {
+        List<ProductSku> list = new ArrayList<>();
+
+        String sql = """
+        SELECT
+            ps.sku_id,
+            ps.product_id,
+            ps.sku_code,
+            ps.color,
+            ps.ram_gb,
+            ps.storage_gb,
+            ps.supplier_id,
+            ps.status,
+            ps.created_at,
+            ps.updated_at,
+            COALESCE(s.supplier_name, 'N/A') AS supplier_name,
+            COALESCE(ib.qty_on_hand, 0) AS stock
+        FROM product_skus ps
+        LEFT JOIN suppliers s ON s.supplier_id = ps.supplier_id
+        LEFT JOIN inventory_balance ib ON ib.sku_id = ps.sku_id
+        WHERE ps.product_id = ?
+          AND ps.status = 'ACTIVE'
+        ORDER BY ps.sku_code ASC
+    """;
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductSku item = new ProductSku();
+
+                    item.setSkuId(rs.getInt("sku_id"));
+                    item.setProductId(rs.getInt("product_id"));
+                    item.setSkuCode(rs.getString("sku_code"));
+                    item.setColor(rs.getString("color"));
+                    item.setRamGb(rs.getInt("ram_gb"));
+                    item.setStorageGb(rs.getInt("storage_gb"));
+                    item.setSupplierId(rs.getInt("supplier_id"));
+                    item.setStatus(rs.getString("status"));
+                    item.setCreatedAt(rs.getTimestamp("created_at"));
+                    item.setUpdatedAt(rs.getTimestamp("updated_at"));
+
+                    item.setSupplierName(rs.getString("supplier_name"));
+
+                    int stock = rs.getInt("stock");
+                    item.setStock(stock);
+
+                    if (stock == 0) {
+                        item.setStockStatus("Out Of Stock");
+                    } else if (stock <= 3) {
+                        item.setStockStatus("Low Stock");
+                    } else {
+                        item.setStockStatus("In Stock");
+                    }
+
+                    list.add(item);
+                }
+            }
+        }
+
+        return list;
+    }
+
 }
