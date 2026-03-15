@@ -92,7 +92,7 @@
                                             <span class="btn btn-sm" style="pointer-events:none; opacity:.6;">Created</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <a class="btn btn-sm" href="${ctx}/home?p=create-export-receipt&id=${r.requestId}">Create</a>
+                                            <a class="btn btn-sm" href="${ctx}/home?p=create-export-receipt&requestId=${r.requestId}">Create</a>
                                         </c:otherwise>
                                     </c:choose>
                                 </c:if>

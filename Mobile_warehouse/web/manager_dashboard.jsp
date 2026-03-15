@@ -89,11 +89,7 @@
                         Export Requests
                     </button>
 
-                    <button type="button"
-                            class="tab-btn <%= "delete".equals(approvalType) ? "active" : "" %>"
-                            data-target="delete">
-                        Import Delete Receipt Requests
-                    </button>
+                    
                 </div>
 
                 <div class="showing-line">
@@ -101,7 +97,6 @@
                     <b>
                         <c:choose>
                             <c:when test="${param.approvalType eq 'export'}">Export Requests</c:when>
-                            <c:when test="${param.approvalType eq 'delete'}">Import Delete Receipt Requests</c:when>
                             <c:otherwise>Import Requests</c:otherwise>
                         </c:choose>
                     </b>
@@ -218,11 +213,7 @@
                                             </tr>
                                         </c:forEach>
                                     </c:when>
-                                    <c:otherwise>
-                                        <tr>
-                                            <td colspan="7" class="empty-state">No import delete receipt requests found.</td>
-                                        </tr>
-                                    </c:otherwise>
+                                    
                                 </c:choose>
                             </c:if>
 
