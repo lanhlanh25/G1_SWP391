@@ -9,7 +9,9 @@ import model.ImportRequestItemCreate;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @WebServlet(name = "CreateImportRequestServlet", urlPatterns = {"/create-import-request"})
 public class CreateImportRequestServlet extends HttpServlet {
@@ -18,22 +20,30 @@ public class CreateImportRequestServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        String roleName = (String) request.getSession().getAttribute("roleName");
-        if (roleName == null || !"SALE".equalsIgnoreCase(roleName)) {
+        HttpSession session = request.getSession(false);
+        String roleName = (session == null) ? null : (String) session.getAttribute("roleName");
+
+        // ✅ allow MANAGER and SALE
+        if (roleName == null || !("SALE".equalsIgnoreCase(roleName) || "MANAGER".equalsIgnoreCase(roleName))) {
             response.sendError(403, "Forbidden");
             return;
         }
 
-        Integer userId = (Integer) request.getSession().getAttribute("userId");
+        Integer userId = (session == null) ? null : (Integer) session.getAttribute("userId");
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
             return;
         }
 
-        String status = "PENDING";
+        String status = "NEW";
 
         Date expected = parseSqlDate(request.getParameter("expected_import_date"));
+        Date today = Date.valueOf(java.time.LocalDate.now());
         String note = request.getParameter("note");
+
+        String sourcePage = request.getParameter("sourcePage");
+        String sourceProductIdRaw = request.getParameter("sourceProductId");
+        boolean fromLowStock = "low-stock-report".equalsIgnoreCase(sourcePage);
 
         String[] productIds = request.getParameterValues("productId");
         String[] skuIds = request.getParameterValues("skuId");
@@ -42,53 +52,128 @@ public class CreateImportRequestServlet extends HttpServlet {
         List<String> errs = new ArrayList<>();
         List<ImportRequestItemCreate> items = new ArrayList<>();
 
-        if (expected == null) {
-            errs.add("Expected Import Date is required.");
-        }
-
-        if (productIds == null || qtys == null || productIds.length == 0) {
-            errs.add("Please add at least 1 item.");
-        } else {
-            for (int i = 0; i < productIds.length; i++) {
-                long pid = parseLong(productIds[i], -1);
-                int q = parseInt(qtys[i], -1);
-
-                if (pid <= 0) {
-                    errs.add("Item #" + (i + 1) + ": Product is required.");
-                    continue;
-                }
-                if (q <= 0) {
-                    errs.add("Item #" + (i + 1) + ": Qty must be > 0.");
-                    continue;
-                }
-
-                long sid = parseLong((skuIds != null && skuIds.length > i) ? skuIds[i] : null, -1);
-                if (sid <= 0) {
-                    errs.add("Item #" + (i + 1) + ": SKU is required.");
-                    continue;
-                }
-
-                items.add(new ImportRequestItemCreate(pid, sid, q));
-            }
-        }
-
-        if (!errs.isEmpty()) {
-            String msg = String.join(" | ", errs);
-            String url = request.getContextPath() + "/home?p=create-import-request"
-                    + "&err=1"
-                    + "&errMsg=" + safe(msg)
-                    + "&expected_import_date=" + safe(expected == null ? "" : expected.toString())
-                    + "&note=" + safe(note == null ? "" : note);
-            response.sendRedirect(url);
-            return;
-        }
-
         try {
             ImportRequestCreateDAO dao = new ImportRequestCreateDAO();
+
+            // expected import date
+            if (expected == null) {
+                errs.add("Expected Import Date is required.");
+            } else if (expected.before(today)) {
+                errs.add("Expected Import Date cannot be in the past.");
+            }
+
+            // source product from low stock report
+            Long sourceProductId = null;
+            if (fromLowStock) {
+                sourceProductId = parseLongObj(sourceProductIdRaw);
+
+                if (sourceProductId == null || sourceProductId <= 0) {
+                    errs.add("Invalid source product from Low Stock Report.");
+                } else if (!dao.isProductExists(sourceProductId)) {
+                    errs.add("Source product does not exist.");
+                } else if (dao.hasActiveImportRequestForProduct(sourceProductId)) {
+                    errs.add("An active import request already exists for this product.");
+                }
+            }
+
+            // item arrays
+            if (productIds == null || skuIds == null || qtys == null
+                    || productIds.length == 0 || skuIds.length == 0 || qtys.length == 0) {
+                errs.add("Please add at least 1 item.");
+            } else if (!(productIds.length == skuIds.length && skuIds.length == qtys.length)) {
+                errs.add("Invalid item data.");
+            } else {
+
+                Set<Long> productSet = new LinkedHashSet<>();
+
+                for (int i = 0; i < productIds.length; i++) {
+                    String productIdRaw = productIds[i] == null ? "" : productIds[i].trim();
+                    String skuIdRaw = (skuIds.length > i && skuIds[i] != null) ? skuIds[i].trim() : "";
+                    String qtyRaw = qtys[i] == null ? "" : qtys[i].trim();
+
+                    long pid = parseLong(productIdRaw, -1);
+                    long sid = parseLong(skuIdRaw, -1);
+                    int q = parseInt(qtyRaw, -1);
+
+                    if (pid <= 0) {
+                        errs.add("Item #" + (i + 1) + ": Product is required.");
+                        continue;
+                    }
+
+                    if (!dao.isProductExists(pid)) {
+                        errs.add("Item #" + (i + 1) + ": Product does not exist.");
+                        continue;
+                    }
+
+                    // ✅ if from low stock, only allow request for that source product
+                    if (fromLowStock && sourceProductId != null && pid != sourceProductId.longValue()) {
+                        errs.add("Item #" + (i + 1) + ": Product must match the selected low stock product.");
+                        continue;
+                    }
+
+                    // ✅ qty > 0
+                    if (q <= 0) {
+                        errs.add("Item #" + (i + 1) + ": Qty must be > 0.");
+                        continue;
+                    }
+
+                    // ✅ sku required, especially from low stock
+                    if (sid <= 0) {
+                        if (fromLowStock) {
+                            errs.add("Item #" + (i + 1) + ": SKU is required when creating request from Low Stock Report.");
+                        } else {
+                            errs.add("Item #" + (i + 1) + ": SKU is required.");
+                        }
+                        continue;
+                    }
+
+                    if (!dao.isSkuExists(sid)) {
+                        errs.add("Item #" + (i + 1) + ": SKU does not exist.");
+                        continue;
+                    }
+
+                    // ✅ sku must belong to product
+                    if (!dao.isSkuBelongsToProduct(sid, pid)) {
+                        errs.add("Item #" + (i + 1) + ": SKU does not belong to selected product.");
+                        continue;
+                    }
+
+                    productSet.add(pid);
+                    items.add(new ImportRequestItemCreate(pid, sid, q));
+                }
+
+                if (fromLowStock && sourceProductId != null && !productSet.isEmpty()) {
+                    if (productSet.size() != 1 || !productSet.contains(sourceProductId)) {
+                        errs.add("Import request from Low Stock Report must contain only the selected product.");
+                    }
+                }
+            }
+
+            if (!errs.isEmpty()) {
+                String msg = String.join(" | ", errs);
+
+                StringBuilder url = new StringBuilder();
+                url.append(request.getContextPath())
+                        .append("/home?p=create-import-request")
+                        .append("&err=1")
+                        .append("&errMsg=").append(safe(msg))
+                        .append("&expected_import_date=").append(safe(expected == null ? "" : expected.toString()))
+                        .append("&note=").append(safe(note == null ? "" : note));
+
+                // keep prefill if came from low stock
+                if (fromLowStock && sourceProductIdRaw != null && !sourceProductIdRaw.isBlank()) {
+                    url.append("&productId=").append(safe(sourceProductIdRaw));
+                }
+
+                response.sendRedirect(url.toString());
+                return;
+            }
+
             dao.createRequest(userId, expected, note, status, items);
 
             response.sendRedirect(request.getContextPath()
                     + "/home?p=import-request-list&msg=Created");
+
         } catch (Exception e) {
             throw new ServletException(e);
         }
@@ -110,6 +195,17 @@ public class CreateImportRequestServlet extends HttpServlet {
             return Long.parseLong(s);
         } catch (Exception e) {
             return def;
+        }
+    }
+
+    private Long parseLongObj(String s) {
+        try {
+            if (s == null || s.trim().isEmpty()) {
+                return null;
+            }
+            return Long.parseLong(s.trim());
+        } catch (Exception e) {
+            return null;
         }
     }
 

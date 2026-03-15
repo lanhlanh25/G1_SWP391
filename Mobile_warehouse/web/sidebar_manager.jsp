@@ -229,5 +229,9 @@
             </li>
         </ul>
     </details>
+    <a class="${currentPage == 'low-stock-report' ? 'active' : ''}"
+       href="${pageContext.request.contextPath}/home?p=low-stock-report">
+        Low Stock Report
+    </a>                
 
 </div>

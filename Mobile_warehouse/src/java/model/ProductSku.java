@@ -1,17 +1,9 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package model;
-
-/**
- *
- * @author Lanhlanh
- */
 
 import java.sql.Timestamp;
 
 public class ProductSku {
+
     private int skuId;
     private int productId;
     private String skuCode;
@@ -23,6 +15,11 @@ public class ProductSku {
     private String status;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+
+    // extra fields for inventory / detail view
+    private String supplierName;
+    private int stock;
+    private String stockStatus;
 
     public ProductSku() {
     }
@@ -113,5 +110,29 @@ public class ProductSku {
 
     public void setUpdatedAt(Timestamp updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    public String getStockStatus() {
+        return stockStatus;
+    }
+
+    public void setStockStatus(String stockStatus) {
+        this.stockStatus = stockStatus;
     }
 }

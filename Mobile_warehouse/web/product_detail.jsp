@@ -53,5 +53,65 @@
             </div>
         </div>
 
+        <div class="card">
+            <div class="card-header">
+                <span class="h2">SKU Inventory</span>
+            </div>
+
+            <div class="card-body" style="padding:0;">
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>SKU Code</th>
+                                <th>Color</th>
+                                <th>RAM</th>
+                                <th>Storage</th>
+                                <th>Supplier</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:choose>
+                                <c:when test="${empty skuList}">
+                                    <tr>
+                                        <td colspan="7">
+                                            <div class="empty-state">No active SKU found for this product.</div>
+                                        </td>
+                                    </tr>
+                                </c:when>
+                                <c:otherwise>
+                                    <c:forEach var="s" items="${skuList}">
+                                        <tr>
+                                            <td><b>${s.skuCode}</b></td>
+                                            <td>${s.color}</td>
+                                            <td>${s.ramGb} GB</td>
+                                            <td>${s.storageGb} GB</td>
+                                            <td>${s.supplierName}</td>
+                                            <td>${s.stock}</td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${s.stockStatus == 'Out Of Stock'}">
+                                                        <span class="badge badge-danger">Out Of Stock</span>
+                                                    </c:when>
+                                                    <c:when test="${s.stockStatus == 'Low Stock'}">
+                                                        <span class="badge badge-warning">Low Stock</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="badge badge-active">In Stock</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:otherwise>
+                            </c:choose>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </c:if>
 </div>

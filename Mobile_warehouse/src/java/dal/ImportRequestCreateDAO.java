@@ -88,7 +88,7 @@ public class ImportRequestCreateDAO {
                 for (ImportRequestItemCreate it : items) {
                     ps.setLong(1, requestId);
                     ps.setLong(2, it.getProductId());
-                    ps.setLong(3, it.getSkuId()); // NOT NULL
+                    ps.setLong(3, it.getSkuId());
                     ps.setInt(4, it.getRequestQty());
                     ps.addBatch();
                 }
@@ -99,16 +99,96 @@ public class ImportRequestCreateDAO {
             return requestId;
 
         } catch (Exception e) {
-            if (con != null) try {
-                con.rollback();
-            } catch (Exception ignore) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignore) {
+                }
             }
             throw e;
         } finally {
-            if (con != null) try {
-                con.setAutoCommit(true);
-                con.close();
-            } catch (Exception ignore) {
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true);
+                    con.close();
+                } catch (Exception ignore) {
+                }
+            }
+        }
+    }
+
+    public boolean isSkuBelongsToProduct(long skuId, long productId) throws Exception {
+        String sql = """
+            SELECT 1
+            FROM product_skus
+            WHERE sku_id = ?
+              AND product_id = ?
+              AND status = 'ACTIVE'
+        """;
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, skuId);
+            ps.setLong(2, productId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public boolean isProductExists(long productId) throws Exception {
+        String sql = """
+            SELECT 1
+            FROM products
+            WHERE product_id = ?
+              AND status = 'ACTIVE'
+        """;
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public boolean isSkuExists(long skuId) throws Exception {
+        String sql = """
+            SELECT 1
+            FROM product_skus
+            WHERE sku_id = ?
+              AND status = 'ACTIVE'
+        """;
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, skuId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public boolean hasActiveImportRequestForProduct(long productId) throws Exception {
+        String sql = """
+            SELECT 1
+            FROM import_request_lines irl
+            INNER JOIN import_requests ir ON ir.request_id = irl.request_id
+            WHERE irl.product_id = ?
+              AND ir.status = 'NEW'
+            LIMIT 1
+        """;
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
             }
         }
     }
