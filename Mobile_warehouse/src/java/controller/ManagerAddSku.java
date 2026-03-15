@@ -98,11 +98,7 @@ public class ManagerAddSku extends HttpServlet {
             if (!errors.isEmpty()) {
                 request.setAttribute("errors", errors);
                 request.setAttribute("products", new ProductDAO().listForSkuSelect());
-
-                request.getSession().setAttribute("flash_errors", errors);
-                request.getSession().setAttribute("flash_products", new ProductDAO().listForSkuSelect());
-
-                response.sendRedirect(request.getContextPath() + "/home?p=sku-add");
+                request.getRequestDispatcher("/add_sku.jsp").forward(request, response);
                 return;
             }
 
@@ -110,15 +106,14 @@ public class ManagerAddSku extends HttpServlet {
 
             response.sendRedirect(
                     request.getContextPath()
-                    + "/home?p=product-list&msg=Add+SKU+successfully"
+                    + "/manager/product/update?id=" + productId
             );
 
         } catch (Exception e) {
             e.printStackTrace();
-
             response.sendRedirect(
                     request.getContextPath()
-                    + "/home?p=sku-add&err=Database+error"
+                    + "/manager/product/update?id=" + productId
             );
         }
     }
