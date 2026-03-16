@@ -466,15 +466,16 @@ public class Home extends HttpServlet {
                     ImportReceiptDeleteRequestDAO deleteDAO = new ImportReceiptDeleteRequestDAO();
                     ImportReceiptListDAO importReceiptListDAO = new ImportReceiptListDAO();
                     ExportReceiptDAO exportReceiptDAO = new ExportReceiptDAO();
+                    LowStockReportDAO lowStockDAO = new LowStockReportDAO();
 
                     // =========================
                     // APPROVAL COUNTS
                     // =========================
-                    int pendingImportCount = importRequestDAO.countByStatus("PENDING");
-                    int pendingExportCount = exportRequestDAO.countByStatus("PENDING");
-                    int pendingDeleteCount = deleteDAO.countRequests(null, null);
+                    int pendingImportCount = importRequestDAO.countByStatus("NEW");
+                    int pendingExportCount = exportRequestDAO.countByStatus("NEW");
 
-                    int pendingApprovals = pendingImportCount + pendingExportCount + pendingDeleteCount;
+                    int pendingApprovals = pendingImportCount + pendingExportCount;
+
                     int overdueApprovals = 0;
 
                     List<DashboardApprovalRow> dashboardImportRequests = new ArrayList<>();
@@ -482,9 +483,9 @@ public class Home extends HttpServlet {
                     List<DashboardApprovalRow> dashboardDeleteRequests = new ArrayList<>();
 
                     // =========================
-                    // IMPORT REQUESTS
+                    // IMPORT REQUESTS 
                     // =========================
-                    List<ImportRequest> importRequests = importRequestDAO.listByStatus("PENDING", 5);
+                    List<ImportRequest> importRequests = importRequestDAO.listByStatus("NEW", 5);
                     for (ImportRequest r : importRequests) {
                         String waiting = calcWaitingTime(r.getRequestDate());
                         String priority = calcPriorityByWaiting(r.getRequestDate());
@@ -507,9 +508,9 @@ public class Home extends HttpServlet {
                     }
 
                     // =========================
-                    // EXPORT REQUESTS
+                    // EXPORT REQUESTS 
                     // =========================
-                    List<ExportRequest> exportRequests = exportRequestDAO.listByStatus("PENDING", 5);
+                    List<ExportRequest> exportRequests = exportRequestDAO.listByStatus("NEW", 5);
                     for (ExportRequest r : exportRequests) {
                         String waiting = calcWaitingTime(r.getRequestDate());
                         String priority = calcPriorityByWaiting(r.getRequestDate());
@@ -532,18 +533,16 @@ public class Home extends HttpServlet {
                     }
 
                     // =========================
-                    // DELETE REQUESTS
+                    // DELETE REQUESTS (optional, keep for separate table only)
                     // =========================
                     List<ImportReceiptDeleteRequest> deleteRequests = deleteDAO.listRequests(null, null, 1, 5);
                     for (ImportReceiptDeleteRequest r : deleteRequests) {
+                        if (!"PENDING".equalsIgnoreCase(r.getStatus())) {
+                            continue;
+                        }
+
                         String waiting = calcWaitingTime(r.getRequestedAt());
                         String priority = calcPriorityByWaiting(r.getRequestedAt());
-
-                        long diffMs = System.currentTimeMillis() - r.getRequestedAt().getTime();
-                        long hours = diffMs / (1000L * 60 * 60);
-                        if (hours >= 24) {
-                            overdueApprovals++;
-                        }
 
                         dashboardDeleteRequests.add(new DashboardApprovalRow(
                                 r.getRequestId(),
@@ -570,8 +569,14 @@ public class Home extends HttpServlet {
                     // =========================
                     // TODAY EXPORTED UNITS
                     // =========================
-                    List<ExportReceiptListItem> todayExports = exportReceiptDAO.list(null, "ALL",
-                            java.sql.Date.valueOf(today), java.sql.Date.valueOf(today), 1, 200);
+                    List<ExportReceiptListItem> todayExports = exportReceiptDAO.list(
+                            null,
+                            "ALL",
+                            java.sql.Date.valueOf(today),
+                            java.sql.Date.valueOf(today),
+                            1,
+                            200
+                    );
 
                     int todayExportedUnits = 0;
                     for (ExportReceiptListItem item : todayExports) {
@@ -579,11 +584,17 @@ public class Home extends HttpServlet {
                     }
 
                     // =========================
+                    // LOW STOCK SUMMARY + DASHBOARD ROWS
+                    // =========================
+                    LowStockSummaryDTO lowStockSummary = lowStockDAO.getSummary();
+                    List<LowStockReportItem> dashboardLowStockRows
+                            = lowStockDAO.getLowStockReport(null, null, null, null, null, 1, 5);
+
+                    // =========================
                     // RECENT ACTIVITIES
                     // =========================
                     List<DashboardActivityRow> dashboardRecentActivities = new ArrayList<>();
 
-                    // recent imports
                     List<ImportReceiptListItem> recentImports = importReceiptListDAO.list(null, "all", null, null, 1, 5);
                     for (ImportReceiptListItem item : recentImports) {
                         if (item.getReceiptDate() != null) {
@@ -597,7 +608,6 @@ public class Home extends HttpServlet {
                         }
                     }
 
-                    // recent exports
                     List<ExportReceiptListItem> recentExports = exportReceiptDAO.list(null, "ALL", null, null, 1, 5);
                     for (ExportReceiptListItem item : recentExports) {
                         if (item.getExportDate() != null) {
@@ -617,9 +627,11 @@ public class Home extends HttpServlet {
                         dashboardRecentActivities = new ArrayList<>(dashboardRecentActivities.subList(0, 6));
                     }
 
-                    // =========================
-                    // SET ATTRIBUTES
-                    // =========================
+// =========================
+// SET ATTRIBUTES
+// =========================
+                    request.setAttribute("approvalType", approvalType);
+
                     request.setAttribute("pendingApprovals", pendingApprovals);
                     request.setAttribute("overdueApprovals", overdueApprovals);
                     request.setAttribute("todayImportedUnits", todayImportedUnits);
@@ -628,22 +640,26 @@ public class Home extends HttpServlet {
                     request.setAttribute("dashboardImportRequests", dashboardImportRequests);
                     request.setAttribute("dashboardExportRequests", dashboardExportRequests);
                     request.setAttribute("dashboardDeleteRequests", dashboardDeleteRequests);
+
+                    request.setAttribute("lowStockProducts",
+                            lowStockSummary != null ? lowStockSummary.getProductsBelowRop() : 0);
+                    request.setAttribute("dashboardLowStockRows", dashboardLowStockRows);
+
                     request.setAttribute("dashboardRecentActivities", dashboardRecentActivities);
 
-                    // not implemented yet
-                    request.setAttribute("lowStockProducts", "—");
                     request.setAttribute("alertsComingSoon", true);
-                    request.setAttribute("lowStockComingSoon", true);
+                    request.setAttribute("lowStockComingSoon", false);
 
-                    // =========================
-                    // INVENTORY REPORT SUMMARY (month-to-date)
-                    // =========================
+// =========================
+// INVENTORY REPORT SUMMARY (month-to-date)
+// =========================
                     try {
                         InventoryReportDAO irDAO = new InventoryReportDAO();
                         LocalDate firstOfMonth = today.withDayOfMonth(1);
                         java.sql.Date invFrom = java.sql.Date.valueOf(firstOfMonth);
                         java.sql.Date invTo = java.sql.Date.valueOf(today);
                         java.util.Map<String, Integer> invSummary = irDAO.getSummary(invFrom, invTo, null);
+
                         request.setAttribute("invTotalOpening", invSummary.getOrDefault("totalOpening", 0));
                         request.setAttribute("invTotalImport", invSummary.getOrDefault("totalImport", 0));
                         request.setAttribute("invTotalExport", invSummary.getOrDefault("totalExport", 0));
