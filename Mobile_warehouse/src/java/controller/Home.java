@@ -402,7 +402,6 @@ public class Home extends HttpServlet {
                             request.setAttribute("erItems", erItems);
                         }
 
-                        
                         request.setAttribute("products", pdao.listActive());
                         request.setAttribute("skus", skdao.listActive());
 
@@ -635,6 +634,26 @@ public class Home extends HttpServlet {
                     request.setAttribute("lowStockProducts", "—");
                     request.setAttribute("alertsComingSoon", true);
                     request.setAttribute("lowStockComingSoon", true);
+
+                    // =========================
+                    // INVENTORY REPORT SUMMARY (month-to-date)
+                    // =========================
+                    try {
+                        InventoryReportDAO irDAO = new InventoryReportDAO();
+                        LocalDate firstOfMonth = today.withDayOfMonth(1);
+                        java.sql.Date invFrom = java.sql.Date.valueOf(firstOfMonth);
+                        java.sql.Date invTo = java.sql.Date.valueOf(today);
+                        java.util.Map<String, Integer> invSummary = irDAO.getSummary(invFrom, invTo, null);
+                        request.setAttribute("invTotalOpening", invSummary.getOrDefault("totalOpening", 0));
+                        request.setAttribute("invTotalImport", invSummary.getOrDefault("totalImport", 0));
+                        request.setAttribute("invTotalExport", invSummary.getOrDefault("totalExport", 0));
+                        request.setAttribute("invTotalClosing", invSummary.getOrDefault("totalClosing", 0));
+                        request.setAttribute("invTotalVariance", invSummary.getOrDefault("totalVariance", 0));
+                        request.setAttribute("invMonthLabel",
+                                firstOfMonth.format(DateTimeFormatter.ofPattern("MMM yyyy")));
+                    } catch (Exception exInv) {
+                        LOG.log(Level.WARNING, "Could not load inventory summary for dashboard", exInv);
+                    }
                 }
                 break;
             }

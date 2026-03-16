@@ -1,15 +1,3 @@
-<%-- 
-    Document   : manager_dashboard
-    Created on : Jan 16, 2026, 8:05:57 AM
-    Author     : Admin
---%>
-
-<%-- 
-    Document   : manager_dashboard
-    Created on : Jan 16, 2026, 8:05:57 AM
-    Author     : Admin
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
@@ -62,6 +50,39 @@
         </div>
     </section>
 
+    <!-- Inventory Summary (month-to-date) -->
+    <section class="kpi-grid" style="margin-bottom:20px;">
+        <div class="card kpi-card" style="border-left:4px solid #64748b;">
+            <div class="kpi-label">Opening Stock</div>
+            <div class="kpi-value" style="color:#475569;">${invTotalOpening}</div>
+            <div class="kpi-note">${invMonthLabel} — beginning</div>
+        </div>
+        <div class="card kpi-card" style="border-left:4px solid #22c55e;">
+            <div class="kpi-label">Total Import</div>
+            <div class="kpi-value" style="color:#16a34a;">+${invTotalImport}</div>
+            <div class="kpi-note">Confirmed receipts</div>
+        </div>
+        <div class="card kpi-card" style="border-left:4px solid #f59e0b;">
+            <div class="kpi-label">Total Export</div>
+            <div class="kpi-value" style="color:#d97706;">-${invTotalExport}</div>
+            <div class="kpi-note">Issued in period</div>
+        </div>
+        <div class="card kpi-card" style="border-left:4px solid #3b82f6;">
+            <div class="kpi-label">Closing Stock</div>
+            <div class="kpi-value" style="color:#2563eb;">${invTotalClosing}</div>
+            <div class="kpi-note">Current on-hand</div>
+        </div>
+        <div class="card kpi-card" style="border-left:4px solid #a855f7; grid-column: span 1;">
+            <div class="kpi-label">View Full Report</div>
+            <div class="kpi-value" style="font-size:14px; font-weight:500; margin-top:8px;">
+                <a href="<%=ctx%>/inventory-report" class="btn btn-outline" style="width:100%; text-align:center;">
+                    Inventory Report
+                </a>
+            </div>
+            <div class="kpi-note">${invMonthLabel}</div>
+        </div>
+    </section>
+
     <section class="dashboard-main">
         <!-- Approval Center -->
         <div class="card">
@@ -82,14 +103,11 @@
                             data-target="import">
                         Import Requests
                     </button>
-
                     <button type="button"
                             class="tab-btn <%= "export".equals(approvalType) ? "active" : "" %>"
                             data-target="export">
                         Export Requests
                     </button>
-
-                    
                 </div>
 
                 <div class="showing-line">
@@ -117,7 +135,6 @@
                         </thead>
                         <tbody>
 
-                            <!-- Import Requests -->
                             <c:if test="${empty param.approvalType || param.approvalType eq 'import'}">
                                 <c:choose>
                                     <c:when test="${not empty dashboardImportRequests}">
@@ -149,7 +166,6 @@
                                 </c:choose>
                             </c:if>
 
-                            <!-- Export Requests -->
                             <c:if test="${param.approvalType eq 'export'}">
                                 <c:choose>
                                     <c:when test="${not empty dashboardExportRequests}">
@@ -166,17 +182,9 @@
                                                 </td>
                                                 <td><span class="badge badge-muted">${r.status}</span></td>
                                                 <td>
-                                                    <c:choose>
-                                                        <c:when test="${param.approvalType eq 'export'}">
-                                                            <a href="${pageContext.request.contextPath}/home?p=export-request-list" class="link-lite">View All &gt;</a>
-                                                        </c:when>
-                                                        <c:when test="${param.approvalType eq 'delete'}">
-                                                            <a href="${pageContext.request.contextPath}/home?p=request-delete-import-receipt-list" class="link-lite">View All &gt;</a>
-                                                        </c:when>
-                                                        <c:otherwise>
-                                                            <a href="${pageContext.request.contextPath}/home?p=import-request-list" class="link-lite">View All &gt;</a>
-                                                        </c:otherwise>
-                                                    </c:choose>
+                                                    <a class="btn btn-sm" href="<%=ctx%>/home?p=export-request-detail&id=${r.id}">
+                                                        View Detail
+                                                    </a>
                                                 </td>
                                             </tr>
                                         </c:forEach>
@@ -189,7 +197,6 @@
                                 </c:choose>
                             </c:if>
 
-                            <!-- Delete Requests -->
                             <c:if test="${param.approvalType eq 'delete'}">
                                 <c:choose>
                                     <c:when test="${not empty dashboardDeleteRequests}">
@@ -213,7 +220,11 @@
                                             </tr>
                                         </c:forEach>
                                     </c:when>
-                                    
+                                    <c:otherwise>
+                                        <tr>
+                                            <td colspan="7" class="empty-state">No delete requests found.</td>
+                                        </tr>
+                                    </c:otherwise>
                                 </c:choose>
                             </c:if>
 
@@ -243,6 +254,8 @@
                         <a href="<%=ctx%>/home?p=import-request-list" class="btn btn-primary">Review Import Requests</a>
                         <a href="<%=ctx%>/home?p=export-request-list" class="btn btn-outline">Review Export Requests</a>
                         <a href="<%=ctx%>/inventory-count" class="btn btn-outline">Start Inventory Count</a>
+                        <a href="<%=ctx%>/inventory-report" class="btn btn-outline">Inventory Report</a>
+                        <a href="<%=ctx%>/home?p=low-stock-report" class="btn btn-outline">Low Stock Report</a>
                     </div>
                 </div>
             </div>
@@ -255,13 +268,10 @@
             <div class="card-header">
                 <div>
                     <div class="h2">Low Stock List</div>
-
                     <div class="card-subtitle">Products that have reached or fallen below the reorder point.</div>
-                    <div class="card-subtitle">Coming soon</div>
                 </div>
-                <a href="<%=ctx%>/home?p=brand-stats" class="link-lite">View All &gt;</a>
+                <a href="<%=ctx%>/home?p=low-stock-report" class="link-lite">View All &gt;</a>
             </div>
-
             <div class="card-body">
                 <div class="empty-state">Coming soon</div>
             </div>
@@ -275,7 +285,6 @@
                     <div class="card-subtitle">Latest import and export transactions.</div>
                 </div>
             </div>
-
             <div class="card-body" style="padding-top:0;">
                 <div class="table-wrap">
                     <table class="table">
