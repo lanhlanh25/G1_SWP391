@@ -378,6 +378,10 @@ a:hover { color: var(--primary); }
 }
 .btn:hover { background: var(--surface-2); border-color: #d1d9e6; }
 
+.btn-equal {
+  width: 78px;
+  justify-content: center;
+}
 .btn-primary {
   background: var(--primary);
   border-color: var(--primary);

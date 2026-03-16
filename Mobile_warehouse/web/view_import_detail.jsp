@@ -223,12 +223,18 @@
                 <td style="font-family:monospace;font-size:12px;">${fn:escapeXml(it.productCode)}</td>
                 <td style="font-family:monospace;font-size:12px;">${fn:escapeXml(it.skuCode)}</td>
                 <td style="text-align:center;font-weight:700;">${it.qty}</td>
-                <td style="white-space:pre-line;font-size:12px;font-family:monospace;">
+                <td style="font-size:12px;font-family:monospace;">
                   <c:choose>
-                    <c:when test="${not empty it.imeiText}">
-                      <c:out value="${it.imeiText}"/>
+                    <c:when test="${not empty it.imeis}">
+                      <div style="line-height:1.8;">
+                        <c:forEach var="im" items="${it.imeis}" varStatus="st2">
+                          <div>IMEI <c:out value="${st2.index + 1}"/>: <c:out value="${im}"/></div>
+                        </c:forEach>
+                      </div>
                     </c:when>
-                    <c:otherwise><span style="color:var(--muted)">—</span></c:otherwise>
+                    <c:otherwise>
+                      <span style="color:var(--muted)">—</span>
+                    </c:otherwise>
                   </c:choose>
                 </td>
                 <td>

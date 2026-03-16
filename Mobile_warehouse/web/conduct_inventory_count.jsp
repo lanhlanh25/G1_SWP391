@@ -77,7 +77,7 @@
       <a href="${ctx}/home" class="btn btn-sm">← Back</a>
       <h1 class="ic-title">Conduct Inventory Count</h1>
     </div>
-    <button type="button" class="btn btn-primary" id="btnSave">💾 Save Count</button>
+    <button type="button" class="btn btn-primary" id="btnSave">Save Count</button>
   </div>
 
   <%-- Flash messages (passed as query params after redirect) --%>
@@ -113,8 +113,8 @@
         <input type="hidden" name="page"     value="1"/>
         <input type="hidden" name="pageSize" value="${pageSize}"/>
         <div style="display:flex;gap:8px;align-items:flex-end;">
-          <button type="submit" class="btn btn-primary btn-sm">Search</button>
-          <a href="${ctx}/inventory-count" class="btn btn-sm">Reset</a>
+          <button type="submit" class="btn btn-primary btn-sm  btn-equal" >Search</button>
+          <a href="${ctx}/inventory-count" class="btn btn-outline btn-sm btn-equal" >Reset</a>
         </div>
       </div>
     </form>

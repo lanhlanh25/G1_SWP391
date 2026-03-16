@@ -27,7 +27,7 @@
     <li>
         <a class="<%= inventoryOverviewActive ? "active" : "" %>"
            href="<%=ctx%>/inventory">
-            Inventory Overview
+            Inventory Management
         </a>
     </li>
     <li>
@@ -69,12 +69,7 @@
                 Receipt List
             </a>
         </li>
-        <li>
-            <a class="<%= "request-delete-import-receipt".equals(currentPage) || "request-delete-import-receipt-list".equals(currentPage) ? "active" : "" %>"
-               href="<%=ctx%>/home?p=request-delete-import-receipt-list">
-                Delete Requests
-            </a>
-        </li>
+      
     </ul>
 </details>
 

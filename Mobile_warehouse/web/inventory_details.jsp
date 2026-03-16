@@ -26,12 +26,16 @@
   .invd-tbl tbody tr:hover td      { background:#f7f9ff; }
   .tc { text-align:center; }
   .tr { text-align:right; font-weight:700; }
+  .tl { text-align:left; }
 
   /* status badges */
   .stbadge { display:inline-flex; align-items:center; padding:5px 14px; border-radius:999px; font-size:12.5px; font-weight:700; border:1px solid transparent; }
   .st-ok  { background:#dcfce7; color:#15803d; border-color:#bbf7d0; }
   .st-low { background:#fef3c7; color:#92400e; border-color:#fde68a; }
   .st-out { background:#fee2e2; color:#b91c1c; border-color:#fecaca; }
+
+  /* ROP hint */
+  .rop-hint { font-size:11px; color:var(--muted); margin-top:3px; }
 
   /* paging */
   .inv-paging { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-top:1px solid var(--border); background:var(--surface-2); flex-wrap:wrap; gap:10px; }
@@ -58,7 +62,6 @@
     <h1 class="invd-title">Inventory Details</h1>
   </div>
 
-  <%-- attrs from servlet: totalQty, productCode, productModel --%>
   <div class="invd-chips">
     <div class="invd-chip">
       <div class="chip-label">Quantity</div>
@@ -74,25 +77,25 @@
     </div>
   </div>
 
-  <%-- build back URL for IMEI list --%>
   <c:url var="backToDetails" value="/inventory-details">
     <c:param name="productCode" value="${productCode}"/>
     <c:param name="page"        value="${pageNumber}"/>
     <c:param name="pageSize"    value="${pageSize}"/>
   </c:url>
 
-  <%-- attr: skuRows = List<SkuInventoryRow>
-       fields: skuId, skuCode, color, ramGb, storageGb, qty, stockStatus (OK/LOW/OUT) --%>
   <div class="invd-card">
     <div style="overflow-x:auto;">
       <table class="invd-tbl">
         <thead>
           <tr>
-            <th>SKU</th>
+            <th class="tl">SKU</th>
             <th class="tc">Color</th>
             <th class="tc">RAM</th>
             <th class="tc">Storage</th>
-            <th class="tc">Inventory Status</th>
+            <th class="tc">
+              Inventory Status
+            
+            </th>
             <th class="tr">Quantity</th>
             <th class="tc">Action</th>
           </tr>
@@ -103,22 +106,28 @@
           </c:if>
           <c:forEach var="s" items="${skuRows}">
             <tr>
-              <td style="font-weight:700;">${fn:escapeXml(s.skuCode)}</td>
+              <td class="tl" style="font-weight:700;">${fn:escapeXml(s.skuCode)}</td>
               <td class="tc">${fn:escapeXml(s.color)}</td>
               <td class="tc">${s.ramGb} GB</td>
               <td class="tc">${s.storageGb} GB</td>
               <td class="tc">
+                <%-- Badge theo ROP: OUT / LOW / OK --%>
                 <c:choose>
                   <c:when test="${s.stockStatus == 'OK'}">
                     <span class="stbadge st-ok">In Stock</span>
                   </c:when>
                   <c:when test="${s.stockStatus == 'LOW'}">
-                    <span class="stbadge st-low">Low Stock</span>
+                    <span class="stbadge st-low"
+                          title="Stock (${s.qty}) ≤ ROP (${s.rop}) — reorder recommended">
+                      Low Stock
+                    </span>
                   </c:when>
                   <c:otherwise>
                     <span class="stbadge st-out">Out of Stock</span>
                   </c:otherwise>
                 </c:choose>
+                <%-- Hiển thị ROP nhỏ bên dưới để manager tham khảo --%>
+                <div class="rop-hint">ROP: ${s.rop}</div>
               </td>
               <td class="tr">
                 ${s.qty}
@@ -139,7 +148,6 @@
       </table>
     </div>
 
-    <%-- attrs: pageNumber, pageSize, totalPages --%>
     <div class="inv-paging">
       <span class="inv-paging-info">Page ${pageNumber} / ${totalPages}</span>
 
