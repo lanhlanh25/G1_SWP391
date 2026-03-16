@@ -13,6 +13,7 @@ import model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import jakarta.servlet.http.Cookie;
 import java.io.IOException;
 
 @WebServlet(name = "LoginServlet", urlPatterns = {"/login"})
@@ -26,6 +27,23 @@ public class Login extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/home");
             return;
         }
+
+        // Read cookies for "Remember Me"
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if (c.getName().equals("c_user")) {
+                    request.setAttribute("usernameVal", c.getValue());
+                }
+                if (c.getName().equals("c_pass")) {
+                    request.setAttribute("passwordVal", c.getValue());
+                }
+                if (c.getName().equals("c_rem")) {
+                    request.setAttribute("rememberVal", c.getValue());
+                }
+            }
+        }
+
         request.getRequestDispatcher("login.jsp").forward(request, response);
     }
 
@@ -64,6 +82,30 @@ public class Login extends HttpServlet {
 
         String roleName = dao.getRoleNameByUserId(u.getUserId());
         session.setAttribute("roleName", roleName);
+
+        // Handle "Remember Me"
+        String remember = request.getParameter("remember");
+        if ("true".equals(remember)) {
+            Cookie cu = new Cookie("c_user", username);
+            Cookie cp = new Cookie("c_pass", password);
+            Cookie cr = new Cookie("c_rem", "checked");
+            cu.setMaxAge(60 * 60 * 24 * 7); // 7 days
+            cp.setMaxAge(60 * 60 * 24 * 7);
+            cr.setMaxAge(60 * 60 * 24 * 7);
+            response.addCookie(cu);
+            response.addCookie(cp);
+            response.addCookie(cr);
+        } else {
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie c : cookies) {
+                    if (c.getName().equals("c_user") || c.getName().equals("c_pass") || c.getName().equals("c_rem")) {
+                        c.setMaxAge(0);
+                        response.addCookie(c);
+                    }
+                }
+            }
+        }
 
         response.sendRedirect(request.getContextPath() + "/home");
     }

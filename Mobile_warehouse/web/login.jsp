@@ -12,87 +12,96 @@
   <title>System Login - WMS</title>
   <%@ include file="/WEB-INF/jspf/common_head.jspf" %>
   <style>
-/* Centered Glassmorphism Login with Warehouse Background */
+/* Modern Phoenix Theme Login */
 body, html {
   margin: 0;
   padding: 0;
   min-height: 100vh;
-  font-family: 'Poppins', 'Nunito Sans', sans-serif;
-  background: url('<%=ctx%>/assets/images/warehouse_bg.png') center/cover no-repeat;
-  background-attachment: fixed;
+  font-family: 'Nunito Sans', sans-serif;
+  background: var(--bg);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Dark overlay to make glass effect visible */
-.overlay {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 0;
-}
-
-.glass-card {
-  position: relative;
-  z-index: 1;
+.login-container {
   width: 100%;
-  max-width: 580px;
-  background: rgba(15, 15, 20, 0.65);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  padding: 60px 60px;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6);
-  color: #fff;
-  text-align: center;
+  max-width: 440px;
+  padding: 20px;
 }
 
-.glass-card h1 {
-  font-size: 38px;
-  font-weight: 700;
-  margin: 0 0 50px 0;
-  letter-spacing: 0.5px;
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 48px 40px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.login-brand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 12px;
+  font-weight: 900;
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+.login-header h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+  margin: 0;
+  letter-spacing: -0.025em;
+}
+
+.login-header p {
+  font-size: 14px;
+  color: var(--text-2);
+  margin: 8px 0 0;
 }
 
 .input-grp {
+  margin-bottom: 24px;
   position: relative;
-  margin-bottom: 30px;
+}
+
+.input-grp label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
 }
 
 .input-grp input {
   width: 100%;
-  padding: 16px 50px 16px 24px;
-  border-radius: 30px;
-  background: #f1f5f9; /* Màu trắng đục ngả xanh nhẹ giống hình */
-  border: 2px solid transparent;
-  color: #1e293b;
-  font-size: 15px;
-  font-weight: 500;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
   outline: none;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   box-sizing: border-box;
 }
 
-.input-grp input::placeholder {
-  color: #64748b;
-}
-
 .input-grp input:focus {
-  background: #ffffff;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-}
-
-.input-grp .icon {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  fill: #94a3b8; /* Chuyển icon sang màu tối để hợp nền input sáng */
-  width: 20px;
-  height: 20px;
+  background: #fff;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(60, 80, 224, 0.1);
 }
 
 .row-options {
@@ -100,7 +109,7 @@ body, html {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
-  font-size: 13.5px;
+  font-size: 13px;
 }
 
 .remember-label {
@@ -108,117 +117,110 @@ body, html {
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  color: var(--text-2);
+  font-weight: 600;
 }
 
 .remember-label input {
-  width: 15px;
-  height: 15px;
+  width: 16px;
+  height: 16px;
   cursor: pointer;
-  accent-color: #fff;
+  accent-color: var(--primary);
 }
 
 .forgot-link {
-  color: #fff;
+  color: var(--primary);
+  font-weight: 700;
   text-decoration: none;
-  transition: opacity 0.2s;
 }
 
 .forgot-link:hover {
-  opacity: 0.8;
   text-decoration: underline;
 }
 
 .btn-login {
   width: 100%;
-  padding: 16px;
-  border-radius: 30px;
+  padding: 14px;
+  border-radius: 10px;
   border: none;
-  background: #fff;
-  color: #222;
-  font-size: 17px;
-  font-weight: 700;
+  background: var(--primary);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 800;
   cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-  margin-bottom: 30px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px -1px rgba(60, 80, 224, 0.2);
 }
 
 .btn-login:hover {
-  background: #e2e8f0;
+  background: var(--primary-2);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 15px -3px rgba(60, 80, 224, 0.3);
 }
 
 .btn-login:active {
-  transform: scale(0.98);
-}
-
-.register-row {
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.register-row a {
-  color: #fff;
-  font-weight: 700;
-  text-decoration: none;
-  margin-left: 5px;
-}
-
-.register-row a:hover {
-  text-decoration: underline;
+  transform: translateY(0);
 }
 
 .msg-err {
-  background: rgba(220, 38, 38, 0.8);
-  color: #fff;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
   padding: 12px;
-  border-radius: 10px;
-  font-size: 14px;
-  margin-bottom: 25px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  text-align: left;
 }
   </style>
 </head>
 <body>
 
-<div class="overlay"></div>
-
-<div class="glass-card">
-  <h1>Login</h1>
-
-  <%
-    String err = (String) request.getAttribute("err");
-    String usernameVal = (String) request.getAttribute("usernameVal");
-    if (usernameVal == null) usernameVal = "";
-    if (err != null && !err.isBlank()) {
-  %>
-    <div class="msg-err"><%= err %></div>
-  <% } %>
-
-  <form action="<%=ctx%>/login" method="post" autocomplete="on">
-    
-    <div class="input-grp">
-      <input type="text" name="username" placeholder="Username" value="<%= usernameVal %>" required>
-      <svg class="icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-brand">MW</div>
+      <h1>Sign in</h1>
+      <p>Enter your details to access your account</p>
     </div>
 
-    <div class="input-grp">
-      <input type="password" name="password" placeholder="Password" required>
-      <svg class="icon" viewBox="0 0 24 24"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zM9 8V6c0-1.66 1.34-3 3-3s3 1.34 3 3v2H9z"/></svg>
-    </div>
+    <%
+      String err = (String) request.getAttribute("err");
+      String usernameVal = (String) request.getAttribute("usernameVal");
+      String passwordVal = (String) request.getAttribute("passwordVal");
+      String rememberVal = (String) request.getAttribute("rememberVal");
+      if (usernameVal == null) usernameVal = "";
+      if (passwordVal == null) passwordVal = "";
+      if (rememberVal == null) rememberVal = "";
+      if (err != null && !err.isBlank()) {
+    %>
+      <div class="msg-err"><%= err %></div>
+    <% } %>
 
-    <div class="row-options">
-      <label class="remember-label">
-        <input type="checkbox" checked>
-        Remember me
-      </label>
-      <a href="#" class="forgot-link">Forgot password?</a>
-    </div>
+    <form action="<%=ctx%>/login" method="post" autocomplete="on">
+      
+      <div class="input-grp">
+        <label>Username</label>
+        <input type="text" name="username" placeholder="Enter your username" value="<%= usernameVal %>" required>
+      </div>
 
-    <button type="submit" class="btn-login">Login</button>
+      <div class="input-grp">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" value="<%= passwordVal %>" required>
+      </div>
 
-    <div class="register-row">
-      Don't have an account? <a href="#">Register</a>
-    </div>
+      <div class="row-options">
+        <label class="remember-label">
+          <input type="checkbox" name="remember" value="true" <%= rememberVal %>>
+          Keep me signed in
+        </label>
+        <a href="<%=ctx%>/forgot-password" class="forgot-link">Forgot password?</a>
+      </div>
 
-  </form>
+      <button type="submit" class="btn-login">Login to Account</button>
+    </form>
+  </div>
 </div>
 
 </body>
