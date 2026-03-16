@@ -7,6 +7,8 @@ public class LowStockReportItem {
     private String productName;
     private long supplierId;
     private String supplierName;
+    private String brandName;
+    
 
     private int currentStock;
     private double avgDailySales;
@@ -18,6 +20,14 @@ public class LowStockReportItem {
     private int suggestedReorderQty;
     private boolean hasActiveImportRequest;
 
+    public String getBrandName() {
+        return brandName;
+    }
+
+    public void setBrandName(String brandName) {
+        this.brandName = brandName;
+    }
+    
     public long getProductId() {
         return productId;
     }

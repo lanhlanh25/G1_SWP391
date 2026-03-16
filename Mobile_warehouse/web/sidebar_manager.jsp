@@ -10,11 +10,11 @@
     String uri = request.getRequestURI();
     if (uri == null) uri = "";
 
-  boolean inventoryOverviewActive = uri.equals(ctx + "/inventory");
-boolean inventoryCountActive = uri.equals(ctx + "/inventory-count");
-boolean inventoryReportActive = uri.equals(ctx + "/inventory-report");     // ← THÊM DÒNG NÀY
-boolean importReportActive = uri.equals(ctx + "/import-receipt-report");
-boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
+    boolean inventoryOverviewActive = uri.equals(ctx + "/inventory");
+    boolean inventoryCountActive = uri.equals(ctx + "/inventory-count");
+    boolean inventoryReportActive = uri.equals(ctx + "/inventory-report");
+    boolean importReportActive = uri.equals(ctx + "/import-receipt-report");
+    boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
 %>
 
 <div>
@@ -53,6 +53,12 @@ boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
             <a class="<%= "variant-matrix".equals(currentPage) ? "active" : "" %>"
                href="<%=ctx%>/home?p=variant-matrix">
                 Variant Matrix
+            </a>
+        </li>
+        <li>
+            <a class="<%= "low-stock-report".equals(currentPage) ? "active" : "" %>"
+               href="<%=ctx%>/home?p=low-stock-report">
+                Low Stock Report
             </a>
         </li>
     </ul>
@@ -224,16 +230,21 @@ boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
                    href="<%=ctx%>/home?p=product-list">
                     Product List
                 </a>
-            </li>  
+            </li>
         </ul>
-   
-                
-   
-
     </details>
 
-  <a class="${currentPage == 'low-stock-report' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/home?p=low-stock-report">
-                Low Stock Report
-            </a> 
+    <div class="section-title">Reports</div>
+    <ul>
+        <li>
+            <a class="<%= "export-center".equals(currentPage) ? "active" : "" %>"
+               href="<%=ctx%>/home?p=export-center">
+                Export Center
+            </a>
+        </li>
+    </ul>
+    <a class="${currentPage == 'low-stock-report' ? 'active' : ''}"
+       href="${pageContext.request.contextPath}/home?p=low-stock-report">
+        Low Stock Report
+    </a>             
 </div>

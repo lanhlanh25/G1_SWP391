@@ -476,8 +476,6 @@ public class Home extends HttpServlet {
 
                     int pendingApprovals = pendingImportCount + pendingExportCount;
 
-                    int overdueApprovals = 0;
-
                     List<DashboardApprovalRow> dashboardImportRequests = new ArrayList<>();
                     List<DashboardApprovalRow> dashboardExportRequests = new ArrayList<>();
                     List<DashboardApprovalRow> dashboardDeleteRequests = new ArrayList<>();
@@ -487,14 +485,6 @@ public class Home extends HttpServlet {
                     // =========================
                     List<ImportRequest> importRequests = importRequestDAO.listByStatus("NEW", 5);
                     for (ImportRequest r : importRequests) {
-                        long diffMs = System.currentTimeMillis() - r.getRequestDate().getTime();
-                        if (diffMs < 0) {
-                            diffMs = 0;
-                        }
-                        long hours = diffMs / (1000L * 60 * 60);
-                        if (hours >= 24) {
-                            overdueApprovals++;
-                        }
 
                         dashboardImportRequests.add(new DashboardApprovalRow(
                                 r.getRequestId(),
@@ -510,14 +500,6 @@ public class Home extends HttpServlet {
                     // =========================
                     List<ExportRequest> exportRequests = exportRequestDAO.listByStatus("NEW", 5);
                     for (ExportRequest r : exportRequests) {
-                        long diffMs = System.currentTimeMillis() - r.getRequestDate().getTime();
-                        if (diffMs < 0) {
-                            diffMs = 0;
-                        }
-                        long hours = diffMs / (1000L * 60 * 60);
-                        if (hours >= 24) {
-                            overdueApprovals++;
-                        }
 
                         dashboardExportRequests.add(new DashboardApprovalRow(
                                 r.getRequestId(),
@@ -644,6 +626,18 @@ public class Home extends HttpServlet {
                         LOG.log(Level.WARNING, "Could not load inventory summary for dashboard", exInv);
                     }
                 }
+                break;
+            }
+
+            case "export-center": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !"MANAGER".equalsIgnoreCase(roleName)) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                BrandDAO dao = new BrandDAO();
+                request.setAttribute("allBrands", dao.list(null, "active", "name", "ASC", 1, 1000));
                 break;
             }
             // =========================
@@ -1957,6 +1951,8 @@ public class Home extends HttpServlet {
                 switch (p) {
                     case "dashboard":
                         return "manager_dashboard.jsp";
+                    case "export-center":
+                        return "export_center.jsp";
                     case "reports":
                         return "reports.jsp";
                     case "product-add":
