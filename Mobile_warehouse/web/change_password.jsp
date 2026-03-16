@@ -5,10 +5,10 @@
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
-<div class="page-wrap">
+<div class="page-wrap-sm">
   <div class="auth-card-inline">
 
-    <%-- Icon --%>
+
     <div class="auth-icon">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

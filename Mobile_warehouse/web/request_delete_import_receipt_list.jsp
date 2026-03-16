@@ -6,7 +6,7 @@
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 
-<div class="container">
+<div class="page-wrap">
   <div class="card">
 
     <div class="card-header">

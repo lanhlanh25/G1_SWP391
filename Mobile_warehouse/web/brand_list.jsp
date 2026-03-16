@@ -50,7 +50,7 @@
     }
 </script>
 
-<div class="container page-wrap">
+<div class="page-wrap">
     <div class="topbar">
         <div class="title">Brand List</div>
 
@@ -74,7 +74,7 @@
         <div class="msg-err">${fn:escapeXml(param.err)}</div>
     </c:if>
 
-    <!-- Description Modal -->
+
     <div id="descModalBackdrop" class="modal-backdrop" onclick="closeDescModal()">
         <div class="modal" onclick="event.stopPropagation()">
             <button class="close" type="button" onclick="closeDescModal()">Close</button>
@@ -83,7 +83,7 @@
         </div>
     </div>
 
-    <!-- Disable Confirm Modal -->
+ 
     <div id="disableModalBackdrop" class="modal-backdrop" onclick="closeDisableModal()">
         <div class="modal" onclick="event.stopPropagation()">
             <h3 id="disableModalTitle">Disable Brand</h3>
@@ -113,7 +113,7 @@
         </div>
     </div>
 
-    <!-- Filter form -->
+   
     <form method="get" action="${ctx}/home">
         <input type="hidden" name="p" value="brand-list"/>
 
@@ -154,7 +154,7 @@
         </div>
     </form>
 
-    <%-- Show current filters so users know what they are viewing --%>
+   
     <c:set var="statusLabel"
            value="${status=='active' ? 'Active'
                     : status=='inactive' ? 'Inactive'
@@ -246,7 +246,7 @@
                                 <input type="hidden" name="id" value="${b.brandId}"/>
                                 <input type="hidden" name="to" value="${b.active ? '0' : '1'}"/>
 
-                                <!-- Keep list state -->
+                               
                                 <input type="hidden" name="q" value="${q}"/>
                                 <input type="hidden" name="status" value="${status}"/>
                                 <input type="hidden" name="sortBy" value="${sortBy}"/>
@@ -274,59 +274,62 @@
         </tbody>
     </table>
 
-    <!-- Paging -->
-    <div class="paging">
-        <c:choose>
-            <c:when test="${page <= 1}">
-                <span style="color:#999;">&laquo; Prev</span>
-            </c:when>
-            <c:otherwise>
-                <c:url var="prevUrl" value="/home">
-                    <c:param name="p" value="brand-list"/>
-                    <c:param name="page" value="${page-1}"/>
-                    <c:param name="q" value="${q}"/>
-                    <c:param name="status" value="${status}"/>
-                    <c:param name="sortBy" value="${sortBy}"/>
-                    <c:param name="sortOrder" value="${sortOrder}"/>
-                </c:url>
-                <a href="${prevUrl}">&laquo; Prev</a>
-            </c:otherwise>
-        </c:choose>
 
-        <c:forEach begin="1" end="${totalPages}" var="i">
+    <div class="paging-footer">
+        <div class="paging-info">Page <b>${page}</b> of <b>${totalPages}</b></div>
+        <div class="paging">
             <c:choose>
-                <c:when test="${i == page}">
-                    <b>${i}</b>
+                <c:when test="${page <= 1}">
+                    <span class="paging-btn disabled">&laquo; Prev</span>
                 </c:when>
                 <c:otherwise>
-                    <c:url var="pUrl" value="/home">
+                    <c:url var="prevUrl" value="/home">
                         <c:param name="p" value="brand-list"/>
-                        <c:param name="page" value="${i}"/>
+                        <c:param name="page" value="${page-1}"/>
                         <c:param name="q" value="${q}"/>
                         <c:param name="status" value="${status}"/>
                         <c:param name="sortBy" value="${sortBy}"/>
                         <c:param name="sortOrder" value="${sortOrder}"/>
                     </c:url>
-                    <a href="${pUrl}">${i}</a>
+                    <a class="paging-btn" href="${prevUrl}">&laquo; Prev</a>
                 </c:otherwise>
             </c:choose>
-        </c:forEach>
 
-        <c:choose>
-            <c:when test="${page >= totalPages}">
-                <span style="color:#999;">Next &raquo;</span>
-            </c:when>
-            <c:otherwise>
-                <c:url var="nextUrl" value="/home">
-                    <c:param name="p" value="brand-list"/>
-                    <c:param name="page" value="${page+1}"/>
-                    <c:param name="q" value="${q}"/>
-                    <c:param name="status" value="${status}"/>
-                    <c:param name="sortBy" value="${sortBy}"/>
-                    <c:param name="sortOrder" value="${sortOrder}"/>
-                </c:url>
-                <a href="${nextUrl}">Next &raquo;</a>
-            </c:otherwise>
-        </c:choose>
+            <c:forEach begin="1" end="${totalPages}" var="i">
+                <c:choose>
+                    <c:when test="${i == page}">
+                        <span class="paging-btn active">${i}</span>
+                    </c:when>
+                    <c:otherwise>
+                        <c:url var="pUrl" value="/home">
+                            <c:param name="p" value="brand-list"/>
+                            <c:param name="page" value="${i}"/>
+                            <c:param name="q" value="${q}"/>
+                            <c:param name="status" value="${status}"/>
+                            <c:param name="sortBy" value="${sortBy}"/>
+                            <c:param name="sortOrder" value="${sortOrder}"/>
+                        </c:url>
+                        <a class="paging-btn" href="${pUrl}">${i}</a>
+                    </c:otherwise>
+                </c:choose>
+            </c:forEach>
+
+            <c:choose>
+                <c:when test="${page >= totalPages}">
+                    <span class="paging-btn disabled">Next &raquo;</span>
+                </c:when>
+                <c:otherwise>
+                    <c:url var="nextUrl" value="/home">
+                        <c:param name="p" value="brand-list"/>
+                        <c:param name="page" value="${page+1}"/>
+                        <c:param name="q" value="${q}"/>
+                        <c:param name="status" value="${status}"/>
+                        <c:param name="sortBy" value="${sortBy}"/>
+                        <c:param name="sortOrder" value="${sortOrder}"/>
+                    </c:url>
+                    <a class="paging-btn" href="${nextUrl}">Next &raquo;</a>
+                </c:otherwise>
+            </c:choose>
+        </div>
     </div>
 </div>

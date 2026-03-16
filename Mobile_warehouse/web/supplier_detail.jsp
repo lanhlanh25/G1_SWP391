@@ -2,7 +2,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <c:set var="d" value="${supplierDetail}"/>
 
-<div class="page-wrap">
+<div class="page-wrap-md">
 
     <div class="topbar">
         <div class="title">Supplier Detail</div>

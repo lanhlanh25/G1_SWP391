@@ -18,7 +18,7 @@
     }
 %>
 
-<div class="page-wrap">
+<div class="page-wrap-sm">
     <div class="topbar">
         <div style="display:flex; align-items:center; gap:10px;">
             <a class="btn" href="${pageContext.request.contextPath}/home?p=role-list">← Back</a>

@@ -2,7 +2,7 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="page-wrap">
+<div class="page-wrap-sm">
 
   <div class="topbar">
     <div class="title">Create Export Receipt — Upload Excel</div>

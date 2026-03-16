@@ -26,7 +26,9 @@ public class ConductInventoryCountDAO {
     public List<IdName> getActiveBrands() {
         List<IdName> list = new ArrayList<>();
         String sql = "SELECT brand_id, brand_name FROM brands WHERE is_active = 1 ORDER BY brand_name";
-        try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection con = getConn();
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
 
@@ -54,8 +56,7 @@ public class ConductInventoryCountDAO {
             params.add(parseLongSafe(brandId));
         }
 
-        String sql
-                = "SELECT COUNT(*) "
+        String sql = "SELECT COUNT(*) "
                 + "FROM product_skus s "
                 + "JOIN products p ON p.product_id = s.product_id "
                 + where;
@@ -93,8 +94,7 @@ public class ConductInventoryCountDAO {
             params.add(parseLongSafe(brandId));
         }
 
-        String sql
-                = "SELECT "
+        String sql = "SELECT "
                 + "  s.sku_id, s.sku_code, p.product_name, s.color, s.ram_gb, s.storage_gb, "
                 + "  COALESCE(("
                 + "    SELECT COUNT(*) FROM product_units pu "
@@ -141,8 +141,7 @@ public class ConductInventoryCountDAO {
     }
 
     public boolean saveCountedQty(Map<Long, Integer> skuToCountedQty) {
-        String sql
-                = "INSERT INTO inventory_balance (sku_id, qty_on_hand, updated_at) "
+        String sql = "INSERT INTO inventory_balance (sku_id, qty_on_hand, updated_at) "
                 + "VALUES (?, ?, NOW()) "
                 + "ON DUPLICATE KEY UPDATE qty_on_hand = VALUES(qty_on_hand), updated_at = NOW()";
 

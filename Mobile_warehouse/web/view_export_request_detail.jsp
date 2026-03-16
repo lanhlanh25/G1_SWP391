@@ -5,7 +5,7 @@
 <fmt:setTimeZone value="Asia/Ho_Chi_Minh"/>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="page-wrap">
+<div class="page-wrap-md">
 
   <div class="topbar">
     <div class="title">Export Request Detail</div>

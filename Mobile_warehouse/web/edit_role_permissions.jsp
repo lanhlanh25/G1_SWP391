@@ -23,7 +23,7 @@
     boolean isSuccess = (msg != null && msg.toLowerCase().contains("success"));
 %>
 
-<div class="page-wrap">
+<div class="page-wrap-md">
     <div class="topbar">
         <div style="display:flex; align-items:center; gap:10px;">
             <a class="btn" href="<%=request.getContextPath()%>/home?p=role-detail&roleId=<%=roleId%>">← Back</a>

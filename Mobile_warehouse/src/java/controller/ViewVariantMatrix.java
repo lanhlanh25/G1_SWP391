@@ -10,6 +10,8 @@ import model.ProductSku;
 
 public class ViewVariantMatrix {
 
+    private static final int PAGE_SIZE = 10;
+
     public static void handle(HttpServletRequest request, HttpServletResponse response) throws Exception {
 
         String color = request.getParameter("color");
@@ -25,9 +27,32 @@ public class ViewVariantMatrix {
         }
         ProductSkuDAO dao = new ProductSkuDAO();
 
-        List<ProductSku> skus = dao.filterVariants(productId, color, storage, ram, status, sku);
-        request.setAttribute("skus", skus);
+        List<ProductSku> allFiltered = dao.filterVariants(productId, color, storage, ram, status, sku);
 
+        // --- Pagination ---
+        int totalItems = allFiltered.size();
+        int totalPages = (int) Math.ceil(totalItems * 1.0 / PAGE_SIZE);
+        if (totalPages < 1) totalPages = 1;
+
+        int page = 1;
+        String pageRaw = request.getParameter("page");
+        if (pageRaw != null && !pageRaw.isEmpty()) {
+            try { page = Integer.parseInt(pageRaw); } catch (NumberFormatException ignored) {}
+        }
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int fromIndex = (page - 1) * PAGE_SIZE;
+        int toIndex = Math.min(fromIndex + PAGE_SIZE, totalItems);
+        List<ProductSku> skus = allFiltered.subList(fromIndex, toIndex);
+
+        request.setAttribute("skus", skus);
+        request.setAttribute("page", page);
+        request.setAttribute("pageSize", PAGE_SIZE);
+        request.setAttribute("totalItems", totalItems);
+        request.setAttribute("totalPages", totalPages);
+
+        // --- Filter dropdowns ---
         List<ProductSku> allSkus = dao.getAllSkus();
 
         Set<String> colors = new LinkedHashSet<>();

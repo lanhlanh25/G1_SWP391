@@ -6,9 +6,12 @@
 <div class="page-wrap">
 
   <div class="topbar">
-    <div>
-      <div class="title">Supplier List</div>
-      <div class="small muted" style="margin-top:4px;">Manager can manage suppliers; Staff view-only.</div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
+      <div>
+        <h1 class="h1" style="margin:0;">Supplier List</h1>
+        <div class="small muted" style="margin-top:4px;">Manager can manage suppliers; Staff view-only.</div>
+      </div>
     </div>
     <c:if test="${isManager}">
       <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=add_supplier">+ Add New Supplier</a>
@@ -120,7 +123,7 @@
     </div>
   </div>
 
-  <%-- Pagination --%>
+
   <c:set var="safeTotal"      value="${empty totalItems  ? 0 : totalItems}"/>
   <c:set var="safePage"       value="${empty page        ? 1 : page}"/>
   <c:set var="safePageSize"   value="${empty pageSize    ? 5 : pageSize}"/>
@@ -129,13 +132,13 @@
   <c:set var="endRow"   value="${safeTotal == 0 ? 0 : (safePage*safePageSize > safeTotal ? safeTotal : safePage*safePageSize)}"/>
   <c:set var="base" value="${pageContext.request.contextPath}/home?p=view_supplier&q=${q}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&page="/>
 
-  <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px; flex-wrap:wrap; gap:10px;">
-    <div class="small muted">Showing ${startRow}–${endRow} of ${safeTotal} suppliers</div>
+  <div class="paging-footer">
+    <div class="paging-info">Showing <b>${startRow}</b>–<b>${endRow}</b> of <b>${safeTotal}</b> suppliers</div>
     <div class="paging">
       <a class="paging-btn ${safePage==1 ? 'disabled' : ''}" href="${base}${safePage-1}">← Prev</a>
       <c:forEach var="i" begin="1" end="${safeTotalPages}">
         <c:choose>
-          <c:when test="${i==safePage}"><b>${i}</b></c:when>
+          <c:when test="${i==safePage}"><span class="paging-btn active">${i}</span></c:when>
           <c:otherwise><a class="paging-btn" href="${base}${i}">${i}</a></c:otherwise>
         </c:choose>
       </c:forEach>

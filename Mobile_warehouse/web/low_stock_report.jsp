@@ -3,11 +3,13 @@
 
 <div class="page-wrap">
     <div class="topbar">
-        <div>
-            <div class="title">Low Stock Report</div>
-            <div class="small">Monitor products that are at or below reorder point.</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
+            <div>
+                <h1 class="h1" style="margin:0;">Low Stock Report</h1>
+                <div class="small">Monitor products that are at or below reorder point.</div>
+            </div>
         </div>
-        <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">Back</a>
     </div>
 
     <c:if test="${not empty err}">

@@ -28,7 +28,7 @@
             ? (ctx + "/assets/default-avatar.jpg")
             : (ctx + "/" + avatarPath);
 
-    long v = System.currentTimeMillis(); // chống cache
+    long v = System.currentTimeMillis(); 
 
     String fullName = u.getFullName() == null ? "User" : u.getFullName().trim();
     String initials = "U";
@@ -40,88 +40,121 @@
 %>
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <title>Home</title>
-    <%@ include file="/WEB-INF/jspf/common_head.jspf" %>
-    <link rel="stylesheet" href="<%=ctx%>/app.css?v=<%=v%>">
-</head>
-<body>
-<div class="app">
+    <head>
+        <meta charset="UTF-8">
+        <title>Home</title>
+        <%@ include file="/WEB-INF/jspf/common_head.jspf" %>
+        <link rel="stylesheet" href="<%=ctx%>/assets/css/app.css?v=<%=v%>">
+    </head>
+    <body>
+        <script>
+            // Restore sidebar state from localStorage before rendering
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.body.classList.add('sidebar-collapsed');
+            }
+        </script>
+        <div class="app">
 
-    <!-- TOPBAR -->
-    <div class="top">
-        <div class="top-left">
-            <a class="brand" href="<%=ctx%>/home?p=dashboard">
-                <span class="brand-mark">MW</span>
-                <span>
-                    <div class="brand-title">DTLA Mobile WMS</div>
-                    <div class="brand-sub">Warehouse Management System</div>
-                </span>
-            </a>
 
-            <span class="page-pill"><%= currentPage %></span>
-        </div>
+            <div class="top">
+                <div class="top-left">
+                    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">☰</button>
+                    <a class="brand" href="<%=ctx%>/home?p=dashboard">
+                        <span class="brand-mark">MW</span>
+                        <span>
+                            <div class="brand-title">DTLA Mobile WMS</div>
+                            <div class="brand-sub">Warehouse Management System</div>
+                        </span>
+                    </a>
 
-        <div class="top-right">
-            <details class="top-user">
-                <summary class="top-user-summary" title="Account">
-                    <div><%= roleName %></div>
-                    <span class="top-avatar">
-                        <img src="<%=avatarUrl%>?v=<%=v%>" alt="avatar"
-                             onerror="this.style.display='none'; this.parentNode.textContent='<%= initials %>';">
-                    </span>
-                </summary>
-
-                <div class="top-user-menu">
-                    <a href="<%=ctx%>/home?p=my-profile">My profile</a>
-                    <a href="<%=ctx%>/home?p=change-password">Change password</a>
-                    <a class="logout"
-                       href="<%=ctx%>/logout"
-                       onclick="return confirm('Are you sure you want to log out?');">Log out</a>
+                    <span class="page-pill"><%= currentPage %></span>
                 </div>
-            </details>
-        </div>
-    </div>
 
-    <!-- BODY -->
-    <div class="layout">
+                <div class="top-right">
+                    <details class="top-user">
+                        <summary class="top-user-summary" title="Account">
+                            <div><%= roleName %></div>
+                            <span class="top-avatar">
+                                <img src="<%=avatarUrl%>?v=<%=v%>" alt="avatar"
+                                     onerror="this.style.display='none'; this.parentNode.textContent='<%= initials %>';">
+                            </span>
+                        </summary>
 
-        <!-- SIDEBAR -->
-        <aside class="side">
-            <div class="side-header">
-                <div class="section-title">Navigation</div>
+                        <div class="top-user-menu">
+                            <a href="<%=ctx%>/home?p=my-profile">My profile</a>
+                            <a href="<%=ctx%>/home?p=change-password">Change password</a>
+                            <a class="logout"
+                               href="<%=ctx%>/logout"
+                               onclick="return confirm('Are you sure you want to log out?');">Log out</a>
+                        </div>
+                    </details>
+                </div>
             </div>
 
-            <div class="side-scroll">
-                <jsp:include page="<%= sidebarPage %>" />
-            </div>
 
-            <div class="side-footer">
-                <a class="side-user-link" href="<%=ctx%>/home?p=my-profile">
-                    <div class="side-avatar">
-                        <img src="<%= avatarUrl %>?v=<%= v %>"
-                             alt="avatar"
-                             onerror="this.style.display='none'; this.parentNode.textContent='<%= initials %>';">
+            <div class="layout">
+
+
+                <aside class="side">
+                    <div class="side-scroll">
+                        <jsp:include page="<%= sidebarPage %>" />
                     </div>
-                    <div class="user-meta">
-                        <div class="user-name"><%= fullName %></div>
-                        <div class="user-role"><%= roleName %></div>
-                    </div>
-                </a>
+                </aside>
+
+                <!-- Floating sidebar profile -->
+                <div class="side-floating-user">
+                    <details class="side-user">
+                        <summary>
+                            <span class="side-avatar">
+                                <img src="<%= avatarUrl %>?v=<%= v %>"
+                                     alt="avatar"
+                                     onerror="this.style.display='none'; this.parentNode.textContent='<%= initials %>';">
+                            </span>
+
+                            <div class="user-meta">
+                                <div class="user-name"><%= fullName %></div>
+                                <div class="user-role"><%= roleName %></div>
+                            </div>
+
+                            <span class="caret">▾</span>
+                        </summary>
+
+                        <div class="side-user-menu">
+                            <a href="<%=ctx%>/home?p=my-profile">My Profile</a>
+                            <a href="<%=ctx%>/home?p=change-password">Change Password</a>
+                            <a class="logout"
+                               href="<%=ctx%>/logout"
+                               onclick="return confirm('Are you sure you want to log out?');">
+                                Log out
+                            </a>
+                        </div>
+                    </details>
+                </div>
+
+                <div class="content-wrap">
+                    <main class="main">
+                        <div class="page-content-shell">
+                            <jsp:include page="<%= contentPage %>" />
+                        </div>
+
+                        <%@ include file="/WEB-INF/jspf/footer.jspf" %>
+                    </main>
+                </div>
+
             </div>
-        </aside>
-
-        <!-- CONTENT -->
-        <div class="content-wrap">
-            <main class="main">
-                <jsp:include page="<%= contentPage %>" />
-            </main>
-
-            <%@ include file="/WEB-INF/jspf/footer.jspf" %>
         </div>
 
-    </div>
-</div>
-</body>
+        <script>
+            (function() {
+                var btn = document.getElementById('sidebarToggle');
+                if (btn) {
+                    btn.addEventListener('click', function() {
+                        document.body.classList.toggle('sidebar-collapsed');
+                        var isCollapsed = document.body.classList.contains('sidebar-collapsed');
+                        localStorage.setItem('sidebarCollapsed', isCollapsed);
+                    });
+                }
+            })();
+        </script>
+    </body>
 </html>

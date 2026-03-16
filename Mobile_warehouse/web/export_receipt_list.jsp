@@ -8,213 +8,66 @@
 <style>
   .er-list-wrap { padding: 24px; }
   .er-list-card {
-    background: var(--surface, #fff);
-    border: 1px solid var(--border, #e2e8f2);
-    border-radius: var(--radius, 16px);
-    box-shadow: var(--shadow, 0 4px 16px rgba(16,24,40,.06));
-    padding: 20px 24px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px 24px;
   }
-
-  .er-toprow {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
-
+  .er-toprow { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
   .er-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border: 1px solid var(--border, #e2e8f2);
-    border-radius: var(--radius-xs, 8px);
-    background: var(--surface, #fff);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text, #0d1829);
-    cursor: pointer;
-    text-decoration: none;
-    transition: background .15s, border-color .15s;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); background: var(--surface);
+    font-size: 13px; font-weight: 600; color: var(--text-2);
+    cursor: pointer; text-decoration: none; transition: all .15s;
   }
-  .er-btn:hover { background: var(--surface-2, #f8fafc); color: var(--text,#0d1829); }
-
-  .er-btn.primary {
-    background: var(--primary, #3b82f6);
-    border-color: var(--primary, #3b82f6);
-    color: #fff;
+  .er-btn:hover { background: var(--surface-2); color: var(--text); text-decoration: none; }
+  .er-btn.primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .er-btn.primary:hover { background: var(--primary-2); }
+  .er-filters { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  .er-left-f, .er-right-f { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .er-list-wrap input[type="text"], .er-list-wrap input[type="date"], .er-list-wrap select {
+    padding: 7px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm);
+    font-size: 13px; background: var(--surface); color: var(--text);
   }
-  .er-btn.primary:hover { background: var(--primary-2, #2563eb); }
-
-  .er-filters {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-  }
-  .er-left-f, .er-right-f {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .er-list-wrap input[type="text"],
-  .er-list-wrap input[type="date"],
-  .er-list-wrap select {
-    padding: 8px 12px;
-    border: 1px solid var(--border, #e2e8f2);
-    border-radius: var(--radius-xs, 8px);
-    font-size: 13px;
-    background: var(--surface, #fff);
-    color: var(--text, #0d1829);
-  }
-
-  .er-tabs {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
+  .er-list-wrap input:focus, .er-list-wrap select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(50,31,219,.12); }
+  .er-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
   .er-tab {
-    display: inline-flex;
-    gap: 6px;
-    align-items: center;
-    padding: 7px 14px;
-    border: 1px solid var(--border, #e2e8f2);
-    border-radius: 20px;
-    background: var(--surface, #fff);
-    text-decoration: none;
-    color: var(--text-2, #334155);
-    font-size: 13px;
-    font-weight: 600;
-    transition: background .15s, border-color .15s;
+    display: inline-flex; gap: 6px; align-items: center; padding: 6px 14px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    background: var(--surface); text-decoration: none; color: var(--text-2);
+    font-size: 13px; font-weight: 600; transition: all .15s;
   }
-  .er-tab.active {
-    background: var(--primary-light, #eff6ff);
-    border-color: var(--primary-border, #bfdbfe);
-    color: var(--primary-2, #2563eb);
-  }
-  .er-tab .cnt {
-    background: rgba(59,130,246,.12);
-    color: var(--primary-2, #2563eb);
-    border-radius: 20px;
-    padding: 1px 8px;
-    font-size: 11.5px;
-    font-weight: 700;
-  }
-  .er-tab.active .cnt {
-    background: var(--primary, #3b82f6);
-    color: #fff;
-  }
-
-  .er-table {
-    border-collapse: collapse;
-    width: 100%;
-    font-size: 13px;
-  }
-  .er-table th, .er-table td {
-    border: 1px solid var(--border, #e2e8f2);
-    padding: 10px 12px;
-    vertical-align: middle;
-  }
-  .er-table th {
-    background: var(--surface-2, #f8fafc);
-    font-weight: 700;
-    color: var(--text-2, #334155);
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: .04em;
-    white-space: nowrap;
-  }
-  .er-table td { color: var(--text, #0d1829); }
-  .er-table tbody tr:hover { background: var(--surface-2, #f8fafc); }
-  .muted-cell { color: var(--muted, #64748b); text-align: center; }
-
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-  }
-  .status-completed { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
-  .status-pending   { background: #fffbeb; color: #92400e; border: 1px solid #fcd34d; }
-  .status-cancelled { background: #fef2f2; color: #b91c1c; border: 1px solid #fca5a5; }
-
-  .cat-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
-    background: var(--primary-light, #eff6ff);
-    color: var(--primary-2, #2563eb);
-    border: 1px solid var(--primary-border, #bfdbfe);
-  }
-
-  .er-actions {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .er-pager {
-    display: flex;
-    justify-content: flex-end;
-    gap: 6px;
-    margin-top: 16px;
-    align-items: center;
-  }
-  .er-pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 36px;
-    padding: 6px 10px;
-    border: 1px solid var(--border, #e2e8f2);
-    border-radius: 8px;
-    background: var(--surface, #fff);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-2, #334155);
-  }
-  .er-pill.active {
-    background: var(--primary, #3b82f6);
-    border-color: var(--primary, #3b82f6);
-    color: #fff;
-  }
-
-  .er-alert-ok {
-    padding: 10px 14px;
-    border: 1px solid #86efac;
-    background: #f0fdf4;
-    border-radius: 10px;
-    color: #166534;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 14px;
-  }
-  .er-alert-err {
-    padding: 10px 14px;
-    border: 1px solid #fca5a5;
-    background: #fef2f2;
-    border-radius: 10px;
-    color: #b91c1c;
-    font-size: 13px;
-    font-weight: 600;
-    margin-bottom: 14px;
-  }
+  .er-tab:hover { text-decoration: none; }
+  .er-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .er-tab .cnt { background: rgba(50,31,219,.12); color: var(--primary); border-radius: 999px; padding: 1px 8px; font-size: 11px; font-weight: 700; }
+  .er-tab.active .cnt { background: rgba(255,255,255,.25); color: #fff; }
+  .er-table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .er-table th, .er-table td { border-bottom: 1px solid var(--border); padding: 10px 12px; vertical-align: middle; }
+  .er-table th { background: var(--surface-2); font-weight: 600; color: var(--text-2); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+  .er-table td { color: var(--text); }
+  .er-table tbody tr:hover { background: #f3f4f7; }
+  .er-table tbody tr:last-child td { border-bottom: none; }
+  .muted-cell { color: var(--muted); text-align: center; }
+  .status-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; }
+  .status-completed { background: #e6f9ed; color: #0d6832; border: 1px solid #b5e8c5; }
+  .status-pending { background: #fff8e1; color: #7c5e00; border: 1px solid #ffe082; }
+  .status-cancelled { background: #fdf0f0; color: #b91c1c; border: 1px solid #f5c6cb; }
+  .cat-badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 700; background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary-border); }
+  .er-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .er-pager { display: flex; justify-content: flex-end; gap: 6px; margin-top: 16px; align-items: center; }
+  .er-pill { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; padding: 6px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); font-size: 13px; font-weight: 600; color: var(--text-2); }
+  .er-pill.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .er-alert-ok { padding: 10px 14px; border: 1px solid #b5e8c5; background: #e6f9ed; border-radius: var(--radius-sm); color: #0d6832; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+  .er-alert-err { padding: 10px 14px; border: 1px solid #f5c6cb; background: #fdf0f0; border-radius: var(--radius-sm); color: #b91c1c; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
 </style>
 
 <div class="er-list-wrap">
+  <div class="topbar" style="margin-bottom: 20px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
+      <h1 class="h1">Export Receipts</h1>
+    </div>
+  </div>
+
   <div class="er-list-card">
 
     <div class="er-toprow">
@@ -252,9 +105,19 @@
       <c:param name="q" value="${q}"/><c:param name="status" value="all"/>
       <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
     </c:url>
+    <c:url var="tabPendingUrl" value="/home">
+      <c:param name="p" value="export-receipt-list"/><c:param name="page" value="1"/>
+      <c:param name="q" value="${q}"/><c:param name="status" value="pending"/>
+      <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
+    </c:url>
     <c:url var="tabCompletedUrl" value="/home">
       <c:param name="p" value="export-receipt-list"/><c:param name="page" value="1"/>
       <c:param name="q" value="${q}"/><c:param name="status" value="completed"/>
+      <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
+    </c:url>
+    <c:url var="tabCancelledUrl" value="/home">
+      <c:param name="p" value="export-receipt-list"/><c:param name="page" value="1"/>
+      <c:param name="q" value="${q}"/><c:param name="status" value="cancelled"/>
       <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
     </c:url>
 
@@ -262,8 +125,14 @@
       <a class="er-tab ${status=='all' || empty status ? 'active' : ''}" href="${tabAllUrl}">
         All <span class="cnt"><c:out value="${tabCounts['all']}"/></span>
       </a>
+      <a class="er-tab ${status=='pending' ? 'active' : ''}" href="${tabPendingUrl}">
+        Pending <span class="cnt"><c:out value="${empty tabCounts['pending'] ? 0 : tabCounts['pending']}"/></span>
+      </a>
       <a class="er-tab ${status=='completed' ? 'active' : ''}" href="${tabCompletedUrl}">
         Completed <span class="cnt"><c:out value="${tabCounts['completed']}"/></span>
+      </a>
+      <a class="er-tab ${status=='cancelled' ? 'active' : ''}" href="${tabCancelledUrl}">
+        Cancelled <span class="cnt"><c:out value="${empty tabCounts['cancelled'] ? 0 : tabCounts['cancelled']}"/></span>
       </a>
     </div>
 
@@ -350,29 +219,43 @@
       <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
     </c:url>
 
-    <c:if test="${totalPages > 1}">
-      <div class="er-pager">
-        <c:choose>
-          <c:when test="${page <= 1}">
-            <span class="er-btn" style="opacity:.4;pointer-events:none;">← Prev</span>
-          </c:when>
-          <c:otherwise>
-            <a class="er-btn" href="${prevUrl}">← Prev</a>
-          </c:otherwise>
-        </c:choose>
+      <div class="paging-footer" style="justify-content:flex-end;">
+        <div class="paging">
+          <c:choose>
+            <c:when test="${page <= 1}">
+              <span class="paging-btn disabled">← Prev</span>
+            </c:when>
+            <c:otherwise>
+              <a class="paging-btn" href="${prevUrl}">← Prev</a>
+            </c:otherwise>
+          </c:choose>
 
-        <span class="er-pill active"><c:out value="${page}"/> / <c:out value="${totalPages}"/></span>
+          <c:forEach begin="1" end="${totalPages}" var="i">
+            <c:choose>
+              <c:when test="${i == page}">
+                <span class="paging-btn active">${i}</span>
+              </c:when>
+              <c:otherwise>
+                <c:url var="pageUrl" value="/home">
+                  <c:param name="p" value="export-receipt-list"/><c:param name="page" value="${i}"/>
+                  <c:param name="q" value="${q}"/><c:param name="status" value="${empty status ? 'all' : status}"/>
+                  <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
+                </c:url>
+                <a class="paging-btn" href="${pageUrl}">${i}</a>
+              </c:otherwise>
+            </c:choose>
+          </c:forEach>
 
-        <c:choose>
-          <c:when test="${page >= totalPages}">
-            <span class="er-btn" style="opacity:.4;pointer-events:none;">Next →</span>
-          </c:when>
-          <c:otherwise>
-            <a class="er-btn" href="${nextUrl}">Next →</a>
-          </c:otherwise>
-        </c:choose>
+          <c:choose>
+            <c:when test="${page >= totalPages}">
+              <span class="paging-btn disabled">Next →</span>
+            </c:when>
+            <c:otherwise>
+              <a class="paging-btn" href="${nextUrl}">Next →</a>
+            </c:otherwise>
+          </c:choose>
+        </div>
       </div>
-    </c:if>
 
   </div>
 </div>

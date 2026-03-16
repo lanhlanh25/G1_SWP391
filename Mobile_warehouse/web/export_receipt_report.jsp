@@ -9,7 +9,7 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<link rel="stylesheet" href="${ctx}/app.css"/>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app.css"/>
 
 <style>
   .export-report-filters{ grid-template-columns: 1fr 1fr auto !important; }
@@ -28,9 +28,9 @@
 <div class="page-wrap">
 
   <div class="topbar">
-    <div style="display:flex; align-items:center; gap:12px;">
-      <a class="btn btn-outline" href="${ctx}/home?p=export-receipt-list">Back</a>
-      <div class="title">Export Receipt Report</div>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
+      <h1 class="h1" style="margin:0;">Export Receipt Report</h1>
     </div>
   </div>
 

@@ -4,7 +4,7 @@
     long v = System.currentTimeMillis();
 %>
 
-<div class="page-wrap">
+<div class="page-wrap-sm">
     <div class="topbar">
         <div style="display:flex; align-items:center; gap:10px;">
             <a class="btn" href="<%=request.getContextPath()%>/home?p=user-view&id=${user.userId}">← Back</a>

@@ -134,3 +134,19 @@
         </li>
     </ul>
 </details>
+ 
+ <details <%= (
+     "product-list".equals(currentPage) ||
+     "product-detail".equals(currentPage) ||
+     "variant-matrix".equals(currentPage)
+ ) ? "open" : "" %>>
+     <summary>Products</summary>
+     <ul>
+         <li>
+             <a class="<%= "product-list".equals(currentPage) || "product-detail".equals(currentPage) || "variant-matrix".equals(currentPage) ? "active" : "" %>"
+                href="<%=ctx%>/home?p=product-list">
+                 Product List
+             </a>
+         </li>
+     </ul>
+ </details>

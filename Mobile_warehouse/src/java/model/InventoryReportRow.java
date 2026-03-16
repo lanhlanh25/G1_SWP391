@@ -10,95 +10,130 @@ public class InventoryReportRow {
     private int openingQty;
     private int importQty;
     private int exportQty;
-    private int closingQty;
-    private int variance;
+    private int closingQty;       // = currentStock from inventory_balance
+
+    // ROP fields
+    private double avgDailySales;
+    private int leadTimeDays;
+    private int safetyStock;
+    private int rop;              // = CEIL(avgDailySales * leadTimeDays + safetyStock)
+    private String ropStatus;     // OK / At ROP Level / Reorder Needed / Out Of Stock
+    private int suggestedReorderQty;
 
     public InventoryReportRow() {
     }
 
-    public InventoryReportRow(String productCode, String productName, String brandName,
-            int openingQty, int importQty, int exportQty,
-            int closingQty) {
-        this.productCode = productCode;
-        this.productName = productName;
-        this.brandName = brandName;
-        this.unit = "Phone";
-        this.openingQty = openingQty;
-        this.importQty = importQty;
-        this.exportQty = exportQty;
-        this.closingQty = closingQty;
-        this.variance = closingQty - (openingQty + importQty - exportQty);
-    }
+    // Getters & Setters
 
     public String getProductCode() {
         return productCode;
+    }
+
+    public void setProductCode(String productCode) {
+        this.productCode = productCode;
     }
 
     public String getProductName() {
         return productName;
     }
 
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
     public String getBrandName() {
         return brandName;
+    }
+
+    public void setBrandName(String brandName) {
+        this.brandName = brandName;
     }
 
     public String getUnit() {
         return unit;
     }
 
+    public void setUnit(String unit) {
+        this.unit = unit;
+    }
+
     public int getOpeningQty() {
         return openingQty;
+    }
+
+    public void setOpeningQty(int openingQty) {
+        this.openingQty = openingQty;
     }
 
     public int getImportQty() {
         return importQty;
     }
 
+    public void setImportQty(int importQty) {
+        this.importQty = importQty;
+    }
+
     public int getExportQty() {
         return exportQty;
+    }
+
+    public void setExportQty(int exportQty) {
+        this.exportQty = exportQty;
     }
 
     public int getClosingQty() {
         return closingQty;
     }
 
-    public int getVariance() {
-        return variance;
+    public void setClosingQty(int closingQty) {
+        this.closingQty = closingQty;
     }
 
-    public void setProductCode(String v) {
-        this.productCode = v;
+    public double getAvgDailySales() {
+        return avgDailySales;
     }
 
-    public void setProductName(String v) {
-        this.productName = v;
+    public void setAvgDailySales(double avgDailySales) {
+        this.avgDailySales = avgDailySales;
     }
 
-    public void setBrandName(String v) {
-        this.brandName = v;
+    public int getLeadTimeDays() {
+        return leadTimeDays;
     }
 
-    public void setUnit(String v) {
-        this.unit = v;
+    public void setLeadTimeDays(int leadTimeDays) {
+        this.leadTimeDays = leadTimeDays;
     }
 
-    public void setOpeningQty(int v) {
-        this.openingQty = v;
+    public int getSafetyStock() {
+        return safetyStock;
     }
 
-    public void setImportQty(int v) {
-        this.importQty = v;
+    public void setSafetyStock(int safetyStock) {
+        this.safetyStock = safetyStock;
     }
 
-    public void setExportQty(int v) {
-        this.exportQty = v;
+    public int getRop() {
+        return rop;
     }
 
-    public void setClosingQty(int v) {
-        this.closingQty = v;
+    public void setRop(int rop) {
+        this.rop = rop;
     }
 
-    public void setVariance(int v) {
-        this.variance = v;
+    public String getRopStatus() {
+        return ropStatus;
+    }
+
+    public void setRopStatus(String ropStatus) {
+        this.ropStatus = ropStatus;
+    }
+
+    public int getSuggestedReorderQty() {
+        return suggestedReorderQty;
+    }
+
+    public void setSuggestedReorderQty(int suggestedReorderQty) {
+        this.suggestedReorderQty = suggestedReorderQty;
     }
 }

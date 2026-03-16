@@ -4,7 +4,7 @@
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="page-wrap">
+<div class="page-wrap-md">
 
   <div class="topbar">
     <div class="title">Import Request Detail</div>

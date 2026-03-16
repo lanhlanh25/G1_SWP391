@@ -112,10 +112,26 @@
                                 </c:choose>
                             </td>
                             <td>
-                                <a class="btn btn-sm btn-outline"
-                                   href="${pageContext.request.contextPath}/home?p=user-view&id=${u.userId}">
-                                    View / Update
-                                </a>
+                                <c:choose>
+                                    <c:when test="${sessionScope.roleName == 'ADMIN'}">
+                                        <div style="display:flex; gap:8px;">
+                                            <a class="btn btn-sm btn-outline"
+                                               href="${pageContext.request.contextPath}/home?p=user-view&id=${u.userId}">
+                                                View
+                                            </a>
+                                            <a class="btn btn-sm btn-primary"
+                                               href="${pageContext.request.contextPath}/home?p=user-update&id=${u.userId}">
+                                                Update
+                                            </a>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a class="btn btn-sm btn-outline"
+                                           href="${pageContext.request.contextPath}/home?p=user-detail&id=${u.userId}">
+                                            View
+                                        </a>
+                                    </c:otherwise>
+                                </c:choose>
                             </td>
                         </tr>
                     </c:forEach>
@@ -123,26 +139,29 @@
             </table>
 
             <c:if test="${totalPages > 1}">
-                <div class="paging">
-                    <% if (curPage > 1) { %>
-                        <a class="paging-btn" href="<%= base %>&page=<%= (curPage - 1) %>">Prev</a>
-                    <% } else { %>
-                        <span class="paging-btn disabled">Prev</span>
-                    <% } %>
-
-                    <% for (int i = 1; i <= totalPages; i++) { %>
-                        <% if (i == curPage) { %>
-                            <span class="paging-btn active"><%= i %></span>
+                <div class="paging-footer">
+                    <div class="paging-info">Page <b><%= curPage %></b> of <b><%= totalPages %></b></div>
+                    <div class="paging">
+                        <% if (curPage > 1) { %>
+                            <a class="paging-btn" href="<%= base %>&page=<%= (curPage - 1) %>">Prev</a>
                         <% } else { %>
-                            <a class="paging-btn" href="<%= base %>&page=<%= i %>"><%= i %></a>
+                            <span class="paging-btn disabled">Prev</span>
                         <% } %>
-                    <% } %>
 
-                    <% if (curPage < totalPages) { %>
-                        <a class="paging-btn" href="<%= base %>&page=<%= (curPage + 1) %>">Next</a>
-                    <% } else { %>
-                        <span class="paging-btn disabled">Next</span>
-                    <% } %>
+                        <% for (int i = 1; i <= totalPages; i++) { %>
+                            <% if (i == curPage) { %>
+                                <span class="paging-btn active"><%= i %></span>
+                            <% } else { %>
+                                <a class="paging-btn" href="<%= base %>&page=<%= i %>"><%= i %></a>
+                            <% } %>
+                        <% } %>
+
+                        <% if (curPage < totalPages) { %>
+                            <a class="paging-btn" href="<%= base %>&page=<%= (curPage + 1) %>">Next</a>
+                        <% } else { %>
+                            <span class="paging-btn disabled">Next</span>
+                        <% } %>
+                    </div>
                 </div>
             </c:if>
 

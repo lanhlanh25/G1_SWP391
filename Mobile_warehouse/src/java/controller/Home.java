@@ -2119,6 +2119,14 @@ public class Home extends HttpServlet {
                         return "brand_list.jsp";
                     case "brand-detail":
                         return "brand_detail.jsp";
+                    case "product-list":
+                        return "product_list.jsp";
+                    case "product-detail":
+                        return "product_detail.jsp";
+                    case "variant-matrix":
+                        return "variant_matrix.jsp";
+                    case "imei-list":
+                        return "view_imei_list.jsp";
 
                     case "my-profile":
                     case "profile":

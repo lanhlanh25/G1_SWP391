@@ -13,7 +13,7 @@
 
 
 
-<div class="container">
+<div class="page-wrap-sm">
   <div class="card">
     <div class="card-header">
       <div>

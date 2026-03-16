@@ -30,7 +30,7 @@
 <body>
 <div class="layout">
   <div class="main">
-    <div class="page-wrap">
+    <div class="page-wrap-sm">
 
       <div class="topbar">
         <div class="title">My Profile</div>

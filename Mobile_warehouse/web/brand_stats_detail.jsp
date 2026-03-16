@@ -20,7 +20,7 @@
   <c:param name="page" value="${empty param.listPage ? 1 : param.listPage}"/>
 </c:url>
 
-<div class="container brand-stats-detail">
+<div class="page-wrap-md brand-stats-detail">
   <div class="topbar">
     <div>
       <div class="title">Brand Detail Statistics: ${brand.brandName}</div>
