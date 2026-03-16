@@ -18,7 +18,8 @@ body, html {
   padding: 0;
   min-height: 100vh;
   font-family: 'Nunito Sans', sans-serif;
-  background: var(--bg);
+  background: radial-gradient(circle, rgba(241, 245, 249, 0.6) 0%, rgba(203, 213, 225, 0.7) 100%), 
+              url('<%=ctx%>/assets/images/warehouse_bg.png') center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -85,11 +85,12 @@ boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
         </ul>
     </details>
 
-    <details <%= (
+    <details
+        <%= (
         "export-receipt-list".equals(currentPage) ||
         "export-receipt-detail".equals(currentPage) ||
         exportReportActive
-    ) ? "open" : "" %>
+    ) ? "open" : "" %>>
         <summary>Export Receipts</summary>
         <ul>
             <li>
