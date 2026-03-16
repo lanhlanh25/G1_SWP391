@@ -116,8 +116,7 @@ public class BrandStatsDAO {
               COUNT(DISTINCT p.product_id) AS total_products,
               COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
               COUNT(DISTINCT CASE
-                  WHEN COALESCE(prod_qty.product_qty, 0) = 0 THEN p.product_id
-                  WHEN COALESCE(prod_qty.product_qty, 0) < CEIL(
+                  WHEN COALESCE(prod_qty.product_qty, 0) <= CEIL(
                       COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0)
                       + COALESCE(p.safety_stock, 0)
                   ) THEN p.product_id
@@ -280,8 +279,7 @@ public class BrandStatsDAO {
                   COUNT(DISTINCT p.product_id) AS total_products,
                   COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
                   COUNT(DISTINCT CASE
-                      WHEN COALESCE(prod_qty.product_qty, 0) = 0 THEN p.product_id
-                      WHEN COALESCE(prod_qty.product_qty, 0) < CEIL(
+                      WHEN COALESCE(prod_qty.product_qty, 0) <= CEIL(
                           COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0)
                           + COALESCE(p.safety_stock, 0)
                       ) THEN p.product_id
@@ -713,8 +711,7 @@ public class BrandStatsDAO {
               COUNT(DISTINCT p.product_id) AS total_products,
               COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
               COUNT(DISTINCT CASE
-                  WHEN COALESCE(prod_qty.product_qty, 0) = 0 THEN p.product_id
-                  WHEN COALESCE(prod_qty.product_qty, 0) < CEIL(
+                  WHEN COALESCE(prod_qty.product_qty, 0) <= CEIL(
                       COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0)
                       + COALESCE(p.safety_stock, 0)
                   ) THEN p.product_id
