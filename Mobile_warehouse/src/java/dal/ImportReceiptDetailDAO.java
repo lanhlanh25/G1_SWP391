@@ -63,11 +63,12 @@ public class ImportReceiptDetailDAO {
                     it.setQty(rs.getInt("qty"));
                     it.setItemNote(rs.getString("item_note"));
                     it.setProductCode(rs.getString("product_code"));
-                    it.setProductName(rs.getString("product_name"));   // NEW
+                    it.setProductName(rs.getString("product_name"));
                     it.setSkuCode(rs.getString("sku_code"));
                     it.setCreatedByName(rs.getString("created_by_name"));
                     List<String> imeis = getImeisByLine(con, rs.getLong("line_id"));
-                    it.setImeiText(formatImeis(imeis));
+                    it.setImeis(imeis);                    // ← set List trực tiếp
+                    it.setImeiText(formatImeis(imeis));    // ← giữ lại cho backward compat
                     out.add(it);
                 }
             }
@@ -89,15 +90,9 @@ public class ImportReceiptDetailDAO {
         return out;
     }
 
+    // Mỗi IMEI trên 1 dòng — để JSP parse đơn giản bằng \n
     private String formatImeis(List<String> imeis) {
         if (imeis == null || imeis.isEmpty()) return "";
-        StringBuilder sb = new StringBuilder();
-        int perLine = 2;
-        for (int i = 0; i < imeis.size(); i += perLine) {
-            if (i > 0) sb.append("\n");
-            int end = Math.min(i + perLine, imeis.size());
-            sb.append(String.join(", ", imeis.subList(i, end)));
-        }
-        return sb.toString();
+        return String.join("\n", imeis);
     }
 }

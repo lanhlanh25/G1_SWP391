@@ -38,6 +38,7 @@
   .imei-tbl tbody tr:last-child td { border-bottom:none; }
   .imei-tbl tbody tr:hover td      { background:#f7f9ff; }
   .tc { text-align:center; }
+  .tl { text-align:left; }
   .imei-mono { font-family:'Courier New',monospace; font-size:13.5px; font-weight:600; letter-spacing:.04em; }
 
   /* paging */
@@ -117,12 +118,12 @@
           <input type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Search IMEI…"/>
         </div>
         <div style="display:flex;gap:8px;align-items:flex-end;">
-          <button type="submit" class="btn btn-primary btn-sm">Search</button>
+         <button type="submit" class="btn btn-primary btn-sm btn-equal">Search</button>
           <c:url var="resetUrl" value="/imei-list">
             <c:param name="skuId" value="${skuId}"/>
             <c:param name="back"  value="${param.back}"/>
           </c:url>
-          <a href="${resetUrl}" class="btn btn-sm">Reset</a>
+        <a href="${resetUrl}" class="btn btn-outline btn-sm btn-equal">Reset</a>
         </div>
       </div>
     </form>
@@ -136,7 +137,7 @@
         <thead>
           <tr>
             <th class="tc" style="width:50px;">#</th>
-            <th>IMEI</th>
+            <th class="tl">IMEI</th>
             <th class="tc">Import Date</th>
             <th class="tc">Export Date</th>
           </tr>
@@ -150,7 +151,7 @@
               <td class="tc" style="color:var(--muted);font-size:12px;">
                 ${(pageNumber - 1) * pageSize + st.index + 1}
               </td>
-              <td class="imei-mono">${fn:escapeXml(r.imei)}</td>
+              <td class="imei-mono tl">${fn:escapeXml(r.imei)}</td>
               <td class="tc" style="color:var(--text-2);">
                 <c:choose>
                   <c:when test="${not empty r.importDate}">

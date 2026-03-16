@@ -113,8 +113,8 @@
         <input type="hidden" name="page"     value="1"/>
         <input type="hidden" name="pageSize" value="${pageSize}"/>
         <div style="display:flex;gap:8px;align-items:flex-end;">
-          <button type="submit" class="btn btn-primary btn-sm">Search</button>
-          <a href="${ctx}/inventory-count" class="btn btn-sm">Reset</a>
+          <button type="submit" class="btn btn-primary btn-sm  btn-equal" >Search</button>
+          <a href="${ctx}/inventory-count" class="btn btn-outline btn-sm btn-equal" >Reset</a>
         </div>
       </div>
     </form>
