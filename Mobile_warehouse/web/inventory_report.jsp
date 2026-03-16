@@ -275,7 +275,7 @@
             <a href="${ctx}/home?p=dashboard" class="btn btn-outline" style="text-decoration:none;">← Back</a>
             <h1 class="ir-title">Inventory Report</h1>
         </div>
-        <span style="font-size:13px;color:var(--muted);">Import / Export / Stock summary by period</span>
+        <span style="font-size:13px;color:var(--muted);">(Import / Export / Stock)</span>
     </div>
 
     <c:if test="${not empty err}">
@@ -324,10 +324,7 @@
                 </div>
 
             </div>
-            <p class="formula-hint">
-                Stock is calculated at the end of <b>To Date</b> based on real-time Inventory Balance.
-                <br>Opening Stock = <code>Closing Stock - Import + Export</code>. ROP = <code>Avg Daily Sales * Lead Time + Safety Stock</code>.
-            </p>
+          
         </form>
     </div>
 
@@ -521,8 +518,7 @@
         <span class="badge-reorder" style="font-size:11px;">Reorder Needed</span> Stock < ROP &nbsp;|&nbsp;
         <span class="badge-out" style="font-size:11px;">Out of Stock</span> Stock = 0
         <br/>
-        <strong>Formulas:</strong>
-        ROP = <code>Avg Daily Sales * Lead Time + Safety Stock</code> &nbsp;|&nbsp; Opening Stock = <code>Closing Stock - Import + Export</code>
+      
     </div>
 
 </div>
