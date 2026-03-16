@@ -77,7 +77,7 @@
       <a href="${ctx}/home" class="btn btn-sm">← Back</a>
       <h1 class="ic-title">Conduct Inventory Count</h1>
     </div>
-    <button type="button" class="btn btn-primary" id="btnSave">💾 Save Count</button>
+    <button type="button" class="btn btn-primary" id="btnSave">Save Count</button>
   </div>
 
   <%-- Flash messages (passed as query params after redirect) --%>

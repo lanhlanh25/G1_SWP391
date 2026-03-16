@@ -74,18 +74,8 @@ boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
                     Receipt List
                 </a>
             </li>
-            <li>
-                <a class="<%= "create-import-receipt".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=create-import-receipt">
-                    Create Receipt
-                </a>
-            </li>
-            <li>
-                <a class="<%= "request-delete-import-receipt-list".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=request-delete-import-receipt-list">
-                    Delete Requests
-                </a>
-            </li>
+            
+           
             <li>
                 <a class="<%= importReportActive ? "active" : "" %>"
                    href="<%=ctx%>/import-receipt-report">
