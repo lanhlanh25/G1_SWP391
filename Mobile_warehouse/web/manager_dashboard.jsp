@@ -134,8 +134,6 @@
                                 <th>Code</th>
                                 <th>Requested By</th>
                                 <th>Requested Time</th>
-                                <th>Waiting Time</th>
-                                <th>Priority</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -150,12 +148,6 @@
                                                 <td>${r.code}</td>
                                                 <td>${r.requestedBy}</td>
                                                 <td>${r.requestedTime}</td>
-                                                <td>${r.waitingTime}</td>
-                                                <td>
-                                                    <span class="badge ${r.priority eq 'High' ? 'badge-warning' : 'badge-info'}">
-                                                        ${r.priority}
-                                                    </span>
-                                                </td>
                                                 <td><span class="badge badge-muted">${r.status}</span></td>
                                                 <td>
                                                     <a class="btn btn-sm" href="<%=ctx%>/home?p=import-request-detail&id=${r.id}">
@@ -167,7 +159,7 @@
                                     </c:when>
                                     <c:otherwise>
                                         <tr>
-                                            <td colspan="7" class="empty-state">No import requests found.</td>
+                                            <td colspan="5" class="empty-state">No import requests found.</td>
                                         </tr>
                                     </c:otherwise>
                                 </c:choose>
@@ -181,15 +173,9 @@
                                                 <td>${r.code}</td>
                                                 <td>${r.requestedBy}</td>
                                                 <td>${r.requestedTime}</td>
-                                                <td>${r.waitingTime}</td>
+                                                <td><span class="badge badge-active">${r.status}</span></td>
                                                 <td>
-                                                    <span class="badge ${r.priority eq 'High' ? 'badge-warning' : 'badge-info'}">
-                                                        ${r.priority}
-                                                    </span>
-                                                </td>
-                                                <td><span class="badge badge-muted">${r.status}</span></td>
-                                                <td>
-                                                    <a class="btn btn-sm" href="<%=ctx%>/home?p=export-request-detail&id=${r.id}">
+                                                    <a class="btn btn-sm" href="<%=ctx%>/home?p=import-request-detail&id=${r.id}">
                                                         View Detail
                                                     </a>
                                                 </td>
@@ -198,13 +184,13 @@
                                     </c:when>
                                     <c:otherwise>
                                         <tr>
-                                            <td colspan="7" class="empty-state">No export requests found.</td>
+                                            <td colspan="5" class="empty-state">No export requests found.</td>
                                         </tr>
                                     </c:otherwise>
                                 </c:choose>
                             </c:if>
 
-                            
+
 
                         </tbody>
                     </table>
@@ -216,7 +202,10 @@
         <div class="section-stack">
             <div class="card">
                 <div class="card-header">
-                    <div class="h2">Alerts</div>
+                    <div>
+                        <div class="h2">Top Exported Products</div>
+                        <div class="card-subtitle">Best-performing exported products in the selected period.</div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="empty-state">Coming soon</div>

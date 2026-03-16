@@ -487,10 +487,10 @@ public class Home extends HttpServlet {
                     // =========================
                     List<ImportRequest> importRequests = importRequestDAO.listByStatus("NEW", 5);
                     for (ImportRequest r : importRequests) {
-                        String waiting = calcWaitingTime(r.getRequestDate());
-                        String priority = calcPriorityByWaiting(r.getRequestDate());
-
                         long diffMs = System.currentTimeMillis() - r.getRequestDate().getTime();
+                        if (diffMs < 0) {
+                            diffMs = 0;
+                        }
                         long hours = diffMs / (1000L * 60 * 60);
                         if (hours >= 24) {
                             overdueApprovals++;
@@ -501,8 +501,6 @@ public class Home extends HttpServlet {
                                 r.getRequestCode(),
                                 r.getCreatedByName(),
                                 formatDateTime(r.getRequestDate()),
-                                waiting,
-                                priority,
                                 r.getStatus()
                         ));
                     }
@@ -512,10 +510,10 @@ public class Home extends HttpServlet {
                     // =========================
                     List<ExportRequest> exportRequests = exportRequestDAO.listByStatus("NEW", 5);
                     for (ExportRequest r : exportRequests) {
-                        String waiting = calcWaitingTime(r.getRequestDate());
-                        String priority = calcPriorityByWaiting(r.getRequestDate());
-
                         long diffMs = System.currentTimeMillis() - r.getRequestDate().getTime();
+                        if (diffMs < 0) {
+                            diffMs = 0;
+                        }
                         long hours = diffMs / (1000L * 60 * 60);
                         if (hours >= 24) {
                             overdueApprovals++;
@@ -526,31 +524,6 @@ public class Home extends HttpServlet {
                                 r.getRequestCode(),
                                 r.getCreatedByName(),
                                 formatDateTime(r.getRequestDate()),
-                                waiting,
-                                priority,
-                                r.getStatus()
-                        ));
-                    }
-
-                    // =========================
-                    // DELETE REQUESTS (optional, keep for separate table only)
-                    // =========================
-                    List<ImportReceiptDeleteRequest> deleteRequests = deleteDAO.listRequests(null, null, 1, 5);
-                    for (ImportReceiptDeleteRequest r : deleteRequests) {
-                        if (!"PENDING".equalsIgnoreCase(r.getStatus())) {
-                            continue;
-                        }
-
-                        String waiting = calcWaitingTime(r.getRequestedAt());
-                        String priority = calcPriorityByWaiting(r.getRequestedAt());
-
-                        dashboardDeleteRequests.add(new DashboardApprovalRow(
-                                r.getRequestId(),
-                                r.getImportCode(),
-                                r.getRequestedByName(),
-                                formatDateTime(r.getRequestedAt()),
-                                waiting,
-                                priority,
                                 r.getStatus()
                         ));
                     }
@@ -2171,52 +2144,19 @@ public class Home extends HttpServlet {
         return new java.text.SimpleDateFormat("HH:mm").format(date);
     }
 
-    private String calcWaitingTime(java.util.Date createdAt) {
-        if (createdAt == null) {
-            return "";
-        }
-        long diffMs = System.currentTimeMillis() - createdAt.getTime();
-        long hours = diffMs / (1000L * 60 * 60);
-        long days = hours / 24;
-        long remainHours = hours % 24;
-
-        if (days > 0) {
-            return days + "d " + remainHours + "h";
-        }
-        return hours + "h";
-    }
-
-    private String calcPriorityByWaiting(java.util.Date createdAt) {
-        if (createdAt == null) {
-            return "Medium";
-        }
-        long diffMs = System.currentTimeMillis() - createdAt.getTime();
-        long hours = diffMs / (1000L * 60 * 60);
-
-        if (hours >= 24) {
-            return "High";
-        }
-        return "Medium";
-    }
-
     public static class DashboardApprovalRow {
 
         private long id;
         private String code;
         private String requestedBy;
         private String requestedTime;
-        private String waitingTime;
-        private String priority;
         private String status;
 
-        public DashboardApprovalRow(long id, String code, String requestedBy, String requestedTime,
-                String waitingTime, String priority, String status) {
+        public DashboardApprovalRow(long id, String code, String requestedBy, String requestedTime, String status) {
             this.id = id;
             this.code = code;
             this.requestedBy = requestedBy;
             this.requestedTime = requestedTime;
-            this.waitingTime = waitingTime;
-            this.priority = priority;
             this.status = status;
         }
 
@@ -2234,14 +2174,6 @@ public class Home extends HttpServlet {
 
         public String getRequestedTime() {
             return requestedTime;
-        }
-
-        public String getWaitingTime() {
-            return waitingTime;
-        }
-
-        public String getPriority() {
-            return priority;
         }
 
         public String getStatus() {
