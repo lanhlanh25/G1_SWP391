@@ -1857,6 +1857,16 @@ public class Home extends HttpServlet {
                 request.setAttribute("totalItems", totalItems);
                 break;
             }
+            case "best-selling-product-statistics": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !"MANAGER".equalsIgnoreCase(roleName)) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                ManagerViewBestSellingProductStatistics.handle(request, response);
+                break;
+            }
             case "admin/reset-requests": {
 
                 List<ResetRequest> pending = userDAO.getPendingResetRequests();
@@ -2016,6 +2026,8 @@ public class Home extends HttpServlet {
                         return "create_import_request.jsp";
                     case "low-stock-report":
                         return "low_stock_report.jsp";
+                    case "best-selling-product-statistics":
+                        return "best_selling_product_statistics.jsp";
                     case "export-receipt-list":
                         return "export_receipt_list.jsp";
                     case "export-receipt-detail":
