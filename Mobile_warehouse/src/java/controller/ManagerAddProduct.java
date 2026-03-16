@@ -19,7 +19,6 @@ public class ManagerAddProduct extends HttpServlet {
 
         request.setCharacterEncoding("UTF-8");
 
-        String productCode = request.getParameter("productCode");
         String productName = request.getParameter("productName");
         String brandId = request.getParameter("brandId");
         String model = request.getParameter("model");
@@ -27,10 +26,6 @@ public class ManagerAddProduct extends HttpServlet {
         String status = request.getParameter("status");
 
         Map<String, String> errors = new HashMap<>();
-
-        if (productCode == null || productCode.trim().isEmpty()) {
-            errors.put("productCode", "Product Code is required");
-        }
 
         if (productName == null || productName.trim().isEmpty()) {
             errors.put("productName", "Product Name is required");
@@ -43,22 +38,27 @@ public class ManagerAddProduct extends HttpServlet {
         try {
 
             ProductCRUDDAO dao = new ProductCRUDDAO();
+            if (dao.existsByName(productName)) {
 
+                errors.put("productName", "Product name already exists");
+
+                request.setAttribute("errors", errors);
+
+                keepData(request, null, productName, brandId, model, description, status);
+                request.getRequestDispatcher("/home?p=product-add").forward(request, response);
+
+                return;
+            }
             if (!errors.isEmpty()) {
                 request.setAttribute("errors", errors);
-                keepData(request, productCode, productName, brandId, model, description, status);
+                keepData(request, null, productName, brandId, model, description, status);
                 request.getRequestDispatcher("/home?p=product-add").forward(request, response);
                 return;
             }
 
-            if (dao.existsByCode(productCode)) {
-                errors.put("productCode", "Product Code already exists");
-                request.setAttribute("errors", errors);
-                keepData(request, productCode, productName, brandId, model, description, status);
-                request.getRequestDispatcher("/home?p=product-add").forward(request, response);
-                return;
-            }
+            long bId = Long.parseLong(brandId);
 
+            String productCode = dao.generateProductCode(bId);
             Product p = new Product();
             p.setProductCode(productCode);
             p.setProductName(productName);
@@ -77,7 +77,7 @@ public class ManagerAddProduct extends HttpServlet {
 
             request.setAttribute("errors", errors);
 
-            keepData(request, productCode, productName, brandId, model, description, status);
+            keepData(request, null, productName, brandId, model, description, status);
 
             request.getRequestDispatcher("/home?p=product-add").forward(request, response);
         }

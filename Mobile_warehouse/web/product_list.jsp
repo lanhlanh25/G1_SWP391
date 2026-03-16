@@ -119,6 +119,12 @@
             ${param.msg}
         </div>
     </c:if>
+    <c:if test="${sessionScope.msg != null}">
+        <div class="alert-success">
+            ${sessionScope.msg}
+        </div>
+        <c:remove var="msg" scope="session"/>
+    </c:if>
     <form method="get" action="${pageContext.request.contextPath}/home">
         <input type="hidden" name="p" value="product-list"/>
 

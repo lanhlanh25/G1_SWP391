@@ -10,10 +10,11 @@
     String uri = request.getRequestURI();
     if (uri == null) uri = "";
 
-    boolean inventoryOverviewActive = uri.equals(ctx + "/inventory");
-    boolean inventoryCountActive = uri.equals(ctx + "/inventory-count");
-    boolean importReportActive = uri.equals(ctx + "/import-receipt-report");
-    boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
+  boolean inventoryOverviewActive = uri.equals(ctx + "/inventory");
+boolean inventoryCountActive = uri.equals(ctx + "/inventory-count");
+boolean inventoryReportActive = uri.equals(ctx + "/inventory-report");     // ← THÊM DÒNG NÀY
+boolean importReportActive = uri.equals(ctx + "/import-receipt-report");
+boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
 %>
 
 <div>
@@ -34,6 +35,12 @@
             <a class="<%= inventoryOverviewActive ? "active" : "" %>"
                href="<%=ctx%>/inventory">
                 Inventory Overview
+            </a>
+        </li>
+        <li>
+            <a class="<%= inventoryReportActive ? "active" : "" %>"
+               href="<%=ctx%>/inventory-report">
+                Inventory Report
             </a>
         </li>
         <li>
@@ -226,12 +233,16 @@
                    href="<%=ctx%>/home?p=product-list">
                     Product List
                 </a>
-            </li>
+            </li>  
         </ul>
-    </details>
-    <a class="${currentPage == 'low-stock-report' ? 'active' : ''}"
-       href="${pageContext.request.contextPath}/home?p=low-stock-report">
-        Low Stock Report
-    </a>                
+   
+                
+   
 
+    </details>
+
+  <a class="${currentPage == 'low-stock-report' ? 'active' : ''}"
+               href="${pageContext.request.contextPath}/home?p=low-stock-report">
+                Low Stock Report
+            </a> 
 </div>

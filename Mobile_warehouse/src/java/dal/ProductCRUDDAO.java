@@ -15,6 +15,61 @@ import model.Product;
 
 public class ProductCRUDDAO {
 
+    public String generateProductCode(long brandId) throws Exception {
+
+        String brandSql = "SELECT brand_name FROM brands WHERE brand_id = ?";
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps1 = con.prepareStatement(brandSql)) {
+
+            ps1.setLong(1, brandId);
+
+            ResultSet rs1 = ps1.executeQuery();
+
+            if (!rs1.next()) {
+                throw new RuntimeException("Brand not found");
+            }
+
+            String brandName = rs1.getString("brand_name");
+
+            // lấy 3 ký tự đầu
+            String brandCode = brandName.substring(0, Math.min(3, brandName.length())).toUpperCase();
+
+            String sql = """
+            SELECT COUNT(*) c
+            FROM products
+            WHERE brand_id = ?
+        """;
+
+            PreparedStatement ps2 = con.prepareStatement(sql);
+
+            ps2.setLong(1, brandId);
+
+            ResultSet rs2 = ps2.executeQuery();
+
+            int number = 1;
+
+            if (rs2.next()) {
+                number = rs2.getInt("c") + 1;
+            }
+
+            return String.format("PRD-%s-%05d", brandCode, number);
+        }
+    }
+
+    public boolean existsByName(String name) throws Exception {
+
+        String sql = "SELECT 1 FROM products WHERE product_name = ? LIMIT 1";
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, name);
+
+            ResultSet rs = ps.executeQuery();
+
+            return rs.next();
+        }
+    }
+
     public void inactivateProduct(int productId) throws Exception {
         String sql = "UPDATE products SET status = 'INACTIVE' WHERE product_id = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -129,12 +184,12 @@ public class ProductCRUDDAO {
             ps.executeUpdate();
         }
     }
+
     public void inactivateSkusByProduct(int productId) throws Exception {
-    String sql = "UPDATE product_skus SET status = 'INACTIVE' WHERE product_id = ?";
-    try (Connection con = DBContext.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setInt(1, productId);
-        ps.executeUpdate();
+        String sql = "UPDATE product_skus SET status = 'INACTIVE' WHERE product_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, productId);
+            ps.executeUpdate();
+        }
     }
-}
 }

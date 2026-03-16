@@ -9,6 +9,7 @@ package model;
  * @author Admin
  */
 public class InventoryCountRow {
+
     private long skuId;
     private String skuCode;
     private String productName;
@@ -18,27 +19,67 @@ public class InventoryCountRow {
     private int systemQty;
     private int countedQty;
 
-    public long getSkuId() { return skuId; }
-    public void setSkuId(long skuId) { this.skuId = skuId; }
+    public long getSkuId() {
+        return skuId;
+    }
 
-    public String getSkuCode() { return skuCode; }
-    public void setSkuCode(String skuCode) { this.skuCode = skuCode; }
+    public void setSkuId(long skuId) {
+        this.skuId = skuId;
+    }
 
-    public String getProductName() { return productName; }
-    public void setProductName(String productName) { this.productName = productName; }
+    public String getSkuCode() {
+        return skuCode;
+    }
 
-    public String getColor() { return color; }
-    public void setColor(String color) { this.color = color; }
+    public void setSkuCode(String skuCode) {
+        this.skuCode = skuCode;
+    }
 
-    public int getRamGb() { return ramGb; }
-    public void setRamGb(int ramGb) { this.ramGb = ramGb; }
+    public String getProductName() {
+        return productName;
+    }
 
-    public int getStorageGb() { return storageGb; }
-    public void setStorageGb(int storageGb) { this.storageGb = storageGb; }
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
 
-    public int getSystemQty() { return systemQty; }
-    public void setSystemQty(int systemQty) { this.systemQty = systemQty; }
+    public String getColor() {
+        return color;
+    }
 
-    public int getCountedQty() { return countedQty; }
-    public void setCountedQty(int countedQty) { this.countedQty = countedQty; }
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public int getRamGb() {
+        return ramGb;
+    }
+
+    public void setRamGb(int ramGb) {
+        this.ramGb = ramGb;
+    }
+
+    public int getStorageGb() {
+        return storageGb;
+    }
+
+    public void setStorageGb(int storageGb) {
+        this.storageGb = storageGb;
+    }
+
+    public int getSystemQty() {
+        return systemQty;
+    }
+
+    public void setSystemQty(int systemQty) {
+        this.systemQty = systemQty;
+    }
+
+    public int getCountedQty() {
+        return countedQty;
+    }
+
+    public void setCountedQty(int countedQty) {
+        this.countedQty = countedQty;
+    }
 }

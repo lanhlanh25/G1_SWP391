@@ -6,7 +6,6 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Add New Product</title>
 
         <style>
 
@@ -110,6 +109,17 @@
                 background:#dbe7ff;
             }
 
+            .auto-code{
+                height:40px;
+                display:flex;
+                align-items:center;
+                padding-left:12px;
+                border:1px dashed #aaa;
+                border-radius:10px;
+                background:#fafafa;
+                color:#666;
+            }
+
             @media(max-width:900px){
 
                 .form-grid{
@@ -134,14 +144,13 @@
 
                     <div class="form-grid">
 
-                        <div class="lb">Product Code<span class="req">*</span></div>
+                        <!-- PRODUCT CODE -->
+                        <div class="lb">Product Code</div>
                         <div>
-                            <input class="ip" type="text" name="productCode" value="${productCode}">
-                            <c:if test="${not empty errors.productCode}">
-                                <div class="err">${errors.productCode}</div>
-                            </c:if>
+                            <div class="auto-code">Auto Generate</div>
                         </div>
 
+                        <!-- PRODUCT NAME -->
                         <div class="lb">Product Name<span class="req">*</span></div>
                         <div>
                             <input class="ip" type="text" name="productName" value="${productName}">
@@ -150,14 +159,15 @@
                             </c:if>
                         </div>
 
+                        <!-- BRAND -->
                         <div class="lb">Brand<span class="req">*</span></div>
                         <div>
+
                             <select name="brandId">
 
                                 <option value="">-- Select Brand --</option>
 
                                 <c:forEach var="b" items="${brands}">
-
                                     <option value="${b.brandId}" ${brandId == (''+b.brandId) ? 'selected' : ''}>
                                         ${b.brandName}
                                     </option>
@@ -166,22 +176,20 @@
                             </select>
 
                             <c:if test="${not empty errors.brandId}">
-
                                 <div class="err">${errors.brandId}</div>
                             </c:if>
 
                         </div>
 
-                        <div class="lb">Model</div>
-                        <div>
-                            <input class="ip" type="text" name="model" value="${model}">
-                        </div>
 
+
+                        <!-- DESCRIPTION -->
                         <div class="lb">Description</div>
                         <div>
                             <textarea name="description">${description}</textarea>
                         </div>
 
+                        <!-- STATUS -->
                         <div class="lb">Status</div>
                         <div>
 
@@ -209,12 +217,12 @@
 
                         <button class="btn-form" type="button"
                                 onclick="window.location.href = '${pageContext.request.contextPath}/home?p=product-list'">
-                            Cancel </button>
+                            Cancel
+                        </button>
 
                     </div>
 
                     <c:if test="${not empty errors.db}">
-
                         <div class="err" style="text-align:center;margin-top:12px">
                             ${errors.db}
                         </div>
