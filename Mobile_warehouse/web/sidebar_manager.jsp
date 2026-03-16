@@ -34,7 +34,7 @@ boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
         <li>
             <a class="<%= inventoryOverviewActive ? "active" : "" %>"
                href="<%=ctx%>/inventory">
-                Inventory Overview
+                Inventory Management
             </a>
         </li>
         <li>

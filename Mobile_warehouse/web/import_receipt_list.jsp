@@ -228,7 +228,7 @@
         <form method="get" action="${ctx}/home" style="display:inline;">
           <input type="hidden" name="p" value="import-receipt-list"/>
           <input type="hidden" name="action" value="export"/>
-          <button type="submit" class="ir-btn primary">⬇ Export CSV</button>
+          <button type="submit" class="ir-btn primary">Export Excel</button>
         </form>
 
         <c:if test="${role eq 'STAFF'}">
