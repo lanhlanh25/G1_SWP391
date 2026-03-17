@@ -237,7 +237,14 @@
 
 
     </details>
-
+    <ul>
+        <li>
+            <a class="<%= "export-center".equals(currentPage) ? "active" : "" %>"
+               href="<%=ctx%>/home?p=export-center">
+                Export Center
+            </a>
+        </li>
+    </ul>       
     <a class="${currentPage == 'low-stock-report' ? 'active' : ''}"
        href="${pageContext.request.contextPath}/home?p=low-stock-report">
         Low Stock Report
