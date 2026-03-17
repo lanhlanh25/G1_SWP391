@@ -914,7 +914,11 @@ a:hover {
   line-height: 1.3;
   white-space: nowrap;
 }
-
+.badge-danger {
+  color: #b91c1c;
+  background: #fee2e2;
+  border-color: var(--danger-border);
+}
 .badge-active {
   color: #0d6832;
   background: #e6f9ed;

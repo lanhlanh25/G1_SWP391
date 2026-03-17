@@ -25,11 +25,7 @@
             <div class="kpi-note">New import and export requests</div>
         </div>
 
-        <div class="card kpi-card">
-            <div class="kpi-label">Overdue Approvals</div>
-            <div class="kpi-value">${overdueApprovals}</div>
-            <div class="kpi-note">Waiting more than 24 hours</div>
-        </div>
+        
 
         <div class="card kpi-card">
             <div class="kpi-label">Low-stock Products</div>
@@ -72,7 +68,7 @@
             <div class="kpi-value" style="color:#2563eb;">${invTotalClosing}</div>
             <div class="kpi-note">Current on-hand</div>
         </div>
-        <div class="card kpi-card" style="border-left:4px solid #a855f7; grid-column: span 1;">
+            <%--<div class="card kpi-card" style="border-left:4px solid #a855f7; grid-column: span 1;">
             <div class="kpi-label">View Full Report</div>
             <div class="kpi-value" style="font-size:14px; font-weight:500; margin-top:8px;">
                 <a href="<%=ctx%>/inventory-report" class="btn btn-outline" style="width:100%; text-align:center;">
@@ -80,7 +76,7 @@
                 </a>
             </div>
             <div class="kpi-note">${invMonthLabel}</div>
-        </div>
+        </div>--%>
     </section>
 
     <section class="dashboard-main">

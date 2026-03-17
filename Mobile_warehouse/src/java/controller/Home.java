@@ -588,7 +588,7 @@ public class Home extends HttpServlet {
                     request.setAttribute("approvalType", approvalType);
 
                     request.setAttribute("pendingApprovals", pendingApprovals);
-                    request.setAttribute("overdueApprovals", overdueApprovals);
+                  
                     request.setAttribute("todayImportedUnits", todayImportedUnits);
                     request.setAttribute("todayExportedUnits", todayExportedUnits);
 
