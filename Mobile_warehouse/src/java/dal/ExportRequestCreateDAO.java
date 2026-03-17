@@ -1,40 +1,10 @@
 package dal;
 
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import model.ExportRequestItemCreate;
 
 public class ExportRequestCreateDAO {
-
-    // Format: ER-YYYYMMDD-0001
-    public String generateRequestCode(Connection con) throws SQLException {
-        String datePart = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE); // yyyyMMdd
-        String prefix = "ER-" + datePart + "-";
-
-        String sql = """
-            SELECT request_code
-            FROM export_requests
-            WHERE request_code LIKE ?
-            ORDER BY request_code DESC
-            LIMIT 1
-        """;
-
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, prefix + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    return prefix + "0001";
-                }
-
-                String last = rs.getString(1);
-                String seqStr = last.substring(last.length() - 4); // last 4 digits
-                int seq = Integer.parseInt(seqStr) + 1;
-                return prefix + String.format("%04d", seq);
-            }
-        }
-    }
 
     public long createRequest(long requestedBy, Date expectedExportDate, String note, String status,
             List<ExportRequestItemCreate> items) throws Exception {
@@ -55,7 +25,8 @@ public class ExportRequestCreateDAO {
             con = DBContext.getConnection();
             con.setAutoCommit(false);
 
-            String code = generateRequestCode(con);
+            CodeGeneratorDAO codeDAO = new CodeGeneratorDAO();
+            String code = codeDAO.generateExportRequestCode(con);
 
             long requestId;
             try (PreparedStatement ps = con.prepareStatement(insertHeader, Statement.RETURN_GENERATED_KEYS)) {
@@ -97,7 +68,7 @@ public class ExportRequestCreateDAO {
                         ps.setLong(3, it.getSkuId());
                     }
 
-                    ps.setInt(4, it.getRequestQty()); // map to qty
+                    ps.setInt(4, it.getRequestQty());
                     ps.addBatch();
                 }
                 ps.executeBatch();

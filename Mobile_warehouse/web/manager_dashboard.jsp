@@ -14,7 +14,7 @@
             <h1 class="h1 m-0">Manager Dashboard</h1>
 <!--            <div class="small muted">Review approvals, monitor stock risks, and track warehouse operations.</div>-->
         </div>
-        <a href="#" class="btn btn-primary">Export Report</a>
+        
     </div>
 
     <!-- KPI -->
@@ -135,7 +135,7 @@
                                                 <td>${r.code}</td>
                                                 <td>${r.requestedBy}</td>
                                                 <td>${r.requestedTime}</td>
-                                                <td><span class="badge badge-muted">${r.status}</span></td>
+                                                <td><span class="badge badge-active">${r.status}</span></td>
                                                 <td>
                                                     <a class="btn btn-sm" href="<%=ctx%>/home?p=import-request-detail&id=${r.id}">
                                                         View Detail

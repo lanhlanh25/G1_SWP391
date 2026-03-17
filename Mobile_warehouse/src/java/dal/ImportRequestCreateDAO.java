@@ -3,37 +3,9 @@ package dal;
 import model.ImportRequestItemCreate;
 
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class ImportRequestCreateDAO {
-
-    public String generateRequestCode(Connection con) throws SQLException {
-        String datePart = LocalDate.now().format(DateTimeFormatter.BASIC_ISO_DATE); // yyyyMMdd
-        String prefix = "IR-" + datePart + "-";
-
-        String sql = """
-            SELECT request_code
-            FROM import_requests
-            WHERE request_code LIKE ?
-            ORDER BY request_code DESC
-            LIMIT 1
-        """;
-
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, prefix + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    return prefix + "0001";
-                }
-
-                String last = rs.getString(1);
-                int seq = Integer.parseInt(last.substring(last.length() - 4)) + 1;
-                return prefix + String.format("%04d", seq);
-            }
-        }
-    }
 
     public long createRequest(long requestedBy, Date expectedImportDate, String note, String status,
             List<ImportRequestItemCreate> items) throws Exception {
@@ -54,7 +26,8 @@ public class ImportRequestCreateDAO {
             con = DBContext.getConnection();
             con.setAutoCommit(false);
 
-            String code = generateRequestCode(con);
+            CodeGeneratorDAO codeDAO = new CodeGeneratorDAO();
+            String code = codeDAO.generateImportRequestCode(con);
 
             long requestId;
             try (PreparedStatement ps = con.prepareStatement(insertHeader, Statement.RETURN_GENERATED_KEYS)) {
@@ -67,7 +40,7 @@ public class ImportRequestCreateDAO {
                     ps.setNull(3, Types.DATE);
                 }
 
-                ps.setString(4, status);
+                ps.setString(4, (status == null || status.isBlank()) ? "NEW" : status.trim());
 
                 if (note != null && !note.trim().isEmpty()) {
                     ps.setString(5, note.trim());
@@ -76,6 +49,7 @@ public class ImportRequestCreateDAO {
                 }
 
                 ps.executeUpdate();
+
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (!rs.next()) {
                         throw new SQLException("Cannot get generated request_id");

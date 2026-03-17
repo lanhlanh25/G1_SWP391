@@ -1,20 +1,18 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package controller;
 
 /**
  *
  * @author Admin
  */
-
 import dal.BrandDAO;
 import dal.BrandStatsDAO;
+import dal.CodeGeneratorDAO;
+import dal.DBContext;
 import dal.ExportReceiptReportDAO;
 import dal.ImportReceiptReportDAO;
 import dal.InventoryReportDAO;
 import dal.LowStockReportDAO;
+import dal.ReportRequestDAO;
 import dal.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -24,6 +22,7 @@ import util.ExcelExportUtil;
 import util.PdfExportUtil;
 
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -51,7 +50,9 @@ public class ExportCenter extends HttpServlet {
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
             role = UserDAO.getRoleNameByUserId(u.getUserId());
-            if (role == null || role.isBlank()) role = "STAFF";
+            if (role == null || role.isBlank()) {
+                role = "STAFF";
+            }
             session.setAttribute("roleName", role);
         }
         role = role.toUpperCase();
@@ -95,14 +96,45 @@ public class ExportCenter extends HttpServlet {
                         reportType, fromRaw, toRaw, brandIdRaw, keyword, ropStatus, detailLevel, 1, EXPORT_MAX_ROWS
                 );
 
+                String reportCode;
+                String fileName;
+                String reportDbType = mapReportType(reportType);
+                Date fromDate = parseDate(fromRaw);
+                Date toDate = parseDate(toRaw);
+
+                try (Connection con = DBContext.getConnection()) {
+                    CodeGeneratorDAO codeDAO = new CodeGeneratorDAO();
+                    ReportRequestDAO reportDAO = new ReportRequestDAO();
+
+                    reportCode = codeDAO.generateReportCode(con);
+
+                    String baseName = safeFileName(payload.reportTitle);
+                    if ("pdf".equalsIgnoreCase(format)) {
+                        fileName = baseName + "_" + reportCode + ".pdf";
+                    } else {
+                        fileName = baseName + "_" + reportCode + ".xlsx";
+                    }
+
+                    reportDAO.createGeneratedReport(
+                            con,
+                            reportCode,
+                            reportDbType,
+                            fromDate,
+                            toDate,
+                            u.getUserId(),
+                            fileName,
+                            "Export Center " + format.toUpperCase() + " - " + payload.reportTitle
+                    );
+                }
+
                 if ("pdf".equalsIgnoreCase(format)) {
-                    String filename = safeFileName(payload.reportTitle) + ".pdf";
                     response.setContentType("application/pdf");
-                    response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+                    response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
                     boolean landscape = "landscape".equalsIgnoreCase(pdfOrientation);
                     PdfExportUtil.export(
                             response.getOutputStream(),
+                            reportCode,
                             payload.reportTitle,
                             payload.filterLines,
                             payload.summaryLines,
@@ -112,12 +144,12 @@ public class ExportCenter extends HttpServlet {
                     );
                     return;
                 } else {
-                    String filename = safeFileName(payload.reportTitle) + ".xlsx";
                     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-                    response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+                    response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
                     ExcelExportUtil.export(
                             response.getOutputStream(),
+                            reportCode,
                             payload.reportTitle,
                             payload.filterLines,
                             payload.summaryLines,
@@ -451,6 +483,25 @@ public class ExportCenter extends HttpServlet {
                         String.valueOf(r.getSuggestedReorderQty())
                 ));
             }
+        }
+    }
+
+    private String mapReportType(String reportType) {
+        if (reportType == null) {
+            return "INVENTORY";
+        }
+
+        switch (reportType.toLowerCase()) {
+            case "import":
+            case "export":
+                return "IMPORT_EXPORT";
+            case "brand-statistic":
+                return "BRAND";
+            case "low-stock":
+                return "INVENTORY";
+            case "inventory":
+            default:
+                return "INVENTORY";
         }
     }
 

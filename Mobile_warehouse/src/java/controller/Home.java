@@ -582,13 +582,13 @@ public class Home extends HttpServlet {
                         dashboardRecentActivities = new ArrayList<>(dashboardRecentActivities.subList(0, 6));
                     }
 
-// =========================
-// SET ATTRIBUTES
-// =========================
+                    // =========================
+                    // SET ATTRIBUTES
+                    // =========================
                     request.setAttribute("approvalType", approvalType);
 
                     request.setAttribute("pendingApprovals", pendingApprovals);
-                  
+
                     request.setAttribute("todayImportedUnits", todayImportedUnits);
                     request.setAttribute("todayExportedUnits", todayExportedUnits);
 
@@ -605,9 +605,9 @@ public class Home extends HttpServlet {
                     request.setAttribute("alertsComingSoon", true);
                     request.setAttribute("lowStockComingSoon", false);
 
-// =========================
-// INVENTORY REPORT SUMMARY (month-to-date)
-// =========================
+                    // =========================
+                    // INVENTORY REPORT SUMMARY (month-to-date)
+                    // =========================
                     try {
                         InventoryReportDAO irDAO = new InventoryReportDAO();
                         LocalDate firstOfMonth = today.withDayOfMonth(1);
@@ -1504,13 +1504,13 @@ public class Home extends HttpServlet {
 
                 ProductDAO pdao = new ProductDAO();
                 ProductSkuDAO skdao = new ProductSkuDAO();
-                ExportRequestCreateDAO dao = new ExportRequestCreateDAO();
+                CodeGeneratorDAO codeDAO = new CodeGeneratorDAO();
 
-                request.setAttribute("erProducts", pdao.listForExportRequest()); // ✅ List<Product>
+                request.setAttribute("erProducts", pdao.listForExportRequest());
                 request.setAttribute("erSkus", skdao.listActive());
 
                 try (Connection con = DBContext.getConnection()) {
-                    request.setAttribute("erCreateCode", dao.generateRequestCode(con));
+                    request.setAttribute("erCreateCode", codeDAO.generateExportRequestCode(con));
                 }
 
                 String createdByName = String.valueOf(request.getSession().getAttribute("fullName"));
@@ -1529,13 +1529,13 @@ public class Home extends HttpServlet {
 
                 ProductDAO pdao = new ProductDAO();
                 ProductSkuDAO skdao = new ProductSkuDAO();
-                ImportRequestCreateDAO dao = new ImportRequestCreateDAO();
+                CodeGeneratorDAO codeDAO = new CodeGeneratorDAO();
 
                 request.setAttribute("irProducts", pdao.listForExportRequest());
                 request.setAttribute("irSkus", skdao.listActive());
 
                 try (Connection con = DBContext.getConnection()) {
-                    request.setAttribute("irCreateCode", dao.generateRequestCode(con));
+                    request.setAttribute("irCreateCode", codeDAO.generateImportRequestCode(con));
                 }
 
                 HttpSession session = request.getSession(false);
