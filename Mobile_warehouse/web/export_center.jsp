@@ -72,7 +72,7 @@
 
   <div class="topbar">
     <div>
-      <div class="title">Export Center</div>
+      <div class="title">Report Export Center</div>
       <div class="small">Preview and export reports to Excel or PDF from one shared screen.</div>
     </div>
   </div>

@@ -239,7 +239,7 @@
         <li>
             <a class="<%= "export-center".equals(currentPage) ? "active" : "" %>"
                href="<%=ctx%>/home?p=export-center">
-                Export Center
+                Report Export Center
             </a>
         </li>
     </ul>

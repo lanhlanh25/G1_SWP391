@@ -34,7 +34,6 @@ public class PdfExportUtil {
     private static final String COMPANY_CONTACT = "Phone: 0965298768  |  Email: minhduchoang2410@gmail.com";
 
     private static final DateTimeFormatter UI_DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final DateTimeFormatter RPT_DTF = DateTimeFormatter.ofPattern("yyMMddHHmmss");
 
     private static class ReportFooter extends PdfPageEventHelper {
 
@@ -67,21 +66,22 @@ public class PdfExportUtil {
     }
 
     public static void export(
-            OutputStream os,
-            String title,
-            Map<String, String> filters,
-            Map<String, String> summary,
-            List<String> headers,
-            List<List<String>> rows,
-            Rectangle pageSize
-    ) throws Exception {
+        OutputStream os,
+        String reportCode,
+        String title,
+        Map<String, String> filters,
+        Map<String, String> summary,
+        List<String> headers,
+        List<List<String>> rows,
+        Rectangle pageSize
+) throws Exception{
 
         Document doc = new Document(pageSize, 36, 36, 36, 50);
         PdfWriter writer = PdfWriter.getInstance(doc, os);
         writer.setPageEvent(new ReportFooter());
         doc.open();
 
-        writePdf(doc, title, filters, summary, headers, rows);
+        writePdf(doc, reportCode, title, filters, summary, headers, rows);
 
         if (doc.isOpen()) {
             doc.close();
@@ -89,13 +89,14 @@ public class PdfExportUtil {
     }
 
     private static void writePdf(
-            Document doc,
-            String reportTitle,
-            Map<String, String> filters,
-            Map<String, String> summary,
-            List<String> headers,
-            List<List<String>> rows
-    ) throws DocumentException {
+        Document doc,
+        String reportCode,
+        String reportTitle,
+        Map<String, String> filters,
+        Map<String, String> summary,
+        List<String> headers,
+        List<List<String>> rows
+) throws DocumentException{
 
         Font fH2 = new Font(Font.HELVETICA, 11, Font.BOLD);
         Font fH1 = new Font(Font.HELVETICA, 14, Font.BOLD);
@@ -114,7 +115,7 @@ public class PdfExportUtil {
         left.addElement(new Paragraph(COMPANY_ADDRESS, fN));
         left.addElement(new Paragraph(COMPANY_CONTACT, fN));
 
-        String reportNo = "RPT-" + LocalDateTime.now().format(RPT_DTF);
+        String reportNo = reportCode;
         PdfPCell right = new PdfPCell();
         right.setBorder(Rectangle.NO_BORDER);
 
