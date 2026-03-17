@@ -1867,6 +1867,87 @@ public class Home extends HttpServlet {
                 ManagerViewBestSellingProductStatistics.handle(request, response);
                 break;
             }
+            case "stock-movement-history": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !"MANAGER".equalsIgnoreCase(roleName)) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                StockMovementHistoryDAO dao = new StockMovementHistoryDAO();
+
+                String keyword = request.getParameter("keyword");
+                String movementType = request.getParameter("movementType");
+                String referenceCode = request.getParameter("referenceCode");
+                String performedBy = request.getParameter("performedBy");
+                String fromRaw = request.getParameter("from");
+                String toRaw = request.getParameter("to");
+
+                java.sql.Date from = null;
+                java.sql.Date to = null;
+
+                try {
+                    if (fromRaw != null && !fromRaw.isBlank()) {
+                        from = java.sql.Date.valueOf(fromRaw.trim());
+                    }
+                } catch (Exception e) {
+                    from = null;
+                }
+
+                try {
+                    if (toRaw != null && !toRaw.isBlank()) {
+                        to = java.sql.Date.valueOf(toRaw.trim());
+                    }
+                } catch (Exception e) {
+                    to = null;
+                }
+
+                if (movementType == null || movementType.isBlank()) {
+                    movementType = "ALL";
+                }
+
+                int page = parseInt(request.getParameter("page"), 1);
+                if (page < 1) {
+                    page = 1;
+                }
+
+                int pageSize = 5;
+
+                if (from != null && to != null && from.after(to)) {
+                    request.setAttribute("err", "From Date cannot be later than To Date.");
+                    from = null;
+                    to = null;
+                    fromRaw = "";
+                    toRaw = "";
+                }
+
+                int totalItems = dao.count(keyword, movementType, referenceCode, performedBy, from, to);
+                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
+
+                List<StockMovementHistoryItem> rows
+                        = dao.list(keyword, movementType, referenceCode, performedBy, from, to, page, pageSize);
+
+                request.setAttribute("rows", rows);
+
+                request.setAttribute("keyword", keyword);
+                request.setAttribute("movementType", movementType);
+                request.setAttribute("referenceCode", referenceCode);
+                request.setAttribute("performedBy", performedBy);
+                request.setAttribute("from", fromRaw);
+                request.setAttribute("to", toRaw);
+
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                request.setAttribute("totalItems", totalItems);
+                request.setAttribute("totalPages", totalPages);
+                break;
+            }
             case "admin/reset-requests": {
 
                 List<ResetRequest> pending = userDAO.getPendingResetRequests();
@@ -2028,6 +2109,8 @@ public class Home extends HttpServlet {
                         return "low_stock_report.jsp";
                     case "best-selling-product-statistics":
                         return "best_selling_product_statistics.jsp";
+                    case "stock-movement-history":
+                        return "stock_movement_history.jsp";
                     case "export-receipt-list":
                         return "export_receipt_list.jsp";
                     case "export-receipt-detail":

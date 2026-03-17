@@ -246,4 +246,8 @@
        class="${currentPage == 'best-selling-product-statistics' ? 'active' : ''}">
         Best-selling Product Statistics
     </a>
+    <a href="${pageContext.request.contextPath}/home?p=stock-movement-history"
+       class="${currentPage == 'stock-movement-history' ? 'active' : ''}">
+        Stock Movement History
+    </a>
 </div>
