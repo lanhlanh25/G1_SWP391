@@ -11,7 +11,7 @@
 %>
 
 
-<div class="section-title">Overview</div>
+<%--<div class="section-title">Overview</div>
 <ul>
     <li>
         <a class="<%= "dashboard".equals(currentPage) ? "active" : "" %>"
@@ -19,7 +19,7 @@
             Dashboard
         </a>
     </li>
-</ul>
+</ul>--%>
 
 <div class="section-title">Warehouse</div>
 <ul>

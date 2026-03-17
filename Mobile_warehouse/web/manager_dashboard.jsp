@@ -22,19 +22,15 @@
         <div class="card kpi-card">
             <div class="kpi-label">Pending Approvals</div>
             <div class="kpi-value">${pendingApprovals}</div>
-            <div class="kpi-note">Requests waiting</div>
+            <div class="kpi-note">New import and export requests</div>
         </div>
 
-        <div class="card kpi-card">
-            <div class="kpi-label">Overdue Approvals</div>
-            <div class="kpi-value">${overdueApprovals}</div>
-            <div class="kpi-note">Waiting more than 24 hours</div>
-        </div>
+        
 
         <div class="card kpi-card">
             <div class="kpi-label">Low-stock Products</div>
-            <div class="kpi-value">—</div>
-            <div class="kpi-note">Coming soon</div>
+            <div class="kpi-value">${lowStockProducts}</div>
+            <div class="kpi-note">At or below reorder point</div>
         </div>
 
         <div class="card kpi-card">
@@ -72,7 +68,7 @@
             <div class="kpi-value" style="color:#2563eb;">${invTotalClosing}</div>
             <div class="kpi-note">Current on-hand</div>
         </div>
-        <div class="card kpi-card" style="border-left:4px solid #a855f7; grid-column: span 1;">
+            <%--<div class="card kpi-card" style="border-left:4px solid #a855f7; grid-column: span 1;">
             <div class="kpi-label">View Full Report</div>
             <div class="kpi-value" style="font-size:14px; font-weight:500; margin-top:8px;">
                 <a href="<%=ctx%>/inventory-report" class="btn btn-outline" style="width:100%; text-align:center;">
@@ -80,7 +76,7 @@
                 </a>
             </div>
             <div class="kpi-note">${invMonthLabel}</div>
-        </div>
+        </div>--%>
     </section>
 
     <section class="dashboard-main">
@@ -93,7 +89,14 @@
                         Select a request type to view only the approval queue for that category.
                     </div>
                 </div>
-                <a href="<%=ctx%>/home?p=<%=approvalType%>-receipt-list" class="link-lite">View All &gt;</a>
+                <c:choose>
+                    <c:when test="${param.approvalType eq 'export'}">
+                        <a href="<%=ctx%>/home?p=export-request-list&status=NEW" class="link-lite">View All &gt;</a>
+                    </c:when>
+                    <c:otherwise>
+                        <a href="<%=ctx%>/home?p=import-request-list&status=NEW" class="link-lite">View All &gt;</a>
+                    </c:otherwise>
+                </c:choose>
             </div>
 
             <div class="card-body">
@@ -127,8 +130,6 @@
                                 <th>Code</th>
                                 <th>Requested By</th>
                                 <th>Requested Time</th>
-                                <th>Waiting Time</th>
-                                <th>Priority</th>
                                 <th>Status</th>
                                 <th>Action</th>
                             </tr>
@@ -143,12 +144,6 @@
                                                 <td>${r.code}</td>
                                                 <td>${r.requestedBy}</td>
                                                 <td>${r.requestedTime}</td>
-                                                <td>${r.waitingTime}</td>
-                                                <td>
-                                                    <span class="badge ${r.priority eq 'High' ? 'badge-warning' : 'badge-info'}">
-                                                        ${r.priority}
-                                                    </span>
-                                                </td>
                                                 <td><span class="badge badge-muted">${r.status}</span></td>
                                                 <td>
                                                     <a class="btn btn-sm" href="<%=ctx%>/home?p=import-request-detail&id=${r.id}">
@@ -160,7 +155,7 @@
                                     </c:when>
                                     <c:otherwise>
                                         <tr>
-                                            <td colspan="7" class="empty-state">No import requests found.</td>
+                                            <td colspan="5" class="empty-state">No import requests found.</td>
                                         </tr>
                                     </c:otherwise>
                                 </c:choose>
@@ -174,15 +169,9 @@
                                                 <td>${r.code}</td>
                                                 <td>${r.requestedBy}</td>
                                                 <td>${r.requestedTime}</td>
-                                                <td>${r.waitingTime}</td>
+                                                <td><span class="badge badge-active">${r.status}</span></td>
                                                 <td>
-                                                    <span class="badge ${r.priority eq 'High' ? 'badge-warning' : 'badge-info'}">
-                                                        ${r.priority}
-                                                    </span>
-                                                </td>
-                                                <td><span class="badge badge-muted">${r.status}</span></td>
-                                                <td>
-                                                    <a class="btn btn-sm" href="<%=ctx%>/home?p=export-request-detail&id=${r.id}">
+                                                    <a class="btn btn-sm" href="<%=ctx%>/home?p=import-request-detail&id=${r.id}">
                                                         View Detail
                                                     </a>
                                                 </td>
@@ -191,42 +180,13 @@
                                     </c:when>
                                     <c:otherwise>
                                         <tr>
-                                            <td colspan="7" class="empty-state">No export requests found.</td>
+                                            <td colspan="5" class="empty-state">No export requests found.</td>
                                         </tr>
                                     </c:otherwise>
                                 </c:choose>
                             </c:if>
 
-                            <c:if test="${param.approvalType eq 'delete'}">
-                                <c:choose>
-                                    <c:when test="${not empty dashboardDeleteRequests}">
-                                        <c:forEach var="r" items="${dashboardDeleteRequests}">
-                                            <tr>
-                                                <td>${r.code}</td>
-                                                <td>${r.requestedBy}</td>
-                                                <td>${r.requestedTime}</td>
-                                                <td>${r.waitingTime}</td>
-                                                <td>
-                                                    <span class="badge ${r.priority eq 'High' ? 'badge-warning' : 'badge-info'}">
-                                                        ${r.priority}
-                                                    </span>
-                                                </td>
-                                                <td><span class="badge badge-muted">${r.status}</span></td>
-                                                <td>
-                                                    <a class="btn btn-sm" href="<%=ctx%>/home?p=request-delete-import-receipt-list">
-                                                        Open List
-                                                    </a>
-                                                </td>
-                                            </tr>
-                                        </c:forEach>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <tr>
-                                            <td colspan="7" class="empty-state">No delete requests found.</td>
-                                        </tr>
-                                    </c:otherwise>
-                                </c:choose>
-                            </c:if>
+
 
                         </tbody>
                     </table>
@@ -236,14 +196,17 @@
 
         <!-- Right side -->
         <div class="section-stack">
-            <div class="card">
+            <%--<div class="card">
                 <div class="card-header">
-                    <div class="h2">Alerts</div>
+                    <div>
+                        <div class="h2">Top Exported Products</div>
+                        <div class="card-subtitle">Best-performing exported products in the selected period.</div>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="empty-state">Coming soon</div>
                 </div>
-            </div>
+            </div>--%>
 
             <div class="card">
                 <div class="card-header">
@@ -272,8 +235,68 @@
                 </div>
                 <a href="<%=ctx%>/home?p=low-stock-report" class="link-lite">View All &gt;</a>
             </div>
-            <div class="card-body">
-                <div class="empty-state">Coming soon</div>
+
+            <div class="card-body" style="padding-top:0;">
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Supplier</th>
+                                <th>Stock</th>
+                                <th>ROP</th>
+                                <th>Status</th>
+                                <th>Suggested Qty</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <c:choose>
+                                <c:when test="${not empty dashboardLowStockRows}">
+                                    <c:forEach var="item" items="${dashboardLowStockRows}">
+                                        <tr>
+                                            <td>
+                                                <div><b>${item.productName}</b></div>
+                                                <div class="small">${item.productCode}</div>
+                                            </td>
+                                            <td>${item.supplierName}</td>
+                                            <td>${item.currentStock}</td>
+                                            <td>${item.rop}</td>
+                                            <td>
+                                                <c:choose>
+                                                    <c:when test="${item.ropStatus == 'Out Of Stock'}">
+                                                        <span class="badge badge-danger">Out Of Stock</span>
+                                                    </c:when>
+                                                    <c:when test="${item.ropStatus == 'Reorder Needed'}">
+                                                        <span class="badge badge-warning">Reorder Needed</span>
+                                                    </c:when>
+                                                    <c:when test="${item.ropStatus == 'At ROP Level'}">
+                                                        <span class="badge badge-info">At ROP Level</span>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="badge badge-active">OK</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </td>
+                                            <td>${item.suggestedReorderQty}</td>
+                                            <td>
+                                                <a class="btn btn-sm"
+                                                   href="<%=ctx%>/home?p=product-detail&id=${item.productId}">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </c:forEach>
+                                </c:when>
+                                <c:otherwise>
+                                    <tr>
+                                        <td colspan="7" class="empty-state">No low stock products found.</td>
+                                    </tr>
+                                </c:otherwise>
+                            </c:choose>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 

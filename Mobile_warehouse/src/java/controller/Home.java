@@ -466,92 +466,46 @@ public class Home extends HttpServlet {
                     ImportReceiptDeleteRequestDAO deleteDAO = new ImportReceiptDeleteRequestDAO();
                     ImportReceiptListDAO importReceiptListDAO = new ImportReceiptListDAO();
                     ExportReceiptDAO exportReceiptDAO = new ExportReceiptDAO();
+                    LowStockReportDAO lowStockDAO = new LowStockReportDAO();
 
                     // =========================
                     // APPROVAL COUNTS
                     // =========================
-                    int pendingImportCount = importRequestDAO.countByStatus("PENDING");
-                    int pendingExportCount = exportRequestDAO.countByStatus("PENDING");
-                    int pendingDeleteCount = deleteDAO.countRequests(null, null);
+                    int pendingImportCount = importRequestDAO.countByStatus("NEW");
+                    int pendingExportCount = exportRequestDAO.countByStatus("NEW");
 
-                    int pendingApprovals = pendingImportCount + pendingExportCount + pendingDeleteCount;
-                    int overdueApprovals = 0;
+                    int pendingApprovals = pendingImportCount + pendingExportCount;
 
                     List<DashboardApprovalRow> dashboardImportRequests = new ArrayList<>();
                     List<DashboardApprovalRow> dashboardExportRequests = new ArrayList<>();
                     List<DashboardApprovalRow> dashboardDeleteRequests = new ArrayList<>();
 
                     // =========================
-                    // IMPORT REQUESTS
+                    // IMPORT REQUESTS 
                     // =========================
-                    List<ImportRequest> importRequests = importRequestDAO.listByStatus("PENDING", 5);
+                    List<ImportRequest> importRequests = importRequestDAO.listByStatus("NEW", 5);
                     for (ImportRequest r : importRequests) {
-                        String waiting = calcWaitingTime(r.getRequestDate());
-                        String priority = calcPriorityByWaiting(r.getRequestDate());
-
-                        long diffMs = System.currentTimeMillis() - r.getRequestDate().getTime();
-                        long hours = diffMs / (1000L * 60 * 60);
-                        if (hours >= 24) {
-                            overdueApprovals++;
-                        }
 
                         dashboardImportRequests.add(new DashboardApprovalRow(
                                 r.getRequestId(),
                                 r.getRequestCode(),
                                 r.getCreatedByName(),
                                 formatDateTime(r.getRequestDate()),
-                                waiting,
-                                priority,
                                 r.getStatus()
                         ));
                     }
 
                     // =========================
-                    // EXPORT REQUESTS
+                    // EXPORT REQUESTS 
                     // =========================
-                    List<ExportRequest> exportRequests = exportRequestDAO.listByStatus("PENDING", 5);
+                    List<ExportRequest> exportRequests = exportRequestDAO.listByStatus("NEW", 5);
                     for (ExportRequest r : exportRequests) {
-                        String waiting = calcWaitingTime(r.getRequestDate());
-                        String priority = calcPriorityByWaiting(r.getRequestDate());
-
-                        long diffMs = System.currentTimeMillis() - r.getRequestDate().getTime();
-                        long hours = diffMs / (1000L * 60 * 60);
-                        if (hours >= 24) {
-                            overdueApprovals++;
-                        }
 
                         dashboardExportRequests.add(new DashboardApprovalRow(
                                 r.getRequestId(),
                                 r.getRequestCode(),
                                 r.getCreatedByName(),
                                 formatDateTime(r.getRequestDate()),
-                                waiting,
-                                priority,
-                                r.getStatus()
-                        ));
-                    }
-
-                    // =========================
-                    // DELETE REQUESTS
-                    // =========================
-                    List<ImportReceiptDeleteRequest> deleteRequests = deleteDAO.listRequests(null, null, 1, 5);
-                    for (ImportReceiptDeleteRequest r : deleteRequests) {
-                        String waiting = calcWaitingTime(r.getRequestedAt());
-                        String priority = calcPriorityByWaiting(r.getRequestedAt());
-
-                        long diffMs = System.currentTimeMillis() - r.getRequestedAt().getTime();
-                        long hours = diffMs / (1000L * 60 * 60);
-                        if (hours >= 24) {
-                            overdueApprovals++;
-                        }
-
-                        dashboardDeleteRequests.add(new DashboardApprovalRow(
-                                r.getRequestId(),
-                                r.getImportCode(),
-                                r.getRequestedByName(),
-                                formatDateTime(r.getRequestedAt()),
-                                waiting,
-                                priority,
                                 r.getStatus()
                         ));
                     }
@@ -570,8 +524,14 @@ public class Home extends HttpServlet {
                     // =========================
                     // TODAY EXPORTED UNITS
                     // =========================
-                    List<ExportReceiptListItem> todayExports = exportReceiptDAO.list(null, "ALL",
-                            java.sql.Date.valueOf(today), java.sql.Date.valueOf(today), 1, 200);
+                    List<ExportReceiptListItem> todayExports = exportReceiptDAO.list(
+                            null,
+                            "ALL",
+                            java.sql.Date.valueOf(today),
+                            java.sql.Date.valueOf(today),
+                            1,
+                            200
+                    );
 
                     int todayExportedUnits = 0;
                     for (ExportReceiptListItem item : todayExports) {
@@ -579,11 +539,17 @@ public class Home extends HttpServlet {
                     }
 
                     // =========================
+                    // LOW STOCK SUMMARY + DASHBOARD ROWS
+                    // =========================
+                    LowStockSummaryDTO lowStockSummary = lowStockDAO.getSummary();
+                    List<LowStockReportItem> dashboardLowStockRows
+                            = lowStockDAO.getLowStockReport(null, null, null, null, null, 1, 5);
+
+                    // =========================
                     // RECENT ACTIVITIES
                     // =========================
                     List<DashboardActivityRow> dashboardRecentActivities = new ArrayList<>();
 
-                    // recent imports
                     List<ImportReceiptListItem> recentImports = importReceiptListDAO.list(null, "all", null, null, 1, 5);
                     for (ImportReceiptListItem item : recentImports) {
                         if (item.getReceiptDate() != null) {
@@ -597,7 +563,6 @@ public class Home extends HttpServlet {
                         }
                     }
 
-                    // recent exports
                     List<ExportReceiptListItem> recentExports = exportReceiptDAO.list(null, "ALL", null, null, 1, 5);
                     for (ExportReceiptListItem item : recentExports) {
                         if (item.getExportDate() != null) {
@@ -617,33 +582,39 @@ public class Home extends HttpServlet {
                         dashboardRecentActivities = new ArrayList<>(dashboardRecentActivities.subList(0, 6));
                     }
 
-                    // =========================
-                    // SET ATTRIBUTES
-                    // =========================
+// =========================
+// SET ATTRIBUTES
+// =========================
+                    request.setAttribute("approvalType", approvalType);
+
                     request.setAttribute("pendingApprovals", pendingApprovals);
-                    request.setAttribute("overdueApprovals", overdueApprovals);
+                  
                     request.setAttribute("todayImportedUnits", todayImportedUnits);
                     request.setAttribute("todayExportedUnits", todayExportedUnits);
 
                     request.setAttribute("dashboardImportRequests", dashboardImportRequests);
                     request.setAttribute("dashboardExportRequests", dashboardExportRequests);
                     request.setAttribute("dashboardDeleteRequests", dashboardDeleteRequests);
+
+                    request.setAttribute("lowStockProducts",
+                            lowStockSummary != null ? lowStockSummary.getProductsBelowRop() : 0);
+                    request.setAttribute("dashboardLowStockRows", dashboardLowStockRows);
+
                     request.setAttribute("dashboardRecentActivities", dashboardRecentActivities);
 
-                    // not implemented yet
-                    request.setAttribute("lowStockProducts", "—");
                     request.setAttribute("alertsComingSoon", true);
-                    request.setAttribute("lowStockComingSoon", true);
+                    request.setAttribute("lowStockComingSoon", false);
 
-                    // =========================
-                    // INVENTORY REPORT SUMMARY (month-to-date)
-                    // =========================
+// =========================
+// INVENTORY REPORT SUMMARY (month-to-date)
+// =========================
                     try {
                         InventoryReportDAO irDAO = new InventoryReportDAO();
                         LocalDate firstOfMonth = today.withDayOfMonth(1);
                         java.sql.Date invFrom = java.sql.Date.valueOf(firstOfMonth);
                         java.sql.Date invTo = java.sql.Date.valueOf(today);
                         java.util.Map<String, Integer> invSummary = irDAO.getSummary(invFrom, invTo, null);
+
                         request.setAttribute("invTotalOpening", invSummary.getOrDefault("totalOpening", 0));
                         request.setAttribute("invTotalImport", invSummary.getOrDefault("totalImport", 0));
                         request.setAttribute("invTotalExport", invSummary.getOrDefault("totalExport", 0));
@@ -655,6 +626,18 @@ public class Home extends HttpServlet {
                         LOG.log(Level.WARNING, "Could not load inventory summary for dashboard", exInv);
                     }
                 }
+                break;
+            }
+
+            case "export-center": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !"MANAGER".equalsIgnoreCase(roleName)) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                BrandDAO dao = new BrandDAO();
+                request.setAttribute("allBrands", dao.list(null, "active", "name", "ASC", 1, 1000));
                 break;
             }
             // =========================
@@ -1874,6 +1857,97 @@ public class Home extends HttpServlet {
                 request.setAttribute("totalItems", totalItems);
                 break;
             }
+            case "best-selling-product-statistics": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !"MANAGER".equalsIgnoreCase(roleName)) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                ManagerViewBestSellingProductStatistics.handle(request, response);
+                break;
+            }
+            case "stock-movement-history": {
+                String roleName = (String) request.getSession().getAttribute("roleName");
+                if (roleName == null || !"MANAGER".equalsIgnoreCase(roleName)) {
+                    response.sendError(403, "Forbidden");
+                    return;
+                }
+
+                StockMovementHistoryDAO dao = new StockMovementHistoryDAO();
+
+                String keyword = request.getParameter("keyword");
+                String movementType = request.getParameter("movementType");
+                String referenceCode = request.getParameter("referenceCode");
+                String performedBy = request.getParameter("performedBy");
+                String fromRaw = request.getParameter("from");
+                String toRaw = request.getParameter("to");
+
+                java.sql.Date from = null;
+                java.sql.Date to = null;
+
+                try {
+                    if (fromRaw != null && !fromRaw.isBlank()) {
+                        from = java.sql.Date.valueOf(fromRaw.trim());
+                    }
+                } catch (Exception e) {
+                    from = null;
+                }
+
+                try {
+                    if (toRaw != null && !toRaw.isBlank()) {
+                        to = java.sql.Date.valueOf(toRaw.trim());
+                    }
+                } catch (Exception e) {
+                    to = null;
+                }
+
+                if (movementType == null || movementType.isBlank()) {
+                    movementType = "ALL";
+                }
+
+                int page = parseInt(request.getParameter("page"), 1);
+                if (page < 1) {
+                    page = 1;
+                }
+
+                int pageSize = 5;
+
+                if (from != null && to != null && from.after(to)) {
+                    request.setAttribute("err", "From Date cannot be later than To Date.");
+                    from = null;
+                    to = null;
+                    fromRaw = "";
+                    toRaw = "";
+                }
+
+                int totalItems = dao.count(keyword, movementType, referenceCode, performedBy, from, to);
+                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
+
+                List<StockMovementHistoryItem> rows
+                        = dao.list(keyword, movementType, referenceCode, performedBy, from, to, page, pageSize);
+
+                request.setAttribute("rows", rows);
+
+                request.setAttribute("keyword", keyword);
+                request.setAttribute("movementType", movementType);
+                request.setAttribute("referenceCode", referenceCode);
+                request.setAttribute("performedBy", performedBy);
+                request.setAttribute("from", fromRaw);
+                request.setAttribute("to", toRaw);
+
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                request.setAttribute("totalItems", totalItems);
+                request.setAttribute("totalPages", totalPages);
+                break;
+            }
             case "admin/reset-requests": {
 
                 List<ResetRequest> pending = userDAO.getPendingResetRequests();
@@ -1968,6 +2042,8 @@ public class Home extends HttpServlet {
                 switch (p) {
                     case "dashboard":
                         return "manager_dashboard.jsp";
+                    case "export-center":
+                        return "export_center.jsp";
                     case "reports":
                         return "reports.jsp";
                     case "product-add":
@@ -2031,6 +2107,10 @@ public class Home extends HttpServlet {
                         return "create_import_request.jsp";
                     case "low-stock-report":
                         return "low_stock_report.jsp";
+                    case "best-selling-product-statistics":
+                        return "best_selling_product_statistics.jsp";
+                    case "stock-movement-history":
+                        return "stock_movement_history.jsp";
                     case "export-receipt-list":
                         return "export_receipt_list.jsp";
                     case "export-receipt-detail":
@@ -2155,52 +2235,19 @@ public class Home extends HttpServlet {
         return new java.text.SimpleDateFormat("HH:mm").format(date);
     }
 
-    private String calcWaitingTime(java.util.Date createdAt) {
-        if (createdAt == null) {
-            return "";
-        }
-        long diffMs = System.currentTimeMillis() - createdAt.getTime();
-        long hours = diffMs / (1000L * 60 * 60);
-        long days = hours / 24;
-        long remainHours = hours % 24;
-
-        if (days > 0) {
-            return days + "d " + remainHours + "h";
-        }
-        return hours + "h";
-    }
-
-    private String calcPriorityByWaiting(java.util.Date createdAt) {
-        if (createdAt == null) {
-            return "Medium";
-        }
-        long diffMs = System.currentTimeMillis() - createdAt.getTime();
-        long hours = diffMs / (1000L * 60 * 60);
-
-        if (hours >= 24) {
-            return "High";
-        }
-        return "Medium";
-    }
-
     public static class DashboardApprovalRow {
 
         private long id;
         private String code;
         private String requestedBy;
         private String requestedTime;
-        private String waitingTime;
-        private String priority;
         private String status;
 
-        public DashboardApprovalRow(long id, String code, String requestedBy, String requestedTime,
-                String waitingTime, String priority, String status) {
+        public DashboardApprovalRow(long id, String code, String requestedBy, String requestedTime, String status) {
             this.id = id;
             this.code = code;
             this.requestedBy = requestedBy;
             this.requestedTime = requestedTime;
-            this.waitingTime = waitingTime;
-            this.priority = priority;
             this.status = status;
         }
 
@@ -2218,14 +2265,6 @@ public class Home extends HttpServlet {
 
         public String getRequestedTime() {
             return requestedTime;
-        }
-
-        public String getWaitingTime() {
-            return waitingTime;
-        }
-
-        public String getPriority() {
-            return priority;
         }
 
         public String getStatus() {

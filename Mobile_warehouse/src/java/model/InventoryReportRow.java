@@ -19,7 +19,16 @@ public class InventoryReportRow {
     private int rop;              // = CEIL(avgDailySales * leadTimeDays + safetyStock)
     private String ropStatus;     // OK / At ROP Level / Reorder Needed / Out Of Stock
     private int suggestedReorderQty;
+    private int variance;
 
+    public int getVariance() {
+        return variance;
+    }
+
+    public void setVariance(int variance) {
+        this.variance = variance;
+    }
+    
     public InventoryReportRow() {
     }
 

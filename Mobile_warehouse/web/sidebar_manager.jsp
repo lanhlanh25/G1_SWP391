@@ -10,11 +10,11 @@
     String uri = request.getRequestURI();
     if (uri == null) uri = "";
 
-  boolean inventoryOverviewActive = uri.equals(ctx + "/inventory");
-boolean inventoryCountActive = uri.equals(ctx + "/inventory-count");
-boolean inventoryReportActive = uri.equals(ctx + "/inventory-report");     // ← THÊM DÒNG NÀY
-boolean importReportActive = uri.equals(ctx + "/import-receipt-report");
-boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
+    boolean inventoryOverviewActive = uri.equals(ctx + "/inventory");
+    boolean inventoryCountActive = uri.equals(ctx + "/inventory-count");
+    boolean inventoryReportActive = uri.equals(ctx + "/inventory-report");
+    boolean importReportActive = uri.equals(ctx + "/import-receipt-report");
+    boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
 %>
 
 <div>
@@ -55,6 +55,12 @@ boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
                 Variant Matrix
             </a>
         </li>
+        <%--<li>
+            <a class="<%= "low-stock-report".equals(currentPage) ? "active" : "" %>"
+               href="<%=ctx%>/home?p=low-stock-report">
+                Low Stock Report
+            </a>
+</li>--%>
     </ul>
 
     <div class="section-title">Transactions</div>
@@ -74,8 +80,8 @@ boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
                     Receipt List
                 </a>
             </li>
-            
-           
+
+
             <li>
                 <a class="<%= importReportActive ? "active" : "" %>"
                    href="<%=ctx%>/import-receipt-report">
@@ -224,16 +230,31 @@ boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
                    href="<%=ctx%>/home?p=product-list">
                     Product List
                 </a>
-            </li>  
+            </li>
         </ul>
-   
-                
-   
+
+
+
 
     </details>
-
-  <a class="${currentPage == 'low-stock-report' ? 'active' : ''}"
-               href="${pageContext.request.contextPath}/home?p=low-stock-report">
-                Low Stock Report
-            </a> 
+    <ul>
+        <li>
+            <a class="<%= "export-center".equals(currentPage) ? "active" : "" %>"
+               href="<%=ctx%>/home?p=export-center">
+                Export Center
+            </a>
+        </li>
+    </ul>       
+    <a class="${currentPage == 'low-stock-report' ? 'active' : ''}"
+       href="${pageContext.request.contextPath}/home?p=low-stock-report">
+        Low Stock Report
+    </a> 
+    <a href="${pageContext.request.contextPath}/home?p=best-selling-product-statistics"
+       class="${currentPage == 'best-selling-product-statistics' ? 'active' : ''}">
+        Best-selling Product Statistics
+    </a>
+    <a href="${pageContext.request.contextPath}/home?p=stock-movement-history"
+       class="${currentPage == 'stock-movement-history' ? 'active' : ''}">
+        Stock Movement History
+    </a>
 </div>
