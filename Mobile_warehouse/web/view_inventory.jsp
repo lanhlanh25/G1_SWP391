@@ -136,5 +136,111 @@
       </table>
     </div>
   </div>
+<%-- Pagination --%>
+<c:if test="${totalPages > 1}">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; flex-wrap:wrap; gap:8px;">
+    
+    <%-- Page info --%>
+    <div class="small muted">
+      Showing ${(pageNumber - 1) * pageSize + 1}–${pageNumber * pageSize > totalItems ? totalItems : pageNumber * pageSize}
+      of ${totalItems} items
+    </div>
 
+    <%-- Page buttons --%>
+    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+
+      <%-- Previous --%>
+      <c:choose>
+        <c:when test="${pageNumber <= 1}">
+          <button class="btn btn-outline btn-sm" disabled>‹ Prev</button>
+        </c:when>
+        <c:otherwise>
+          <c:url var="prevUrl" value="/inventory">
+            <c:param name="q"           value="${q}"/>
+            <c:param name="brandId"     value="${brandId}"/>
+            <c:param name="stockStatus" value="${stockStatus}"/>
+            <c:param name="page"        value="${pageNumber - 1}"/>
+            <c:param name="pageSize"    value="${pageSize}"/>
+          </c:url>
+          <a class="btn btn-outline btn-sm" href="${prevUrl}">‹ Prev</a>
+        </c:otherwise>
+      </c:choose>
+
+      <%-- Page numbers (show up to 5 around current) --%>
+      <c:set var="startPage" value="${pageNumber - 2 > 1 ? pageNumber - 2 : 1}"/>
+      <c:set var="endPage"   value="${pageNumber + 2 < totalPages ? pageNumber + 2 : totalPages}"/>
+
+      <c:if test="${startPage > 1}">
+        <c:url var="p1Url" value="/inventory">
+          <c:param name="q" value="${q}"/><c:param name="brandId" value="${brandId}"/>
+          <c:param name="stockStatus" value="${stockStatus}"/><c:param name="page" value="1"/>
+          <c:param name="pageSize" value="${pageSize}"/>
+        </c:url>
+        <a class="btn btn-outline btn-sm" href="${p1Url}">1</a>
+        <c:if test="${startPage > 2}"><span style="align-self:center; padding:0 4px;">…</span></c:if>
+      </c:if>
+
+      <c:forEach var="i" begin="${startPage}" end="${endPage}">
+        <c:url var="pageUrl" value="/inventory">
+          <c:param name="q"           value="${q}"/>
+          <c:param name="brandId"     value="${brandId}"/>
+          <c:param name="stockStatus" value="${stockStatus}"/>
+          <c:param name="page"        value="${i}"/>
+          <c:param name="pageSize"    value="${pageSize}"/>
+        </c:url>
+        <c:choose>
+          <c:when test="${i == pageNumber}">
+            <button class="btn btn-primary btn-sm" disabled>${i}</button>
+          </c:when>
+          <c:otherwise>
+            <a class="btn btn-outline btn-sm" href="${pageUrl}">${i}</a>
+          </c:otherwise>
+        </c:choose>
+      </c:forEach>
+
+      <c:if test="${endPage < totalPages}">
+        <c:if test="${endPage < totalPages - 1}"><span style="align-self:center; padding:0 4px;">…</span></c:if>
+        <c:url var="lastUrl" value="/inventory">
+          <c:param name="q" value="${q}"/><c:param name="brandId" value="${brandId}"/>
+          <c:param name="stockStatus" value="${stockStatus}"/><c:param name="page" value="${totalPages}"/>
+          <c:param name="pageSize" value="${pageSize}"/>
+        </c:url>
+        <a class="btn btn-outline btn-sm" href="${lastUrl}">${totalPages}</a>
+      </c:if>
+
+      <%-- Next --%>
+      <c:choose>
+        <c:when test="${pageNumber >= totalPages}">
+          <button class="btn btn-outline btn-sm" disabled>Next ›</button>
+        </c:when>
+        <c:otherwise>
+          <c:url var="nextUrl" value="/inventory">
+            <c:param name="q"           value="${q}"/>
+            <c:param name="brandId"     value="${brandId}"/>
+            <c:param name="stockStatus" value="${stockStatus}"/>
+            <c:param name="page"        value="${pageNumber + 1}"/>
+            <c:param name="pageSize"    value="${pageSize}"/>
+          </c:url>
+          <a class="btn btn-outline btn-sm" href="${nextUrl}">Next ›</a>
+        </c:otherwise>
+      </c:choose>
+
+    </div>
+
+    <%-- Page size selector --%>
+    <form method="get" action="${pageContext.request.contextPath}/inventory" style="display:flex; align-items:center; gap:6px;">
+      <input type="hidden" name="q"           value="${fn:escapeXml(q)}"/>
+      <input type="hidden" name="brandId"     value="${brandId}"/>
+      <input type="hidden" name="stockStatus" value="${stockStatus}"/>
+      <input type="hidden" name="page"        value="1"/>
+      <span class="small muted">Rows:</span>
+      <select class="select" name="pageSize" onchange="this.form.submit()" style="width:70px;">
+        <option value="10"  <c:if test="${pageSize==10}">selected</c:if>>10</option>
+        <option value="20"  <c:if test="${pageSize==20}">selected</c:if>>20</option>
+        <option value="50"  <c:if test="${pageSize==50}">selected</c:if>>50</option>
+      </select>
+    </form>
+
+  </div>
+</c:if>
 </div>
