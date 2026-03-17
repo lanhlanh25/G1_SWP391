@@ -8,7 +8,7 @@
 <%
   String ctx = request.getContextPath();
 
-  // keep list state (NOTE: đừng đặt tên biến là "page" vì trùng implicit object)
+  
   String qParam = request.getParameter("q");
   String statusParam = request.getParameter("status");
   String sortByParam = request.getParameter("sortBy");
@@ -16,7 +16,7 @@
   String pageParam = request.getParameter("page");
 %>
 
-<div class="container">
+<div class="page-wrap-sm">
   <div class="topbar">
     <div>
       <div class="title">Add New Brand</div>
@@ -38,7 +38,7 @@
     <div class="card-body">
       <form class="form" method="post" action="<%=ctx%>/manager/brand-create" onsubmit="return validateDesc255();">
 
-        <!-- keep list state -->
+      
         <input type="hidden" name="q" value="<%= (qParam==null?"":qParam) %>"/>
         <input type="hidden" name="status" value="<%= (statusParam==null?"":statusParam) %>"/>
         <input type="hidden" name="sortBy" value="<%= (sortByParam==null?"":sortByParam) %>"/>

@@ -6,7 +6,10 @@
 <div class="page-wrap">
 
     <div class="topbar">
-        <div class="title">Export Request List</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
+            <h1 class="h1" style="margin:0;">Export Request List</h1>
+        </div>
     </div>
 
     <div class="card" style="margin-bottom:14px;">
@@ -114,8 +117,8 @@
         <c:param name="expDate" value="${expDate}"/>
     </c:url>
 
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px; flex-wrap:wrap; gap:10px;">
-        <div class="small muted">Total: ${totalItems} item(s) • Page ${page}/${totalPages}</div>
+    <div class="paging-footer">
+        <div class="paging-info">Total: <b>${totalItems}</b> item(s) • Page <b>${page}</b>/<b>${totalPages}</b></div>
         <div class="paging">
             <c:choose>
                 <c:when test="${page > 1}">
@@ -129,7 +132,7 @@
             <c:forEach var="i" begin="1" end="${totalPages}">
                 <c:choose>
                     <c:when test="${i==page}">
-                        <b>${i}</b>
+                        <span class="paging-btn active">${i}</span>
                     </c:when>
                     <c:otherwise>
                         <a class="paging-btn" href="${baseUrl}&page=${i}">${i}</a>

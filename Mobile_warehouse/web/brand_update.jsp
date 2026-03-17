@@ -16,7 +16,7 @@
   String pageParam = request.getParameter("page");
 %>
 
-<div class="container">
+<div class="page-wrap-sm">
   <div class="topbar">
     <div>
       <div class="title">Update Brand</div>

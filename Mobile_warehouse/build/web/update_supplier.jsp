@@ -11,7 +11,7 @@
 <c:if test="${empty email}">       <c:set var="email"        value="${s.email}"/></c:if>
 <c:if test="${empty address}">     <c:set var="address"      value="${s.address}"/></c:if>
 
-<div class="page-wrap">
+<div class="page-wrap-sm">
 
   <div class="topbar">
     <div class="title">Update Supplier</div>

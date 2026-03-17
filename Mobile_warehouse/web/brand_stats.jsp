@@ -19,12 +19,15 @@
     <c:param name="range" value="${range}" />
 </c:url>
 
-<div class="container page-wrap brand-stats-page">
-    <!-- Page Header -->
-    <div class="topbar brand-stats-topbar">
-        <div>
-            <div class="title">Brand Statistics</div>
-            <div class="small">Track products, stock units and movement by brand</div>
+<div class="page-wrap-md brand-stats-page">
+
+    <div class="topbar">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
+            <div>
+                <h1 class="title" style="margin:0;">Brand Statistics</h1>
+                <div class="small">Track products, stock units and movement by brand</div>
+            </div>
         </div>
 
         <div class="actions">
@@ -49,57 +52,57 @@
         <div class="msg-err">${param.err}</div>
     </c:if>
 
-    <!-- Summary cards -->
-<div class="brand-summary-grid">
-    <div class="card brand-summary-card">
-        <div class="brand-summary-label">Total Brands</div>
-        <div class="brand-summary-value">${summary.totalBrands}</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <div class="card" style="margin-bottom:0; padding:20px;">
+        <div class="muted">Total Brands</div>
+        <div style="font-size:24px; font-weight:700; color:var(--text);">${summary.totalBrands}</div>
     </div>
 
-    <div class="card brand-summary-card">
-        <div class="brand-summary-label">Products types</div>
-        <div class="brand-summary-value">${summary.totalProducts}</div>
+    <div class="card" style="margin-bottom:0; padding:20px;">
+        <div class="muted">Products types</div>
+        <div style="font-size:24px; font-weight:700; color:var(--text);">${summary.totalProducts}</div>
     </div>
 
-    <div class="card brand-summary-card">
-        <div class="brand-summary-label">Total Stock Units</div>
-        <div class="brand-summary-value">${summary.totalStockUnits}</div>
+    <div class="card" style="margin-bottom:0; padding:20px;">
+        <div class="muted">Total Stock Units</div>
+        <div style="font-size:24px; font-weight:700; color:var(--text);">${summary.totalStockUnits}</div>
     </div>
 
-    <div class="card brand-summary-card">
-        <div class="brand-summary-label">Low Stock Products</div>
-        <div class="brand-summary-value">${summary.lowStockProducts}</div>
+    <div class="card" style="margin-bottom:0; padding:20px;">
+        <div class="muted">Low Stock Products</div>
+        <div style="font-size:24px; font-weight:700; color:var(--danger);">${summary.lowStockProducts}</div>
     </div>
 
-    <div class="card brand-summary-card">
-        <div class="brand-summary-label">Imported Units (Range)</div>
-        <div class="brand-summary-value">${summary.importedUnitsInRange}</div>
+    <div class="card" style="margin-bottom:0; padding:20px;">
+        <div class="muted">Imported (Range)</div>
+        <div style="font-size:24px; font-weight:700; color:var(--info);">${summary.importedUnitsInRange}</div>
     </div>
 
-    <div class="card brand-summary-card">
-        <div class="brand-summary-label">Exported Units (Range)</div>
-        <div class="brand-summary-value">${summary.exportedUnitsInRange}</div>
+    <div class="card" style="margin-bottom:0; padding:20px;">
+        <div class="muted">Exported (Range)</div>
+        <div style="font-size:24px; font-weight:700; color:var(--info);">${summary.exportedUnitsInRange}</div>
     </div>
 </div>
 
-    <!-- Filter panel -->
-    <div class="card filter-panel brand-filter-panel">
-        <div class="filter-panel-head">
+
+    <div class="card">
+        <div class="card-header">
             <div>
-                <div class="filter-panel-title">Filter & Sort</div>
-                <div class="filter-panel-sub">
+                <div class="h2">Filter & Sort</div>
+                <div class="muted">
                     Refine brand statistics by range, brand, status, keyword and sort order.
                 </div>
             </div>
         </div>
 
-        <form method="get" action="${ctx}/home" class="brand-filter-form">
+        <form method="get" action="${ctx}/home" class="card-body">
             <input type="hidden" name="p" value="brand-stats"/>
 
-            <div class="brand-filter-grid">
-                <!-- Row 1 -->
-                <div class="field field-span-2">
-                    <label>Data Range</label>
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+    
+                <div style="grid-column: span 2;">
+                    <label class="label" style="display:block; margin-bottom:8px; font-weight:600; font-size:14px;">Data Range</label>
                     <select class="select" name="range">
                         <option value="all" ${empty range || range=='all' ? 'selected' : ''}>All Time</option>
                         <option value="today" ${range=='today' ? 'selected' : ''}>Today</option>
@@ -111,8 +114,8 @@
                     </select>
                 </div>
 
-                <div class="field">
-                    <label>Brand</label>
+                <div>
+                    <label class="label" style="display:block; margin-bottom:8px; font-weight:600; font-size:14px;">Brand</label>
                     <select class="select" name="brandId" id="brandIdSelect">
                         <option value="" ${empty brandId ? 'selected' : ''}>All Brands</option>
                         <c:forEach items="${allBrands}" var="b">
@@ -123,8 +126,8 @@
                     </select>
                 </div>
 
-                <div class="field">
-                    <label>Brand Status</label>
+                <div>
+                    <label class="label" style="display:block; margin-bottom:8px; font-weight:600; font-size:14px;">Brand Status</label>
                     <select class="select" name="status">
                         <option value="" ${empty status ? 'selected' : ''}>All Status</option>
                         <option value="active" ${status=='active' ? 'selected' : ''}>Active</option>
@@ -132,14 +135,14 @@
                     </select>
                 </div>
 
-                <!-- note row -->
-                <div class="filter-note-row field-span-4">
-                    <div class="field-note">Affects Imported Units and Exported Units only.</div>
+
+                <div style="grid-column: span 4; font-size: 13px; color: var(--info); background: var(--primary-light); padding: 8px 12px; border-radius: 6px;">
+                    Affects Imported Units and Exported Units only.
                 </div>
 
-                <!-- Row 2 -->
-                <div class="field field-span-2">
-                    <label>Search</label>
+       
+                <div style="grid-column: span 2;">
+                    <label class="label" style="display:block; margin-bottom:8px; font-weight:600; font-size:14px;">Search</label>
                     <input
                         class="input"
                         type="text"
@@ -149,8 +152,8 @@
                         placeholder="Search by brand name"/>
                 </div>
 
-                <div class="field">
-                    <label>Sort By</label>
+                <div>
+                    <label class="label" style="display:block; margin-bottom:8px; font-weight:600; font-size:14px;">Sort By</label>
                     <select class="select" name="sortBy">
                         <option value="stock"    ${sortBy=='stock' ? 'selected' : ''}>Total Stock</option>
                         <option value="products" ${sortBy=='products' ? 'selected' : ''}>Product Types</option>
@@ -161,8 +164,8 @@
                     </select>
                 </div>
 
-                <div class="field">
-                    <label>Order</label>
+                <div>
+                    <label class="label" style="display:block; margin-bottom:8px; font-weight:600; font-size:14px;">Order</label>
                     <select class="select" name="sortOrder">
                         <option value="DESC" ${sortOrder=='DESC' ? 'selected' : ''}>Descending</option>
                         <option value="ASC"  ${sortOrder=='ASC' ? 'selected' : ''}>Ascending</option>
@@ -170,14 +173,14 @@
                 </div>
             </div>
 
-            <div class="brand-filter-actions">
+            <div style="margin-top:20px; display:flex; gap:10px;">
                 <button class="btn btn-primary" type="submit">Apply Filters</button>
                 <a class="btn btn-outline" href="${ctx}/home?p=brand-stats">Reset</a>
             </div>
         </form>
     </div>
 
-    <!-- Applied summary -->
+
     <c:set var="statusLabel"
            value="${status=='active' ? 'Active'
                     : status=='inactive' ? 'Inactive'
@@ -225,7 +228,7 @@
         <span class="filter-chip">Sort: <b>${sortLabel} ${orderLabel}</b></span>
     </div>
 
-    <!-- Result table -->
+
     <div class="card card-body brand-table-card">
         <div class="table-wrap">
             <table class="table">
@@ -291,7 +294,7 @@
         </div>
     </div>
 
-    <!-- Paging -->
+
     <div class="paging">
         <c:choose>
             <c:when test="${page <= 1}">

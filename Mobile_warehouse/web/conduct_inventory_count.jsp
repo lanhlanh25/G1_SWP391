@@ -4,9 +4,9 @@
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <style>
-  .ic-wrap { padding: 24px; }
+  .ic-wrap { padding: 0; }
   .ic-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; flex-wrap:wrap; gap:12px; }
-  .ic-title  { font-size:22px; font-weight:800; color:var(--text); letter-spacing:-.02em; margin:0; }
+  .ic-title  { font-size:22px; font-weight:700; color:var(--text); letter-spacing:-.02em; margin:0; }
 
   /* flash messages */
   .ic-msg-ok  { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; padding:10px 16px; border-radius:var(--radius-xs); font-weight:600; margin-bottom:14px; }
@@ -31,8 +31,8 @@
   .ic-card-head { display:flex; align-items:center; justify-content:flex-end; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--surface-2); }
 
   .ic-tbl   { width:100%; border-collapse:collapse; font-size:13.5px; }
-  .ic-tbl th { padding:11px 14px; background:#f8fafd; font-weight:700; font-size:12px; color:var(--text-2); text-transform:uppercase; letter-spacing:.04em; border-bottom:1px solid var(--border); white-space:nowrap; }
-  .ic-tbl td { padding:11px 14px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
+  .ic-tbl th { padding:14px 16px; background:transparent; font-weight:600; font-size:14px; color:var(--muted); border-bottom:1px solid var(--border); white-space:nowrap; }
+  .ic-tbl td { padding:14px 16px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
   .ic-tbl tbody tr:last-child td { border-bottom:none; }
   .ic-tbl tbody tr:hover td      { background:#f7f9ff; }
   .tc { text-align:center; }
@@ -74,7 +74,7 @@
   <!-- Top bar -->
   <div class="ic-topbar">
     <div style="display:flex;align-items:center;gap:14px;">
-      <a href="${ctx}/home" class="btn btn-sm">← Back</a>
+      <a href="${ctx}/home?p=dashboard" class="btn btn-sm">← Back</a>
       <h1 class="ic-title">Conduct Inventory Count</h1>
     </div>
     <button type="button" class="btn btn-primary" id="btnSave">Save Count</button>

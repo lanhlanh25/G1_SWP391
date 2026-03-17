@@ -7,7 +7,7 @@
     if (approvalType == null || approvalType.isBlank()) approvalType = "import";
 %>
 
-<div class="page-wrap manager-dashboard">
+<div class="page-wrap-md manager-dashboard">
 
     <div class="topbar">
         <div>

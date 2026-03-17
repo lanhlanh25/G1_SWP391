@@ -44,14 +44,21 @@
         <meta charset="UTF-8">
         <title>Home</title>
         <%@ include file="/WEB-INF/jspf/common_head.jspf" %>
-        <link rel="stylesheet" href="<%=ctx%>/app.css?v=<%=v%>">
+        <link rel="stylesheet" href="<%=ctx%>/assets/css/app.css?v=<%=v%>">
     </head>
     <body>
+        <script>
+            // Restore sidebar state from localStorage before rendering
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.body.classList.add('sidebar-collapsed');
+            }
+        </script>
         <div class="app">
 
 
             <div class="top">
                 <div class="top-left">
+                    <button class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">☰</button>
                     <a class="brand" href="<%=ctx%>/home?p=dashboard">
                         <span class="brand-mark">MW</span>
                         <span>
@@ -136,5 +143,18 @@
 
             </div>
         </div>
+
+        <script>
+            (function() {
+                var btn = document.getElementById('sidebarToggle');
+                if (btn) {
+                    btn.addEventListener('click', function() {
+                        document.body.classList.toggle('sidebar-collapsed');
+                        var isCollapsed = document.body.classList.contains('sidebar-collapsed');
+                        localStorage.setItem('sidebarCollapsed', isCollapsed);
+                    });
+                }
+            })();
+        </script>
     </body>
 </html>

@@ -143,8 +143,17 @@ public class ExportReceiptDAO {
             params.add("%" + q.trim() + "%");
         }
         if (status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)) {
-            sql.append(" AND er.status = ? ");
-            params.add(status.trim());
+            String upStatus = status.trim().toUpperCase();
+            if (upStatus.equals("COMPLETED")) {
+                sql.append(" AND er.status = 'CONFIRMED' ");
+            } else if (upStatus.equals("PENDING")) {
+                sql.append(" AND er.status IN ('DRAFT', 'PENDING') ");
+            } else if (upStatus.equals("CANCELLED")) {
+                sql.append(" AND er.status IN ('CANCELED', 'CANCELLED') ");
+            } else {
+                sql.append(" AND er.status = ? ");
+                params.add(upStatus);
+            }
         }
         if (from != null) {
             sql.append(" AND DATE(er.export_date) >= ? ");
@@ -195,8 +204,17 @@ public class ExportReceiptDAO {
             params.add("%" + q.trim() + "%");
         }
         if (status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)) {
-            sql.append(" AND er.status = ? ");
-            params.add(status.trim());
+            String upStatus = status.trim().toUpperCase();
+            if (upStatus.equals("COMPLETED")) {
+                sql.append(" AND er.status = 'CONFIRMED' ");
+            } else if (upStatus.equals("PENDING")) {
+                sql.append(" AND er.status IN ('DRAFT', 'PENDING') ");
+            } else if (upStatus.equals("CANCELLED")) {
+                sql.append(" AND er.status IN ('CANCELED', 'CANCELLED') ");
+            } else {
+                sql.append(" AND er.status = ? ");
+                params.add(upStatus);
+            }
         }
         if (from != null) {
             sql.append(" AND DATE(er.export_date) >= ? ");

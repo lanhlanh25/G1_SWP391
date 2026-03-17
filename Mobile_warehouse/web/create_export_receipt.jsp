@@ -18,8 +18,8 @@
     </head>
 
     <body>
-        <div class="page-wrap">
-            <div class="container">
+        <div class="page-wrap-md">
+            <div class="page-wrap-md">
                 <div class="card">
                     <div class="card-body">
 

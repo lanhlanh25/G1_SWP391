@@ -1,7 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
-<div class="page-wrap">
+<div class="page-wrap-md">
 
     <div class="topbar">
         <div class="title">Product Detail</div>

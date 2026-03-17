@@ -1,201 +1,170 @@
-
-<%-- 
-    Document   : user_list
-    Created on : Jan 14, 2026, 12:46:01 AM
-    Author     : Admin
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title>User List</title>
-        <style>
-            body {
-                font-family: Arial;
-                background:#f2f2f2;
-                margin:0;
-            }
-            .topbar {
-                padding:10px;
-            }
-            .btn {
-                display:inline-block;
-                padding:6px 14px;
-                border:2px solid #1f4aa8;
-                background:#4a86d4;
-                color:#000;
-                text-decoration:none;
-                font-weight:600;
-                margin-right:8px;
-            }
-            .btn:hover {
-                opacity:0.9;
-            }
+<%@page import="java.net.URLEncoder"%>
 
-            .wrap {
-                padding: 30px 60px;
-            }
-            h3 {
-                margin:0 0 10px;
-            }
+<%
+    Integer pageObj = (Integer) request.getAttribute("page");
+    Integer totalPagesObj = (Integer) request.getAttribute("totalPages");
 
-            table {
-                border-collapse:collapse;
-                width: 820px;
-                background:#fff;
-            }
-            th, td {
-                border:1px solid #000;
-                padding:10px;
-                text-align:center;
-            }
-            th {
-                background:#fff;
-                font-weight:700;
-            }
+    int curPage = (pageObj == null) ? 1 : pageObj;
+    int totalPages = (totalPagesObj == null) ? 1 : totalPagesObj;
 
-            .actions {
-                text-align:right;
-                margin-bottom:8px;
-                width:820px;
-            }
-            .link {
-                color: #1a54ff;
-                text-decoration: underline;
-                cursor:pointer;
-            }
-        </style>
-    </head>
-    <body>
+    String q = (String) request.getAttribute("q");
+    String st = (String) request.getAttribute("status");
 
-        
-        <div class="topbar">
-            <a class="btn" href="<%=request.getContextPath()%>/home">Back</a>
+    if (q == null) q = "";
+    if (st == null) st = "";
+
+    String base = request.getContextPath() + "/home?p=user-list"
+            + (!q.isEmpty() ? "&q=" + URLEncoder.encode(q, "UTF-8") : "")
+            + (!st.isEmpty() ? "&status=" + st : "");
+%>
+
+<div class="page-wrap">
+
+    <div class="topbar">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <a class="btn" href="<%=request.getContextPath()%>/home?p=dashboard">← Back</a>
+            <h1 class="h1">User List</h1>
         </div>
-        <form action="<%=request.getContextPath()%>/home" method="get">
-            <input type="hidden" name="p" value="user-list"/>
-            <input type="hidden" name="page" value="1"/>
-            Search User:
-            <input type="text" name="q"
-                   value="<%= request.getAttribute("q") != null ? request.getAttribute("q") : "" %>"
-                   placeholder="e.g. duc, email, username...">
 
-            Status:
-            <select name="status">
-                <%
-                    String status = (String) request.getAttribute("status");
-                %>
-                <option value="" <%= (status == null || status.isEmpty()) ? "selected" : "" %>>All</option>
-                <option value="1" <%= "1".equals(status) ? "selected" : "" %>>Active</option>
-                <option value="0" <%= "0".equals(status) ? "selected" : "" %>>Inactive</option>
-            </select>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=user-toggle">Active/Deactive</a>
+            <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=user-add">Add User</a>
+        </div>
+    </div>
+<c:if test="${not empty param.msg}">
+    <div class="msg-ok">
+        <c:choose>
+            <c:when test="${param.msg == 'updated'}">User updated successfully.</c:when>
+            <c:when test="${param.msg == 'invalid'}">Invalid user id.</c:when>
+            <c:when test="${param.msg == 'notfound'}">User not found.</c:when>
+            <c:otherwise>${param.msg}</c:otherwise>
+        </c:choose>
+    </div>
+</c:if>
+    <div class="card">
+        <div class="card-body">
 
-            <button type="submit">Filter</button>
-        </form>
+            <div class="h2" style="margin-bottom:6px;">Manage users</div>
+            <div class="muted" style="margin-bottom:14px;">Search and filter user accounts in the system.</div>
 
+            <form action="<%=request.getContextPath()%>/home" method="get" class="filters" style="grid-template-columns: 2fr 1fr auto auto;">
+                <input type="hidden" name="p" value="user-list"/>
+                <input type="hidden" name="page" value="1"/>
 
+                <div>
+                    <label>Search User</label>
+                    <input class="input" type="text" name="q"
+                           value="<%= q %>"
+                           placeholder="e.g. username, email, fullname...">
+                </div>
 
-        <br>
-        <div class="wrap">
-            <div class="actions">
-               
-                <%--<a class="btn" href="${pageContext.request.contextPath}/admin/users/active-page">Active/Deactive</a>
-                
-                <!-- nút Add User -->
-                <a class="btn" href="${pageContext.request.contextPath}/admin/user-add">Add User</a>--%>
-                <a class="btn" href="${pageContext.request.contextPath}/home?p=user-toggle">Active/Deactive</a>
-                <a class="btn" href="${pageContext.request.contextPath}/home?p=user-add">Add User</a>
+                <div>
+                    <label>Status</label>
+                    <select class="select" name="status">
+                        <option value="" <%= st.isEmpty() ? "selected" : "" %>>All</option>
+                        <option value="1" <%= "1".equals(st) ? "selected" : "" %>>Active</option>
+                        <option value="0" <%= "0".equals(st) ? "selected" : "" %>>Inactive</option>
+                    </select>
+                </div>
 
-            </div>
+                <div style="display:flex; align-items:end;">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </div>
 
-            <h3>User List</h3>
+                <div style="display:flex; align-items:end;">
+                    <a class="btn" href="<%=request.getContextPath()%>/home?p=user-list">Reset</a>
+                </div>
+            </form>
 
-            <table>
+            <table class="table">
                 <thead>
                     <tr>
                         <th style="width:80px;">ID</th>
-                        <th style="width:200px;">Username</th>
-                        <th style="width:260px;">Action</th>
-                        <th style="width:280px;">Status</th>
+                        <th>Username</th>
+                        <th style="width:180px;">Status</th>
+                        <th style="width:220px;">Action</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     <c:if test="${empty users}">
                         <tr>
-                            <td colspan="4">No users found.</td>
+                            <td colspan="4" style="text-align:center;">No users found.</td>
                         </tr>
                     </c:if>
 
                     <c:forEach var="u" items="${users}">
                         <tr>
                             <td>${u.userId}</td>
-                            <td>${u.username}</td>
-
                             <td>
-                                
-                                <a class="link" href="${pageContext.request.contextPath}/admin/user/view?id=${u.userId}">
-                                    View/Update
-                                </a>
-
-
-
-
+                                <div style="font-weight:700;">${u.username}</div>
                             </td>
-
                             <td>
                                 <c:choose>
-                                    <c:when test="${u.status == 1}">Active</c:when>
-                                    <c:otherwise>Deactive</c:otherwise>
+                                    <c:when test="${u.status == 1}">
+                                        <span class="badge badge-active">Active</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge badge-inactive">Inactive</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${sessionScope.roleName == 'ADMIN'}">
+                                        <div style="display:flex; gap:8px;">
+                                            <a class="btn btn-sm btn-outline"
+                                               href="${pageContext.request.contextPath}/home?p=user-view&id=${u.userId}">
+                                                View
+                                            </a>
+                                            <a class="btn btn-sm btn-primary"
+                                               href="${pageContext.request.contextPath}/home?p=user-update&id=${u.userId}">
+                                                Update
+                                            </a>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <a class="btn btn-sm btn-outline"
+                                           href="${pageContext.request.contextPath}/home?p=user-detail&id=${u.userId}">
+                                            View
+                                        </a>
+                                    </c:otherwise>
                                 </c:choose>
                             </td>
                         </tr>
                     </c:forEach>
                 </tbody>
             </table>
-            <%
-                Integer pageObj = (Integer) request.getAttribute("page");
-                Integer totalPagesObj = (Integer) request.getAttribute("totalPages");
 
-                int curPage = (pageObj == null) ? 1 : pageObj;
-                int totalPages = (totalPagesObj == null) ? 1 : totalPagesObj;
+            <c:if test="${totalPages > 1}">
+                <div class="paging-footer">
+                    <div class="paging-info">Page <b><%= curPage %></b> of <b><%= totalPages %></b></div>
+                    <div class="paging">
+                        <% if (curPage > 1) { %>
+                            <a class="paging-btn" href="<%= base %>&page=<%= (curPage - 1) %>">Prev</a>
+                        <% } else { %>
+                            <span class="paging-btn disabled">Prev</span>
+                        <% } %>
 
-                String q = (String) request.getAttribute("q");
-                String st = (String) request.getAttribute("status");
+                        <% for (int i = 1; i <= totalPages; i++) { %>
+                            <% if (i == curPage) { %>
+                                <span class="paging-btn active"><%= i %></span>
+                            <% } else { %>
+                                <a class="paging-btn" href="<%= base %>&page=<%= i %>"><%= i %></a>
+                            <% } %>
+                        <% } %>
 
-                String base = request.getContextPath() + "/home?p=user-list"
-                        + (q != null && !q.isEmpty() ? "&q=" + java.net.URLEncoder.encode(q, "UTF-8") : "")
-                        + (st != null && !st.isEmpty() ? "&status=" + st : "");
-            %>
-
-            <div class="pager">
-                <% if (curPage > 1) { %>
-                <a class="btn" href="<%= base %>&page=<%= (curPage - 1) %>">Prev</a>
-                <% } else { %>
-                <span class="page-current">Prev</span>
-                <% } %>
-
-                <% for (int i = 1; i <= totalPages; i++) { %>
-                <% if (i == curPage) { %>
-                <span class="page-current"><%= i %></span>
-                <% } else { %>
-                <a class="btn" href="<%= base %>&page=<%= i %>"><%= i %></a>
-                <% } %>
-                <% } %>
-
-                <% if (curPage < totalPages) { %>
-                <a class="btn" href="<%= base %>&page=<%= (curPage + 1) %>">Next</a>
-                <% } else { %>
-                <span class="page-current">Next</span>
-                <% } %>
-            </div>
-
-
+                        <% if (curPage < totalPages) { %>
+                            <a class="paging-btn" href="<%= base %>&page=<%= (curPage + 1) %>">Next</a>
+                        <% } else { %>
+                            <span class="paging-btn disabled">Next</span>
+                        <% } %>
+                    </div>
+                </div>
+            </c:if>
 
         </div>
-
-    </body>
-</html>
+    </div>
+</div>

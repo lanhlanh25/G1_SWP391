@@ -5,8 +5,10 @@
 <div class="page-wrap">
 
   <div class="topbar">
-    <div class="title">Inventory Management</div>
-    <a class="btn" href="${pageContext.request.contextPath}/home">← Back</a>
+    <div style="display:flex; align-items:center; gap:10px;">
+      <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
+      <h1 class="h1" style="margin:0;">Inventory Management</h1>
+    </div>
   </div>
 
   <c:if test="${not empty param.msg}"><p class="msg-ok">${fn:escapeXml(param.msg)}</p></c:if>

@@ -1,7 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<div class="container">
+<div class="page-wrap-sm">
     <div class="topbar">
         <div>
             <div class="title">Add New Supplier</div>

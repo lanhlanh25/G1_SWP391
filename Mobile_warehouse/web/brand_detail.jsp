@@ -11,7 +11,7 @@
 %>
 <c:set var="role" value="${sessionScope.roleName}" />
 
-<div class="container">
+<div class="page-wrap-md">
   <div class="topbar">
     <div>
       <div class="title">Brand Detail</div>

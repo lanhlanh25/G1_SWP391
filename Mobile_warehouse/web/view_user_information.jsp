@@ -1,7 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<div class="page-wrap">
+<div class="page-wrap-md">
     <div class="topbar">
         <div style="display:flex; align-items:center; gap:10px;">
             <a class="btn" href="${pageContext.request.contextPath}/home?p=user-list">← Back</a>

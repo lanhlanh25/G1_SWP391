@@ -1,6 +1,6 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
-<div class="container">
+<div class="page-wrap-md">
     <div class="card">
         <div class="card-header">
             <div>

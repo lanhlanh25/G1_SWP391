@@ -1,7 +1,7 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%
-    // ── Đọc flash attributes từ session (do POST redirect về đây qua home controller) ──
+
     HttpSession _s = request.getSession(false);
     if (_s != null) {
         String[] flashKeys = {
@@ -12,7 +12,7 @@
         for (String key : flashKeys) {
             Object val = _s.getAttribute(key);
             if (val != null) {
-                // strip "flash_" prefix để set vào request
+        
                 String reqKey = key.startsWith("flash_") ? key.substring(6) : key;
                 request.setAttribute(reqKey, val);
                 _s.removeAttribute(key);
@@ -21,7 +21,7 @@
     }
 %>
 
-<div class="page-wrap">
+<div class="page-wrap-sm">
 
   <div class="topbar">
     <div style="display:flex; align-items:center; gap:10px;">

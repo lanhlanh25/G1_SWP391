@@ -4,7 +4,7 @@
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <c:set var="role" value="${sessionScope.roleName}"/>
 
-<div class="page-wrap">
+<div class="page-wrap-md">
 
   <div class="topbar">
     <div class="title">Export Receipt Detail</div>
