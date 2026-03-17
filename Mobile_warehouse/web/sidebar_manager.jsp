@@ -55,12 +55,12 @@
                 Variant Matrix
             </a>
         </li>
-        <li>
+        <%--<li>
             <a class="<%= "low-stock-report".equals(currentPage) ? "active" : "" %>"
                href="<%=ctx%>/home?p=low-stock-report">
                 Low Stock Report
             </a>
-        </li>
+</li>--%>
     </ul>
 
     <div class="section-title">Transactions</div>
