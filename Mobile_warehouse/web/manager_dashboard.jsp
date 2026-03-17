@@ -200,7 +200,7 @@
 
         <!-- Right side -->
         <div class="section-stack">
-            <div class="card">
+            <%--<div class="card">
                 <div class="card-header">
                     <div>
                         <div class="h2">Top Exported Products</div>
@@ -210,7 +210,7 @@
                 <div class="card-body">
                     <div class="empty-state">Coming soon</div>
                 </div>
-            </div>
+            </div>--%>
 
             <div class="card">
                 <div class="card-header">
