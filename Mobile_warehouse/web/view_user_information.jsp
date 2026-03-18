@@ -2,21 +2,21 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <div class="page-wrap-md">
-    <div class="topbar">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <a class="btn" href="${pageContext.request.contextPath}/home?p=user-list">← Back</a>
-            <h1 class="h1">View User Information</h1>
+    <div class="topbar mb-20">
+        <div class="d-flex align-center gap-10">
+            <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=user-list">← Back</a>
+            <h1 class="h1 m-0">View User Information</h1>
         </div>
     </div>
 
     <div class="card">
         <div class="card-body">
-            <div style="display:flex; gap:18px; align-items:center; margin-bottom:18px; flex-wrap:wrap;">
+            <div class="d-flex gap-18 align-center mb-18 flex-wrap">
                 <img src="${pageContext.request.contextPath}/${empty user.avatar ? 'assets/default-avatar.jpg' : user.avatar}?v=<fmt:formatDate value='${now}' pattern='yyyyMMddHHmmssSSS'/>"
-                     style="width:88px;height:88px;object-fit:cover;border:1px solid var(--border);border-radius:14px;">
+                     class="avatar-lg">
 
                 <div>
-                    <div class="h2">${user.fullName}</div>
+                    <div class="h2 m-0">${user.fullName}</div>
                     <div class="muted">@${user.username}</div>
                 </div>
             </div>
@@ -56,7 +56,7 @@
                 </div>
             </div>
 
-            <div class="form-actions" style="margin-top:20px;">
+            <div class="form-actions mt-20">
                 <a class="btn btn-primary"
                    href="${pageContext.request.contextPath}/home?p=user-update&id=${user.userId}">
                     Update

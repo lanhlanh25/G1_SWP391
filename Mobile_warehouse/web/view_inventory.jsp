@@ -4,10 +4,10 @@
 
 <div class="page-wrap">
 
-  <div class="topbar">
-    <div style="display:flex; align-items:center; gap:10px;">
-      <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
-      <h1 class="h1" style="margin:0;">Inventory Management</h1>
+  <div class="topbar mb-20">
+    <div class="d-flex align-center gap-10">
+      <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
+      <h1 class="h1 m-0">Inventory Management</h1>
     </div>
   </div>
 
@@ -15,7 +15,7 @@
   <c:if test="${not empty param.err}"><p class="msg-err">${fn:escapeXml(param.err)}</p></c:if>
 
   <%-- Summary cards --%>
-  <div class="stat-cards" style="margin-bottom:14px;">
+  <div class="stat-cards mb-14">
     <div class="card stat-card-item">
       <div class="small muted">Total Products</div>
       <div class="stat-value">${totalProducts}</div>
@@ -37,12 +37,12 @@
   </div>
 
   <%-- Filter --%>
-  <div class="card" style="margin-bottom:14px;">
+  <div class="card mb-14">
     <div class="card-body">
       <form method="get" action="${pageContext.request.contextPath}/inventory">
         <input type="hidden" name="page"     value="1"/>
         <input type="hidden" name="pageSize" value="${pageSize}"/>
-        <div class="filters" style="grid-template-columns: 2fr 1fr 1fr auto auto;">
+        <div class="filters grid-5">
           <div>
             <label class="label">Search</label>
             <input class="input" type="text" name="q" value="${fn:escapeXml(q)}" placeholder="Product name, SKU..."/>
@@ -65,10 +65,10 @@
               <option value="OUT" <c:if test="${stockStatus=='OUT'}">selected</c:if>>Out of Stock</option>
             </select>
           </div>
-          <div style="display:flex; align-items:flex-end;">
+          <div class="d-flex align-end">
             <button class="btn btn-primary btn-sm btn-equal" type="submit" >Search</button>
           </div>
-          <div style="display:flex; align-items:flex-end;">
+          <div class="d-flex align-end">
             <a class="btn btn-outline btn-sm btn-equal" href="${pageContext.request.contextPath}/inventory" >Reset</a>
           </div>
         </div>
@@ -77,17 +77,17 @@
   </div>
 
   <%-- Table --%>
-  <div class="card">
-    <div class="card-body" style="padding:0;">
+  <div class="card overflow-hidden">
+    <div class="card-body p-0">
       <table class="table">
         <thead>
           <tr>
-            <th style="width:150px;">Product Code</th>
+            <th class="w-150">Product Code</th>
             <th>Product Name</th>
-            <th style="width:120px;">Brand</th>
-            <th style="width:90px; text-align:center;">Quantity</th>
-            <th style="width:160px;">Stock Status</th>
-            <th style="width:130px; text-align:center;">Last Updated</th>
+            <th class="w-120">Brand</th>
+            <th class="w-90 text-center">Quantity</th>
+            <th class="w-160">Stock Status</th>
+            <th class="w-130 text-center">Last Updated</th>
           </tr>
         </thead>
         <tbody>
@@ -103,7 +103,7 @@
                   <c:param name="page"        value="${pageNumber}"/>
                   <c:param name="pageSize"    value="${pageSize}"/>
                 </c:url>
-                <a href="${detailUrl}" style="color:var(--primary); text-decoration:underline;">
+                <a href="${detailUrl}" class="text-primary text-underline">
                   ${fn:escapeXml(it.productName)}
                 </a>
               </td>
@@ -130,7 +130,7 @@
             </tr>
           </c:forEach>
           <c:if test="${empty inventoryModels}">
-            <tr><td colspan="6" class="small muted" style="padding:20px; text-align:center;">No data</td></tr>
+            <tr><td colspan="6" class="p-20 text-center text-muted small">No data</td></tr>
           </c:if>
         </tbody>
       </table>
@@ -138,7 +138,7 @@
   </div>
 <%-- Pagination --%>
 <c:if test="${totalPages > 1}">
-  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; flex-wrap:wrap; gap:8px;">
+  <div class="d-flex justify-between align-center mt-14 flex-wrap gap-8">
     
     <%-- Page info --%>
     <div class="small muted">
@@ -147,7 +147,7 @@
     </div>
 
     <%-- Page buttons --%>
-    <div style="display:flex; gap:4px; flex-wrap:wrap;">
+    <div class="d-flex gap-4 flex-wrap">
 
       <%-- Previous --%>
       <c:choose>
@@ -177,7 +177,7 @@
           <c:param name="pageSize" value="${pageSize}"/>
         </c:url>
         <a class="btn btn-outline btn-sm" href="${p1Url}">1</a>
-        <c:if test="${startPage > 2}"><span style="align-self:center; padding:0 4px;">…</span></c:if>
+        <c:if test="${startPage > 2}"><span class="align-self-center px-4">…</span></c:if>
       </c:if>
 
       <c:forEach var="i" begin="${startPage}" end="${endPage}">
@@ -199,7 +199,7 @@
       </c:forEach>
 
       <c:if test="${endPage < totalPages}">
-        <c:if test="${endPage < totalPages - 1}"><span style="align-self:center; padding:0 4px;">…</span></c:if>
+        <c:if test="${endPage < totalPages - 1}"><span class="align-self-center px-4">…</span></c:if>
         <c:url var="lastUrl" value="/inventory">
           <c:param name="q" value="${q}"/><c:param name="brandId" value="${brandId}"/>
           <c:param name="stockStatus" value="${stockStatus}"/><c:param name="page" value="${totalPages}"/>
@@ -228,13 +228,13 @@
     </div>
 
     <%-- Page size selector --%>
-    <form method="get" action="${pageContext.request.contextPath}/inventory" style="display:flex; align-items:center; gap:6px;">
+    <form method="get" action="${pageContext.request.contextPath}/inventory" class="d-flex align-center gap-6">
       <input type="hidden" name="q"           value="${fn:escapeXml(q)}"/>
       <input type="hidden" name="brandId"     value="${brandId}"/>
       <input type="hidden" name="stockStatus" value="${stockStatus}"/>
       <input type="hidden" name="page"        value="1"/>
       <span class="small muted">Rows:</span>
-      <select class="select" name="pageSize" onchange="this.form.submit()" style="width:70px;">
+      <select class="select w-70" name="pageSize" onchange="this.form.submit()">
         <option value="10"  <c:if test="${pageSize==10}">selected</c:if>>10</option>
         <option value="20"  <c:if test="${pageSize==20}">selected</c:if>>20</option>
         <option value="50"  <c:if test="${pageSize==50}">selected</c:if>>50</option>

@@ -3,71 +3,8 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<style>
-  .ic-wrap { padding: 0; }
-  .ic-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:22px; flex-wrap:wrap; gap:12px; }
-  .ic-title  { font-size:22px; font-weight:700; color:var(--text); letter-spacing:-.02em; margin:0; }
-
-  /* flash messages */
-  .ic-msg-ok  { background:#dcfce7; color:#15803d; border:1px solid #bbf7d0; padding:10px 16px; border-radius:var(--radius-xs); font-weight:600; margin-bottom:14px; }
-  .ic-msg-err { background:#fee2e2; color:#b91c1c; border:1px solid #fecaca; padding:10px 16px; border-radius:var(--radius-xs); font-weight:600; margin-bottom:14px; }
-
-  /* filter card */
-  .ic-filter-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px 20px; margin-bottom:18px; }
-  .ic-filter-row  { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; }
-  .ic-filter-grp  { display:flex; flex-direction:column; gap:5px; flex:1; min-width:180px; }
-  .ic-filter-grp label { font-size:11.5px; font-weight:600; color:var(--text-2); }
-  .ic-filter-grp input, .ic-filter-grp select {
-    padding:8px 12px; border:1px solid var(--border); border-radius:var(--radius-xs);
-    font-size:13px; font-family:inherit; background:var(--surface); color:var(--text);
-    transition:border-color .15s;
-  }
-  .ic-filter-grp input:focus, .ic-filter-grp select:focus {
-    outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(59,130,246,.1);
-  }
-
-  /* table card */
-  .ic-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
-  .ic-card-head { display:flex; align-items:center; justify-content:flex-end; padding:14px 20px; border-bottom:1px solid var(--border); background:var(--surface-2); }
-
-  .ic-tbl   { width:100%; border-collapse:collapse; font-size:13.5px; }
-  .ic-tbl th { padding:14px 16px; background:transparent; font-weight:600; font-size:14px; color:var(--muted); border-bottom:1px solid var(--border); white-space:nowrap; }
-  .ic-tbl td { padding:14px 16px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:middle; }
-  .ic-tbl tbody tr:last-child td { border-bottom:none; }
-  .ic-tbl tbody tr:hover td      { background:#f7f9ff; }
-  .tc { text-align:center; }
-  .tr { text-align:right; font-weight:700; }
-
-  /* status badges */
-  .stbadge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px; font-size:12px; font-weight:700; border:1px solid transparent; }
-  .st-enough  { background:#dcfce7; color:#15803d; border-color:#bbf7d0; }
-  .st-missing { background:#fee2e2; color:#b91c1c; border-color:#fecaca; }
-
-  /* counted input */
-  .counted-inp {
-    width:80px; padding:6px 10px; border:1px solid var(--border);
-    border-radius:var(--radius-xs); font-size:13px; text-align:right;
-    font-family:inherit; transition:border-color .15s;
-  }
-  .counted-inp:focus   { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(59,130,246,.1); }
-  .counted-inp.changed { border-color:#f59e0b; background:#fffbeb; }
-
-  /* paging */
-  .ic-paging { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; border-top:1px solid var(--border); background:var(--surface-2); flex-wrap:wrap; gap:10px; }
-  .ic-paging-info { font-size:13px; color:var(--muted); }
-  .ic-paging-btns { display:flex; gap:6px; align-items:center; }
-  .ic-paging-btns a, .ic-paging-btns span {
-    display:inline-flex; align-items:center; padding:7px 13px;
-    border:1px solid var(--border); border-radius:var(--radius-xs);
-    background:var(--surface); font-size:13px; font-weight:600; color:var(--text); text-decoration:none;
-  }
-  .ic-paging-btns a:hover  { background:var(--surface-2); }
-  .pg-active   { background:var(--primary) !important; border-color:var(--primary) !important; color:#fff !important; pointer-events:none; }
-  .pg-disabled { opacity:.4; pointer-events:none; }
-  .psz-wrap2 { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
-  .psz-wrap2 select { padding:6px 10px; border:1px solid var(--border); border-radius:var(--radius-xs); font-size:13px; font-family:inherit; background:var(--surface); }
-  .empty-row { text-align:center; padding:40px; color:var(--muted); font-size:14px; }
-</style>
+<link rel="stylesheet" href="${ctx}/assets/css/app.css">
+<%-- Internal styles moved to app.css --%>
 
 <div class="ic-wrap">
 
@@ -82,10 +19,10 @@
 
   <%-- Flash messages (passed as query params after redirect) --%>
   <c:if test="${not empty param.msg}">
-    <div class="ic-msg-ok">✓ ${fn:escapeXml(param.msg)}</div>
+    <div class="alert alert-success mb-12">✓ ${fn:escapeXml(param.msg)}</div>
   </c:if>
   <c:if test="${not empty param.err}">
-    <div class="ic-msg-err">✕ ${fn:escapeXml(param.err)}</div>
+    <div class="alert alert-danger mb-12">✕ ${fn:escapeXml(param.err)}</div>
   </c:if>
 
   <!-- Filter (GET form) -->
@@ -149,13 +86,13 @@
               <th>#</th>
               <th>SKU</th>
               <th>Product Name</th>
-              <th class="tc">Color</th>
-              <th class="tc">RAM</th>
-              <th class="tc">Storage</th>
-              <th class="tr">System Qty</th>
-              <th class="tc">Counted Qty</th>
-              <th class="tc">Status</th>
-              <th class="tc">Action</th>
+              <th class="text-center">Color</th>
+              <th class="text-center">RAM</th>
+              <th class="text-center">Storage</th>
+              <th class="text-right">System Qty</th>
+              <th class="text-center">Counted Qty</th>
+              <th class="text-center">Status</th>
+              <th class="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -169,36 +106,36 @@
                 </td>
                 <td style="font-weight:700;font-size:12.5px;">${fn:escapeXml(r.skuCode)}</td>
                 <td>${fn:escapeXml(r.productName)}</td>
-                <td class="tc">${fn:escapeXml(r.color)}</td>
-                <td class="tc">${r.ramGb} GB</td>
-                <td class="tc">${r.storageGb} GB</td>
-                <td class="tr">
+                <td class="text-center">${fn:escapeXml(r.color)}</td>
+                <td class="text-center">${r.ramGb} GB</td>
+                <td class="text-center">${r.storageGb} GB</td>
+                <td class="text-right">
                   ${r.systemQty}
-                  <span style="font-size:11px;color:var(--muted);">Phone</span>
+                  <span class="muted font-xs">Phone</span>
                 </td>
-                <td class="tc">
+                <td class="text-center">
                   <input type="hidden" name="skuId" value="${r.skuId}"/>
-                  <div style="display:inline-flex;align-items:center;gap:6px;">
+                  <div class="d-inline-flex align-center gap-8">
                     <input class="counted-inp js-counted"
                            type="number"
                            name="countedQty"
                            min="0"
                            value="${r.countedQty}"
                            data-system="${r.systemQty}"/>
-                    <span style="font-size:12px;color:var(--muted);">Phone</span>
+                    <span class="muted font-xs">Phone</span>
                   </div>
                 </td>
-                <td class="tc js-status-cell">
+                <td class="text-center js-status-cell">
                   <c:choose>
                     <c:when test="${r.countedQty == r.systemQty}">
-                      <span class="stbadge st-enough">enough</span>
+                      <span class="badge badge-success">enough</span>
                     </c:when>
                     <c:otherwise>
-                      <span class="stbadge st-missing">missing</span>
+                      <span class="badge badge-danger">missing</span>
                     </c:otherwise>
                   </c:choose>
                 </td>
-                <td class="tc">
+                <td class="text-center">
                   <c:url var="imeiUrl" value="/imei-list">
                     <c:param name="skuId"    value="${r.skuId}"/>
                     <c:param name="page"     value="1"/>

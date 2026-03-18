@@ -17,7 +17,7 @@
 <div class="page-wrap">
 
     <div class="topbar">
-        <div style="display:flex; align-items:center; gap:10px;">
+        <div class="d-flex align-center gap-12">
             <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
             <h1 class="h1">View Product List</h1>
         </div>
@@ -36,10 +36,10 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="h2" style="margin-bottom:6px;">Manage Products</div>
-            <div class="muted" style="margin-bottom:14px;">Search and filter products in the warehouse.</div>
+            <div class="h2 mb-4">Manage Products</div>
+            <div class="muted mb-16">Search and filter products in the warehouse.</div>
 
-            <form method="get" action="${pageContext.request.contextPath}/home" class="filters" style="grid-template-columns: 1.5fr 1fr 1fr auto auto; gap: 12px; align-items: end;">
+            <form method="get" action="${pageContext.request.contextPath}/home" class="filters mb-20">
                 <input type="hidden" name="p" value="product-list"/>
                 <input type="hidden" name="page" value="1"/>
 
@@ -67,9 +67,9 @@
                     </select>
                 </div>
 
-                <div class="filter-actions" style="display:contents;">
-                    <button class="btn btn-primary" type="submit" style="height: 38px;">Search</button>
-                    <a class="btn" href="${pageContext.request.contextPath}/home?p=product-list" style="height: 38px;">Reset</a>
+                <div class="filter-actions h-38">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                    <a class="btn" href="${pageContext.request.contextPath}/home?p=product-list">Reset</a>
                 </div>
             </form>
 
@@ -103,7 +103,7 @@
                             </td>
                             <td><fmt:formatDate value="${x.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
                             <td>
-                                <div style="display:flex; gap:6px; flex-wrap:nowrap; align-items:center;">
+                                <div class="d-flex gap-8 align-center flex-nowrap">
                                     <a class="btn btn-sm btn-info" href="${pageContext.request.contextPath}/home?p=product-detail&id=${x.productId}">View</a>
                                     <c:if test="${sessionScope.roleName == 'MANAGER' || sessionScope.roleName == 'ADMIN'}">
                                         <a class="btn btn-sm btn-warning" href="${pageContext.request.contextPath}/manager/product/update?id=${x.productId}">Update</a>

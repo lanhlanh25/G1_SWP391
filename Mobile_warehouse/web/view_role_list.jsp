@@ -10,13 +10,13 @@
 %>
 
 <div class="page-wrap">
-    <div class="topbar">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <a class="btn" href="<%=request.getContextPath()%>/home?p=dashboard">← Back</a>
-            <h1 class="h1">Role List</h1>
+    <div class="topbar mb-20">
+        <div class="d-flex align-center gap-10">
+            <a class="btn btn-outline" href="<%=request.getContextPath()%>/home?p=dashboard">← Back</a>
+            <h1 class="h1 m-0">Role List</h1>
         </div>
 
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <div class="d-flex gap-8 flex-wrap">
             <a class="btn btn-outline" href="<%=request.getContextPath()%>/home?p=role-toggle">Active/Deactive</a>
             <a class="btn btn-primary" href="<%=request.getContextPath()%>/home?p=role-add">Add Role</a>
         </div>
@@ -24,10 +24,10 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="h2" style="margin-bottom:6px;">Manage roles and permissions</div>
-            <div class="muted" style="margin-bottom:14px;">Filter roles by name and status.</div>
+            <div class="h2 mb-6">Manage roles and permissions</div>
+            <div class="muted mb-14">Filter roles by name and status.</div>
 
-            <form action="<%=request.getContextPath()%>/home" method="get" class="filters" style="grid-template-columns:2fr 1fr auto;">
+            <form action="<%=request.getContextPath()%>/home" method="get" class="filters grid-role-filter">
                 <input type="hidden" name="p" value="role-list"/>
 
                 <div>
@@ -44,7 +44,7 @@
                     </select>
                 </div>
 
-                <div style="display:flex; gap:8px;">
+                <div class="d-flex gap-8">
                     <button class="btn btn-primary" type="submit">Filter</button>
                     <a class="btn" href="<%=request.getContextPath()%>/home?p=role-list">Reset</a>
                 </div>
@@ -66,7 +66,7 @@
                         if (roles == null || roles.isEmpty()) {
                     %>
                     <tr>
-                        <td colspan="6" style="text-align:center;">No roles found.</td>
+                        <td colspan="6" class="text-center">No roles found.</td>
                     </tr>
                     <%
                         } else {

@@ -6,7 +6,7 @@
 <div class="page-wrap">
 
     <div class="topbar">
-        <div style="display:flex; align-items:center; gap:10px;">
+        <div class="d-flex align-center gap-12">
             <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
             <h1 class="h1">View Supplier List</h1>
         </div>
@@ -21,10 +21,10 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="h2" style="margin-bottom:6px;">Manage Suppliers</div>
-            <div class="muted" style="margin-bottom:14px;">Browse and search for existing suppliers in the system.</div>
+            <div class="h2 mb-4">Manage Suppliers</div>
+            <div class="muted mb-16">Browse and search for existing suppliers in the system.</div>
 
-            <form method="get" action="${pageContext.request.contextPath}/home" class="filters" style="grid-template-columns: 1.5fr 1fr 1fr 1fr auto; gap: 12px; align-items: end;">
+            <form method="get" action="${pageContext.request.contextPath}/home" class="filters mb-20">
                 <input type="hidden" name="p" value="view_supplier"/>
                 
                 <div class="filter-group">
@@ -58,8 +58,8 @@
                     </select>
                 </div>
                 
-                <div class="filter-actions">
-                    <button class="btn btn-primary" type="submit" style="height: 38px;">Apply</button>
+                <div class="filter-actions h-38">
+                    <button class="btn btn-primary" type="submit">Apply</button>
                 </div>
             </form>
 
@@ -95,7 +95,7 @@
                             </td>
                             <td style="text-align:center;">${s.totalTransactions}</td>
                             <td>
-                                <div style="display:flex; gap:6px; flex-wrap:nowrap; align-items:center;">
+                                <div class="d-flex gap-8 align-center flex-nowrap">
                                     <a class="btn btn-sm btn-info" href="${pageContext.request.contextPath}/home?p=supplier_detail&id=${s.supplierId}">View</a>
                                     <c:if test="${isManager}">
                                         <a class="btn btn-sm btn-warning" href="${pageContext.request.contextPath}/home?p=update_supplier&id=${s.supplierId}">Update</a>
@@ -104,7 +104,7 @@
                                                 <a class="btn btn-sm btn-danger" href="${pageContext.request.contextPath}/home?p=supplier_inactive&id=${s.supplierId}">Inactive</a>
                                             </c:when>
                                             <c:otherwise>
-                                                <form method="post" action="${pageContext.request.contextPath}/supplier-toggle" style="margin:0;">
+                                                <form method="post" action="${pageContext.request.contextPath}/supplier-toggle" class="mb-0">
                                                     <input type="hidden" name="supplierId" value="${s.supplierId}"/>
                                                     <button type="submit" class="btn btn-sm btn-primary">Active</button>
                                                 </form>

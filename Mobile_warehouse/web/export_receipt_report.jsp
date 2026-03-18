@@ -9,25 +9,11 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app.css"/>
-
-<style>
-  .export-report-filters{ grid-template-columns: 1fr 1fr auto !important; }
-  @media (max-width: 980px){
-    .export-report-filters{ grid-template-columns: 1fr 1fr !important; }
-    .export-report-filters .apply-wrap{ grid-column: 1 / -1; display:flex; justify-content:flex-end; }
-    .export-report-filters .apply-wrap .btn{ width:140px; }
-  }
-  @media (max-width: 560px){
-    .export-report-filters{ grid-template-columns: 1fr !important; }
-    .export-report-filters .apply-wrap{ justify-content:stretch; }
-    .export-report-filters .apply-wrap .btn{ width:100%; }
-  }
-</style>
+<%-- No internal styles needed here anymore --%>
 
 <div class="page-wrap">
   <div class="topbar">
-    <div style="display:flex; align-items:center; gap:10px;">
+    <div class="d-flex align-center gap-12">
       <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
       <h1 class="h1">Export Receipt Report</h1>
     </div>
@@ -38,7 +24,7 @@
   </c:if>
 
   <!-- Filters -->
-  <form method="get" action="${ctx}/export-receipt-report" class="filters export-report-filters" style="margin-bottom: 20px;">
+  <form method="get" action="${ctx}/export-receipt-report" class="filters mb-20">
     <div class="filter-group">
       <label>From</label>
       <input class="input" type="date" name="from" value="${from}" />
@@ -47,27 +33,28 @@
       <label>To</label>
       <input class="input" type="date" name="to" value="${to}" />
     </div>
-    <div class="filter-actions" style="display:flex; align-items:end;">
-      <button class="btn btn-primary" type="submit" style="height: 38px;">Apply</button>
+    <div class="filter-actions h-38">
+      <button class="btn btn-primary" type="submit">Apply</button>
     </div>
   </form>
 
   <!-- Stats -->
-  <div class="stat-cards" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-    <div class="card" style="margin-bottom:0;">
-      <div class="card-body" style="padding: 16px 20px;">
-        <div class="muted" style="margin-bottom:4px;">Total Export Receipts</div>
-        <div class="h1" style="font-size: 28px;">
+  <div class="grid-2 mb-20">
+    <div class="card mb-0">
+      <div class="card-body p-20">
+        <div class="muted mb-4">Total Export Receipts</div>
+        <div class="h1 fw-800 text-primary">
           <c:out value="${reportSummary.totalExportReceipts}" default="0"/>
         </div>
       </div>
     </div>
 
-    <div class="card" style="margin-bottom:0; border-color: var(--primary-border); background: var(--primary-light);">
-      <div class="card-body" style="padding: 16px 20px;">
-        <div class="muted" style="margin-bottom:4px; color: var(--primary);">Total Phone Quantity</div>
-        <div class="h1" style="font-size: 28px; color: var(--primary);">
-          <c:out value="${reportSummary.totalPhoneQuantity}" default="0"/> <span style="font-size: 16px; font-weight: 600;">Phones</span>
+    <div class="card mb-0 bg-primary-light">
+      <div class="card-body p-20">
+        <div class="text-primary fw-600 mb-4">Total Phone Quantity</div>
+        <div class="h1 fw-800 text-primary">
+          <c:out value="${reportSummary.totalPhoneQuantity}" default="0"/> 
+          <span class="small fw-600 opacity-75">Phones</span>
         </div>
       </div>
     </div>
@@ -75,7 +62,7 @@
 
   <div class="card">
     <div class="card-body">
-      <div class="h2" style="margin-bottom:14px;">Export History</div>
+      <div class="h2 mb-16">Export History</div>
       
       <table class="table">
         <thead>
@@ -112,7 +99,7 @@
       </table>
 
       <c:if test="${totalPages > 1}">
-        <div class="paging-footer" style="margin-top: 20px; justify-content: flex-end;">
+        <div class="paging-footer mt-20 justify-end">
           <div class="paging">
             <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
 

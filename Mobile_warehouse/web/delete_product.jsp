@@ -9,168 +9,21 @@
             <head>
                 <meta charset="UTF-8">
                 <title>Delete Product</title>
-                <style>
-                    body {
-                        font-family: 'Inter', sans-serif;
-                        background: var(--bg, #ebedef);
-                        margin: 0;
-                    }
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app.css">
+    <%-- Internal styles moved to app.css --%>
+</head>
 
-                    .wrap {
-                        width: 100%;
-                        max-width: 880px;
-                        margin: 18px auto;
-                        background: var(--surface);
-                        border-radius: var(--radius);
-                        border: 1px solid var(--border);
-                        padding: 18px 22px;
-                        box-sizing: border-box;
-                        box-shadow: var(--shadow);
-                    }
-
-                    .head {
-                        margin: 0 0 12px;
-                    }
-
-                    .head h1 {
-                        margin: 0;
-                        font-size: 22px;
-                        font-weight: 700;
-                        color: var(--text);
-                    }
-
-                    .sub {
-                        margin: 8px 0 0;
-                        color: var(--muted);
-                        font-size: 14px;
-                    }
-
-                    .card {
-                        margin-top: 14px;
-                        border: 1px solid var(--border);
-                        border-radius: var(--radius);
-                        background: var(--surface-2);
-                        padding: 14px;
-                    }
-
-                    .grid {
-                        display: grid;
-                        grid-template-columns: 220px 1fr;
-                        gap: 10px 16px;
-                        align-items: center;
-                    }
-
-                    .lb {
-                        font-weight: 700;
-                        color: var(--text);
-                        font-size: 13px;
-                    }
-
-                    .val {
-                        background: var(--surface);
-                        border: 1px solid var(--border);
-                        border-radius: var(--radius-sm);
-                        padding: 7px 12px;
-                        font-size: 14px;
-                        color: var(--text-2);
-                    }
-
-                    .warn {
-                        margin-top: 14px;
-                        border: 1px solid #ffe082;
-                        background: #fff8e1;
-                        border-radius: var(--radius-sm);
-                        padding: 12px;
-                        color: #7c5e00;
-                        font-weight: 700;
-                        font-size: 13px;
-                    }
-
-                    .err {
-                        margin-top: 14px;
-                        border: 1px solid #f5c6cb;
-                        background: #fdf0f0;
-                        border-radius: var(--radius-sm);
-                        padding: 12px;
-                        color: #b91c1c;
-                        font-weight: 700;
-                        font-size: 13px;
-                    }
-
-                    .ok {
-                        margin-top: 14px;
-                        color: var(--success);
-                        font-weight: 700;
-                        text-align: center;
-                    }
-
-                    .btns {
-                        margin-top: 18px;
-                        display: flex;
-                        justify-content: flex-end;
-                        gap: 14px;
-                        flex-wrap: wrap;
-                    }
-
-                    .wrap .btn {
-                        min-width: 160px;
-                        height: 40px;
-                        border-radius: var(--radius-sm);
-                        border: 1px solid var(--border);
-                        font-size: 14px;
-                        cursor: pointer;
-                        background: var(--surface-2);
-                        font-weight: 600;
-                        font-family: inherit;
-                        transition: all .15s;
-                    }
-
-                    .wrap .btn:hover {
-                        background: #e9ecef;
-                    }
-
-                    .wrap .btn-danger {
-                        background: #fdf0f0;
-                        border-color: var(--danger);
-                        font-weight: 700;
-                        color: var(--danger);
-                    }
-
-                    .wrap .btn-danger:hover {
-                        background: #f8d7da;
-                    }
-
-                    .btn-secondary:hover {
-                        background: #e9ecef;
-                    }
-
-                    @media(max-width:900px) {
-                        .wrap {
-                            max-width: 96%;
-                        }
-
-                        .grid {
-                            grid-template-columns: 1fr;
-                        }
-
-                        .btns {
-                            justify-content: center;
-                        }
-                    }
-                </style>
-            </head>
-
-            <body>
-                <div class="wrap">
-                    <div class="head">
-                        <h1>Delete Product</h1>
-                        <div class="sub">(soft delete).</div>
-                    </div>
+<body>
+    <div class="dp-wrap">
+        <div class="dp-head">
+            <h1>Delete Product</h1>
+            <div class="dp-sub">(soft delete).</div>
+        </div>
 
                     <c:if test="${empty product}">
-                        <div class="err">Product not found.</div>
-                        <div class="btns">
-                            <button class="btn btn-secondary" type="button"
+                        <div class="alert alert-danger mb-14">Product not found.</div>
+                        <div class="dp-btns">
+                            <button class="btn btn-outline" type="button"
                                 onclick="window.location.href = '${pageContext.request.contextPath}/home?p=product-list'">
                                 Back
                             </button>
@@ -180,44 +33,44 @@
                     <c:if test="${not empty product}">
 
                         <c:if test="${not empty blockReason}">
-                            <div class="warn">
+                            <div class="alert alert-warning mb-14">
                                 Cannot delete this product because: ${blockReason}
                             </div>
                         </c:if>
-                        <div class="card">
-                            <div class="grid">
-                                <div class="lb">Product Code</div>
-                                <div class="val">${product.productCode}</div>
+                        <div class="dp-card">
+                            <div class="dp-grid">
+                                <div class="dp-lb">Product Code</div>
+                                <div class="dp-val">${product.productCode}</div>
 
-                                <div class="lb">Brand</div>
-                                <div class="val">${product.brandName}</div>
+                                <div class="dp-lb">Brand</div>
+                                <div class="dp-val">${product.brandName}</div>
 
-                                <div class="lb">Model</div>
-                                <div class="val">${product.model}</div>
+                                <div class="dp-lb">Model</div>
+                                <div class="dp-val">${product.model}</div>
 
-                                <div class="lb">Status</div>
-                                <div class="val">${product.status}</div>
+                                <div class="dp-lb">Status</div>
+                                <div class="dp-val">${product.status}</div>
 
-                                <div class="lb">SKU Count</div>
-                                <div class="val">${skuCount}</div>
+                                <div class="dp-lb">SKU Count</div>
+                                <div class="dp-val">${skuCount}</div>
                             </div>
 
-                            <div style="margin-top:12px; display:flex; gap:12px; align-items:center;">
-                                <div class="lb" style="min-width:220px;">Created At</div>
-                                <div class="val" style="flex:1;">${createdAt}</div>
+                            <div class="d-flex align-center gap-12 mt-12">
+                                <div class="dp-lb" style="min-width:220px;">Created At</div>
+                                <div class="dp-val flex-1">${createdAt}</div>
                             </div>
 
                         </div>
 
                         <c:if test="${not empty errors}">
-                            <div class="err">${errors}</div>
+                            <div class="alert alert-danger mb-14">${errors}</div>
                         </c:if>
 
                         <c:if test="${not empty message}">
-                            <div class="ok">${message}</div>
+                            <div class="alert alert-success mt-14 text-center">${message}</div>
                         </c:if>
 
-                        <div class="btns">
+                        <div class="dp-btns">
                             <c:choose>
                                 <c:when test="${empty blockReason}">
                                     <form action="${pageContext.request.contextPath}/manager/product/delete"
@@ -234,7 +87,7 @@
                                 </c:otherwise>
                             </c:choose>
 
-                            <button class="btn btn-secondary" type="button"
+                            <button class="btn btn-outline" type="button"
                                 onclick="window.location.href = '${pageContext.request.contextPath}/home?p=product-list'">
                                 Cancel
                             </button>

@@ -89,7 +89,7 @@
                 </div>
 
                 <c:if test="${not empty errors.db}">
-                    <div class="err" style="text-align:center; margin-top: 15px;">
+                    <div class="err text-center mt-16">
                         ${errors.db}
                     </div>
                 </c:if>

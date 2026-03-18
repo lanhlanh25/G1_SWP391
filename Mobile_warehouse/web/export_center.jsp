@@ -3,70 +3,8 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<style>
-  .ec-page {
-    display: grid;
-    gap: 16px;
-  }
-
-  .ec-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 16px;
-  }
-
-  .ec-grid .span-2 {
-    grid-column: span 2;
-  }
-
-  .ec-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
-
-  .ec-box {
-    padding: 16px 18px;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    background: var(--surface);
-    box-shadow: var(--shadow);
-  }
-
-  .ec-kv {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 8px 14px;
-  }
-
-  .ec-kv div:nth-child(odd) {
-    color: var(--muted);
-    font-weight: 700;
-  }
-
-  .ec-note {
-    margin-top: 6px;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  @media (max-width: 900px) {
-    .ec-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .ec-grid .span-2 {
-      grid-column: span 1;
-    }
-
-    .ec-kv {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
+<link rel="stylesheet" href="${ctx}/assets/css/app.css">
+<%-- Internal styles moved to app.css --%>
 
 <div class="container page-wrap ec-page">
 
