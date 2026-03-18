@@ -93,7 +93,7 @@
     </div>
 
     <div class="paging-footer">
-      <span class="text-muted text-sm">Page ${pageNumber} / ${totalPages}</span>
+      <div class="paging-info">Page <b>${pageNumber}</b> of <b>${totalPages}</b></div>
 
       <div class="paging">
         <c:url var="prevUrl" value="/inventory-details">
@@ -123,14 +123,13 @@
         <a class="paging-btn ${pageNumber >= totalPages ? 'disabled' : ''}" href="${nextUrl}">Next →</a>
       </div>
 
-      <div class="d-flex align-center gap-8 text-muted text-sm">
-        Show
-        <select class="input p-4" onchange="location.href='${ctx}/inventory-details?productCode=${fn:escapeXml(productCode)}&page=1&pageSize='+this.value">
+      <div class="paging-size">
+        <span>Rows:</span>
+        <select class="select w-70" onchange="location.href='${ctx}/inventory-details?productCode=${fn:escapeXml(productCode)}&page=1&pageSize='+this.value">
           <option value="5"  ${pageSize == 5  ? 'selected' : ''}>5</option>
           <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
           <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
         </select>
-        Row
       </div>
     </div>
   </div>

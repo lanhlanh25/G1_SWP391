@@ -114,7 +114,7 @@
             <%-- Pagination --%>
             <div class="paging-footer">
                 <div class="paging-info">
-                    Showing <b><%= totalItems == 0 ? 0 : (curPage - 1) * 10 + 1 %></b>–<b><%= Math.min(curPage * 10, totalItems) %></b> of <b><%= totalItems %></b> variants
+                    Showing <b><%= totalItems == 0 ? 0 : (curPage - 1) * 10 + 1 %></b>–<b><%= Math.min(curPage * 10, totalItems) %></b> 
                 </div>
                 <div class="paging">
                     <% if (curPage > 1) { %>

@@ -79,22 +79,30 @@
   <%-- Table --%>
   <div class="card overflow-hidden">
     <div class="card-body p-0">
-      <table class="table">
+      <table class="table inventory-table">
+        <colgroup>
+          <col class="inventory-col-code"/>
+          <col class="inventory-col-name"/>
+          <col class="inventory-col-brand"/>
+          <col class="inventory-col-qty"/>
+          <col class="inventory-col-status"/>
+          <col class="inventory-col-updated"/>
+        </colgroup>
         <thead>
           <tr>
-            <th class="w-150">Product Code</th>
+            <th>Product Code</th>
             <th>Product Name</th>
-            <th class="w-120">Brand</th>
-            <th class="w-90 text-center">Quantity</th>
-            <th class="w-160">Stock Status</th>
-            <th class="w-130 text-center">Last Updated</th>
+            <th>Brand</th>
+            <th class="text-center">Quantity</th>
+            <th class="text-center">Stock Status</th>
+            <th class="text-center">Last Updated</th>
           </tr>
         </thead>
         <tbody>
           <c:forEach var="it" items="${inventoryModels}">
             <tr>
-              <td style="text-align:left;">${fn:escapeXml(it.productCode)}</td>
-              <td>
+              <td class="inventory-code">${fn:escapeXml(it.productCode)}</td>
+              <td class="inventory-name">
                 <c:url var="detailUrl" value="/inventory-details">
                   <c:param name="productCode" value="${it.productCode}"/>
                   <c:param name="q"           value="${q}"/>
@@ -107,11 +115,11 @@
                   ${fn:escapeXml(it.productName)}
                 </a>
               </td>
-              <td>${fn:escapeXml(it.brandName)}</td>
-              <td class="center">${it.totalQty} Phone</td>
+              <td class="inventory-brand">${fn:escapeXml(it.brandName)}</td>
+              <td class="inventory-qty center">${it.totalQty} Phone</td>
 
               <%-- Badge dựa theo ROP formula --%>
-              <td class="center">
+              <td class="inventory-status center">
                 <c:set var="st" value="${it.status}"/>
                 <c:choose>
                   <c:when test="${st == 'OK'}">
@@ -126,7 +134,7 @@
                   </c:otherwise>
                 </c:choose>
               </td>
-              <td style="text-align:center;">${fn:escapeXml(it.lastUpdated)}</td>
+              <td class="inventory-updated text-center">${fn:escapeXml(it.lastUpdated)}</td>
             </tr>
           </c:forEach>
           <c:if test="${empty inventoryModels}">
@@ -138,16 +146,16 @@
   </div>
 <%-- Pagination --%>
 <c:if test="${totalPages > 1}">
-  <div class="d-flex justify-between align-center mt-14 flex-wrap gap-8">
+  <div class="paging-footer">
     
     <%-- Page info --%>
-    <div class="small muted">
+    <div class="paging-info">
       Showing ${(pageNumber - 1) * pageSize + 1}–${pageNumber * pageSize > totalItems ? totalItems : pageNumber * pageSize}
       of ${totalItems} items
     </div>
 
     <%-- Page buttons --%>
-    <div class="d-flex gap-4 flex-wrap">
+    <div class="paging">
 
       <%-- Previous --%>
       <c:choose>
@@ -228,12 +236,12 @@
     </div>
 
     <%-- Page size selector --%>
-    <form method="get" action="${pageContext.request.contextPath}/inventory" class="d-flex align-center gap-6">
+    <form method="get" action="${pageContext.request.contextPath}/inventory" class="paging-size">
       <input type="hidden" name="q"           value="${fn:escapeXml(q)}"/>
       <input type="hidden" name="brandId"     value="${brandId}"/>
       <input type="hidden" name="stockStatus" value="${stockStatus}"/>
       <input type="hidden" name="page"        value="1"/>
-      <span class="small muted">Rows:</span>
+      <span>Rows:</span>
       <select class="select w-70" name="pageSize" onchange="this.form.submit()">
         <option value="10"  <c:if test="${pageSize==10}">selected</c:if>>10</option>
         <option value="20"  <c:if test="${pageSize==20}">selected</c:if>>20</option>

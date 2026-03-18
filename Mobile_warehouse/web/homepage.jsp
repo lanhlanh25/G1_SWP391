@@ -136,9 +136,9 @@
                         <div class="page-content-shell">
                             <jsp:include page="<%= contentPage %>" />
                         </div>
-
-                        <%@ include file="/WEB-INF/jspf/footer.jspf" %>
                     </main>
+
+                    <%@ include file="/WEB-INF/jspf/footer.jspf" %>
                 </div>
 
             </div>

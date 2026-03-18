@@ -151,13 +151,13 @@
       </div>
 
       <!-- Paging (attrs: pageNumber, pageSize, totalPages, totalItems) -->
-      <div class="ic-paging">
-        <span class="ic-paging-info">
-          Page ${pageNumber} / ${totalPages}
-          &nbsp;•&nbsp; Total <strong>${totalItems}</strong> SKUs
-        </span>
+      <div class="paging-footer">
+        <div class="paging-info">
+          Page <b>${pageNumber}</b> of <b>${totalPages}</b>
+<!--          &nbsp;•&nbsp; Total <strong>${totalItems}</strong> SKUs-->
+        </div>
 
-        <div class="ic-paging-btns">
+        <div class="paging">
           <c:url var="prevUrl" value="/inventory-count">
             <c:param name="q"        value="${q}"/>
             <c:param name="brandId"  value="${brandId}"/>
@@ -203,14 +203,13 @@
           <a class="${pageNumber >= totalPages ? 'pg-disabled' : ''}" href="${nextUrl}">Next →</a>
         </div>
 
-        <div class="psz-wrap2">
-          Show
-          <select onchange="location.href='${ctx}/inventory-count?q=${fn:escapeXml(q)}&brandId=${fn:escapeXml(brandId)}&page=1&pageSize='+this.value">
+        <div class="paging-size">
+          <span>Rows:</span>
+          <select class="select w-70" onchange="location.href='${ctx}/inventory-count?q=${fn:escapeXml(q)}&brandId=${fn:escapeXml(brandId)}&page=1&pageSize='+this.value">
             <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
             <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
             <option value="50" ${pageSize == 50 ? 'selected' : ''}>50</option>
           </select>
-          Row
         </div>
       </div>
 

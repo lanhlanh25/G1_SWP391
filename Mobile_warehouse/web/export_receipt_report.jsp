@@ -1,4 +1,4 @@
-<%-- 
+<%--
     Document   : export_receipt_report
     Created on : Mar 6, 2026, 1:09:56 PM
     Author     : Admin
@@ -53,7 +53,7 @@
       <div class="card-body p-20">
         <div class="text-primary fw-600 mb-4">Total Phone Quantity</div>
         <div class="h1 fw-800 text-primary">
-          <c:out value="${reportSummary.totalPhoneQuantity}" default="0"/> 
+          <c:out value="${reportSummary.totalPhoneQuantity}" default="0"/>
           <span class="small fw-600 opacity-75">Phones</span>
         </div>
       </div>
@@ -63,7 +63,7 @@
   <div class="card">
     <div class="card-body">
       <div class="h2 mb-16">Export History</div>
-      
+
       <table class="table">
         <thead>
           <tr>
@@ -99,7 +99,8 @@
       </table>
 
       <c:if test="${totalPages > 1}">
-        <div class="paging-footer mt-20 justify-end">
+        <div class="paging-footer">
+          <div class="paging-info">Page <b>${page}</b> of <b>${totalPages}</b></div>
           <div class="paging">
             <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
 
@@ -136,4 +137,4 @@
       </c:if>
     </div>
   </div>
-</div>
+</div>

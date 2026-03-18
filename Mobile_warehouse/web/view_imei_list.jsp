@@ -124,10 +124,8 @@
     </div>
 
     <!-- Paging -->
-    <div class="paging-footer justify-between align-center p-20 p-24">
-      <span class="muted font-sm">
-        Page ${pageNumber} / ${totalPages}
-      </span>
+    <div class="paging-footer">
+      <div class="paging-info">Page <b>${pageNumber}</b> of <b>${totalPages}</b></div>
 
       <div class="paging">
         <c:url var="prevUrl" value="/imei-list">
@@ -178,13 +176,13 @@
         <a class="paging-btn ${pageNumber >= totalPages ? 'disabled' : ''}" href="${nextUrl}">Next →</a>
       </div>
 
-      <div class="d-flex align-center gap-8 muted font-sm">
-        Show
-        <select class="select" style="width: auto;" onchange="
+      <div class="paging-size">
+        <span>Rows:</span>
+        <select class="select w-70" onchange="
           location.href='${ctx}/imei-list?skuId=${skuId}&q=${fn:escapeXml(q)}&back='+encodeURIComponent('${fn:escapeXml(param.back)}')+'&page=1&pageSize='+this.value">
-          <option value="10" ${pageSize == 10 ? 'selected' : ''}>10 Row</option>
-          <option value="20" ${pageSize == 20 ? 'selected' : ''}>20 Row</option>
-          <option value="50" ${pageSize == 50 ? 'selected' : ''}>50 Row</option>
+          <option value="10" ${pageSize == 10 ? 'selected' : ''}>10</option>
+          <option value="20" ${pageSize == 20 ? 'selected' : ''}>20</option>
+          <option value="50" ${pageSize == 50 ? 'selected' : ''}>50</option>
         </select>
       </div>
     </div>

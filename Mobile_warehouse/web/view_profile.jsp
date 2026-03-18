@@ -14,68 +14,69 @@
         else if (rid == 4) roleName = "SALE";
         else roleName = "STAFF";
     }
-    String avatar  = pu.getAvatar();
+
+    String avatar = pu.getAvatar();
     if (avatar == null || avatar.isBlank()) avatar = "assets/default-avatar.jpg";
+
     String address = pu.getAddress();
     if (address == null) address = "";
+
+    String msg = request.getParameter("msg");
     long v = System.currentTimeMillis();
 %>
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8"/>
-  <title>My Profile</title>
-  <link rel="stylesheet" href="<%=request.getContextPath()%>/assets/css/app.css"/>
-</head>
-<body>
-<div class="layout">
-  <div class="main">
-    <div class="page-wrap-sm">
 
-      <div class="topbar mb-20">
-        <h1 class="h1 m-0">My Profile</h1>
-        <a class="btn btn-outline" href="javascript:history.back()">← Back</a>
-      </div>
+<div class="page-wrap-sm profile-page">
+    <div class="topbar mb-20">
+        <div>
+            <h1 class="h1 m-0">My Profile</h1>
+            <div class="muted">Your personal information and current account status.</div>
+        </div>
+        <a class="btn btn-outline" href="javascript:history.back()">&larr; Back</a>
+    </div>
 
-      <div class="grid-profile gap-16">
+    <% if ("avatar_updated".equals(msg)) { %>
+        <div class="msg-ok">Avatar updated successfully.</div>
+    <% } else if ("nofile".equals(msg)) { %>
+        <div class="msg-err">Please choose an image before uploading.</div>
+    <% } else if ("badtype".equals(msg)) { %>
+        <div class="msg-err">Only JPG, JPEG, PNG or WEBP images are allowed.</div>
+    <% } else if ("dbfail".equals(msg)) { %>
+        <div class="msg-err">Could not save the avatar right now. Please try again.</div>
+    <% } %>
 
+    <div class="grid-profile gap-16">
         <div class="card">
-          <div class="card-body text-center">
-            <img src="<%=request.getContextPath()%>/<%=avatar%>?v=<%=v%>"
-                 alt="avatar"
-                 class="avatar-xl"/>
-            <div class="small muted mt-8">Avatar</div>
-          </div>
+            <div class="card-body text-center">
+                <img src="<%=request.getContextPath()%>/<%=avatar%>?v=<%=v%>"
+                     alt="avatar"
+                     class="avatar-xl"/>
+                <div class="small muted mt-8">Avatar</div>
+            </div>
         </div>
 
         <div class="card overflow-hidden">
-          <div class="card-header"><span class="h2">User Information</span></div>
-          <div class="card-body p-0">
-            <table class="table">
-              <tr><td class="label w-160">User ID</td><td><%=pu.getUserId()%></td></tr>
-              <tr><td class="label">Username</td><td><%=pu.getUsername()%></td></tr>
-              <tr><td class="label">Full Name</td><td><%=pu.getFullName()%></td></tr>
-              <tr><td class="label">Email</td><td><%=pu.getEmail()%></td></tr>
-              <tr><td class="label">Phone</td><td><%=pu.getPhone()%></td></tr>
-              <tr><td class="label">Address</td><td><%=address.isBlank() ? "-" : address%></td></tr>
-              <tr><td class="label">Role</td><td><%=roleName%></td></tr>
-              <tr>
-                <td class="label">Status</td>
-                <td>
-                  <% if (pu.getStatus() == 1) { %>
-                    <span class="badge badge-active">ACTIVE</span>
-                  <% } else { %>
-                    <span class="badge badge-inactive">INACTIVE</span>
-                  <% } %>
-                </td>
-              </tr>
-            </table>
-          </div>
+            <div class="card-header"><span class="h2">User Information</span></div>
+            <div class="card-body p-0">
+                <table class="table">
+                    <tr><td class="label w-160">User ID</td><td><%=pu.getUserId()%></td></tr>
+                    <tr><td class="label">Username</td><td><%=pu.getUsername()%></td></tr>
+                    <tr><td class="label">Full Name</td><td><%=pu.getFullName()%></td></tr>
+                    <tr><td class="label">Email</td><td><%=pu.getEmail()%></td></tr>
+                    <tr><td class="label">Phone</td><td><%=pu.getPhone()%></td></tr>
+                    <tr><td class="label">Address</td><td><%=address.isBlank() ? "-" : address%></td></tr>
+                    <tr><td class="label">Role</td><td><%=roleName%></td></tr>
+                    <tr>
+                        <td class="label">Status</td>
+                        <td>
+                            <% if (pu.getStatus() == 1) { %>
+                                <span class="badge badge-active">ACTIVE</span>
+                            <% } else { %>
+                                <span class="badge badge-inactive">INACTIVE</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
-
-      </div>
     </div>
-  </div>
 </div>
-</body>
-</html>

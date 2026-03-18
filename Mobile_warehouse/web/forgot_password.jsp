@@ -20,8 +20,7 @@
     <title>Forgot Password – DTLA Mobile WMS</title>
     <link rel="stylesheet" href="<%= ctx %>/assets/css/app.css">
 </head>
-  <%-- Styles moved to app.css --%>
-</head>
+<%-- Styles moved to app.css --%>
 <body class="auth-body">
 
 <div class="auth-container">

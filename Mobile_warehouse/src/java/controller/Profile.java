@@ -32,14 +32,8 @@ public class Profile extends HttpServlet {
       
         if (fresh != null) {
             session.setAttribute("authUser", fresh);
-            request.setAttribute("profileUser", fresh);
-        } else {
-            request.setAttribute("profileUser", u);
         }
-
-        
-        request.getRequestDispatcher("/view_profile.jsp")
-                .forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/home?p=my-profile");
     }
 
     @Override

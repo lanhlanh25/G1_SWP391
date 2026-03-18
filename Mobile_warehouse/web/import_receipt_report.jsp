@@ -8,7 +8,7 @@
 
   <%-- Internal styles moved to app.css --%>
 
-<<div class="page-wrap">
+<div class="page-wrap">
   <div class="topbar">
     <div style="display:flex; align-items:center; gap:10px;">
       <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
@@ -109,7 +109,8 @@
       </table>
 
       <c:if test="${totalPages > 1}">
-        <div class="paging-footer mt-20 justify-end">
+        <div class="paging-footer">
+          <div class="paging-info">Page <b>${page}</b> of <b>${totalPages}</b></div>
           <div class="paging">
             <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}&supplierId=${supplierId}" />
 
@@ -147,4 +148,3 @@
     </div>
   </div>
 </div>
-v>

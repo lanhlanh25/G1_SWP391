@@ -182,26 +182,101 @@
             </div>
 
             <c:if test="${totalPages > 1}">
-                <div class="paging">
-                    <c:choose>
-                        <c:when test="${page > 1}">
-                            <a href="${pageContext.request.contextPath}/home?p=low-stock-report&page=${page-1}&q=${q}&supplierId=${supplierId}&ropStatus=${ropStatus}&minStock=${minStock}&maxStock=${maxStock}">Prev</a>
-                        </c:when>
-                        <c:otherwise>
-                            <span class="paging-btn disabled">Prev</span>
-                        </c:otherwise>
-                    </c:choose>
+                <div class="paging-footer">
+                    <div class="paging-info">Page <b>${page}</b> of <b>${totalPages}</b></div>
 
-                    <b>${page}</b>
+                    <div class="paging">
+                        <c:url var="prevUrl" value="/home">
+                            <c:param name="p" value="low-stock-report"/>
+                            <c:param name="page" value="${page - 1}"/>
+                            <c:param name="q" value="${q}"/>
+                            <c:param name="supplierId" value="${supplierId}"/>
+                            <c:param name="ropStatus" value="${ropStatus}"/>
+                            <c:param name="minStock" value="${minStock}"/>
+                            <c:param name="maxStock" value="${maxStock}"/>
+                        </c:url>
+                        <c:choose>
+                            <c:when test="${page > 1}">
+                                <a class="paging-btn" href="${prevUrl}">Prev</a>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="paging-btn disabled">Prev</span>
+                            </c:otherwise>
+                        </c:choose>
 
-                    <c:choose>
-                        <c:when test="${page < totalPages}">
-                            <a href="${pageContext.request.contextPath}/home?p=low-stock-report&page=${page+1}&q=${q}&supplierId=${supplierId}&ropStatus=${ropStatus}&minStock=${minStock}&maxStock=${maxStock}">Next</a>
-                        </c:when>
-                        <c:otherwise>
-                            <span class="paging-btn disabled">Next</span>
-                        </c:otherwise>
-                    </c:choose>
+                        <c:set var="pgStart" value="${page - 2 > 1 ? page - 2 : 1}"/>
+                        <c:set var="pgEnd" value="${page + 2 < totalPages ? page + 2 : totalPages}"/>
+
+                        <c:if test="${pgStart > 1}">
+                            <c:url var="firstUrl" value="/home">
+                                <c:param name="p" value="low-stock-report"/>
+                                <c:param name="page" value="1"/>
+                                <c:param name="q" value="${q}"/>
+                                <c:param name="supplierId" value="${supplierId}"/>
+                                <c:param name="ropStatus" value="${ropStatus}"/>
+                                <c:param name="minStock" value="${minStock}"/>
+                                <c:param name="maxStock" value="${maxStock}"/>
+                            </c:url>
+                            <a class="paging-btn" href="${firstUrl}">1</a>
+                            <c:if test="${pgStart > 2}">
+                                <span class="paging-ellipsis">&hellip;</span>
+                            </c:if>
+                        </c:if>
+
+                        <c:forEach begin="${pgStart}" end="${pgEnd}" var="pg">
+                            <c:url var="pageUrl" value="/home">
+                                <c:param name="p" value="low-stock-report"/>
+                                <c:param name="page" value="${pg}"/>
+                                <c:param name="q" value="${q}"/>
+                                <c:param name="supplierId" value="${supplierId}"/>
+                                <c:param name="ropStatus" value="${ropStatus}"/>
+                                <c:param name="minStock" value="${minStock}"/>
+                                <c:param name="maxStock" value="${maxStock}"/>
+                            </c:url>
+                            <c:choose>
+                                <c:when test="${pg == page}">
+                                    <span class="paging-btn active">${pg}</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <a class="paging-btn" href="${pageUrl}">${pg}</a>
+                                </c:otherwise>
+                            </c:choose>
+                        </c:forEach>
+
+                        <c:if test="${pgEnd < totalPages}">
+                            <c:if test="${pgEnd < totalPages - 1}">
+                                <span class="paging-ellipsis">&hellip;</span>
+                            </c:if>
+                            <c:url var="lastUrl" value="/home">
+                                <c:param name="p" value="low-stock-report"/>
+                                <c:param name="page" value="${totalPages}"/>
+                                <c:param name="q" value="${q}"/>
+                                <c:param name="supplierId" value="${supplierId}"/>
+                                <c:param name="ropStatus" value="${ropStatus}"/>
+                                <c:param name="minStock" value="${minStock}"/>
+                                <c:param name="maxStock" value="${maxStock}"/>
+                            </c:url>
+                            <a class="paging-btn" href="${lastUrl}">${totalPages}</a>
+                        </c:if>
+
+                        <c:url var="nextUrl" value="/home">
+                            <c:param name="p" value="low-stock-report"/>
+                            <c:param name="page" value="${page + 1}"/>
+                            <c:param name="q" value="${q}"/>
+                            <c:param name="supplierId" value="${supplierId}"/>
+                            <c:param name="ropStatus" value="${ropStatus}"/>
+                            <c:param name="minStock" value="${minStock}"/>
+                            <c:param name="maxStock" value="${maxStock}"/>
+                        </c:url>
+                        <c:choose>
+                            <c:when test="${page < totalPages}">
+                                <a class="paging-btn" href="${nextUrl}">Next</a>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="paging-btn disabled">Next</span>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
                 </div>
             </c:if>
         </div>

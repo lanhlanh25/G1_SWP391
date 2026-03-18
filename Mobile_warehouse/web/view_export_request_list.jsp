@@ -118,7 +118,7 @@
     </c:url>
 
     <div class="paging-footer">
-        <div class="paging-info">Total: <b>${totalItems}</b> item(s) • Page <b>${page}</b>/<b>${totalPages}</b></div>
+        <div class="paging-info">Page <b>${page}</b> of <b>${totalPages}</b></div>
         <div class="paging">
             <c:choose>
                 <c:when test="${page > 1}">

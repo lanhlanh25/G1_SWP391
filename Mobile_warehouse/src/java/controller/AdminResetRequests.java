@@ -37,7 +37,10 @@ public class AdminResetRequests extends HttpServlet {
         }
 
         req.setAttribute("pendingRequests", dao.getPendingResetRequests());
-        req.getRequestDispatcher("/admin_reset_requests.jsp").forward(req, resp);
+        req.setAttribute("contentPage", "admin_reset_requests.jsp");
+        req.setAttribute("sidebarPage", "sidebar_admin.jsp");
+        req.setAttribute("currentPage", "admin/reset-requests");
+        req.getRequestDispatcher("/homepage.jsp").forward(req, resp);
     }
 
 }
