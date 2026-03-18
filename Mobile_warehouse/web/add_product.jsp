@@ -3,87 +3,100 @@
 
 <div class="page-wrap-sm">
 
-    <div class="form-topbar">
-        <a class="btn" href="${pageContext.request.contextPath}/home?p=product-list">← Back</a>
-        <h1 class="h1">Add New Product</h1>
+    <div class="topbar">
+        <div>
+            <div class="title">Add New Product</div>
+            <div class="small">Create product information for warehouse operations</div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-outline" type="button"
+                    onclick="window.location.href = '${pageContext.request.contextPath}/home?p=product-list'">
+                Back
+            </button>
+        </div>
     </div>
 
-    <div class="form-card">
-        <div class="title">Add New Product</div>
-        <div class="subtitle">Create product information for warehouse operations</div>
+    <div class="card">
+        <div class="card-body">
 
-        <form action="${pageContext.request.contextPath}/manager/product/add" method="post">
+            <form action="${pageContext.request.contextPath}/manager/product/add" method="post" autocomplete="off">
 
-            <div class="form-grid">
+                <div class="form-grid">
 
-                <!-- PRODUCT CODE -->
-                <div class="label">Product Code</div>
-                <div>
-                    <div class="auto-code">Auto Generate</div>
-                </div>
+                    <!-- Product Code -->
+                    <div class="label">Product Code</div>
+                    <div>
+                        <input class="input readonly" type="text" value="Auto Generated" readonly>
+                    </div>
 
-                <div class="label">Product Name<span class="req">*</span></div>
-                <div>
-                    <input class="input" type="text" name="productName" value="${productName}">
-                    <c:if test="${not empty errors.productName}">
-                        <div class="err">${errors.productName}</div>
-                    </c:if>
-                </div>
+                    <!-- Product Name -->
+                    <div class="label">Product Name <span class="req">*</span></div>
+                    <div>
+                        <input class="input" type="text" name="productName" value="${productName}" 
+                               placeholder="Enter product name" required>
+                        <c:if test="${not empty errors.productName}">
+                            <div class="err">${errors.productName}</div>
+                        </c:if>
+                    </div>
 
-               
-                <div class="label">Brand<span class="req">*</span></div>
-                <div>
-                    <select class="select" name="brandId">
-                        <option value="">-- Select Brand --</option>
-                        <c:forEach var="b" items="${brands}">
-                            <option value="${b.brandId}" ${brandId==(''+b.brandId) ? 'selected' : '' }>
-                                ${b.brandName}
+                    <!-- Brand -->
+                    <div class="label">Brand <span class="req">*</span></div>
+                    <div>
+                        <select class="select" name="brandId" required>
+                            <option value="">-- Select Brand --</option>
+                            <c:forEach var="b" items="${brands}">
+                                <option value="${b.brandId}" ${brandId==(''+b.brandId) ? 'selected' : '' }>
+                                    ${b.brandName}
+                                </option>
+                            </c:forEach>
+                        </select>
+                        <c:if test="${not empty errors.brandId}">
+                            <div class="err">${errors.brandId}</div>
+                        </c:if>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="label">Description</div>
+                    <div>
+                        <textarea class="textarea" name="description" 
+                                  placeholder="Enter product description">${description}</textarea>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="label">Status</div>
+                    <div>
+                        <select class="select" name="status">
+                            <option value="ACTIVE" ${status=='ACTIVE' || empty status ? 'selected' : '' }>
+                                ACTIVE
                             </option>
-                        </c:forEach>
-                    </select>
-                    <c:if test="${not empty errors.brandId}">
-                        <div class="err">${errors.brandId}</div>
-                    </c:if>
+                            <option value="INACTIVE" ${status=='INACTIVE' ? 'selected' : '' }>
+                                INACTIVE
+                            </option>
+                        </select>
+                    </div>
+
                 </div>
 
-              
-                <div class="label">Description</div>
-                <div>
-                    <textarea class="textarea" name="description">${description}</textarea>
+                <div class="form-actions">
+                    <button class="btn btn-primary" type="submit">
+                        Save
+                    </button>
+                    <button class="btn btn-outline" type="button"
+                            onclick="window.location.href = '${pageContext.request.contextPath}/home?p=product-list'">
+                        Cancel
+                    </button>
                 </div>
 
-              
-                <div class="label">Status</div>
-                <div>
-                    <select class="select" name="status">
-                        <option value="ACTIVE" ${status=='ACTIVE' || empty status ? 'selected' : '' }>
-                            Active
-                        </option>
-                        <option value="INACTIVE" ${status=='INACTIVE' ? 'selected' : '' }>
-                            Inactive
-                        </option>
-                    </select>
-                </div>
+                <c:if test="${not empty errors.db}">
+                    <div class="err" style="text-align:center; margin-top: 15px;">
+                        ${errors.db}
+                    </div>
+                </c:if>
 
-            </div>
+            </form>
 
-            <div class="form-btns">
-                <button class="btn" type="button"
-                    onclick="window.location.href = '${pageContext.request.contextPath}/home?p=product-list'">
-                    Cancel
-                </button>
-                <button class="btn btn-primary" type="submit">
-                    Create
-                </button>
-            </div>
-
-            <c:if test="${not empty errors.db}">
-                <div class="err" style="text-align:center;margin-top:12px">
-                    ${errors.db}
-                </div>
-            </c:if>
-
-        </form>
-
+        </div>
     </div>
 </div>
+>

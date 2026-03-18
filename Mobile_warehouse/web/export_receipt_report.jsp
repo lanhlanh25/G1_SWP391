@@ -26,11 +26,10 @@
 </style>
 
 <div class="page-wrap">
-
   <div class="topbar">
     <div style="display:flex; align-items:center; gap:10px;">
       <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
-      <h1 class="h1" style="margin:0;">Export Receipt Report</h1>
+      <h1 class="h1">Export Receipt Report</h1>
     </div>
   </div>
 
@@ -39,106 +38,115 @@
   </c:if>
 
   <!-- Filters -->
-  <form method="get" action="${ctx}/export-receipt-report" class="filters export-report-filters">
-    <div class="field">
+  <form method="get" action="${ctx}/export-receipt-report" class="filters export-report-filters" style="margin-bottom: 20px;">
+    <div class="filter-group">
       <label>From</label>
       <input class="input" type="date" name="from" value="${from}" />
     </div>
-    <div class="field">
+    <div class="filter-group">
       <label>To</label>
       <input class="input" type="date" name="to" value="${to}" />
     </div>
-    <div class="apply-wrap" style="display:flex; align-items:end; justify-content:flex-end;">
-      <button class="btn btn-primary" type="submit">Apply</button>
+    <div class="filter-actions" style="display:flex; align-items:end;">
+      <button class="btn btn-primary" type="submit" style="height: 38px;">Apply</button>
     </div>
   </form>
 
   <!-- Stats -->
-  <div class="stat-cards" style="margin-top:10px;">
-    <div class="card stat-card-item">
-      <div class="muted-label">Total Export Receipts</div>
-      <div class="stat-value">
-        <c:out value="${reportSummary.totalExportReceipts}" default="0"/>
+  <div class="stat-cards" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+    <div class="card" style="margin-bottom:0;">
+      <div class="card-body" style="padding: 16px 20px;">
+        <div class="muted" style="margin-bottom:4px;">Total Export Receipts</div>
+        <div class="h1" style="font-size: 28px;">
+          <c:out value="${reportSummary.totalExportReceipts}" default="0"/>
+        </div>
       </div>
     </div>
 
-    <div class="card stat-card-item" style="border-color: var(--primary-border); background: var(--primary-light);">
-      <div class="muted-label">Total Phone Quantity</div>
-      <div class="stat-value">
-        <c:out value="${reportSummary.totalPhoneQuantity}" default="0"/> Phones
+    <div class="card" style="margin-bottom:0; border-color: var(--primary-border); background: var(--primary-light);">
+      <div class="card-body" style="padding: 16px 20px;">
+        <div class="muted" style="margin-bottom:4px; color: var(--primary);">Total Phone Quantity</div>
+        <div class="h1" style="font-size: 28px; color: var(--primary);">
+          <c:out value="${reportSummary.totalPhoneQuantity}" default="0"/> <span style="font-size: 16px; font-weight: 600;">Phones</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <div style="height:10px;"></div>
-  <div class="h2" style="margin:12px 0 10px;">Export History</div>
-
-  <table class="table">
-    <thead>
-      <tr>
-        <th>RECEIPT CODE</th>
-        <th>CREATED DATE</th>
-        <th>CREATED BY</th>
-        <th>TOTAL QUANTITY</th>
-        <th>STATUS</th>
-      </tr>
-    </thead>
-    <tbody>
-      <c:choose>
-        <c:when test="${empty rows}">
+  <div class="card">
+    <div class="card-body">
+      <div class="h2" style="margin-bottom:14px;">Export History</div>
+      
+      <table class="table">
+        <thead>
           <tr>
-            <td colspan="5" style="text-align:center; color:#64748b; font-weight:700;">
-              No export receipts found
-            </td>
+            <th>Receipt Code</th>
+            <th>Created Date</th>
+            <th>Created By</th>
+            <th style="text-align:center;">Total Quantity</th>
+            <th style="width:120px;">Status</th>
           </tr>
-        </c:when>
-        <c:otherwise>
-          <c:forEach var="r" items="${rows}">
-            <tr>
-              <td><c:out value="${r.exportCode}"/></td>
-              <td><c:out value="${r.exportDateUi}"/></td>
-              <td><c:out value="${r.createdByName}"/></td>
-              <td><c:out value="${r.totalQuantity}"/> Phone</td>
-              <td><c:out value="${r.status}"/></td>
-            </tr>
-          </c:forEach>
-        </c:otherwise>
-      </c:choose>
-    </tbody>
-  </table>
+        </thead>
+        <tbody>
+          <c:choose>
+            <c:when test="${empty rows}">
+              <tr>
+                <td colspan="5" style="text-align:center; padding:32px; color:var(--muted);">
+                  No export receipts found
+                </td>
+              </tr>
+            </c:when>
+            <c:otherwise>
+              <c:forEach var="r" items="${rows}">
+                <tr>
+                  <td style="font-weight:600;"><c:out value="${r.exportCode}"/></td>
+                  <td style="color:var(--muted);"><c:out value="${r.exportDateUi}"/></td>
+                  <td><c:out value="${r.createdByName}"/></td>
+                  <td style="font-weight:700; text-align:center;"><c:out value="${r.totalQuantity}"/> Phone</td>
+                  <td><span class="badge badge-active"><c:out value="${r.status}"/></span></td>
+                </tr>
+              </c:forEach>
+            </c:otherwise>
+          </c:choose>
+        </tbody>
+      </table>
 
-  <!-- Paging -->
-  <div class="paging">
-    <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
+      <c:if test="${totalPages > 1}">
+        <div class="paging-footer" style="margin-top: 20px; justify-content: flex-end;">
+          <div class="paging">
+            <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
 
-    <c:choose>
-      <c:when test="${page > 1}">
-        <a class="paging-btn" href="${ctx}/export-receipt-report?${qsBase}&page=${page-1}">Prev</a>
-      </c:when>
-      <c:otherwise>
-        <span class="paging-btn disabled">Prev</span>
-      </c:otherwise>
-    </c:choose>
+            <c:choose>
+              <c:when test="${page > 1}">
+                <a class="paging-btn" href="${ctx}/export-receipt-report?${qsBase}&page=${page-1}">← Prev</a>
+              </c:when>
+              <c:otherwise>
+                <span class="paging-btn disabled">← Prev</span>
+              </c:otherwise>
+            </c:choose>
 
-    <c:forEach var="p" begin="1" end="${totalPages}">
-      <c:choose>
-        <c:when test="${p == page}">
-          <b>${p}</b>
-        </c:when>
-        <c:otherwise>
-          <a href="${ctx}/export-receipt-report?${qsBase}&page=${p}">${p}</a>
-        </c:otherwise>
-      </c:choose>
-    </c:forEach>
+            <c:forEach var="p" begin="1" end="${totalPages}">
+              <c:choose>
+                <c:when test="${p == page}">
+                  <span class="paging-btn active">${p}</span>
+                </c:when>
+                <c:otherwise>
+                  <a class="paging-btn" href="${ctx}/export-receipt-report?${qsBase}&page=${p}">${p}</a>
+                </c:otherwise>
+              </c:choose>
+            </c:forEach>
 
-    <c:choose>
-      <c:when test="${page < totalPages}">
-        <a class="paging-btn" href="${ctx}/export-receipt-report?${qsBase}&page=${page+1}">Next</a>
-      </c:when>
-      <c:otherwise>
-        <span class="paging-btn disabled">Next</span>
-      </c:otherwise>
-    </c:choose>
+            <c:choose>
+              <c:when test="${page < totalPages}">
+                <a class="paging-btn" href="${ctx}/export-receipt-report?${qsBase}&page=${page+1}">Next →</a>
+              </c:when>
+              <c:otherwise>
+                <span class="paging-btn disabled">Next →</span>
+              </c:otherwise>
+            </c:choose>
+          </div>
+        </div>
+      </c:if>
+    </div>
   </div>
-
-</div>
+</div>

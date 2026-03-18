@@ -52,7 +52,10 @@
 
 <div class="page-wrap">
     <div class="topbar">
-        <div class="title">Brand List</div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
+            <h1 class="h1">View Brand List</h1>
+        </div>
 
         <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
             <c:url var="addUrl" value="/home">
@@ -63,7 +66,7 @@
                 <c:param name="sortOrder" value="${sortOrder}"/>
                 <c:param name="page" value="${page}"/>
             </c:url>
-            <a class="btn" href="${addUrl}">+ Add New Brand</a>
+            <a class="btn btn-primary" href="${addUrl}">+ Add Brand</a>
         </c:if>
     </div>
 
@@ -74,85 +77,50 @@
         <div class="msg-err">${fn:escapeXml(param.err)}</div>
     </c:if>
 
+    <div class="card">
+        <div class="card-body">
+            <div class="h2" style="margin-bottom:6px;">Manage Brands</div>
+            <div class="muted" style="margin-bottom:14px;">Define and manage product brands in your catalog.</div>
 
-    <div id="descModalBackdrop" class="modal-backdrop" onclick="closeDescModal()">
-        <div class="modal" onclick="event.stopPropagation()">
-            <button class="close" type="button" onclick="closeDescModal()">Close</button>
-            <h3 id="descModalTitle">Description</h3>
-            <pre id="descModalBody"></pre>
-        </div>
-    </div>
+            <form method="get" action="${ctx}/home" class="filters" style="grid-template-columns: 1.5fr 1fr 1fr 1.5fr auto auto; gap: 12px; align-items: end;">
+                <input type="hidden" name="p" value="brand-list"/>
 
- 
-    <div id="disableModalBackdrop" class="modal-backdrop" onclick="closeDisableModal()">
-        <div class="modal" onclick="event.stopPropagation()">
-            <h3 id="disableModalTitle">Disable Brand</h3>
+                <div class="filter-group">
+                    <label>Search Brand</label>
+                    <input class="input" name="q" value="${fn:escapeXml(q)}" placeholder="Brand name..."/>
+                </div>
 
-            <div style="margin:8px 0; color:#333;">
-                Are you sure you want to set this brand to <b><span id="disableActionText">Inactive</span></b>?
-            </div>
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select class="select" name="status">
+                        <option value="" ${empty status ? 'selected' : ''}>All Status</option>
+                        <option value="active" ${status=='active' ? 'selected' : ''}>Active</option>
+                        <option value="inactive" ${status=='inactive' ? 'selected' : ''}>Inactive</option>
+                    </select>
+                </div>
 
-            <div style="margin:8px 0;">
-                <b>Name:</b> <span id="disableBrandName"></span>
-            </div>
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select class="select" name="sortBy">
+                        <option value="name" ${sortBy=='name'?'selected':''}>Name</option>
+                        <option value="createdAt" ${sortBy=='createdAt'?'selected':''}>Created At</option>
+                        <option value="status" ${sortBy=='status'?'selected':''}>Status</option>
+                    </select>
+                </div>
 
-            <div style="margin:8px 0;">
-                <b>Description:</b>
-                <pre id="disableBrandDesc" style="margin-top:6px;"></pre>
-            </div>
+                <div class="filter-group">
+                    <label>Order</label>
+                    <select class="select" name="sortOrder">
+                        <option value="ASC" ${sortOrder=='ASC'?'selected':''}>Ascending (A-Z)</option>
+                        <option value="DESC" ${sortOrder=='DESC'?'selected':''}>Descending (Z-A)</option>
+                    </select>
+                </div>
 
-            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:12px;">
-                <button id="disableConfirmBtn" type="button" class="btn"
-                        style="border-color:#d32f2f;background:#ffecec;"
-                        onclick="submitDisableForm()">
-                    Confirm Disable
-                </button>
-
-                <button type="button" class="btn" onclick="closeDisableModal()">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-   
-    <form method="get" action="${ctx}/home">
-        <input type="hidden" name="p" value="brand-list"/>
-
-        <div class="filters">
-            <div>
-                <label>Search</label>
-                <input class="input" name="q" value="${fn:escapeXml(q)}" placeholder="brand name"/>
-            </div>
-
-            <div>
-                <label>Status</label>
-                <select class="select" name="status">
-                    <option value="" ${empty status ? 'selected' : ''}>All</option>
-                    <option value="active" ${status=='active' ? 'selected' : ''}>Active</option>
-                    <option value="inactive" ${status=='inactive' ? 'selected' : ''}>Inactive</option>
-                </select>
-            </div>
-
-            <div>
-                <label>Sort By</label>
-                <select class="select" name="sortBy">
-                    <option value="name" ${sortBy=='name'?'selected':''}>Name</option>
-                    <option value="createdAt" ${sortBy=='createdAt'?'selected':''}>Created At</option>
-                    <option value="status" ${sortBy=='status'?'selected':''}>Status</option>
-                </select>
-            </div>
-
-            <div>
-                <label>Order</label>
-                <select class="select" name="sortOrder">
-                    <option value="ASC" ${sortOrder=='ASC'?'selected':''}>Ascending (A→Z / Low→High)</option>
-                    <option value="DESC" ${sortOrder=='DESC'?'selected':''}>Descending (Z→A / High→Low)</option>
-                </select>
-            </div>
-
-            <button class="btn" type="submit">Apply</button>
-            <a class="btn" href="${ctx}/home?p=brand-list">Reset</a>
-        </div>
-    </form>
+                <div class="filter-actions" style="display:contents;">
+                    <button class="btn btn-primary" type="submit" style="height: 38px;">Apply</button>
+                    <a class="btn" href="${ctx}/home?p=brand-list" style="height: 38px;">Reset</a>
+                </div>
+            </form>
 
    
     <c:set var="statusLabel"
@@ -174,105 +142,104 @@
         Sort = <b>${sortLabel}</b> <b>${orderLabel}</b>
     </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th style="width:60px;">#</th>
-                <th style="width:220px;">Brand Name</th>
-                <th>Description</th>
-                <th style="width:120px;">Status</th>
-                <th style="width:180px;">Created At</th>
-                <th style="width:220px;">Action</th>
-            </tr>
-        </thead>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">#</th>
+                        <th style="width:220px;">Brand Name</th>
+                        <th>Description</th>
+                        <th style="width:120px;">Status</th>
+                        <th style="width:180px;">Created At</th>
+                        <th style="width:240px;">Action</th>
+                    </tr>
+                </thead>
 
-        <tbody>
-            <c:forEach items="${brands}" var="b" varStatus="st">
-                <tr>
-                    <td>${(page - 1) * pageSize + st.index + 1}</td>
+                <tbody>
+                    <c:forEach items="${brands}" var="b" varStatus="st">
+                        <tr>
+                            <td>${(page - 1) * pageSize + st.index + 1}</td>
 
-                    <td>${fn:escapeXml(b.brandName)}</td>
+                            <td style="font-weight:600;">${fn:escapeXml(b.brandName)}</td>
 
-                    <td class="desc-cell" title="${fn:escapeXml(b.description)}">
-                        <c:choose>
-                            <c:when test="${not empty b.description && fn:length(b.description) > 60}">
-                                ${fn:escapeXml(fn:substring(b.description, 0, 60))}...
-                                <button type="button" class="desc-link"
-                                        data-title="${fn:escapeXml(b.brandName)}"
-                                        data-full="${fn:escapeXml(b.description)}"
-                                        onclick="openDescModal(this.dataset.title, this.dataset.full)">
-                                    View
-                                </button>
-                            </c:when>
-                            <c:otherwise>
-                                ${fn:escapeXml(b.description)}
-                            </c:otherwise>
-                        </c:choose>
-                    </td>
+                            <td class="desc-cell" title="${fn:escapeXml(b.description)}">
+                                <c:choose>
+                                    <c:when test="${not empty b.description && fn:length(b.description) > 60}">
+                                        ${fn:escapeXml(fn:substring(b.description, 0, 60))}...
+                                        <button type="button" class="desc-link"
+                                                data-title="${fn:escapeXml(b.brandName)}"
+                                                data-full="${fn:escapeXml(b.description)}"
+                                                onclick="openDescModal(this.dataset.title, this.dataset.full)">
+                                            View
+                                        </button>
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${fn:escapeXml(b.description)}
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
 
-                    <td>
-                        <span class="badge ${b.active ? 'badge-active' : 'badge-inactive'}">
-                            ${b.active ? 'Active' : 'Inactive'}
-                        </span>
-                    </td>
+                            <td>
+                                <span class="badge ${b.active ? 'badge-active' : 'badge-inactive'}">
+                                    ${b.active ? 'Active' : 'Inactive'}
+                                </span>
+                            </td>
 
-                    <td>${b.createdAt}</td>
+                            <td style="color:var(--muted);">${b.createdAt}</td>
 
-                    <td>
-                        <c:url var="detailUrl" value="/home">
-                            <c:param name="p" value="brand-detail"/>
-                            <c:param name="id" value="${b.brandId}"/>
-                        </c:url>
-                        <a href="${detailUrl}">Detail</a>
+                            <td>
+                                <div style="display:flex; gap:6px; flex-wrap:nowrap; align-items:center;">
+                                    <c:url var="detailUrl" value="/home">
+                                        <c:param name="p" value="brand-detail"/>
+                                        <c:param name="id" value="${b.brandId}"/>
+                                    </c:url>
+                                    <a class="btn btn-sm btn-info" href="${detailUrl}">View</a>
 
-                        <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
-                            |
-                            <c:url var="updateUrl" value="/home">
-                                <c:param name="p" value="brand-update"/>
-                                <c:param name="id" value="${b.brandId}"/>
-                                <c:param name="q" value="${q}"/>
-                                <c:param name="status" value="${status}"/>
-                                <c:param name="sortBy" value="${sortBy}"/>
-                                <c:param name="sortOrder" value="${sortOrder}"/>
-                                <c:param name="page" value="${page}"/>
-                            </c:url>
-                            <a href="${updateUrl}">Update</a>
+                                    <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
+                                        <c:url var="updateUrl" value="/home">
+                                            <c:param name="p" value="brand-update"/>
+                                            <c:param name="id" value="${b.brandId}"/>
+                                            <c:param name="q" value="${q}"/>
+                                            <c:param name="status" value="${status}"/>
+                                            <c:param name="sortBy" value="${sortBy}"/>
+                                            <c:param name="sortOrder" value="${sortOrder}"/>
+                                            <c:param name="page" value="${page}"/>
+                                        </c:url>
+                                        <a class="btn btn-sm btn-warning" href="${updateUrl}">Update</a>
 
-                            |
-                            <form id="disableForm_${b.brandId}" method="post"
-                                  action="${ctx}/manager/brand-disable"
-                                  style="display:inline;">
+                                        <form id="disableForm_${b.brandId}" method="post"
+                                              action="${ctx}/manager/brand-disable"
+                                              style="margin:0;">
+                                            <input type="hidden" name="id" value="${b.brandId}"/>
+                                            <input type="hidden" name="to" value="${b.active ? '0' : '1'}"/>
+                                            <input type="hidden" name="q" value="${q}"/>
+                                            <input type="hidden" name="status" value="${status}"/>
+                                            <input type="hidden" name="sortBy" value="${sortBy}"/>
+                                            <input type="hidden" name="sortOrder" value="${sortOrder}"/>
+                                            <input type="hidden" name="page" value="${page}"/>
 
-                                <input type="hidden" name="id" value="${b.brandId}"/>
-                                <input type="hidden" name="to" value="${b.active ? '0' : '1'}"/>
+                                            <button type="button" class="btn btn-sm ${b.active ? 'btn-danger' : 'btn-primary'}"
+                                                    data-name="${fn:escapeXml(b.brandName)}"
+                                                    data-desc="${fn:escapeXml(b.description)}"
+                                                    data-to="${b.active ? '0' : '1'}"
+                                                    onclick="openDisableModal('disableForm_${b.brandId}', this.dataset.name, this.dataset.desc, this.dataset.to)">
+                                                ${b.active ? 'Inactive' : 'Active'}
+                                            </button>
+                                        </form>
+                                    </c:if>
+                                </div>
+                            </td>
+                        </tr>
+                    </c:forEach>
 
-                               
-                                <input type="hidden" name="q" value="${q}"/>
-                                <input type="hidden" name="status" value="${status}"/>
-                                <input type="hidden" name="sortBy" value="${sortBy}"/>
-                                <input type="hidden" name="sortOrder" value="${sortOrder}"/>
-                                <input type="hidden" name="page" value="${page}"/>
-
-                                <button type="button" class="mini-btn"
-                                        data-name="${fn:escapeXml(b.brandName)}"
-                                        data-desc="${fn:escapeXml(b.description)}"
-                                        data-to="${b.active ? '0' : '1'}"
-                                        onclick="openDisableModal('disableForm_${b.brandId}', this.dataset.name, this.dataset.desc, this.dataset.to)">
-                                    ${b.active ? 'Inactive' : 'Active'}
-                                </button>
-                            </form>
-                        </c:if>
-                    </td>
-                </tr>
-            </c:forEach>
-
-            <c:if test="${empty brands}">
-                <tr>
-                    <td colspan="6" style="text-align:center;color:#666;">No data</td>
-                </tr>
-            </c:if>
-        </tbody>
-    </table>
+                    <c:if test="${empty brands}">
+                        <tr>
+                            <td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No data found</td>
+                        </tr>
+                    </c:if>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
 
     <div class="paging-footer">

@@ -33,12 +33,12 @@
   --warning: #f5a623;
   --danger: #d34053;
 
-  /* Sidebar – TailAdmin Light */
-  --sidebar: #ffffff;
-  --sidebar-2: #f8fafc;
-  --sidebar-text: #64748b;
-  --sidebar-muted: #8a99af;
-  --sidebar-active-bg: #eff4fb;
+  /* Sidebar – Black Theme */
+  --sidebar: #111827;
+  --sidebar-2: #1f2937;
+  --sidebar-text: rgba(255, 255, 255, 0.85);
+  --sidebar-muted: rgba(255, 255, 255, 0.5);
+  --sidebar-active-bg: rgba(255, 255, 255, 0.1);
 
   /* Radius – TailAdmin */
   --radius: 8px;
@@ -476,9 +476,9 @@ a:hover {
 .side-user {
   border-radius: var(--radius);
   overflow: hidden;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  box-shadow: var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--sidebar-2); /* Darker surface */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .side-user summary {
@@ -538,7 +538,7 @@ a:hover {
 .user-name {
   font-weight: 700;
   font-size: 13px;
-  color: var(--text);
+  color: #fff; /* Light text on dark bg */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -777,6 +777,17 @@ a:hover {
 .btn-warning:hover {
   background: #d08a00;
   border-color: #c07c00;
+}
+
+.btn-info {
+  background: var(--info);
+  border-color: var(--info);
+  color: #fff;
+}
+
+.btn-info:hover {
+  background: #2f899c;
+  border-color: #277484;
 }
 
 .btn-sm {
@@ -1959,7 +1970,7 @@ a:hover {
   background: var(--surface);
   border-top: 1px solid var(--border);
   padding: 12px 24px;
-  color: var(--muted);
+  color: var(--text); /* Black text */
 }
 
 .footer .footer-inner {
