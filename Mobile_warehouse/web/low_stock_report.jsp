@@ -19,41 +19,33 @@
         <div class="msg-err mb-16">${param.err}</div>
     </c:if>
 
-    <div class="grid-12 gap-16 mb-16">
-        <div class="col-3">
-            <div class="card p-20 d-flex justify-between align-center h-full">
-                <div>
-                    <div class="muted fs-12 uppercase mb-4">Urgent Attention</div>
-                    <div class="h2 m-0 text-danger">${summary.outOfStock}</div>
-                    <div class="fs-10 text-muted mt-4">Totally Out of Stock</div>
-                </div>
+    <div class="stats-grid mb-16">
+        <div class="card report-stat-card report-tone-danger p-20 d-flex justify-between align-center">
+            <div>
+                <div class="muted fs-12 uppercase mb-4">Urgent Attention</div>
+                <div class="h2 m-0 text-danger">${summary.outOfStock}</div>
+                <div class="fs-10 text-muted mt-4">Totally Out of Stock</div>
             </div>
         </div>
-        <div class="col-3">
-            <div class="card p-20 d-flex justify-between align-center h-full">
-                <div>
-                    <div class="muted fs-12 uppercase mb-4">Below ROP</div>
-                    <div class="h2 m-0 text-warning">${summary.productsBelowRop}</div>
-                    <div class="fs-10 text-muted mt-4">Action Required</div>
-                </div>
+        <div class="card report-stat-card report-tone-warning p-20 d-flex justify-between align-center">
+            <div>
+                <div class="muted fs-12 uppercase mb-4">Below ROP</div>
+                <div class="h2 m-0 text-warning">${summary.productsBelowRop}</div>
+                <div class="fs-10 text-muted mt-4">Action Required</div>
             </div>
         </div>
-        <div class="col-3">
-            <div class="card p-20 d-flex justify-between align-center h-full">
-                <div>
-                    <div class="muted fs-12 uppercase mb-4">Pending Reorder</div>
-                    <div class="h2 m-0 text-primary">${summary.reorderNeeded}</div>
-                    <div class="fs-10 text-muted mt-4">In Pipeline</div>
-                </div>
+        <div class="card report-stat-card report-tone-primary p-20 d-flex justify-between align-center">
+            <div>
+                <div class="muted fs-12 uppercase mb-4">Pending Reorder</div>
+                <div class="h2 m-0 text-primary">${summary.reorderNeeded}</div>
+                <div class="fs-10 text-muted mt-4">In Pipeline</div>
             </div>
         </div>
-        <div class="col-3">
-            <div class="card p-20 d-flex justify-between align-center h-full">
-                <div>
-                    <div class="muted fs-12 uppercase mb-4">Total Monitor</div>
-                    <div class="h2 m-0">${summary.totalProducts}</div>
-                    <div class="fs-10 text-muted mt-4">In Active Catalog</div>
-                </div>
+        <div class="card report-stat-card report-tone-info p-20 d-flex justify-between align-center">
+            <div>
+                <div class="muted fs-12 uppercase mb-4">Total Monitor</div>
+                <div class="h2 m-0">${summary.totalProducts}</div>
+                <div class="fs-10 text-muted mt-4">In Active Catalog</div>
             </div>
         </div>
     </div>

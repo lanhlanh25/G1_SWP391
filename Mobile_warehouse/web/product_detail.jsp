@@ -90,7 +90,7 @@
                                 <c:otherwise>
                                     <c:forEach var="s" items="${skuList}">
                                         <tr>
-                                            <td class="fw-600">${s.skuCode}</td>
+                                            <td class="fw-700 mono-text text-primary">${s.skuCode}</td>
                                             <td>${s.color}</td>
                                             <td class="text-muted">${s.ramGb} GB</td>
                                             <td class="text-muted">${s.storageGb} GB</td>
@@ -117,7 +117,5 @@
                     </table>
                 </div>
             </div>
-        </div>
-
     </c:if>
 </div>

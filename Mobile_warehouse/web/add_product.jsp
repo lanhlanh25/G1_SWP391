@@ -36,7 +36,7 @@
                         <input class="input" type="text" name="productName" value="${productName}" 
                                placeholder="Enter product name" required>
                         <c:if test="${not empty errors.productName}">
-                            <div class="err">${errors.productName}</div>
+                            <div style="color: red; font-size: 13px; margin-top: 5px; font-weight: 500;">⚠ ${errors.productName}</div>
                         </c:if>
                     </div>
 
@@ -52,7 +52,7 @@
                             </c:forEach>
                         </select>
                         <c:if test="${not empty errors.brandId}">
-                            <div class="err">${errors.brandId}</div>
+                            <div style="color: red; font-size: 13px; margin-top: 5px;">⚠ ${errors.brandId}</div>
                         </c:if>
                     </div>
 
@@ -89,8 +89,8 @@
                 </div>
 
                 <c:if test="${not empty errors.db}">
-                    <div class="err text-center mt-16">
-                        ${errors.db}
+                    <div style="color: red; text-align: center; margin-top: 16px; font-weight: 600;">
+                        ⚠ ${errors.db}
                     </div>
                 </c:if>
 
@@ -99,4 +99,3 @@
         </div>
     </div>
 </div>
->
