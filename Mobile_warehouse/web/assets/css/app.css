@@ -51,14 +51,14 @@
   --shadow-lg: 0 8px 28px rgba(13, 27, 42, 0.12);
 
   /* ── Sidebar ── */
-  --sidebar:           #0d1b2a;
-  --sidebar-2:         #152638;
-  --sidebar-3:         #1a2f42;
-  --sidebar-text:      #e2ecf5;
-  --sidebar-muted:     #6b8fa8;
-  --sidebar-active-bg: rgba(37, 99, 235, 0.18);
-  --sidebar-active-text: #60a5fa;
-  --sidebar-border:    rgba(255,255,255,0.06);
+  --sidebar:           #020617; /* Slate 950 - Much darker, almost black but deep blue */
+  --sidebar-2:         #0f172a; /* Slate 900 - For the floating user card */
+  --sidebar-3:         #1e293b; /* Slate 800 - For sub-menus and hover states */
+  --sidebar-text:      #f8fafc; /* Slate 50 - High contrast text */
+  --sidebar-muted:     #94a3b8; /* Slate 400 - Clearer muted text */
+  --sidebar-active-bg: rgba(37, 99, 235, 0.25); /* More vibrant active state */
+  --sidebar-active-text: #60a5fa; /* Keep the consistent blue accent */
+  --sidebar-border:    rgba(255,255,255,0.08); /* Slightly more visible border */
 
   /* ── Radius (flat, slightly rounded) ── */
   --radius:    8px;
@@ -275,7 +275,7 @@ a:hover { color: var(--primary-2); text-decoration: underline; }
   background: var(--sidebar);
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--sidebar-border);
+  border-right: none;
   transition: width 0.22s ease;
 }
 
@@ -367,7 +367,7 @@ a:hover { color: var(--primary-2); text-decoration: underline; }
 }
 .side details[open] > summary::after { transform: rotate(90deg); }
 
-.side details > ul { background: rgba(0,0,0,.15); padding: 2px 0; }
+.side details > ul { background: var(--sidebar-2); padding: 2px 0; }
 .side details > ul a {
   padding: 6px 12px 6px 28px;
   font-size: 12.5px;
@@ -388,7 +388,7 @@ a:hover { color: var(--primary-2); text-decoration: underline; }
 .side-user {
   border-radius: var(--radius-md);
   overflow: hidden;
-  border: 1px solid var(--sidebar-border);
+  border: none;
   background: var(--sidebar-2);
 }
 
@@ -400,6 +400,7 @@ a:hover { color: var(--primary-2); text-decoration: underline; }
   cursor: pointer;
   user-select: none;
   list-style: none;
+  outline: none;
 }
 .side-user summary::-webkit-details-marker { display: none; }
 
@@ -2996,14 +2997,14 @@ a {
   --shadow: 0 2px 6px rgba(49, 57, 77, 0.06);
   --shadow-md: 0 4px 12px rgba(49, 57, 77, 0.08);
   --shadow-lg: 0 8px 20px rgba(49, 57, 77, 0.1);
-  --sidebar: #ffffff;
-  --sidebar-2: #ffffff;
-  --sidebar-3: #f8f9fb;
-  --sidebar-text: #565f6d;
-  --sidebar-muted: #99abb4;
-  --sidebar-active-bg: #e8f0ff;
-  --sidebar-active-text: #2196f3;
-  --sidebar-border: #edf1f5;
+  --sidebar: #020617;
+  --sidebar-2: #0f172a;
+  --sidebar-3: #1e293b;
+  --sidebar-text: #f8fafc;
+  --sidebar-muted: #94a3b8;
+  --sidebar-active-bg: rgba(37, 99, 235, 0.2);
+  --sidebar-active-text: #60a5fa;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
   --radius: 4px;
   --radius-md: 4px;
   --radius-sm: 4px;
@@ -3135,8 +3136,8 @@ body {
 .side a:hover,
 .side details > summary:hover,
 .side details > ul a:hover {
-  color: var(--text);
-  background: var(--surface-2);
+  color: var(--sidebar-text);
+  background: rgba(255, 255, 255, 0.05);
   transform: none;
   border-color: transparent;
 }
@@ -3159,14 +3160,14 @@ body {
 }
 
 .side-floating-user {
-  background: #fff;
-  border-top: 1px solid var(--border);
-  border-right: 1px solid var(--border);
+  background: var(--sidebar);
+  border-top: 1px solid var(--sidebar-border);
+  border-right: 1px solid var(--sidebar-border);
   box-shadow: none;
 }
 
 .side-user {
-  background: #fff;
+  background: var(--sidebar-2);
 }
 
 .side-user summary {

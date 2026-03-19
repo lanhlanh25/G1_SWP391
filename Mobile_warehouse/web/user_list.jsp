@@ -11,9 +11,13 @@
 
     String q = (String) request.getAttribute("q");
     String st = (String) request.getAttribute("status");
+    Integer totalItemsObj = (Integer) request.getAttribute("totalItems");
+    Integer pageSizeObj = (Integer) request.getAttribute("pageSize");
 
     if (q == null) q = "";
     if (st == null) st = "";
+    int totalItems = (totalItemsObj == null) ? 0 : totalItemsObj;
+    int pageSize = (pageSizeObj == null) ? 5 : pageSizeObj;
 
     String base = request.getContextPath() + "/home?p=user-list"
             + (!q.isEmpty() ? "&q=" + URLEncoder.encode(q, "UTF-8") : "")
@@ -138,15 +142,24 @@
 
             <c:if test="${totalPages > 1}">
                 <div class="paging-footer">
-                    <div class="paging-info">Page <b><%= curPage %></b> of <b><%= totalPages %></b></div>
+                    <div class="paging-info">
+                        Showing <b><%= totalItems == 0 ? 0 : (curPage - 1) * pageSize + 1 %></b>–<b><%= Math.min(curPage * pageSize, totalItems) %></b> of <b><%= totalItems %></b>
+                    </div>
                     <div class="paging">
+                        <% 
+                            int start = Math.max(1, curPage - 1);
+                            int end = Math.min(totalPages, start + 2);
+                            if (end == totalPages) {
+                                start = Math.max(1, end - 2);
+                            }
+                        %>
                         <% if (curPage > 1) { %>
                             <a class="paging-btn" href="<%= base %>&page=<%= (curPage - 1) %>">Prev</a>
                         <% } else { %>
                             <span class="paging-btn disabled">Prev</span>
                         <% } %>
 
-                        <% for (int i = 1; i <= totalPages; i++) { %>
+                        <% for (int i = start; i <= end; i++) { %>
                             <% if (i == curPage) { %>
                                 <span class="paging-btn active"><%= i %></span>
                             <% } else { %>

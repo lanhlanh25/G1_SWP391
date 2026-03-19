@@ -111,7 +111,7 @@
             </form>
 
             <div class="text-muted fs-13 mb-12">
-                Showing <b class="text-dark">${totalItems}</b> products requiring attention
+                Showing <b class="text-dark">${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b class="text-dark">${totalItems}</b> products requiring attention
             </div>
 
             <div class="table-wrap">
@@ -200,10 +200,15 @@
             </div>
 
             <c:if test="${totalPages > 1}">
-                <div class="d-flex justify-between align-center mt-20">
-                    <div class="fs-13 text-muted">Page <b>${page}</b> of <b>${totalPages}</b></div>
+                <div class="d-flex justify-end mt-20">
 
                     <div class="d-flex gap-4">
+                        <c:set var="pgStart" value="${page - 1 < 1 ? 1 : page - 1}" />
+                        <c:set var="pgEnd" value="${pgStart + 2 > totalPages ? totalPages : pgStart + 2}" />
+                        <c:if test="${pgEnd == totalPages}">
+                            <c:set var="pgStart" value="${pgEnd - 2 < 1 ? 1 : pgEnd - 2}" />
+                        </c:if>
+
                         <c:url var="prevUrl" value="/home">
                             <c:param name="p" value="low-stock-report"/>
                             <c:param name="page" value="${page - 1}"/>
@@ -221,9 +226,6 @@
                                 <span class="btn btn-sm btn-outline disabled">Prev</span>
                             </c:otherwise>
                         </c:choose>
-
-                        <c:set var="pgStart" value="${page - 2 > 1 ? page - 2 : 1}"/>
-                        <c:set var="pgEnd" value="${page + 2 < totalPages ? page + 2 : totalPages}"/>
 
                         <c:forEach begin="${pgStart}" end="${pgEnd}" var="pg">
                             <c:url var="pageUrl" value="/home">

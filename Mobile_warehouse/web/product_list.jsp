@@ -122,7 +122,9 @@
 
             <c:if test="${totalPages > 1}">
                 <div class="paging-footer">
-                    <div class="paging-info">Page <b>${page}</b> of <b>${totalPages}</b></div>
+                    <div class="paging-info">
+                        Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
+                    </div>
                     <div class="paging">
                         <c:set var="base" value="${pageContext.request.contextPath}/home?p=product-list&q=${q}&brandId=${brandId}&status=${status}"/>
 

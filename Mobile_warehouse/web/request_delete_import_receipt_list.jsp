@@ -75,7 +75,11 @@
 
     
       <c:if test="${totalPages > 1}">
-        <div class="paging">
+        <div class="paging-footer">
+          <div class="paging-info">
+             Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
+          </div>
+          <div class="paging">
           <c:set var="qsBase"
                  value="p=request-delete-import-receipt-list&q=${fn:escapeXml(q)}&transactionTime=${fn:escapeXml(transactionTime)}" />
 
@@ -88,13 +92,19 @@
             </c:otherwise>
           </c:choose>
 
-          <c:forEach var="p" begin="1" end="${totalPages}">
+          <c:set var="pgStart" value="${page - 1 < 1 ? 1 : page - 1}" />
+          <c:set var="pgEnd" value="${pgStart + 2 > totalPages ? totalPages : pgStart + 2}" />
+          <c:if test="${pgEnd == totalPages}">
+              <c:set var="pgStart" value="${pgEnd - 2 < 1 ? 1 : pgEnd - 2}" />
+          </c:if>
+
+          <c:forEach var="p" begin="${pgStart}" end="${pgEnd}">
             <c:choose>
               <c:when test="${p == page}">
-                <b>${p}</b>
+                <span class="paging-btn active">${p}</span>
               </c:when>
               <c:otherwise>
-                <a href="${ctx}/home?${qsBase}&page=${p}">${p}</a>
+                <a class="paging-btn" href="${ctx}/home?${qsBase}&page=${p}">${p}</a>
               </c:otherwise>
             </c:choose>
           </c:forEach>
@@ -108,6 +118,7 @@
             </c:otherwise>
           </c:choose>
         </div>
+      </div>
       </c:if>
 
     </div>

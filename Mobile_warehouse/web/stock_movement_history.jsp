@@ -65,7 +65,9 @@
         <div class="card-body">
             <div class="d-flex justify-between align-center mb-16">
                 <div class="h2">Movement List</div>
-                <div class="text-muted fs-14">Total records: <b class="text-primary">${totalItems}</b></div>
+                <div class="paging-info">
+                   Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
+                </div>
             </div>
             <table class="table">
                 <thead>
@@ -141,8 +143,12 @@
             </div>
 
             <c:if test="${totalPages > 1}">
-                <div class="d-flex justify-between align-center mt-20">
-                    <div class="fs-13 text-muted">Page <b>${page}</b> of <b>${totalPages}</b></div>
+                <div class="paging-footer justify-end">
+                    <c:set var="pgStart" value="${page - 1 < 1 ? 1 : page - 1}" />
+                    <c:set var="pgEnd" value="${pgStart + 2 > totalPages ? totalPages : pgStart + 2}" />
+                    <c:if test="${pgEnd == totalPages}">
+                        <c:set var="pgStart" value="${pgEnd - 2 < 1 ? 1 : pgEnd - 2}" />
+                    </c:if>
 
                     <div class="d-flex gap-4">
                         <c:url var="baseUrl" value="/home">
@@ -164,7 +170,7 @@
                             </c:otherwise>
                         </c:choose>
 
-                        <c:forEach begin="1" end="${totalPages}" var="i">
+                        <c:forEach begin="${pgStart}" end="${pgEnd}" var="i">
                             <c:choose>
                                 <c:when test="${i == page}">
                                     <span class="btn btn-sm btn-primary">${i}</span>

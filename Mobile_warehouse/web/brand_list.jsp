@@ -243,7 +243,9 @@
 
 
     <div class="paging-footer">
-        <div class="paging-info">Page <b>${page}</b> of <b>${totalPages}</b></div>
+        <div class="paging-info">
+            Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
+        </div>
         <div class="paging">
             <c:choose>
                 <c:when test="${page <= 1}">
@@ -269,21 +271,20 @@
                     </c:when>
                     <c:otherwise>
                         <c:url var="pUrl" value="/home">
+                        <c:url var="pageUrl" value="/home">
                             <c:param name="p" value="brand-list"/>
                             <c:param name="page" value="${i}"/>
                             <c:param name="q" value="${q}"/>
-                            <c:param name="status" value="${status}"/>
-                            <c:param name="sortBy" value="${sortBy}"/>
-                            <c:param name="sortOrder" value="${sortOrder}"/>
+                            <c:param name="status" value="${empty status ? 'all' : status}"/>
                         </c:url>
-                        <a class="paging-btn" href="${pUrl}">${i}</a>
+                        <a class="paging-btn" href="${pageUrl}">${i}</a>
                     </c:otherwise>
                 </c:choose>
             </c:forEach>
 
             <c:choose>
                 <c:when test="${page >= totalPages}">
-                    <span class="paging-btn disabled">Next &raquo;</span>
+                    <span class="paging-btn disabled">Next →</span>
                 </c:when>
                 <c:otherwise>
                     <c:url var="nextUrl" value="/home">

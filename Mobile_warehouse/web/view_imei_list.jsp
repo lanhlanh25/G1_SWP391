@@ -125,7 +125,9 @@
 
     <!-- Paging -->
     <div class="paging-footer">
-      <div class="paging-info">Page <b>${pageNumber}</b> of <b>${totalPages}</b></div>
+      <div class="paging-info">
+          Showing <b>${totalItems == 0 ? 0 : (pageNumber - 1) * pageSize + 1}</b>–<b>${pageNumber * pageSize < totalItems ? pageNumber * pageSize : totalItems}</b> of <b>${totalItems}</b>
+      </div>
 
       <div class="paging">
         <c:url var="prevUrl" value="/imei-list">
@@ -137,22 +139,13 @@
         </c:url>
         <a class="paging-btn ${pageNumber <= 1 ? 'disabled' : ''}" href="${prevUrl}">← Prev</a>
 
-        <c:choose>
-          <c:when test="${totalPages <= 5}">
-            <c:set var="pgS" value="1"/><c:set var="pgE" value="${totalPages}"/>
-          </c:when>
-          <c:when test="${pageNumber <= 3}">
-            <c:set var="pgS" value="1"/><c:set var="pgE" value="5"/>
-          </c:when>
-          <c:when test="${pageNumber >= totalPages - 2}">
-            <c:set var="pgS" value="${totalPages - 4}"/><c:set var="pgE" value="${totalPages}"/>
-          </c:when>
-          <c:otherwise>
-            <c:set var="pgS" value="${pageNumber - 2}"/><c:set var="pgE" value="${pageNumber + 2}"/>
-          </c:otherwise>
-        </c:choose>
+        <c:set var="pgStart" value="${pageNumber - 1 < 1 ? 1 : pageNumber - 1}" />
+        <c:set var="pgEnd" value="${pgStart + 2 > totalPages ? totalPages : pgStart + 2}" />
+        <c:if test="${pgEnd == totalPages}">
+            <c:set var="pgStart" value="${pgEnd - 2 < 1 ? 1 : pgEnd - 2}" />
+        </c:if>
 
-        <c:forEach begin="${pgS}" end="${pgE}" var="pg">
+        <c:forEach begin="${pgStart}" end="${pgEnd}" var="pg">
           <c:url var="pgUrl" value="/imei-list">
             <c:param name="skuId"    value="${skuId}"/>
             <c:param name="q"        value="${q}"/>

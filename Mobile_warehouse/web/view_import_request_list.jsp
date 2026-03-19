@@ -48,6 +48,8 @@
     </div>
   </div>
 
+  <div class="card">
+    <div class="card-body p-0">
       <table class="table">
         <thead>
           <tr>
@@ -114,13 +116,21 @@
     <c:param name="expDate" value="${expDate}"/>
   </c:url>
   <div class="paging-footer">
-    <div class="paging-info">Page <b>${page}</b> of <b>${totalPages}</b></div>
+    <div class="paging-info">
+        Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
+    </div>
     <div class="paging">
+      <c:set var="pgStart" value="${page - 1 < 1 ? 1 : page - 1}" />
+      <c:set var="pgEnd" value="${pgStart + 2 > totalPages ? totalPages : pgStart + 2}" />
+      <c:if test="${pgEnd == totalPages}">
+          <c:set var="pgStart" value="${pgEnd - 2 < 1 ? 1 : pgEnd - 2}" />
+      </c:if>
+
       <c:choose>
         <c:when test="${page > 1}"><a class="paging-btn" href="${baseUrl}&page=${page-1}">← Prev</a></c:when>
         <c:otherwise><span class="paging-btn disabled">← Prev</span></c:otherwise>
       </c:choose>
-      <c:forEach var="i" begin="1" end="${totalPages}">
+      <c:forEach var="i" begin="${pgStart}" end="${pgEnd}">
         <c:choose>
           <c:when test="${i==page}"><span class="paging-btn active">${i}</span></c:when>
           <c:otherwise><a class="paging-btn" href="${baseUrl}&page=${i}">${i}</a></c:otherwise>

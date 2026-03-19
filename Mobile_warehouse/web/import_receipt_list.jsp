@@ -153,32 +153,10 @@
         </c:url>
 
         <div class="paging-footer">
-            <div class="paging-info">Page <b>${page}</b> of <b>${totalPages}</b></div>
+            <div class="paging-info">
+                Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
+            </div>
             <div class="paging">
-                <c:choose>
-                    <c:when test="${page <= 1}">
-                        <span class="paging-btn disabled">← Prev</span>
-                    </c:when>
-                    <c:otherwise>
-                        <a class="paging-btn" href="${prevUrl}">← Prev</a>
-                    </c:otherwise>
-                </c:choose>
-
-                <c:forEach begin="1" end="${totalPages}" var="i">
-                    <c:choose>
-                        <c:when test="${i == page}">
-                            <span class="paging-btn active">${i}</span>
-                        </c:when>
-                        <c:otherwise>
-                            <c:url var="pageUrl" value="/home">
-                                <c:param name="p" value="import-receipt-list"/><c:param name="page" value="${i}"/>
-                                <c:param name="q" value="${q}"/><c:param name="status" value="${empty status ? 'all' : status}"/>
-                                <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
-                            </c:url>
-                            <a class="paging-btn" href="${pageUrl}">${i}</a>
-                        </c:otherwise>
-                    </c:choose>
-                </c:forEach>
 
                 <c:choose>
                     <c:when test="${page >= totalPages}">
