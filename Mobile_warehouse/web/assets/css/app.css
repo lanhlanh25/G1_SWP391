@@ -7,7 +7,7 @@
 
 :root {
   /* ── Background & Surface ── */
-  --bg:            #f0f4f8;
+  --bg:            #f8fafc; /* Slate 50 - Cleaner & More Premium */
   --surface:       #ffffff;
   --surface-solid: #ffffff;
   --surface-2:     #f5f8fb;

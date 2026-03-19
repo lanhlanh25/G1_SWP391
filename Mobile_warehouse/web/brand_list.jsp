@@ -52,9 +52,9 @@
 
 <div class="page-wrap">
     <div class="topbar">
-        <div style="display:flex; align-items:center; gap:10px;">
+        <div class="d-flex align-center gap-12">
             <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
-            <h1 class="h1">View Brand List</h1>
+            <h1 class="h1">Brand Management</h1>
         </div>
 
         <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
@@ -145,23 +145,23 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="width:60px;">#</th>
+                        <th style="width:60px;" class="text-center">#</th>
                         <th style="width:220px;">Brand Name</th>
                         <th>Description</th>
-                        <th style="width:120px;">Status</th>
+                        <th style="width:120px;" class="text-center">Status</th>
                         <th style="width:180px;">Created At</th>
-                        <th style="width:240px;">Action</th>
+                        <th style="width:240px;" class="text-center">Action</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     <c:forEach items="${brands}" var="b" varStatus="st">
                         <tr>
-                            <td>${(page - 1) * pageSize + st.index + 1}</td>
+                            <td class="text-center text-muted">${(page - 1) * pageSize + st.index + 1}</td>
 
-                            <td style="font-weight:600;">${fn:escapeXml(b.brandName)}</td>
+                            <td class="fw-600">${fn:escapeXml(b.brandName)}</td>
 
-                            <td class="desc-cell" title="${fn:escapeXml(b.description)}">
+                            <td class="desc-cell text-muted" title="${fn:escapeXml(b.description)}">
                                 <c:choose>
                                     <c:when test="${not empty b.description && fn:length(b.description) > 60}">
                                         ${fn:escapeXml(fn:substring(b.description, 0, 60))}...
@@ -178,16 +178,16 @@
                                 </c:choose>
                             </td>
 
-                            <td>
+                            <td class="text-center">
                                 <span class="badge ${b.active ? 'badge-active' : 'badge-inactive'}">
                                     ${b.active ? 'Active' : 'Inactive'}
                                 </span>
                             </td>
 
-                            <td style="color:var(--muted);">${b.createdAt}</td>
+                            <td class="text-muted">${b.createdAt}</td>
 
                             <td>
-                                <div style="display:flex; gap:6px; flex-wrap:nowrap; align-items:center;">
+                                <div class="d-flex gap-8 align-center justify-center flex-nowrap">
                                     <c:url var="detailUrl" value="/home">
                                         <c:param name="p" value="brand-detail"/>
                                         <c:param name="id" value="${b.brandId}"/>

@@ -8,13 +8,15 @@
 <link rel="stylesheet" href="${ctx}/assets/css/app.css">
 <%-- Internal styles moved to app.css --%>
 
-<div class="vir-wrap">
-  <div class="vir-card">
-
-    <div class="vir-header">
-      <a class="vir-btn" href="${ctx}/home?p=import-receipt-list">← Back to List</a>
-      <div class="vir-title">Import Receipt Detail</div>
+<div class="page-wrap">
+  <div class="topbar">
+    <div class="d-flex align-center gap-12">
+      <h1 class="h1">Import Receipt Detail</h1>
     </div>
+    <div class="d-flex gap-8 align-center">
+      <a class="btn btn-outline" href="${ctx}/home?p=import-receipt-list">← Back to List</a>
+    </div>
+  </div>
 
     <c:if test="${not empty param.msg}">
       <div class="vir-alert-ok">${fn:escapeXml(param.msg)}</div>
@@ -25,101 +27,111 @@
 
     <c:if test="${not empty receipt}">
 
-      <div class="vir-section-title">Receipt Information</div>
-
-      <div class="vir-meta">
-        <div class="mk">Import Code</div>
-        <div class="mv">${fn:escapeXml(receipt.importCode)}</div>
-
-        <div class="mk">Transaction Time</div>
-        <div class="mv">
-          <c:choose>
-            <c:when test="${not empty receipt.receiptDate}">
-              <fmt:formatDate value="${receipt.receiptDate}" pattern="dd/MM/yyyy HH:mm"/>
-            </c:when>
-            <c:otherwise>—</c:otherwise>
-          </c:choose>
-        </div>
-
-        <div class="mk">Supplier</div>
-        <div class="mv">${fn:escapeXml(receipt.supplierName)}</div>
-
-        <div class="mk">Created By</div>
-        <div class="mv">${fn:escapeXml(receipt.createdByName)}</div>
-
-        <div class="mk">Note</div>
-        <div class="mv">
-          <c:choose>
-            <c:when test="${not empty receipt.note}">${fn:escapeXml(receipt.note)}</c:when>
-            <c:otherwise><span style="color:var(--muted)">—</span></c:otherwise>
-          </c:choose>
-        </div>
-
-        <div class="mk">Status</div>
-        <div class="mv">
-          <c:set var="statusUp" value="${fn:toUpperCase(receipt.status)}"/>
-          <c:choose>
-            <c:when test="${statusUp == 'CONFIRMED'}">
-              <span class="status-badge status-completed">Completed</span>
-            </c:when>
-            <c:when test="${statusUp == 'PENDING' || statusUp == 'DRAFT'}">
-              <span class="status-badge status-pending">Pending</span>
-            </c:when>
-            <c:when test="${statusUp == 'CANCELED' || statusUp == 'CANCELLED'}">
-              <span class="status-badge status-cancelled">Cancelled</span>
-            </c:when>
-            <c:otherwise>
-              <span class="status-badge status-pending">${fn:escapeXml(receipt.status)}</span>
-            </c:otherwise>
-          </c:choose>
-        </div>
+    <div class="card mb-16">
+      <div class="card-body">
+        <div class="h2 mb-16">Receipt Information</div>
+        <table class="table no-border-first">
+          <tbody>
+            <tr>
+              <th style="width:180px;">Import Code</th>
+              <td class="fw-600">${fn:escapeXml(receipt.importCode)}</td>
+            </tr>
+            <tr>
+              <th>Transaction Time</th>
+              <td class="text-muted">
+                <c:choose>
+                  <c:when test="${not empty receipt.receiptDate}">
+                    <fmt:formatDate value="${receipt.receiptDate}" pattern="dd/MM/yyyy HH:mm"/>
+                  </c:when>
+                  <c:otherwise>—</c:otherwise>
+                </c:choose>
+              </td>
+            </tr>
+            <tr>
+              <th>Supplier</th>
+              <td class="text-primary fw-600">${fn:escapeXml(receipt.supplierName)}</td>
+            </tr>
+            <tr>
+              <th>Created By</th>
+              <td class="text-muted fs-14">${fn:escapeXml(receipt.createdByName)}</td>
+            </tr>
+            <tr>
+              <th>Note</th>
+              <td class="text-muted fs-14">
+                <c:choose>
+                  <c:when test="${not empty receipt.note}">${fn:escapeXml(receipt.note)}</c:when>
+                  <c:otherwise>—</c:otherwise>
+                </c:choose>
+              </td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td>
+                <c:set var="statusUp" value="${fn:toUpperCase(receipt.status)}"/>
+                <c:choose>
+                  <c:when test="${statusUp == 'CONFIRMED'}">
+                    <span class="badge badge-active">Completed</span>
+                  </c:when>
+                  <c:when test="${statusUp == 'PENDING' || statusUp == 'DRAFT'}">
+                    <span class="badge badge-warning">Pending</span>
+                  </c:when>
+                  <c:when test="${statusUp == 'CANCELED' || statusUp == 'CANCELLED'}">
+                    <span class="badge badge-inactive">Cancelled</span>
+                  </c:when>
+                  <c:otherwise>
+                    <span class="badge badge-info">${fn:escapeXml(receipt.status)}</span>
+                  </c:otherwise>
+                </c:choose>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </div>
 
-      <div class="vir-section-title">Import Items</div>
-
-      <div style="overflow-x:auto;">
-        <table class="vir-table">
+    <div class="card">
+      <div class="card-body">
+        <div class="h2 mb-16">Import Items</div>
+        <table class="table">
           <thead>
             <tr>
-              <th style="width:46px;">#</th>
-              <th style="width:160px;">Product Name</th>
-              <th style="width:130px;">Product Code</th>
-              <th style="width:180px;">SKU</th>
-              <th style="width:90px;">Quantity</th>
+              <th style="width:46px;" class="text-center">#</th>
+              <th>Product Name</th>
+              <th style="width:130px;">Code</th>
+              <th style="width:150px;">SKU</th>
+              <th style="width:80px;" class="text-center">Qty</th>
               <th>IMEI Numbers</th>
-              <th style="width:140px;">Item Note</th>
-              <th style="width:120px;">Created By</th>
+              <th style="width:140px;">Note</th>
             </tr>
           </thead>
           <tbody>
             <c:forEach var="it" items="${lines}" varStatus="st">
               <tr>
-                <td style="text-align:center;color:var(--muted);">${st.index + 1}</td>
-                <td style="font-weight:600;">${fn:escapeXml(it.productName)}</td>
-                <td style="font-family:monospace;font-size:12px;">${fn:escapeXml(it.productCode)}</td>
-                <td style="font-family:monospace;font-size:12px;">${fn:escapeXml(it.skuCode)}</td>
-                <td style="text-align:center;font-weight:700;">${it.qty}</td>
-                <td style="font-size:12px;font-family:monospace;">
+                <td class="text-center text-muted fs-12">${st.index + 1}</td>
+                <td class="fw-600">${fn:escapeXml(it.productName)}</td>
+                <td class="mono-text fs-12">${fn:escapeXml(it.productCode)}</td>
+                <td class="mono-text fs-12">${fn:escapeXml(it.skuCode)}</td>
+                <td class="text-center fw-700">${it.qty}</td>
+                <td class="fs-12">
                   <c:choose>
                     <c:when test="${not empty it.imeis}">
-                      <div style="line-height:1.8;">
+                      <div class="d-flex flex-column gap-2">
                         <c:forEach var="im" items="${it.imeis}" varStatus="st2">
-                          <div>IMEI <c:out value="${st2.index + 1}"/>: <c:out value="${im}"/></div>
+                          <span class="mono-text text-muted">#${st2.index + 1}: ${im}</span>
                         </c:forEach>
                       </div>
                     </c:when>
                     <c:otherwise>
-                      <span style="color:var(--muted)">—</span>
+                      <span class="text-muted">—</span>
                     </c:otherwise>
                   </c:choose>
                 </td>
-                <td>
+                <td class="text-muted fs-12">
                   <c:choose>
                     <c:when test="${not empty it.itemNote}">${fn:escapeXml(it.itemNote)}</c:when>
-                    <c:otherwise><span style="color:var(--muted)">—</span></c:otherwise>
+                    <c:otherwise>—</c:otherwise>
                   </c:choose>
                 </td>
-                <td style="color:var(--muted);font-size:12px;">${fn:escapeXml(it.createdByName)}</td>
               </tr>
             </c:forEach>
             <c:if test="${empty lines}">

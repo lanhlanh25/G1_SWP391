@@ -19,7 +19,7 @@
           <a href="${ctx}/inventory-count" class="btn">← Back</a>
         </c:otherwise>
       </c:choose>
-      <h1 class="h1">View IMEI List</h1>
+      <h1 class="h1">IMEI Inventory Detail</h1>
     </div>
   </div>
 

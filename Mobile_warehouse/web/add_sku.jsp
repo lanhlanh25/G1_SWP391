@@ -3,11 +3,10 @@
 
 <div class="page-wrap-sm">
 
-    ```
     <div class="topbar">
         <div>
             <div class="title">Add SKU</div>
-            <div class="small">Create SKU information for warehouse operations</div>
+            <!--<div class="small">Create SKU information for warehouse operations</div>-->
         </div>
 
         <div class="actions">

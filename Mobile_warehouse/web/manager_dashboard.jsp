@@ -12,7 +12,7 @@
     <div class="topbar mb-20">
         <div>
             <h1 class="h1 m-0">Manager Dashboard</h1>
-            <div class="small muted">Review approvals, monitor stock risks, and track warehouse operations.</div>
+<!--            <div class="small muted">Review approvals, monitor stock risks, and track warehouse operations.</div>-->
         </div>
         <a href="#" class="btn btn-primary">Export Report</a>
     </div>

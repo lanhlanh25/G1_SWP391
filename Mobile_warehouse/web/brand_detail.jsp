@@ -13,15 +13,14 @@
 
 <div class="page-wrap-md">
   <div class="topbar">
-    <div>
-      <div class="title">Brand Detail</div>
-      <div class="small">View brand information</div>
+    <div class="d-flex align-center gap-12">
+      <h1 class="h1">Brand Details</h1>
     </div>
-    <div class="actions">
+    <div class="d-flex gap-8 align-center">
       <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
         <a class="btn btn-primary" href="<%=ctx%>/home?p=brand-update&id=${brand.brandId}">Update</a>
       </c:if>
-      <a class="btn btn-outline" href="<%=ctx%>/home?p=brand-list">Back</a>
+      <a class="btn btn-outline" href="<%=ctx%>/home?p=brand-list">← Back</a>
     </div>
   </div>
 
@@ -34,12 +33,12 @@
       <table class="table">
         <tbody>
           <tr>
-            <th style="width:220px;">Name</th>
-            <td>${brand.brandName}</td>
+            <th style="width:180px;">Brand Name</th>
+            <td class="fw-600">${brand.brandName}</td>
           </tr>
           <tr>
             <th>Description</th>
-            <td>${brand.description}</td>
+            <td class="text-muted fs-14">${brand.description}</td>
           </tr>
           <tr>
             <th>Status</th>
@@ -53,12 +52,12 @@
             </td>
           </tr>
           <tr>
-            <th>Created At</th>
-            <td class="muted">${brand.createdAt}</td>
+            <th>Creation Date</th>
+            <td class="text-muted"><c:out value="${brand.createdAt}"/></td>
           </tr>
           <tr>
-            <th>Updated At</th>
-            <td class="muted">${brand.updatedAt}</td>
+            <th>Last Updated</th>
+            <td class="text-muted"><c:out value="${brand.updatedAt}"/></td>
           </tr>
         </tbody>
       </table>

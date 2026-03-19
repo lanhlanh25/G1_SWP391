@@ -76,22 +76,22 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Product Code</th>
+                        <th style="width:140px;">Product Code</th>
                         <th>Product Name</th>
-                        <th>Brand</th>
-                        <th style="width:120px;">Status</th>
+                        <th style="width:140px;">Brand</th>
+                        <th style="width:120px;" class="text-center">Status</th>
                         <th style="width:160px;">Created At</th>
-                        <th style="width:240px;">Action</th>
+                        <th style="width:240px;" class="text-center">Action</th>
                     </tr>
                 </thead>
 
                 <tbody>
                     <c:forEach var="x" items="${products}">
                         <tr>
-                            <td>${x.productCode}</td>
+                            <td class="fw-600">${x.productCode}</td>
                             <td>${x.productName}</td>
-                            <td>${x.brandName}</td>
-                            <td>
+                            <td class="text-muted">${x.brandName}</td>
+                            <td class="text-center">
                                 <c:choose>
                                     <c:when test="${x.status == 'ACTIVE'}">
                                         <span class="badge badge-active">Active</span>
@@ -101,9 +101,9 @@
                                     </c:otherwise>
                                 </c:choose>
                             </td>
-                            <td><fmt:formatDate value="${x.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
+                            <td class="text-muted"><fmt:formatDate value="${x.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
                             <td>
-                                <div class="d-flex gap-8 align-center flex-nowrap">
+                                <div class="d-flex gap-8 align-center justify-center flex-nowrap">
                                     <a class="btn btn-sm btn-info" href="${pageContext.request.contextPath}/home?p=product-detail&id=${x.productId}">View</a>
                                     <c:if test="${sessionScope.roleName == 'MANAGER' || sessionScope.roleName == 'ADMIN'}">
                                         <a class="btn btn-sm btn-warning" href="${pageContext.request.contextPath}/manager/product/update?id=${x.productId}">Update</a>

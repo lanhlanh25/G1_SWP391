@@ -4,62 +4,63 @@
 
 <div class="page-wrap">
     <div class="topbar">
-        <div>
-            <div class="title">View Best-selling Product Statistics</div>
-            <div class="small">Manager can view the products with the highest exported quantity in a selected reporting period.</div>
+        <div class="d-flex align-center gap-12">
+            <div>
+                <h1 class="h1">Best-selling Products</h1>
+                <div class="text-muted fs-13">Ranked by export quantity in selected reporting period</div>
+            </div>
         </div>
-        <div>
-            <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=dashboard">Back</a>
+        <div class="d-flex gap-8 align-center">
+            <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=dashboard">← Dashboard</a>
         </div>
     </div>
 
     <c:if test="${not empty msg}">
-        <div class="msg-ok">${msg}</div>
+        <div class="msg-ok mb-16">${msg}</div>
     </c:if>
     <c:if test="${not empty err}">
-        <div class="msg-err">${err}</div>
+        <div class="msg-err mb-16">${err}</div>
     </c:if>
 
-    <div class="stat-cards" style="margin-bottom:16px;">
-        <div class="card stat-card-item">
-            <div class="small">Best Product</div>
-            <div class="stat-value">
-                <c:choose>
-                    <c:when test="${bestProduct != null}">
-                        ${bestProduct.productName}
-                    </c:when>
-                    <c:otherwise>—</c:otherwise>
-                </c:choose>
-            </div>
-            <div class="small">
-                Units:
-                <c:choose>
-                    <c:when test="${bestProduct != null}">
-                        ${bestProduct.unitsSold}
-                    </c:when>
-                    <c:otherwise>0</c:otherwise>
-                </c:choose>
+    <!-- Stats -->
+    <div class="grid-12 gap-16 mb-16">
+        <div class="col-8">
+            <div class="card p-20 d-flex justify-between align-center h-full">
+                <div>
+                    <div class="muted fs-12 uppercase mb-4 text-primary">👑 Top Performer</div>
+                    <div class="h2 m-0">
+                        <c:choose>
+                            <c:when test="${bestProduct != null}">
+                                ${bestProduct.productName}
+                            </c:when>
+                            <c:otherwise>—</c:otherwise>
+                        </c:choose>
+                    </div>
+                    <div class="fs-10 text-muted mt-4">Units Sold: <b>${not empty bestProduct ? bestProduct.unitsSold : 0}</b></div>
+                </div>
             </div>
         </div>
 
-        <div class="card stat-card-item">
-            <div class="small">Total Units Sold</div>
-            <div class="stat-value">${totalUnitsSold}</div>
-            <div class="small">${fromDate} → ${toDate}</div>
+        <div class="col-4">
+            <div class="card p-20 d-flex justify-between align-center h-full">
+                <div>
+                    <div class="muted fs-12 uppercase mb-4">Cumulative Sales</div>
+                    <div class="h2 m-0 text-primary">${totalUnitsSold}</div>
+                    <div class="fs-10 text-muted mt-4">${fromDate} → ${toDate}</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="card" style="margin-bottom:16px;">
-        <div class="card-header">
-            <h2 class="h2">Filters</h2>
-        </div>
+    <!-- Filters -->
+    <div class="card mb-16">
         <div class="card-body">
             <form method="get" action="${pageContext.request.contextPath}/home">
                 <input type="hidden" name="p" value="best-selling-product-statistics"/>
 
-                <div class="filters" style="grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr auto auto;">
-                    <div>
-                        <label>Period Type</label>
+                <div class="grid-12 gap-16 align-end">
+                    <div class="col-2">
+                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Period Type</label>
                         <select class="select" name="periodType" id="periodType" onchange="togglePeriodFields()">
                             <option value="week" ${periodType == 'week' ? 'selected' : ''}>Week</option>
                             <option value="month" ${periodType == 'month' ? 'selected' : ''}>Month</option>
@@ -69,14 +70,14 @@
                         </select>
                     </div>
 
-                    <div id="yearGroup">
-                        <label>Year</label>
+                    <div class="col-2" id="yearGroup">
+                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Year</label>
                         <input class="input" type="number" name="year" min="2000" max="2100"
                                value="${not empty param.year ? param.year : fromDate.year}">
                     </div>
 
-                    <div id="weekGroup">
-                        <label>Week</label>
+                    <div class="col-2" id="weekGroup">
+                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Week</label>
                         <select class="select" name="week">
                             <c:forEach begin="1" end="53" var="w">
                                 <option value="${w}" ${param.week == w.toString() ? 'selected' : ''}>Week ${w}</option>
@@ -84,17 +85,17 @@
                         </select>
                     </div>
 
-                    <div id="monthGroup">
-                        <label>Month</label>
+                    <div class="col-2" id="monthGroup">
+                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Month</label>
                         <select class="select" name="month">
                             <c:forEach begin="1" end="12" var="m">
-                                <option value="${m}" ${param.month == m.toString() ? 'selected' : ''}>${m}</option>
+                                <option value="${m}" ${param.month == m.toString() ? 'selected' : ''}>Month ${m}</option>
                             </c:forEach>
                         </select>
                     </div>
 
-                    <div id="quarterGroup">
-                        <label>Quarter</label>
+                    <div class="col-2" id="quarterGroup">
+                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Quarter</label>
                         <select class="select" name="quarter">
                             <option value="1" ${param.quarter == '1' ? 'selected' : ''}>Q1</option>
                             <option value="2" ${param.quarter == '2' ? 'selected' : ''}>Q2</option>
@@ -103,18 +104,18 @@
                         </select>
                     </div>
 
-                    <div id="fromGroup">
-                        <label>From Date</label>
+                    <div class="col-2" id="fromGroup">
+                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">From Date</label>
                         <input class="input" type="date" name="from" value="${param.from}">
                     </div>
 
-                    <div id="toGroup">
-                        <label>To Date</label>
+                    <div class="col-2" id="toGroup">
+                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">To Date</label>
                         <input class="input" type="date" name="to" value="${param.to}">
                     </div>
 
-                    <div>
-                        <label>Top N</label>
+                    <div class="col-1">
+                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Top N</label>
                         <select class="select" name="topN">
                             <option value="10" ${topN == 10 ? 'selected' : ''}>10</option>
                             <option value="20" ${topN == 20 ? 'selected' : ''}>20</option>
@@ -123,21 +124,16 @@
                         </select>
                     </div>
 
-                    <div>
-                        <label>Sort Order</label>
+                    <div class="col-1">
+                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Sort</label>
                         <select class="select" name="sortOrder">
                             <option value="DESC" ${sortOrder == 'DESC' ? 'selected' : ''}>Desc</option>
                             <option value="ASC" ${sortOrder == 'ASC' ? 'selected' : ''}>Asc</option>
                         </select>
                     </div>
 
-                    <div>
-                        <label>&nbsp;</label>
+                    <div class="col-4 d-flex gap-8">
                         <button type="submit" class="btn btn-primary">Apply</button>
-                    </div>
-
-                    <div>
-                        <label>&nbsp;</label>
                         <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=best-selling-product-statistics">Reset</a>
                     </div>
                 </div>
@@ -146,59 +142,61 @@
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <h2 class="h2">Best-selling Product List</h2>
-            <div class="small">Sorted by units sold in selected period</div>
-        </div>
         <div class="card-body">
-            <div class="table-wrap">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th style="width:60px;">#</th>
-                            <th>Product Code</th>
-                            <th>Product Name</th>
-                            <th>Brand</th>
-                            <th style="width:140px;">Units Sold</th>
-                            <th style="width:180px;">Last Sold</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${not empty stats}">
-                                <c:forEach items="${stats}" var="item" varStatus="loop">
-                                    <tr>
-                                        <td>${loop.index + 1}</td>
-                                        <td>${item.productCode}</td>
-                                        <td>
-                                            <a href="${pageContext.request.contextPath}/home?p=product-detail&id=${item.productId}">
+            <div class="d-flex justify-between align-center mb-16">
+                <div class="h2">Sales Rankings</div>
+                <div class="text-muted fs-14">Showing top <b>${topN}</b> products</div>
+            </div>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th style="width:60px;">#</th>
+                        <th>Product Info</th>
+                        <th>Brand</th>
+                        <th class="text-center" style="width:140px;">Units Sold</th>
+                        <th class="text-right" style="width:180px;">Last Export Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:choose>
+                        <c:when test="${not empty stats}">
+                            <c:forEach items="${stats}" var="item" varStatus="loop">
+                                <tr>
+                                    <td class="text-muted fs-13">${loop.index + 1}</td>
+                                    <td>
+                                        <div class="d-flex flex-column">
+                                            <a class="fw-600 text-primary" href="${pageContext.request.contextPath}/home?p=product-detail&id=${item.productId}">
                                                 ${item.productName}
                                             </a>
-                                        </td>
-                                        <td>
-                                            <c:out value="${empty item.brandName ? '—' : item.brandName}"/>
-                                        </td>
-                                        <td>${item.unitsSold}</td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${item.lastSold != null}">
-                                                    <fmt:formatDate value="${item.lastSold}" pattern="yyyy-MM-dd HH:mm"/>
-                                                </c:when>
-                                                <c:otherwise>—</c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </c:when>
-                            <c:otherwise>
-                                <tr>
-                                    <td colspan="6" class="empty-state">No data found for the selected period.</td>
+                                            <span class="mono-text fs-11 text-muted">${item.productCode}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <c:out value="${empty item.brandName ? '—' : item.brandName}"/>
+                                    </td>
+                                    <td class="text-center fw-700 text-primary">${item.unitsSold}</td>
+                                    <td class="text-right text-muted fs-13">
+                                        <c:choose>
+                                            <c:when test="${item.lastSold != null}">
+                                                <fmt:formatDate value="${item.lastSold}" pattern="yyyy-MM-dd HH:mm"/>
+                                            </c:when>
+                                            <c:otherwise>—</c:otherwise>
+                                        </c:choose>
+                                    </td>
                                 </tr>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
-            </div>
+                            </c:forEach>
+                        </c:when>
+                        <c:otherwise>
+                            <tr>
+                                <td colspan="5">
+                                    <div class="p-40 text-center text-muted">No sales data found for this period.</div>
+                                </td>
+                            </tr>
+                        </c:otherwise>
+                    </c:choose>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>

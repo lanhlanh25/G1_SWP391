@@ -8,7 +8,7 @@
     <div class="topbar">
         <div style="display:flex; align-items:center; gap:10px;">
             <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
-            <h1 class="h1">View Import Receipts</h1>
+            <h1 class="h1">Import Receipt List</h1>
         </div>
         <c:if test="${role eq 'STAFF'}">
             <a class="btn btn-primary" href="${ctx}/home?p=create-import-receipt">+ Create Receipt</a>
@@ -20,7 +20,7 @@
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
                 <div>
                     <div class="h2">Manage Import Receipts</div>
-                    <div class="muted">Review and export confirmed material arrival documents.</div>
+                    <!--<div class="muted">Review and export confirmed material arrival documents.</div>-->
                 </div>
                 <form method="get" action="${ctx}/home">
                     <input type="hidden" name="p" value="import-receipt-list"/>
@@ -87,15 +87,15 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="width:50px;">No</th>
-                        <th>Receipt Code</th>
+                        <th style="width:50px;" class="text-center">No</th>
+                        <th style="width:160px;">Receipt Code</th>
                         <th>Supplier</th>
                         <th>Created By</th>
-                        <th>Date</th>
-                        <th style="width:80px; text-align:center;">Qty</th>
+                        <th style="width:160px;">Date</th>
+                        <th style="width:80px;" class="text-center">Qty</th>
                         <th>Category</th>
-                        <th style="width:100px;">Status</th>
-                        <th style="width:180px;">Action</th>
+                        <th style="width:120px;" class="text-center">Status</th>
+                        <th style="width:180px;" class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -109,12 +109,12 @@
                             <td style="text-align:center; color:var(--muted);">
                                 <c:out value="${(page-1)*pageSize + st.index + 1}"/>
                             </td>
-                            <td style="font-weight:600;"><c:out value="${r.importCode}"/></td>
+                            <td class="fw-600"><c:out value="${r.importCode}"/></td>
                             <td><c:out value="${r.supplierName}"/></td>
                             <td><c:out value="${r.createdByName}"/></td>
-                            <td style="color:var(--muted);"><c:out value="${r.receiptDate}"/></td>
-                            <td style="font-weight:700; text-align:center;"><c:out value="${r.totalQuantity}"/></td>
-                            <td><span class="badge" style="background:rgba(52, 58, 64, 0.1); color:#343a40;">Phone</span></td>
+                            <td class="text-muted"><c:out value="${r.receiptDate}"/></td>
+                            <td class="text-center fw-700"><c:out value="${r.totalQuantity}"/></td>
+                            <td class="text-center"><span class="badge badge-outline">Phone</span></td>
                             <td>
                                 <c:choose>
                                     <c:when test="${r.statusUi == 'CONFIRMED' || r.statusUi == 'completed' || r.statusUi == 'COMPLETED'}">
@@ -132,7 +132,7 @@
                                 </c:choose>
                             </td>
                             <td>
-                                <div style="display:flex; gap:6px; flex-wrap:nowrap; align-items:center;">
+                                <div class="d-flex gap-8 align-center justify-center flex-nowrap">
                                     <a class="btn btn-sm btn-info" href="${ctx}/home?p=import-receipt-detail&id=${r.importId}">View</a>
                                     <a class="btn btn-sm btn-warning" href="${ctx}/import-receipt-pdf?id=${r.importId}">PDF</a>
                                 </div>

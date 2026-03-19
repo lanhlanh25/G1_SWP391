@@ -6,7 +6,7 @@
     <div class="topbar">
         <div>
             <div class="title">Add New Product</div>
-            <div class="small">Create product information for warehouse operations</div>
+            <!--<div class="small">Create product information for warehouse operations</div>-->
         </div>
 
         <div class="actions">
@@ -99,4 +99,4 @@
         </div>
     </div>
 </div>
->
+>

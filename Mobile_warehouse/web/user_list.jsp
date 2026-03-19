@@ -23,14 +23,14 @@
 <div class="page-wrap">
 
     <div class="topbar">
-        <div style="display:flex; align-items:center; gap:10px;">
+        <div class="d-flex align-center gap-12">
             <a class="btn" href="<%=request.getContextPath()%>/home?p=dashboard">← Back</a>
-            <h1 class="h1">User List</h1>
+            <h1 class="h1">User Management</h1>
         </div>
 
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=user-toggle">Active/Deactive</a>
-            <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=user-add">Add User</a>
+        <div class="d-flex gap-8 flex-wrap">
+            <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=user-toggle">Status Toggle</a>
+            <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=user-add">+ Add User</a>
         </div>
     </div>
 <c:if test="${not empty param.msg}">
@@ -81,10 +81,10 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="width:80px;">ID</th>
+                        <th style="width:80px;" class="text-center">ID</th>
                         <th>Username</th>
-                        <th style="width:180px;">Status</th>
-                        <th style="width:220px;">Action</th>
+                        <th style="width:140px;" class="text-center">Status</th>
+                        <th style="width:220px;" class="text-center">Action</th>
                     </tr>
                 </thead>
 
@@ -97,11 +97,9 @@
 
                     <c:forEach var="u" items="${users}">
                         <tr>
-                            <td>${u.userId}</td>
-                            <td>
-                                <div style="font-weight:700;">${u.username}</div>
-                            </td>
-                            <td>
+                            <td class="text-center text-muted">${u.userId}</td>
+                            <td class="fw-600">${fn:escapeXml(u.username)}</td>
+                            <td class="text-center">
                                 <c:choose>
                                     <c:when test="${u.status == 1}">
                                         <span class="badge badge-active">Active</span>
@@ -112,26 +110,26 @@
                                 </c:choose>
                             </td>
                             <td>
-                                <c:choose>
-                                    <c:when test="${sessionScope.roleName == 'ADMIN'}">
-                                        <div style="display:flex; gap:8px;">
-                                            <a class="btn btn-sm btn-outline"
+                                <div class="d-flex gap-8 align-center justify-center">
+                                    <c:choose>
+                                        <c:when test="${sessionScope.roleName == 'ADMIN'}">
+                                            <a class="btn btn-sm btn-info"
                                                href="${pageContext.request.contextPath}/home?p=user-view&id=${u.userId}">
                                                 View
                                             </a>
-                                            <a class="btn btn-sm btn-primary"
+                                            <a class="btn btn-sm btn-warning"
                                                href="${pageContext.request.contextPath}/home?p=user-update&id=${u.userId}">
                                                 Update
                                             </a>
-                                        </div>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <a class="btn btn-sm btn-outline"
-                                           href="${pageContext.request.contextPath}/home?p=user-detail&id=${u.userId}">
-                                            View
-                                        </a>
-                                    </c:otherwise>
-                                </c:choose>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a class="btn btn-sm btn-info"
+                                               href="${pageContext.request.contextPath}/home?p=user-detail&id=${u.userId}">
+                                                View
+                                            </a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
                             </td>
                         </tr>
                     </c:forEach>

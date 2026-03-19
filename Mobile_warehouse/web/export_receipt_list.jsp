@@ -12,7 +12,7 @@
   <div class="topbar mb-20">
     <div class="d-flex align-center gap-10">
       <a class="btn btn-outline" href="${ctx}/home?p=dashboard">← Back</a>
-      <h1 class="h1">Export Receipts</h1>
+      <h1 class="h1">Export Management</h1>
     </div>
   </div>
 
@@ -88,14 +88,14 @@
       <table class="table">
         <thead>
           <tr>
-            <th style="width:50px;">No</th>
-            <th>Receipt Code</th>
+            <th style="width:50px;" class="text-center">No</th>
+            <th style="width:140px;">Receipt Code</th>
             <th>Request Code</th>
             <th>Created By</th>
-            <th>Export Date</th>
-            <th>Total Qty</th>
+            <th style="width:140px;">Export Date</th>
+            <th style="width:80px;" class="text-center">Qty</th>
             <th>Category</th>
-            <th>Status</th>
+            <th style="width:120px;" class="text-center">Status</th>
             <th style="width:180px;">Action</th>
           </tr>
         </thead>
@@ -108,10 +108,10 @@
 
           <c:forEach var="r" items="${rows}" varStatus="st">
             <tr>
-              <td style="text-align:center;color:var(--muted);">
+              <td class="text-center text-muted">
                 <c:out value="${(page-1)*pageSize + st.index + 1}"/>
               </td>
-              <td style="font-weight:600;"><c:out value="${r.exportCode}"/></td>
+              <td class="fw-600"><c:out value="${r.exportCode}"/></td>
               <td>
                 <c:choose>
                   <c:when test="${empty r.requestCode || r.requestCode == '-'}">
@@ -123,27 +123,27 @@
                 </c:choose>
               </td>
               <td><c:out value="${r.createdByName}"/></td>
-              <td style="color:var(--muted);"><c:out value="${r.exportDateUi}"/></td>
-              <td style="font-weight:700;text-align:center;"><c:out value="${r.totalQty}"/></td>
-              <td><span class="cat-badge">Phone</span></td>
+              <td class="text-muted"><c:out value="${r.exportDateUi}"/></td>
+              <td class="text-center fw-700"><c:out value="${r.totalQty}"/></td>
+              <td class="text-center"><span class="badge badge-outline">Phone</span></td>
               <td>
                 <c:choose>
                   <c:when test="${r.status == 'CONFIRMED' || r.status == 'completed' || r.status == 'COMPLETED'}">
-                    <span class="badge badge-success">Completed</span>
+                    <span class="badge badge-active">Completed</span>
                   </c:when>
                   <c:when test="${r.status == 'pending' || r.status == 'PENDING'}">
                     <span class="badge badge-warning">Pending</span>
                   </c:when>
                   <c:when test="${r.status == 'cancelled' || r.status == 'CANCELLED' || r.status == 'CANCELED'}">
-                    <span class="badge badge-danger">Cancelled</span>
+                    <span class="badge badge-inactive">Cancelled</span>
                   </c:when>
                   <c:otherwise>
-                    <span class="badge badge-success"><c:out value="${r.status}"/></span>
+                    <span class="badge badge-active"><c:out value="${r.status}"/></span>
                   </c:otherwise>
                 </c:choose>
               </td>
               <td>
-                <div class="d-flex gap-8 align-center">
+                <div class="d-flex gap-8 align-center justify-center flex-nowrap">
                   <a class="btn btn-sm btn-outline"
                      href="${ctx}/home?p=export-receipt-detail&id=${r.exportId}">View</a>
                   <a class="btn btn-sm btn-primary"

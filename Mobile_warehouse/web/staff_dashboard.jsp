@@ -7,7 +7,7 @@
     <div class="topbar">
         <div>
             <h1 class="h1 m-0">Staff Dashboard</h1>
-            <div class="muted">Jump straight into inventory operations, receipt handling and warehouse checks.</div>
+            <!--<div class="muted">Jump straight into inventory operations, receipt handling and warehouse checks.</div>-->
         </div>
     </div>
 
@@ -15,7 +15,7 @@
         <div class="stat-card primary">
             <div class="stat-label">Inventory</div>
             <div class="h2 mb-8">Inventory Management</div>
-            <div class="muted">Review current stock balances, statuses and SKU detail in one view.</div>
+            <!--<div class="muted">Review current stock balances, statuses and SKU detail in one view.</div>-->
             <div class="hero-actions mt-16">
                 <a class="btn btn-primary" href="<%=ctx%>/inventory">Open Inventory</a>
             </div>

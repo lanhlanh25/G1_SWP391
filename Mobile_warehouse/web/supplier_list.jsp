@@ -8,7 +8,7 @@
     <div class="topbar">
         <div class="d-flex align-center gap-12">
             <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
-            <h1 class="h1">View Supplier List</h1>
+            <h1 class="h1">Supplier Management</h1>
         </div>
         <c:if test="${isManager}">
             <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=add_supplier">+ Add Supplier</a>
@@ -66,11 +66,11 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Supplier</th>
+                        <th style="width:240px;">Supplier</th>
                         <th>Contact</th>
-                        <th style="width:110px;">Status</th>
-                        <th style="width:120px; text-align:center;">Transactions</th>
-                        <th style="width:240px;">Action</th>
+                        <th style="width:110px;" class="text-center">Status</th>
+                        <th style="width:120px;" class="text-center">Transactions</th>
+                        <th style="width:240px;" class="text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -80,33 +80,33 @@
                     <c:forEach var="s" items="${suppliers}">
                         <tr>
                             <td>
-                                <b>${s.supplierName}</b>
-                                <div class="small muted">ID: ${s.supplierId}</div>
+                                <div class="fw-600">${s.supplierName}</div>
+                                <div class="small text-muted">ID: ${s.supplierId}</div>
                             </td>
                             <td>
                                 <div>${s.email}</div>
-                                <div class="small muted">${s.phone}</div>
+                                <div class="small text-muted">${s.phone}</div>
                             </td>
-                            <td>
+                            <td class="text-center">
                                 <c:choose>
                                     <c:when test="${s.isActive == 1}"><span class="badge badge-active">Active</span></c:when>
                                     <c:otherwise><span class="badge badge-inactive">Inactive</span></c:otherwise>
                                 </c:choose>
                             </td>
-                            <td style="text-align:center;">${s.totalTransactions}</td>
+                            <td class="text-center fw-600">${s.totalTransactions}</td>
                             <td>
-                                <div class="d-flex gap-8 align-center flex-nowrap">
+                                <div class="d-flex gap-8 align-center justify-center flex-nowrap">
                                     <a class="btn btn-sm btn-info" href="${pageContext.request.contextPath}/home?p=supplier_detail&id=${s.supplierId}">View</a>
                                     <c:if test="${isManager}">
                                         <a class="btn btn-sm btn-warning" href="${pageContext.request.contextPath}/home?p=update_supplier&id=${s.supplierId}">Update</a>
                                         <c:choose>
                                             <c:when test="${s.isActive == 1}">
-                                                <a class="btn btn-sm btn-danger" href="${pageContext.request.contextPath}/home?p=supplier_inactive&id=${s.supplierId}">Inactive</a>
+                                                <a class="btn btn-sm btn-danger" href="${pageContext.request.contextPath}/home?p=supplier_inactive&id=${s.supplierId}">Disable</a>
                                             </c:when>
                                             <c:otherwise>
                                                 <form method="post" action="${pageContext.request.contextPath}/supplier-toggle" class="mb-0">
                                                     <input type="hidden" name="supplierId" value="${s.supplierId}"/>
-                                                    <button type="submit" class="btn btn-sm btn-primary">Active</button>
+                                                    <button type="submit" class="btn btn-sm btn-primary">Enable</button>
                                                 </form>
                                             </c:otherwise>
                                         </c:choose>

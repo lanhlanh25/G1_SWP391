@@ -8,42 +8,59 @@
 <div class="page-wrap-md">
 
   <div class="topbar">
-    <div class="title">Export Request Detail</div>
-    <a class="btn" href="${ctx}/home?p=export-request-list">← Back to List</a>
+    <div class="d-flex align-center gap-12">
+      <h1 class="h1">Export Request Detail</h1>
+    </div>
+    <div class="d-flex gap-8 align-center">
+      <a class="btn btn-outline" href="${ctx}/home?p=export-request-list">← Back to List</a>
+    </div>
   </div>
 
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-header"><span class="h2">Request Info</span></div>
+  <div class="card mb-16">
     <div class="card-body">
-      <div class="info-grid">
-        <span class="label">Request Code</span>
-        <span>${erHeader.requestCode}</span>
-
-        <span class="label">Created By</span>
-        <span>${erHeader.createdByName}</span>
-
-        <span class="label">Request Date</span>
-        <span><fmt:formatDate value="${erHeader.requestDate}" pattern="yyyy-MM-dd HH:mm:ss"/></span>
-
-        <span class="label">Expected Export Date</span>
-        <span><fmt:formatDate value="${erHeader.expectedExportDate}" pattern="yyyy-MM-dd"/></span>
-        
-        <span class="label">Note</span>
-        <span>${erHeader.note}</span>
-      </div>
+      <div class="h2 mb-16">Request Information</div>
+      <table class="table no-border-first">
+        <tbody>
+          <tr>
+            <th style="width:180px;">Request Code</th>
+            <td class="fw-600">${erHeader.requestCode}</td>
+          </tr>
+          <tr>
+            <th>Created By</th>
+            <td class="text-muted fs-14">${erHeader.createdByName}</td>
+          </tr>
+          <tr>
+            <th>Request Date</th>
+            <td class="text-muted"><fmt:formatDate value="${erHeader.requestDate}" pattern="dd/MM/yyyy HH:mm"/></td>
+          </tr>
+          <tr>
+            <th>Expected Export Date</th>
+            <td class="fw-600 text-primary"><fmt:formatDate value="${erHeader.expectedExportDate}" pattern="dd/MM/yyyy"/></td>
+          </tr>
+          <tr>
+            <th>Note</th>
+            <td class="text-muted fs-14">
+              <c:choose>
+                <c:when test="${empty erHeader.note}">—</c:when>
+                <c:otherwise>${erHeader.note}</c:otherwise>
+              </c:choose>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-header"><span class="h2">Items</span></div>
-    <div class="card-body" style="padding:0;">
+    <div class="card-body">
+      <div class="h2 mb-16">Requested Items</div>
       <table class="table">
         <thead>
           <tr>
-            <th style="width:60px; text-align:center;">No</th>
-            <th>Product Code</th>
-            <th>SKU (option)</th>
-            <th style="width:140px; text-align:center;">Request Qty</th>
+            <th style="width:60px;" class="text-center">#</th>
+            <th style="width:150px;">Code</th>
+            <th>SKU</th>
+            <th style="width:140px;" class="text-center">Request Qty</th>
           </tr>
         </thead>
         <tbody>
@@ -52,15 +69,15 @@
           </c:if>
           <c:forEach var="it" items="${erItems}">
             <tr>
-              <td style="text-align:center;">${it.no}</td>
-              <td>${fn:escapeXml(it.productCode)}</td>
-              <td>
+              <td class="text-center text-muted fs-12">${it.no}</td>
+              <td class="mono-text fs-12">${fn:escapeXml(it.productCode)}</td>
+              <td class="fw-600">
                 <c:choose>
                   <c:when test="${empty it.skuCode}">-</c:when>
                   <c:otherwise>${fn:escapeXml(it.skuCode)}</c:otherwise>
                 </c:choose>
               </td>
-              <td style="text-align:center;">${it.requestQty}</td>
+              <td class="text-center fw-700">${it.requestQty}</td>
             </tr>
           </c:forEach>
         </tbody>

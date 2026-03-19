@@ -205,7 +205,7 @@
                                 <td class="text-center report-status">
                                     <c:choose>
                                         <c:when test="${r.ropStatus eq 'Out Of Stock'}">
-                                            <span class="badge badge-danger">Out of Stock</span>
+                                            <span class="badge badge-inactive">Out of Stock</span>
                                         </c:when>
                                         <c:when test="${r.ropStatus eq 'Reorder Needed'}">
                                             <span class="badge badge-warning" title="Suggested: ${r.suggestedReorderQty}">Reorder Needed</span>
@@ -214,7 +214,7 @@
                                             <span class="badge badge-info">At ROP Level</span>
                                         </c:when>
                                         <c:otherwise>
-                                            <span class="badge badge-success">OK</span>
+                                            <span class="badge badge-active">OK</span>
                                         </c:otherwise>
                                     </c:choose>
                                 </td>
@@ -334,7 +334,7 @@
         <div class="card-body report-legend">
             <span class="report-legend-label">Legend</span>
             <span class="report-legend-item">
-                <span class="badge badge-success">OK</span>
+                <span class="badge badge-active">OK</span>
                 Stock &gt; ROP
             </span>
             <span class="report-legend-item">
@@ -346,7 +346,7 @@
                 Stock &lt; ROP
             </span>
             <span class="report-legend-item">
-                <span class="badge badge-danger">Out of Stock</span>
+                <span class="badge badge-inactive">Out of Stock</span>
                 Stock = 0
             </span>
         </div>
