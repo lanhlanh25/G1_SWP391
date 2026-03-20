@@ -6,33 +6,32 @@
 
         <%-- Internal styles moved to app.css --%>
 
-        <div class="page-wrap">
-          <div class="topbar">
-            <div class="d-flex align-center gap-12">
-              <c:choose>
-                <c:when test="${not empty requestId}">
-                  <a class="btn" href="${ctx}/home?p=import-request-list">← Back</a>
-                </c:when>
-                <c:otherwise>
-                  <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
-                </c:otherwise>
-              </c:choose>
-              <h1 class="h1">Create Import Receipt</h1>
-            </div>
-          </div>
-
-          <div class="card p-24">
+        <div class="page-wrap-md">
+          <div class="card">
+            <div class="card-body">
+              <div class="topbar" style="margin-bottom:18px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <c:choose>
+                    <c:when test="${not empty requestId}">
+                      <a class="btn btn-outline" href="${ctx}/home?p=import-request-list">← Back</a>
+                    </c:when>
+                    <c:otherwise>
+                      <a class="btn btn-outline" href="${ctx}/home?p=dashboard">← Back</a>
+                    </c:otherwise>
+                  </c:choose>
+                  <div class="title" style="flex:1;">Create Import Receipt</div>
+                </div>
+              </div>
             <%-- Source request banner --%>
               <c:if test="${not empty irHeader}">
-                <div class="alert alert-info mb-16 font-sm">
-                  <b>Source Request:</b>
-                  <c:out value="${irHeader.requestCode}" />
-                  &nbsp;|&nbsp;
-                  <b>Status:</b>
-                  <c:out value="${irHeader.status}" />
-                  &nbsp;|&nbsp;
-                  <b>Expected Import Date:</b>
-                  <c:out value="${irHeader.expectedImportDate}" />
+                <div class="card" style="background:var(--primary-light); border-color:var(--primary-border); margin-bottom:16px;">
+                  <div class="card-body" style="padding:12px 16px; font-size:13px;">
+                    <b>Source Request:</b> <c:out value="${irHeader.requestCode}" />
+                    &nbsp;|&nbsp;
+                    <b>Status:</b> <c:out value="${irHeader.status}" />
+                    &nbsp;|&nbsp;
+                    <b>Expected Import Date:</b> <c:out value="${irHeader.expectedImportDate}" />
+                  </div>
                 </div>
               </c:if>
 
@@ -61,7 +60,7 @@
                       <input type="hidden" name="requestId" value="${requestId}" />
                     </c:if>
 
-                    <div class="h2 mb-10 text-muted">Import Form</div>
+                    <h2 class="h2" style="margin:0 0 14px;">Import Form</h2>
 
                     <div class="form-grid mb-16">
                       <div class="label">Import Code (auto)</div>
@@ -85,27 +84,31 @@
                         </select>
                       </div>
 
+                      <div class="label">Created by</div>
+                      <div>
+                        <input type="text" class="input readonly" value="${fn:escapeXml(createdByName)}" readonly />
+                      </div>
+ 
                       <div class="label">Note</div>
                       <div>
-                        <textarea class="textarea" name="note" placeholder="Notes..."></textarea>
+                        <textarea class="textarea" name="note" placeholder="Optional note for warehouse staff..."></textarea>
                       </div>
                     </div>
 
-                    <div class="h2 mb-10 text-muted">Import Items</div>
+                    <h2 class="h2" style="margin:22px 0 12px;">Import Items</h2>
 
-                    <div class="table-wrap mb-16">
+                    <div style="overflow-x:auto;">
                       <table class="table" id="itemsTable">
                         <thead>
                           <tr>
-                            <th style="width:46px" class="text-center">#</th>
-                            <th style="width:160px">Product Name</th>
-                            <th style="width:140px">Product Code</th>
-                            <th style="width:160px">SKU</th>
-                            <th style="width:80px" class="text-center">Qty</th>
-                            <th style="width:240px">IMEI Numbers</th>
-                            <th style="width:130px">Item Note</th>
-                            <th style="width:100px">Created By</th>
-                            <th style="width:80px" class="text-center">Action</th>
+                            <th style="width:60px" class="text-center">#</th>
+                            <th style="width:200px">Product Name</th>
+                            <th style="width:180px">Product Code</th>
+                            <th style="width:180px">SKU</th>
+                            <th style="width:100px" class="text-center">Qty</th>
+                            <th style="width:280px">IMEI Numbers</th>
+                            <th style="width:180px">Item Note</th>
+                            <th style="width:100px" class="text-center">Action</th>
                           </tr>
                         </thead>
                         <tbody id="itemsTbody"></tbody>
@@ -116,7 +119,7 @@
                       <button type="button" class="btn btn-outline" id="btnAddRow">+ Add Product Line</button>
                     </div>
 
-                    <div class="form-actions border-t pt-16 mt-20">
+                    <div class="form-actions" style="justify-content:flex-start; margin-top:20px;">
                       <button type="submit" class="btn btn-primary">Save Receipt</button>
                       <c:choose>
                         <c:when test="${not empty requestId}">
@@ -136,7 +139,7 @@
                     <form method="post" action="${ctx}/create-import-receipt" enctype="multipart/form-data">
                       <input type="hidden" name="mode" value="excel" />
 
-                      <div class="h2 mb-10 text-muted">Import Form (Excel)</div>
+                      <h2 class="h2" style="margin:0 0 14px;">Import Form (Excel)</h2>
 
                       <div class="alert alert-info mb-16 font-sm">
                         <b>Excel Format:</b> 3 columns: <b>product_code</b>, <b>sku_code</b>, <b>imei</b> (15 digits)
@@ -182,6 +185,7 @@
                   </div>
                 </c:if><%-- end c:if empty requestId (excel tab) --%>
 
+            </div>
           </div>
         </div>
 
@@ -234,11 +238,12 @@
                 return inp;
               }
               const sel = document.createElement("select");
+              sel.className = "select";
               sel.required = true;
               sel.style.width = "100%";
               const defOpt = document.createElement("option");
               defOpt.value = "";
-              defOpt.textContent = "-- Select Product Name --";
+              defOpt.textContent = "-- Select Product --";
               defOpt.disabled = true;
               defOpt.selected = true;
               sel.appendChild(defOpt);
@@ -262,7 +267,16 @@
 
             function buildCodeDisplay(prefillCode) {
               const div = document.createElement("div");
-              div.className = "mono-text text-sm text-muted";
+              div.style.padding = "10px 14px";
+              div.style.border = "1px solid var(--border)";
+              div.style.borderRadius = "10px";
+              div.style.minHeight = "42px";
+              div.style.display = "flex";
+              div.style.alignItems = "center";
+              div.style.background = "var(--surface-2)";
+              div.style.color = "var(--muted)";
+              div.style.fontSize = "14px";
+              div.style.fontWeight = "600";
               div.textContent = prefillCode || "—";
               return div;
             }
@@ -286,6 +300,7 @@
                 return wrap;
               }
               const sel = document.createElement("select");
+              sel.className = "select";
               sel.name = "skuId";
               sel.required = true;
               sel.style.width = "100%";
@@ -314,12 +329,21 @@
 
             function buildImeiBox(rowIdx, qty) {
               const box = document.createElement("div");
-              box.className = "ir-imei-box";
+              box.style.display = "flex";
+              box.style.flexDirection = "column";
+              box.style.gap = "6px";
+              box.style.minWidth = "220px";
               for (let i = 1; i <= qty; i++) {
                 const row = document.createElement("div");
-                row.className = "ir-imei-row";
+                row.style.display = "flex";
+                row.style.gap = "6px";
+                row.style.alignItems = "center";
                 const label = document.createElement("span");
                 label.textContent = "IMEI " + i + ":";
+                label.style.minWidth = "56px";
+                label.style.fontSize = "12px";
+                label.style.color = "var(--muted)";
+                label.style.fontWeight = "600";
                 const input = document.createElement("input");
                 input.type = "text";
                 input.name = "imei_" + rowIdx + "_" + i;
@@ -327,6 +351,7 @@
                 input.required = true;
                 input.maxLength = 15;
                 input.className = "input";
+                input.style.flex = "1";
                 input.addEventListener("input", function () {
                   this.value = this.value.replace(/\D/g, "").slice(0, 15);
                   if (this.value.length === 15) {
@@ -388,6 +413,7 @@
               // Quantity
               const tdQty = document.createElement("td");
               const qtyInp = document.createElement("input");
+              qtyInp.className = "input";
               qtyInp.type = "number";
               qtyInp.name = "qty";
               qtyInp.min = "1";
@@ -396,6 +422,7 @@
               if (IS_REQUEST_MODE && prefill) {
                 // Lock quantity in request mode
                 qtyInp.readOnly = true;
+                qtyInp.className += " readonly";
                 qtyInp.style.background = "var(--surface-2,#f8fafc)";
                 qtyInp.style.color = "var(--muted,#64748b)";
               }
@@ -422,21 +449,24 @@
               // Item Note
               const tdNote = document.createElement("td");
               const noteInp = document.createElement("input");
+              noteInp.className = "input";
               noteInp.type = "text";
               noteInp.name = "itemNote";
               noteInp.placeholder = "Notes";
               tdNote.appendChild(noteInp);
 
-              // Created By
-              const tdBy = document.createElement("td");
-              tdBy.textContent = CREATED_BY || "Staff";
-              tdBy.style.color = "var(--muted,#64748b)";
-              tdBy.style.fontSize = "12px";
+              // Created By - Moved to main form grid, no longer in table row
+              // const tdBy = document.createElement("td");
+              // tdBy.textContent = CREATED_BY || "Staff";
+              // tdBy.style.color = "var(--muted,#64748b)";
+              // tdBy.style.fontSize = "12px";
 
               // Action — hide delete in request mode
               const tdAct = document.createElement("td");
               tdAct.className = "center";
+              tdAct.style.width = "80px"; // Synchronized width
               if (!IS_REQUEST_MODE) {
+                const delBtn = document.createElement("button");
                 delBtn.type = "button";
                 delBtn.className = "btn btn-sm btn-danger";
                 delBtn.textContent = "Delete";
@@ -452,7 +482,7 @@
                 tdAct.textContent = "-";
               }
 
-              tr.append(tdNo, tdName, tdCode, tdSku, tdQty, tdImei, tdNote, tdBy, tdAct);
+              tr.append(tdNo, tdName, tdCode, tdSku, tdQty, tdImei, tdNote, tdAct);
               tbody.appendChild(tr);
             }
 

@@ -21,11 +21,16 @@
         document.getElementById('disableBrandDesc').textContent = brandDesc || '';
 
         const isToInactive = (toValue === '0');
-        document.getElementById('disableActionText').textContent = isToInactive ? 'Inactive' : 'Active';
-        document.getElementById('disableModalTitle').textContent = isToInactive ? 'Set Inactive' : 'Set Active';
-        document.getElementById('disableConfirmBtn').textContent = isToInactive ? 'Confirm Inactive' : 'Confirm Active';
+        const actionText = isToInactive ? 'DEACTIVATE' : 'ACTIVATE';
+        
+        document.getElementById('disableActionText').textContent = actionText;
+        document.getElementById('disableModalTitle').textContent = actionText + ' BRAND';
+        
+        const confirmBtn = document.getElementById('disableConfirmBtn');
+        confirmBtn.textContent = 'Confirm ' + (isToInactive ? 'Deactivate' : 'Activate');
+        confirmBtn.className = 'btn ' + (isToInactive ? 'btn-danger' : 'btn-primary');
 
-        document.getElementById('disableModalBackdrop').style.display = 'block';
+        document.getElementById('disableModalBackdrop').style.display = 'flex';
     }
 
     function closeDisableModal() {
@@ -42,7 +47,7 @@
     function openDescModal(title, fullText) {
         document.getElementById('descModalTitle').textContent = title || 'Description';
         document.getElementById('descModalBody').textContent = fullText || '';
-        document.getElementById('descModalBackdrop').style.display = 'block';
+        document.getElementById('descModalBackdrop').style.display = 'flex';
     }
 
     function closeDescModal() {
@@ -218,11 +223,8 @@
                                             <input type="hidden" name="page" value="${page}"/>
 
                                             <button type="button" class="btn btn-sm ${b.active ? 'btn-danger' : 'btn-primary'}"
-                                                    data-name="${fn:escapeXml(b.brandName)}"
-                                                    data-desc="${fn:escapeXml(b.description)}"
-                                                    data-to="${b.active ? '0' : '1'}"
-                                                    onclick="openDisableModal('disableForm_${b.brandId}', this.dataset.name, this.dataset.desc, this.dataset.to)">
-                                                ${b.active ? 'Inactive' : 'Active'}
+                                                    onclick="openDisableModal('disableForm_${b.brandId}', '${fn:escapeXml(b.brandName)}', '${fn:escapeXml(b.description)}', '${b.active ? '0' : '1'}')">
+                                                ${b.active ? 'Deactivate' : 'Activate'}
                                             </button>
                                         </form>
                                     </c:if>
@@ -270,7 +272,6 @@
                         <span class="paging-btn active">${i}</span>
                     </c:when>
                     <c:otherwise>
-                        <c:url var="pUrl" value="/home">
                         <c:url var="pageUrl" value="/home">
                             <c:param name="p" value="brand-list"/>
                             <c:param name="page" value="${i}"/>
@@ -298,6 +299,34 @@
                     <a class="paging-btn" href="${nextUrl}">Next &raquo;</a>
                 </c:otherwise>
             </c:choose>
+        </div>
+    </div>
+</div>
+ 
+<!-- Modal Confirm Toggle Action -->
+<div id="disableModalBackdrop" class="modal-backdrop" style="display:none;" onclick="if(event.target==this) closeDisableModal()">
+    <div class="modal">
+        <h3 id="disableModalTitle" class="h2 mb-14 uppercase" style="text-align:center;">Confirm Action</h3>
+        <p class="text-muted fs-14 mb-18" style="text-align:center;">
+            Are you sure you want to <b class="text-primary" id="disableActionText">action</b> brand 
+            <q class="fw-700 text-primary" id="disableBrandName"></q>?
+        </p>
+        <div id="disableBrandDesc" class="small muted mb-24" style="font-style:italic; background:#f9fafb; padding:12px; border-radius:10px; border:1px dashed #e5e7eb;"></div>
+        
+        <div class="d-flex gap-8 justify-center">
+            <button class="btn btn-outline" onclick="closeDisableModal()">Cancel</button>
+            <button id="disableConfirmBtn" class="btn btn-primary" onclick="submitDisableForm()">Confirm</button>
+        </div>
+    </div>
+</div>
+ 
+<!-- Modal Description View -->
+<div id="descModalBackdrop" class="modal-backdrop" style="display:none;" onclick="if(event.target==this) closeDescModal()">
+    <div class="modal" style="width:min(600px, 94vw);">
+        <h3 id="descModalTitle" class="h2 mb-14">Description</h3>
+        <div id="descModalBody" class="fs-14 text-muted mb-20" style="white-space:pre-wrap; max-height:400px; overflow-y:auto; line-height:1.6; padding:12px; background:#f8fafc; border:1px solid #eef2f6; border-radius:10px;"></div>
+        <div class="d-flex justify-end">
+            <button class="btn btn-primary" onclick="closeDescModal()">Close</button>
         </div>
     </div>
 </div>

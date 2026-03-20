@@ -77,3 +77,19 @@
         </li>
     </ul>
 </details>
+
+<div class="section-title">Master Data</div>
+<ul>
+    <li>
+        <a class="<%= "brand-list".equals(currentPage) ? "active" : "" %>"
+           href="<%=ctx%>/home?p=brand-list">
+            Brand List
+        </a>
+    </li>
+    <li>
+        <a class="<%= "view_supplier".equals(currentPage) ? "active" : "" %>"
+           href="<%=ctx%>/home?p=view_supplier">
+            Supplier List
+        </a>
+    </li>
+</ul>

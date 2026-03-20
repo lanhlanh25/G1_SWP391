@@ -44,42 +44,30 @@
     </c:if>
 
     <!-- Stat Cards -->
-    <div class="grid-12 gap-16 mb-16">
-        <div class="col-2">
-            <div class="card p-16 h-full d-flex flex-column justify-center">
-                <div class="muted fs-11 uppercase mb-4">Total Brands</div>
-                <div class="h2 m-0">${summary.totalBrands}</div>
-            </div>
+    <div class="stats-grid mb-16">
+        <div class="card p-16 d-flex flex-column justify-center">
+            <div class="muted fs-11 uppercase mb-4">Total Brands</div>
+            <div class="h2 m-0">${summary.totalBrands}</div>
         </div>
-        <div class="col-2">
-            <div class="card p-16 h-full d-flex flex-column justify-center">
-                <div class="muted fs-11 uppercase mb-4">Product Types</div>
-                <div class="h2 m-0">${summary.totalProducts}</div>
-            </div>
+        <div class="card p-16 d-flex flex-column justify-center">
+            <div class="muted fs-11 uppercase mb-4">Product Types</div>
+            <div class="h2 m-0">${summary.totalProducts}</div>
         </div>
-        <div class="col-2">
-            <div class="card p-16 h-full d-flex flex-column justify-center">
-                <div class="muted fs-11 uppercase mb-4">Stock Units</div>
-                <div class="h2 m-0 text-primary">${summary.totalStockUnits}</div>
-            </div>
+        <div class="card p-16 d-flex flex-column justify-center">
+            <div class="muted fs-11 uppercase mb-4">Stock Units</div>
+            <div class="h2 m-0 text-primary">${summary.totalStockUnits}</div>
         </div>
-        <div class="col-2">
-            <div class="card p-16 h-full d-flex flex-column justify-center">
-                <div class="muted fs-11 uppercase mb-4 text-danger">Low Stock</div>
-                <div class="h2 m-0 text-danger">${summary.lowStockProducts}</div>
-            </div>
+        <div class="card p-16 d-flex flex-column justify-center">
+            <div class="muted fs-11 uppercase mb-4 text-danger">Low Stock</div>
+            <div class="h2 m-0 text-danger">${summary.lowStockProducts}</div>
         </div>
-        <div class="col-2">
-            <div class="card p-16 h-full d-flex flex-column justify-center">
-                <div class="muted fs-11 uppercase mb-4 text-info">Imported (Range)</div>
-                <div class="h2 m-0 text-info">${summary.importedUnitsInRange}</div>
-            </div>
+        <div class="card p-16 d-flex flex-column justify-center">
+            <div class="muted fs-11 uppercase mb-4 text-info">Imported (Range)</div>
+            <div class="h2 m-0 text-info">${summary.importedUnitsInRange}</div>
         </div>
-        <div class="col-2">
-            <div class="card p-16 h-full d-flex flex-column justify-center">
-                <div class="muted fs-11 uppercase mb-4 text-info">Exported (Range)</div>
-                <div class="h2 m-0 text-info">${summary.exportedUnitsInRange}</div>
-            </div>
+        <div class="card p-16 d-flex flex-column justify-center">
+            <div class="muted fs-11 uppercase mb-4 text-info">Exported (Range)</div>
+            <div class="h2 m-0 text-info">${summary.exportedUnitsInRange}</div>
         </div>
     </div>
 

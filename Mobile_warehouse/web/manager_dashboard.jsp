@@ -207,6 +207,7 @@
                     <div class="quick-actions">
                         <a href="<%=ctx%>/home?p=import-request-list" class="btn btn-primary">Review Import Requests</a>
                         <a href="<%=ctx%>/home?p=export-request-list" class="btn btn-outline">Review Export Requests</a>
+                        <a href="<%=ctx%>/home?p=brand-list" class="btn btn-outline">Manage Brands</a>
                         <a href="<%=ctx%>/inventory-count" class="btn btn-outline">Start Inventory Count</a>
                         <a href="<%=ctx%>/inventory-report" class="btn btn-outline">Inventory Report</a>
                         <a href="<%=ctx%>/home?p=low-stock-report" class="btn btn-outline">Low Stock Report</a>
