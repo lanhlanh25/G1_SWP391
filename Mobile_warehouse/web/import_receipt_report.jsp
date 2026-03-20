@@ -55,7 +55,7 @@
   <!-- Stats -->
   <div class="grid-12 gap-16 mb-16">
     <div class="col-6">
-      <div class="card p-20 d-flex justify-between align-center h-full">
+      <div class="card stat-card-item p-20  d-flex justify-between align-center h-full">
         <div>
           <div class="muted fs-12 uppercase mb-4">Total Import Receipts</div>
           <div class="h2 m-0 text-primary">

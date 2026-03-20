@@ -74,10 +74,10 @@
         </div>
 
         <div class="login-frost-row">
-          <label class="login-frost-check">
+            <%--<label class="login-frost-check">
             <input type="checkbox" name="remember" value="true" <%= rememberVal %>>
             <span>Remember me</span>
-          </label>
+          </label>--%>
           <a href="<%=ctx%>/forgot-password" class="login-frost-link">Forgot password?</a>
         </div>
 
