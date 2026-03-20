@@ -107,8 +107,8 @@
 
   <%-- Pagination --%>
   <c:set var="base" value="${pageContext.request.contextPath}/home?p=view_history&supplierId=${sup.supplierId}&q=${q}&from=${from}&to=${to}&status=${status}&page="/>
-  <div style="display:flex; align-items:center; justify-content:space-between; margin-top:14px; flex-wrap:wrap; gap:10px;">
-    <div class="small muted">
+  <div class="paging-footer">
+    <div class="paging-info">
       <c:choose>
         <c:when test="${totalItems > 0}">
           Showing ${(page-1)*pageSize+1}–${page*pageSize > totalItems ? totalItems : page*pageSize} of ${totalItems} receipts
@@ -120,7 +120,7 @@
       <a class="paging-btn ${page==1 ? 'disabled' : ''}" href="${base}${page-1}">← Prev</a>
       <c:forEach var="i" begin="1" end="${totalPages}">
         <c:choose>
-          <c:when test="${i==page}"><b>${i}</b></c:when>
+          <c:when test="${i==page}"><span class="paging-btn active">${i}</span></c:when>
           <c:otherwise><a class="paging-btn" href="${base}${i}">${i}</a></c:otherwise>
         </c:choose>
       </c:forEach>

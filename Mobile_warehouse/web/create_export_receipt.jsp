@@ -10,18 +10,9 @@
 
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8" />
-        <title>Create Export Receipt</title>
-    </head>
-
-    <body>
-        <div class="page-wrap-md">
-            <div class="page-wrap-md">
-                <div class="card">
-                    <div class="card-body">
+<div class="page-wrap-md">
+    <div class="card">
+        <div class="card-body">
 
                         <div class="topbar" style="margin-bottom:18px;">
                             <div style="display:flex; align-items:center; gap:10px;">
@@ -178,10 +169,9 @@
                             </div>
                         </c:if>
 
-                    </div>
-                </div>
-            </div>
         </div>
+    </div>
+</div>
 
         <script>
             (function () {
@@ -649,6 +639,3 @@
             }
             })();
         </script>
-
-    </body>
-</html>

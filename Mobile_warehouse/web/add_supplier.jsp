@@ -5,7 +5,7 @@
     <div class="topbar">
         <div>
             <div class="title">Add New Supplier</div>
-            <div class="small">Create supplier information for purchasing and import operations</div>
+            <!--<div class="small">Create supplier information for purchasing and import operations</div>-->
         </div>
         <div class="actions">
             <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=dashboard">Back</a>

@@ -20,7 +20,7 @@
   <div class="topbar">
     <div>
       <div class="title">Add New Brand</div>
-      <div class="small">Create a new brand</div>
+      <!--<div class="small">Create a new brand</div>-->
     </div>
     <div class="actions">
       <a class="btn btn-outline"

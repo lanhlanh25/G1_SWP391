@@ -1,6 +1,6 @@
-<%-- 
+<%--
     Document   : login.jsp
-    Created on : Jan 13, 2026, 2:56:12 PM
+    Created on : Jan 13, 2026, 2:56:12 PM
     Author     : Admin
 --%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
@@ -11,218 +11,95 @@
   <meta charset="UTF-8">
   <title>System Login - WMS</title>
   <%@ include file="/WEB-INF/jspf/common_head.jspf" %>
-  <style>
-/* Modern Phoenix Theme Login */
-body, html {
-  margin: 0;
-  padding: 0;
-  min-height: 100vh;
-  font-family: 'Nunito Sans', sans-serif;
-  background: radial-gradient(circle, rgba(241, 245, 249, 0.6) 0%, rgba(203, 213, 225, 0.7) 100%), 
-              url('<%=ctx%>/assets/images/warehouse_bg.png') center/cover no-repeat;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.login-container {
-  width: 100%;
-  max-width: 440px;
-  padding: 20px;
-}
-
-.login-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 48px 40px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.login-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.login-brand {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  background: var(--primary);
-  color: #fff;
-  border-radius: 12px;
-  font-weight: 900;
-  font-size: 18px;
-  margin-bottom: 16px;
-}
-
-.login-header h1 {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--text);
-  margin: 0;
-  letter-spacing: -0.025em;
-}
-
-.login-header p {
-  font-size: 14px;
-  color: var(--text-2);
-  margin: 8px 0 0;
-}
-
-.input-grp {
-  margin-bottom: 24px;
-  position: relative;
-}
-
-.input-grp label {
-  display: block;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 8px;
-}
-
-.input-grp input {
-  width: 100%;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  transition: all 0.2s ease;
-  box-sizing: border-box;
-}
-
-.input-grp input:focus {
-  background: #fff;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 4px rgba(60, 80, 224, 0.1);
-}
-
-.row-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  font-size: 13px;
-}
-
-.remember-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  color: var(--text-2);
-  font-weight: 600;
-}
-
-.remember-label input {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  accent-color: var(--primary);
-}
-
-.forgot-link {
-  color: var(--primary);
-  font-weight: 700;
-  text-decoration: none;
-}
-
-.forgot-link:hover {
-  text-decoration: underline;
-}
-
-.btn-login {
-  width: 100%;
-  padding: 14px;
-  border-radius: 10px;
-  border: none;
-  background: var(--primary);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 6px -1px rgba(60, 80, 224, 0.2);
-}
-
-.btn-login:hover {
-  background: var(--primary-2);
-  transform: translateY(-1px);
-  box-shadow: 0 10px 15px -3px rgba(60, 80, 224, 0.3);
-}
-
-.btn-login:active {
-  transform: translateY(0);
-}
-
-.msg-err {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  color: #dc2626;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 13.5px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  text-align: left;
-}
-  </style>
 </head>
-<body>
+<body class="auth-body auth-login-glass">
+<%
+  String err = (String) request.getAttribute("err");
+  String usernameVal = (String) request.getAttribute("usernameVal");
+  String passwordVal = (String) request.getAttribute("passwordVal");
+  String rememberVal = (String) request.getAttribute("rememberVal");
+  if (usernameVal == null) usernameVal = "";
+  if (passwordVal == null) passwordVal = "";
+  if (rememberVal == null) rememberVal = "";
+%>
 
-<div class="login-container">
-  <div class="login-card">
-    <div class="login-header">
-      <div class="login-brand">MW</div>
-      <h1>Sign in</h1>
-      <p>Enter your details to access your account</p>
+<div class="login-frost-scene">
+  <span class="login-orb orb-top"></span>
+  <span class="login-orb orb-left"></span>
+  <span class="login-orb orb-bottom"></span>
+  <span class="login-orb orb-right"></span>
+
+  <div class="login-frost-card">
+    <div class="login-frost-inner">
+      <div class="login-frost-brand">MW</div>
+      <h1 class="login-frost-title">LOGIN</h1>
+
+      <% if (err != null && !err.isBlank()) { %>
+        <div class="login-frost-alert"><%= err %></div>
+      <% } %>
+
+      <form class="login-frost-form" action="<%=ctx%>/login" method="post" autocomplete="on">
+        <div class="login-frost-field">
+          <label class="login-frost-label" for="login-username">Username</label>
+          <input id="login-username"
+                 class="login-frost-input"
+                 type="text"
+                 name="username"
+                 placeholder="Enter your username"
+                 value="<%= usernameVal %>"
+                 required>
+        </div>
+
+        <div class="login-frost-field">
+          <label class="login-frost-label" for="login-password">Password</label>
+          <div class="login-password-shell">
+            <input id="login-password"
+                   class="login-frost-input login-password-input"
+                   type="password"
+                   name="password"
+                   placeholder="Enter your password"
+                   value="<%= passwordVal %>"
+                   required>
+            <button class="login-password-toggle"
+                    type="button"
+                    aria-label="Show password"
+                    aria-pressed="false"
+                    onclick="toggleLoginPassword()">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M2 12s3.8-6 10-6 10 6 10 6-3.8 6-10 6S2 12 2 12Z"></path>
+                <circle cx="12" cy="12" r="3.2"></circle>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="login-frost-row">
+            <%--<label class="login-frost-check">
+            <input type="checkbox" name="remember" value="true" <%= rememberVal %>>
+            <span>Remember me</span>
+          </label>--%>
+          <a href="<%=ctx%>/forgot-password" class="login-frost-link">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="login-frost-submit">SIGN IN</button>
+      </form>
     </div>
-
-    <%
-      String err = (String) request.getAttribute("err");
-      String usernameVal = (String) request.getAttribute("usernameVal");
-      String passwordVal = (String) request.getAttribute("passwordVal");
-      String rememberVal = (String) request.getAttribute("rememberVal");
-      if (usernameVal == null) usernameVal = "";
-      if (passwordVal == null) passwordVal = "";
-      if (rememberVal == null) rememberVal = "";
-      if (err != null && !err.isBlank()) {
-    %>
-      <div class="msg-err"><%= err %></div>
-    <% } %>
-
-    <form action="<%=ctx%>/login" method="post" autocomplete="on">
-      
-      <div class="input-grp">
-        <label>Username</label>
-        <input type="text" name="username" placeholder="Enter your username" value="<%= usernameVal %>" required>
-      </div>
-
-      <div class="input-grp">
-        <label>Password</label>
-        <input type="password" name="password" placeholder="••••••••" value="<%= passwordVal %>" required>
-      </div>
-
-      <div class="row-options">
-        <label class="remember-label">
-          <input type="checkbox" name="remember" value="true" <%= rememberVal %>>
-          Keep me signed in
-        </label>
-        <a href="<%=ctx%>/forgot-password" class="forgot-link">Forgot password?</a>
-      </div>
-
-      <button type="submit" class="btn-login">Login to Account</button>
-    </form>
   </div>
 </div>
 
+<script>
+  function toggleLoginPassword() {
+    const input = document.getElementById('login-password');
+    const btn = document.querySelector('.login-password-toggle');
+    if (!input || !btn) return;
+
+    const nextType = input.type === 'password' ? 'text' : 'password';
+    input.type = nextType;
+    const isVisible = nextType === 'text';
+    btn.setAttribute('aria-pressed', isVisible ? 'true' : 'false');
+    btn.setAttribute('aria-label', isVisible ? 'Hide password' : 'Show password');
+    btn.classList.toggle('is-active', isVisible);
+  }
+</script>
 </body>
 </html>

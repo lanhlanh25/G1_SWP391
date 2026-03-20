@@ -7,10 +7,12 @@
 <div class="page-wrap-md">
 
   <div class="topbar">
-    <div class="title">Export Receipt Detail</div>
-    <div style="display:flex; gap:8px; align-items:center;">
-      <span class="badge badge-info"><c:out value="${role}"/></span>
-      <a class="btn" href="${ctx}/home?p=export-receipt-list">← Back</a>
+    <div class="d-flex align-center gap-12">
+      <h1 class="h1">Export Record Details</h1>
+    </div>
+    <div class="d-flex gap-8 align-center">
+      <span class="badge badge-info uppercase fs-10 fw-600"><c:out value="${role}"/></span>
+      <a class="btn btn-outline" href="${ctx}/home?p=export-receipt-list">← Back</a>
     </div>
   </div>
 
@@ -20,53 +22,63 @@
 
   <c:if test="${not empty receiptHeader}">
 
-    <div class="card" style="margin-bottom:16px;">
-      <div class="card-header"><span class="h2">Receipt Info</span></div>
+    <div class="card mb-16">
       <div class="card-body">
-        <div class="info-grid">
-          <span class="label">Export Code</span>
-          <span><c:out value="${receiptHeader.exportCode}"/></span>
-
-          <span class="label">Transaction time</span>
-          <span><c:out value="${receiptHeader.exportDateUi}"/></span>
-
-          <span class="label">Request Code</span>
-          <span>
-            <c:choose>
-              <c:when test="${empty receiptHeader.requestCode}">
-                <span class="muted">N/A</span>
-              </c:when>
-              <c:otherwise><c:out value="${receiptHeader.requestCode}"/></c:otherwise>
-            </c:choose>
-          </span>
-
-          <span class="label">Note</span>
-          <span>
-            <c:choose>
-              <c:when test="${empty receiptHeader.note}"><span class="muted">-</span></c:when>
-              <c:otherwise><c:out value="${receiptHeader.note}"/></c:otherwise>
-            </c:choose>
-          </span>
-
-          <span class="label">Status</span>
-          <span><c:out value="${receiptHeader.status}"/></span>
-        </div>
+        <div class="h2 mb-16">Receipt Information</div>
+        <table class="table no-border-first">
+          <tbody>
+            <tr>
+              <th style="width:180px;">Export Code</th>
+              <td class="fw-600"><c:out value="${receiptHeader.exportCode}"/></td>
+            </tr>
+            <tr>
+              <th>Transaction Time</th>
+              <td class="text-muted"><c:out value="${receiptHeader.exportDateUi}"/></td>
+            </tr>
+            <tr>
+              <th>Request Code</th>
+              <td class="fw-600 text-primary">
+                <c:choose>
+                  <c:when test="${empty receiptHeader.requestCode}">
+                    <span class="text-muted">—</span>
+                  </c:when>
+                  <c:otherwise><c:out value="${receiptHeader.requestCode}"/></c:otherwise>
+                </c:choose>
+              </td>
+            </tr>
+            <tr>
+              <th>Note</th>
+              <td class="text-muted fs-14">
+                <c:choose>
+                  <c:when test="${empty receiptHeader.note}">—</c:when>
+                  <c:otherwise><c:out value="${receiptHeader.note}"/></c:otherwise>
+                </c:choose>
+              </td>
+            </tr>
+            <tr>
+              <th>Status</th>
+              <td>
+                <span class="badge badge-active"><c:out value="${receiptHeader.status}"/></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header"><span class="h2">Export Items</span></div>
-      <div class="card-body" style="padding:0;">
+      <div class="card-body">
+        <div class="h2 mb-16">Export Items</div>
         <table class="table">
           <thead>
             <tr>
-              <th style="width:50px; text-align:center;">#</th>
-              <th>Product Code</th>
+              <th style="width:50px;" class="text-center">#</th>
+              <th style="width:140px;">Code</th>
               <th>SKU</th>
-              <th style="width:120px;">Quantity</th>
+              <th style="width:100px;" class="text-center">Qty</th>
               <th>IMEI Numbers</th>
-              <th>Item Note</th>
-              <th>Created By</th>
+              <th style="width:140px;">Note</th>
+              <th style="width:120px;">Staff</th>
             </tr>
           </thead>
           <tbody>
@@ -75,24 +87,24 @@
             </c:if>
             <c:forEach var="it" items="${lines}" varStatus="st">
               <tr>
-                <td style="text-align:center;"><c:out value="${st.index + 1}"/></td>
-                <td><c:out value="${it.productCode}"/></td>
-                <td><c:out value="${it.skuCode}"/></td>
-                <td><c:out value="${it.qty}"/></td>
-                <td>
-                  <div style="white-space:pre-line; line-height:1.5;">
+                <td class="text-center text-muted fs-12"><c:out value="${st.index + 1}"/></td>
+                <td class="mono-text fs-12"><c:out value="${it.productCode}"/></td>
+                <td class="fw-600"><c:out value="${it.skuCode}"/></td>
+                <td class="text-center fw-700"><c:out value="${it.qty}"/></td>
+                <td class="fs-12">
+                  <div class="d-flex flex-column gap-2">
                     <c:forEach var="im" items="${it.imeis}" varStatus="st2">
-                      IMEI <c:out value="${st2.index + 1}"/>: <c:out value="${im}"/><c:if test="${!st2.last}">&#10;</c:if>
+                      <span class="mono-text text-muted">#${st2.index + 1}: ${im}</span>
                     </c:forEach>
                   </div>
                 </td>
-                <td>
+                <td class="text-muted fs-12">
                   <c:choose>
-                    <c:when test="${empty it.itemNote}"><span class="muted">-</span></c:when>
+                    <c:when test="${empty it.itemNote}">—</c:when>
                     <c:otherwise><c:out value="${it.itemNote}"/></c:otherwise>
                   </c:choose>
                 </td>
-                <td><c:out value="${it.createdByName}"/></td>
+                <td class="fs-12 text-muted"><c:out value="${it.createdByName}"/></td>
               </tr>
             </c:forEach>
           </tbody>

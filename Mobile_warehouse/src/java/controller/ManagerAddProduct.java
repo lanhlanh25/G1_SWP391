@@ -8,6 +8,8 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import model.Product;
 
 @WebServlet(name = "ManagerAddProduct", urlPatterns = {"/manager/product/add"})
@@ -39,20 +41,24 @@ public class ManagerAddProduct extends HttpServlet {
 
             ProductCRUDDAO dao = new ProductCRUDDAO();
             if (dao.existsByName(productName)) {
-
                 errors.put("productName", "Product name already exists");
-
                 request.setAttribute("errors", errors);
-
                 keepData(request, null, productName, brandId, model, description, status);
-                request.getRequestDispatcher("/home?p=product-add").forward(request, response);
 
+                request.setAttribute("brands", new BrandDAO().list(null, "active", "name", "ASC", 1, 1000));
+                request.setAttribute("contentPage", "add_product.jsp");
+                request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+                request.getRequestDispatcher("/homepage.jsp").forward(request, response);
                 return;
             }
             if (!errors.isEmpty()) {
                 request.setAttribute("errors", errors);
                 keepData(request, null, productName, brandId, model, description, status);
-                request.getRequestDispatcher("/home?p=product-add").forward(request, response);
+
+                request.setAttribute("brands", new BrandDAO().list(null, "active", "name", "ASC", 1, 1000));
+                request.setAttribute("contentPage", "add_product.jsp");
+                request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+                request.getRequestDispatcher("/homepage.jsp").forward(request, response);
                 return;
             }
 
@@ -77,9 +83,14 @@ public class ManagerAddProduct extends HttpServlet {
 
             request.setAttribute("errors", errors);
 
-            keepData(request, null, productName, brandId, model, description, status);
-
-            request.getRequestDispatcher("/home?p=product-add").forward(request, response);
+            try {
+                request.setAttribute("brands", new BrandDAO().list(null, "active", "name", "ASC", 1, 1000));
+            } catch (Exception ex) {
+                Logger.getLogger(ManagerAddProduct.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            request.setAttribute("contentPage", "add_product.jsp");
+            request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+            request.getRequestDispatcher("/homepage.jsp").forward(request, response);
         }
     }
 

@@ -7,42 +7,56 @@
 <div class="page-wrap-md">
 
   <div class="topbar">
-    <div class="title">Import Request Detail</div>
-    <a class="btn" href="${ctx}/home?p=import-request-list">← Back to List</a>
+    <div class="d-flex align-center gap-12">
+      <h1 class="h1">Import Request Detail</h1>
+    </div>
+    <div class="d-flex gap-8 align-center">
+      <a class="btn btn-outline" href="${ctx}/home?p=import-request-list">← Back to List</a>
+    </div>
   </div>
 
-  <div class="card" style="margin-bottom:14px;">
-    <div class="card-header"><span class="h2">Request Info</span></div>
+  <div class="card mb-16">
     <div class="card-body">
-      <div class="info-grid">
-        <span class="label">Request Code</span>
-        <span><c:out value="${irHeader.requestCode}"/></span>
-
-        <span class="label">Created By</span>
-        <span><c:out value="${irHeader.createdByName}"/></span>
-
-        <span class="label">Request Date</span>
-        <span><fmt:formatDate value="${irHeader.requestDate}" pattern="yyyy-MM-dd HH:mm:ss"/></span>
-
-        <span class="label">Expected Import Date</span>
-        <span><fmt:formatDate value="${irHeader.expectedImportDate}" pattern="yyyy-MM-dd"/></span>
-
-        <span class="label">Status</span>
-        <span><c:out value="${irHeader.status}"/></span>
-      </div>
+      <div class="h2 mb-16">Request Information</div>
+      <table class="table no-border-first">
+        <tbody>
+          <tr>
+            <th style="width:180px;">Request Code</th>
+            <td class="fw-600"><c:out value="${irHeader.requestCode}"/></td>
+          </tr>
+          <tr>
+            <th>Created By</th>
+            <td class="text-muted fs-14"><c:out value="${irHeader.createdByName}"/></td>
+          </tr>
+          <tr>
+            <th>Request Date</th>
+            <td class="text-muted"><fmt:formatDate value="${irHeader.requestDate}" pattern="dd/MM/yyyy HH:mm"/></td>
+          </tr>
+          <tr>
+            <th>Expected Import Date</th>
+            <td class="fw-600 text-primary"><fmt:formatDate value="${irHeader.expectedImportDate}" pattern="dd/MM/yyyy"/></td>
+          </tr>
+          <tr>
+            <th>Status</th>
+            <td>
+              <span class="badge badge-info"><c:out value="${irHeader.status}"/></span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
   <div class="card">
-    <div class="card-header"><span class="h2">Items</span></div>
-    <div class="card-body" style="padding:0;">
+    <div class="card-body">
+      <div class="h2 mb-16">Requested Items</div>
       <table class="table">
         <thead>
           <tr>
-            <th style="width:60px; text-align:center;">No</th>
-            <th>Product Code</th>
+            <th style="width:60px;" class="text-center">#</th>
+            <th style="width:150px;">Code</th>
             <th>SKU</th>
-            <th style="width:140px; text-align:center;">Request Qty</th>
+            <th style="width:140px;" class="text-center">Request Qty</th>
           </tr>
         </thead>
         <tbody>
@@ -51,10 +65,10 @@
           </c:if>
           <c:forEach var="it" items="${irItems}">
             <tr>
-              <td style="text-align:center;">${it.no}</td>
-              <td>${fn:escapeXml(it.productCode)}</td>
-              <td>${fn:escapeXml(it.skuCode)}</td>
-              <td style="text-align:center;">${it.requestQty}</td>
+              <td class="text-center text-muted fs-12">${it.no}</td>
+              <td class="mono-text fs-12">${fn:escapeXml(it.productCode)}</td>
+              <td class="fw-600">${fn:escapeXml(it.skuCode)}</td>
+              <td class="text-center fw-700">${it.requestQty}</td>
             </tr>
           </c:forEach>
         </tbody>

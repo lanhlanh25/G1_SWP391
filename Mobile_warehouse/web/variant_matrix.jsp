@@ -114,7 +114,7 @@
             <%-- Pagination --%>
             <div class="paging-footer">
                 <div class="paging-info">
-                    Showing <b><%= totalItems == 0 ? 0 : (curPage - 1) * 10 + 1 %></b>–<b><%= Math.min(curPage * 10, totalItems) %></b> of <b><%= totalItems %></b> variants
+                    Showing <b><%= totalItems == 0 ? 0 : (curPage - 1) * 10 + 1 %></b>–<b><%= Math.min(curPage * 10, totalItems) %></b> 
                 </div>
                 <div class="paging">
                     <% if (curPage > 1) { %>
@@ -123,7 +123,14 @@
                         <span class="paging-btn disabled">Prev</span>
                     <% } %>
 
-                    <% for (int i = 1; i <= totalPages; i++) { %>
+                    <% 
+                        int start = Math.max(1, curPage - 1);
+                        int end = Math.min(totalPages, start + 2);
+                        if (end == totalPages) {
+                            start = Math.max(1, end - 2);
+                        }
+                        for (int i = start; i <= end; i++) { 
+                    %>
                         <% if (i == curPage) { %>
                             <span class="paging-btn active"><%= i %></span>
                         <% } else { %>

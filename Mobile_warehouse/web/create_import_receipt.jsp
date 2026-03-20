@@ -4,331 +4,27 @@
       <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
         <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-        <style>
-          .ir-wrap {
-            padding: 24px;
-            background: transparent;
-          }
+        <%-- Internal styles moved to app.css --%>
 
-          .ir-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 24px;
-          }
-
-          .ir-header {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            margin-bottom: 20px;
-          }
-
-          .ir-title {
-            font-size: 20px;
-            font-weight: 700;
-            color: var(--text);
-          }
-
-          .ir-err {
-            border: 1px solid #f5c6cb;
-            background: #fdf0f0;
-            border-radius: var(--radius-sm);
-            padding: 10px 14px;
-            margin: 0 0 16px;
-            color: #b91c1c;
-            font-size: 13px;
-            font-weight: 600;
-          }
-
-          .ir-ok {
-            border: 1px solid #b5e8c5;
-            background: #e6f9ed;
-            border-radius: var(--radius-sm);
-            padding: 10px 14px;
-            margin: 0 0 16px;
-            color: #0d6832;
-            font-size: 13px;
-            font-weight: 600;
-          }
-
-          .ir-section-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: .08em;
-            margin: 20px 0 10px;
-          }
-
-          .ir-row {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
-            align-items: flex-start;
-          }
-
-          .ir-row label {
-            min-width: 150px;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-2);
-            padding-top: 8px;
-          }
-
-          .ir-col {
-            flex: 1;
-          }
-
-          .ir-hint {
-            font-size: 11.5px;
-            color: var(--muted);
-            margin-top: 4px;
-          }
-
-          .ir-wrap input[type="text"],
-          .ir-wrap input[type="number"],
-          .ir-wrap input[type="datetime-local"],
-          .ir-wrap select,
-          .ir-wrap textarea {
-            width: 100%;
-            padding: 7px 12px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 13px;
-            font-family: inherit;
-            color: var(--text);
-            background: var(--surface);
-            box-sizing: border-box;
-            transition: border-color .15s;
-          }
-
-          .ir-wrap input:focus,
-          .ir-wrap select:focus,
-          .ir-wrap textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(50, 31, 219, .12);
-          }
-
-          .ir-wrap input[readonly] {
-            background: var(--surface-2);
-            color: var(--muted);
-          }
-
-          .ir-wrap textarea {
-            height: 72px;
-            resize: vertical;
-          }
-
-          .ir-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 0;
-          }
-
-          .ir-tab-btn {
-            padding: 8px 18px;
-            border: none;
-            background: none;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--muted);
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
-            border-radius: 0;
-            transition: color .15s, border-color .15s;
-          }
-
-          .ir-tab-btn.active {
-            color: var(--primary);
-            border-bottom-color: var(--primary);
-          }
-
-          .ir-tab-panel {
-            display: none;
-          }
-
-          .ir-tab-panel.active {
-            display: block;
-          }
-
-          .ir-table {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-            table-layout: fixed;
-            font-size: 13px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            overflow: hidden;
-          }
-
-          .ir-table th,
-          .ir-table td {
-            border-bottom: 1px solid var(--border);
-            padding: 8px 10px;
-            vertical-align: top;
-            overflow: hidden;
-            text-overflow: ellipsis;
-          }
-
-          .ir-table th {
-            background: var(--surface-2);
-            font-weight: 600;
-            color: var(--text-2);
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: .03em;
-            white-space: nowrap;
-          }
-
-          .ir-table tbody tr:last-child td {
-            border-bottom: none;
-          }
-
-          .ir-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 7px 16px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--surface);
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-2);
-            cursor: pointer;
-            text-decoration: none;
-            transition: all .15s;
-          }
-
-          .ir-btn:hover {
-            background: var(--surface-2);
-            text-decoration: none;
-          }
-
-          .ir-btn.primary {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: #fff;
-          }
-
-          .ir-btn.primary:hover {
-            background: var(--primary-2);
-          }
-
-          .ir-btn.danger {
-            background: #fdf0f0;
-            border-color: #f5c6cb;
-            color: #b91c1c;
-          }
-
-          .ir-btn.danger:hover {
-            background: #f8d7da;
-          }
-
-          .ir-btn-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            align-items: center;
-            flex-wrap: wrap;
-          }
-
-          .ir-hint-box {
-            background: var(--primary-light);
-            border: 1px solid var(--primary-border);
-            border-radius: var(--radius-sm);
-            padding: 10px 14px;
-            font-size: 12.5px;
-            color: var(--text-2);
-            margin-bottom: 16px;
-          }
-
-          td.ir-imei-cell {
-            overflow: auto;
-          }
-
-          .ir-imei-box {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            min-width: 200px;
-          }
-
-          .ir-imei-row {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-          }
-
-          .ir-imei-row span {
-            min-width: 52px;
-            font-size: 11.5px;
-            color: var(--muted);
-            white-space: nowrap;
-            font-weight: 600;
-          }
-
-          .ir-imei-row input {
-            flex: 1;
-            min-width: 140px;
-            padding: 5px 8px !important;
-            font-size: 12px !important;
-          }
-
-          .ir-imei-row input.valid {
-            border-color: #2eb85c !important;
-            background: #e6f9ed !important;
-          }
-
-          .ir-imei-row input.invalid {
-            border-color: #e55353 !important;
-            background: #fdf0f0 !important;
-          }
-
-          .center {
-            text-align: center;
-          }
-
-          .ir-code-display {
-            padding: 7px 12px;
-            background: var(--surface-2);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            font-size: 13px;
-            color: var(--muted);
-            min-height: 36px;
-            display: flex;
-            align-items: center;
-            font-weight: 600;
-          }
-        </style>
-
-        <div class="ir-wrap">
-          <div class="ir-card">
-
-            <div class="ir-header">
+        <div class="page-wrap">
+          <div class="topbar">
+            <div class="d-flex align-center gap-12">
               <c:choose>
                 <c:when test="${not empty requestId}">
-                  <a class="ir-btn" href="${ctx}/home?p=import-request-list">← Back</a>
+                  <a class="btn" href="${ctx}/home?p=import-request-list">← Back</a>
                 </c:when>
                 <c:otherwise>
-                  <a class="ir-btn" href="${ctx}/home?p=dashboard">← Back</a>
+                  <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
                 </c:otherwise>
               </c:choose>
-              <div class="ir-title">Create Import Receipt</div>
+              <h1 class="h1">Create Import Receipt</h1>
             </div>
+          </div>
 
+          <div class="card p-24">
             <%-- Source request banner --%>
               <c:if test="${not empty irHeader}">
-                <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px;
-                  padding:10px 16px; margin-bottom:16px; font-size:13px; color:#1e40af;">
+                <div class="alert alert-info mb-16 font-sm">
                   <b>Source Request:</b>
                   <c:out value="${irHeader.requestCode}" />
                   &nbsp;|&nbsp;
@@ -341,21 +37,19 @@
               </c:if>
 
               <c:if test="${not empty err}">
-                <div class="ir-err">${fn:escapeXml(err)}</div>
+                <div class="alert alert-danger mb-16">${fn:escapeXml(err)}</div>
               </c:if>
               <c:if test="${not empty msg}">
-                <div class="ir-ok">${fn:escapeXml(msg)}</div>
+                <div class="alert alert-success mb-16">${fn:escapeXml(msg)}</div>
               </c:if>
 
               <c:set var="isExcel" value="${mode == 'excel'}" />
 
               <%-- Hide mode tabs when coming from a request --%>
                 <c:if test="${empty requestId}">
-                  <div class="ir-tabs">
-                    <button type="button" class="ir-tab-btn ${isExcel ? '' : 'active'}" data-tab="manual">Manual
-                      Entry</button>
-                    <button type="button" class="ir-tab-btn ${isExcel ? 'active' : ''}" data-tab="excel">Upload Excel
-                      With IMEI</button>
+                  <div class="tab-group mb-20">
+                    <button type="button" class="tab-btn ${isExcel ? '' : 'active'}" data-tab="manual">Manual Entry</button>
+                    <button type="button" class="tab-btn ${isExcel ? 'active' : ''}" data-tab="excel">Upload Excel With IMEI</button>
                   </div>
                 </c:if>
 
@@ -367,76 +61,69 @@
                       <input type="hidden" name="requestId" value="${requestId}" />
                     </c:if>
 
-                    <div class="ir-section-title">Import Form</div>
+                    <div class="h2 mb-10 text-muted">Import Form</div>
 
-                    <div class="ir-row">
-                      <label>Import Code (auto)</label>
-                      <div class="ir-col">
-                        <input type="text" name="importCode" value="${fn:escapeXml(importCode)}" readonly />
-                        <div class="ir-hint">Generated by system</div>
+                    <div class="form-grid mb-16">
+                      <div class="label">Import Code (auto)</div>
+                      <div>
+                        <input type="text" class="input readonly" name="importCode" value="${fn:escapeXml(importCode)}" readonly />
+                        <div class="field-hint">Generated by system</div>
                       </div>
-                    </div>
 
-                    <div class="ir-row">
-                      <label>Transaction time</label>
-                      <div class="ir-col">
-                        <input type="datetime-local" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}"
-                          required />
+                      <div class="label">Transaction time</div>
+                      <div>
+                        <input type="datetime-local" class="input" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}" required />
                       </div>
-                    </div>
 
-                    <div class="ir-row">
-                      <label>Supplier <span style="color:#ef4444">*</span></label>
-                      <div class="ir-col">
-                        <select name="supplierId" required>
+                      <div class="label">Supplier <span class="text-danger">*</span></div>
+                      <div>
+                        <select class="select" name="supplierId" required>
                           <option value="" selected disabled>-- Select Supplier --</option>
                           <c:forEach var="s" items="${suppliers}">
                             <option value="${s.id}">${fn:escapeXml(s.name)}</option>
                           </c:forEach>
                         </select>
                       </div>
-                    </div>
 
-                    <div class="ir-row">
-                      <label>Note</label>
-                      <div class="ir-col">
-                        <textarea name="note" placeholder="Notes..."></textarea>
+                      <div class="label">Note</div>
+                      <div>
+                        <textarea class="textarea" name="note" placeholder="Notes..."></textarea>
                       </div>
                     </div>
 
-                    <div class="ir-section-title">Import Items</div>
+                    <div class="h2 mb-10 text-muted">Import Items</div>
 
-                    <div style="overflow-x:auto;">
-                      <table class="ir-table" id="itemsTable">
+                    <div class="table-wrap mb-16">
+                      <table class="table" id="itemsTable">
                         <thead>
                           <tr>
-                            <th style="width:46px" class="center">#</th>
+                            <th style="width:46px" class="text-center">#</th>
                             <th style="width:160px">Product Name</th>
                             <th style="width:140px">Product Code</th>
                             <th style="width:160px">SKU</th>
-                            <th style="width:80px">Quantity</th>
+                            <th style="width:80px" class="text-center">Qty</th>
                             <th style="width:240px">IMEI Numbers</th>
                             <th style="width:130px">Item Note</th>
                             <th style="width:100px">Created By</th>
-                            <th style="width:80px" class="center">Action</th>
+                            <th style="width:80px" class="text-center">Action</th>
                           </tr>
                         </thead>
                         <tbody id="itemsTbody"></tbody>
                       </table>
                     </div>
 
-                    <div style="margin-top:12px;">
-                      <button type="button" class="ir-btn" id="btnAddRow">+ Add Product Line</button>
+                    <div class="mb-20">
+                      <button type="button" class="btn btn-outline" id="btnAddRow">+ Add Product Line</button>
                     </div>
 
-                    <div class="ir-btn-row">
-                      <button type="submit" class="ir-btn primary">Save</button>
+                    <div class="form-actions border-t pt-16 mt-20">
+                      <button type="submit" class="btn btn-primary">Save Receipt</button>
                       <c:choose>
                         <c:when test="${not empty requestId}">
-                          <a class="ir-btn" href="${ctx}/home?p=import-request-list">Cancel</a>
+                          <a class="btn" href="${ctx}/home?p=import-request-list">Cancel</a>
                         </c:when>
                         <c:otherwise>
-                          <a class="ir-btn" href="${ctx}/home?p=import-receipt-list">Cancel</a>
+                          <a class="btn" href="${ctx}/home?p=import-receipt-list">Cancel</a>
                         </c:otherwise>
                       </c:choose>
                     </div>
@@ -449,57 +136,47 @@
                     <form method="post" action="${ctx}/create-import-receipt" enctype="multipart/form-data">
                       <input type="hidden" name="mode" value="excel" />
 
-                      <div class="ir-section-title">Import Form</div>
+                      <div class="h2 mb-10 text-muted">Import Form (Excel)</div>
 
-                      <div class="ir-hint-box">
-                        <b>Excel Format:</b> 3 columns: <b>product_code</b>, <b>sku_code</b>, <b>imei</b> (IMEI 15
-                        digits)
+                      <div class="alert alert-info mb-16 font-sm">
+                        <b>Excel Format:</b> 3 columns: <b>product_code</b>, <b>sku_code</b>, <b>imei</b> (15 digits)
                       </div>
 
-                      <div class="ir-row">
-                        <label>Import Code (auto)</label>
-                        <div class="ir-col">
-                          <input type="text" name="importCode" value="${fn:escapeXml(importCode)}" readonly />
+                      <div class="form-grid mb-16">
+                        <div class="label">Import Code (auto)</div>
+                        <div>
+                          <input type="text" class="input readonly" name="importCode" value="${fn:escapeXml(importCode)}" readonly />
                         </div>
-                      </div>
 
-                      <div class="ir-row">
-                        <label>Excel File (.xlsx)</label>
-                        <div class="ir-col">
-                          <input type="file" name="excelFile" accept=".xlsx" required />
+                        <div class="label">Excel File (.xlsx)</div>
+                        <div>
+                          <input type="file" class="input" name="excelFile" accept=".xlsx" required />
                         </div>
-                      </div>
 
-                      <div class="ir-row">
-                        <label>Transaction time</label>
-                        <div class="ir-col">
-                          <input type="datetime-local" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}"
-                            required />
+                        <div class="label">Transaction time</div>
+                        <div>
+                          <input type="datetime-local" class="input" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}" required />
                         </div>
-                      </div>
 
-                      <div class="ir-row">
-                        <label>Supplier <span style="color:#ef4444">*</span></label>
-                        <div class="ir-col">
-                          <select name="supplierId" required>
+                        <div class="label">Supplier <span class="text-danger">*</span></div>
+                        <div>
+                          <select class="select" name="supplierId" required>
                             <option value="" selected disabled>-- Select Supplier --</option>
                             <c:forEach var="s" items="${suppliers}">
                               <option value="${s.id}">${fn:escapeXml(s.name)}</option>
                             </c:forEach>
                           </select>
                         </div>
-                      </div>
 
-                      <div class="ir-row">
-                        <label>Note</label>
-                        <div class="ir-col">
-                          <textarea name="note" placeholder="Notes..."></textarea>
+                        <div class="label">Note</div>
+                        <div>
+                          <textarea class="textarea" name="note" placeholder="Notes..."></textarea>
                         </div>
                       </div>
 
-                      <div class="ir-btn-row">
-                        <button type="submit" class="ir-btn primary">Import with Excel</button>
-                        <a class="ir-btn" href="${ctx}/home?p=import-receipt-list">Cancel</a>
+                      <div class="form-actions border-t pt-16 mt-20">
+                        <button type="submit" class="btn btn-primary">Import with Excel</button>
+                        <a class="btn" href="${ctx}/home?p=import-receipt-list">Cancel</a>
                       </div>
                     </form>
                   </div>
@@ -513,13 +190,13 @@
             // PRODUCTS: id, code, name
             const PRODUCTS = [
               <c:forEach var="p" items="${products}" varStatus="st">
-                {id: ${p.productId}, code: "${fn:escapeXml(p.productCode)}", name: "${fn:escapeXml(p.productName)}" }<c:if test="${!st.last}">,</c:if>
+                { id: "${p.productId}", code: "${fn:escapeXml(p.productCode)}", name: "${fn:escapeXml(p.productName)}" }${!st.last ? ',' : ''}
               </c:forEach>
             ];
 
             const SKUS = [
               <c:forEach var="k" items="${skus}" varStatus="st">
-                {id: ${k.skuId}, code: "${fn:escapeXml(k.skuCode)}", productId: ${k.productId} }<c:if test="${!st.last}">,</c:if>
+                { id: "${k.skuId}", code: "${fn:escapeXml(k.skuCode)}", productId: "${k.productId}" }${!st.last ? ',' : ''}
               </c:forEach>
             ];
 
@@ -527,13 +204,13 @@
             const REQUEST_ITEMS = [
               <c:forEach var="it" items="${requestItems}" varStatus="st">
                 {
-                  productId:   ${it.productId},
-                productCode: "${fn:escapeXml(it.productCode)}",
-                productName: "${fn:escapeXml(it.productName)}",
-                skuId:       ${it.skuId},
-                skuCode:     "${fn:escapeXml(it.skuCode)}",
-                qty:         ${it.requestQty}
-      }<c:if test="${!st.last}">,</c:if>
+                  productId: "${it.productId}",
+                  productCode: "${fn:escapeXml(it.productCode)}",
+                  productName: "${fn:escapeXml(it.productName)}",
+                  skuId: "${it.skuId}",
+                  skuCode: "${fn:escapeXml(it.skuCode)}",
+                  qty: ${it.requestQty}
+                }${!st.last ? ',' : ''}
               </c:forEach>
             ];
 
@@ -585,7 +262,7 @@
 
             function buildCodeDisplay(prefillCode) {
               const div = document.createElement("div");
-              div.className = "ir-code-display";
+              div.className = "mono-text text-sm text-muted";
               div.textContent = prefillCode || "—";
               return div;
             }
@@ -649,6 +326,7 @@
                 input.placeholder = "15 digits";
                 input.required = true;
                 input.maxLength = 15;
+                input.className = "input";
                 input.addEventListener("input", function () {
                   this.value = this.value.replace(/\D/g, "").slice(0, 15);
                   if (this.value.length === 15) {
@@ -759,12 +437,9 @@
               const tdAct = document.createElement("td");
               tdAct.className = "center";
               if (!IS_REQUEST_MODE) {
-                const delBtn = document.createElement("button");
                 delBtn.type = "button";
-                delBtn.className = "ir-btn danger";
+                delBtn.className = "btn btn-sm btn-danger";
                 delBtn.textContent = "Delete";
-                delBtn.style.fontSize = "12px";
-                delBtn.style.padding = "5px 10px";
                 delBtn.addEventListener("click", function () {
                   tr.remove();
                   Array.from(tbody.children).forEach((row, idx) => {
@@ -797,10 +472,10 @@
             });
 
             // Tabs (only in manual mode — tabs are hidden in request mode)
-            document.querySelectorAll('.ir-tab-btn').forEach(btn => {
+            document.querySelectorAll('.tab-btn').forEach(btn => {
               btn.addEventListener('click', function () {
                 const tab = this.dataset.tab;
-                document.querySelectorAll('.ir-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 document.querySelectorAll('.ir-tab-panel').forEach(p => p.classList.remove('active'));
                 document.getElementById('tab-' + tab).classList.add('active');

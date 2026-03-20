@@ -15,16 +15,16 @@
 
 <div class="page-wrap-md">
     <div class="topbar">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <a class="btn" href="<%=request.getContextPath()%>/home?p=role-list">← Back</a>
+        <div class="d-flex align-center gap-12">
             <h1 class="h1">Role Detail</h1>
         </div>
 
-        <div>
+        <div class="d-flex gap-8 align-center">
             <a class="btn btn-primary"
                href="<%=request.getContextPath()%>/home?p=role-permissions&roleId=<%=roleId%>">
                 Update Permissions
             </a>
+            <a class="btn btn-outline" href="<%=request.getContextPath()%>/home?p=role-list">← Back</a>
         </div>
     </div>
 
@@ -38,14 +38,16 @@
 
     <div class="card">
         <div class="card-body">
-            <div class="h1" style="font-size:28px; margin-bottom:6px;"><%= roleName %></div>
-            <div class="h2" style="margin-bottom:16px;">Permissions</div>
+            <div class="h2 mb-4 uppercase text-muted fs-12">Role Name</div>
+            <div class="h1 mb-24"><%= roleName %></div>
+            
+            <div class="h2 mb-12">Assigned Permissions</div>
 
             <table class="table">
                 <thead>
                     <tr>
-                        <th style="width:100px;">Status</th>
-                        <th>Permission</th>
+                        <th style="width:120px;" class="text-center">Status</th>
+                        <th>Permission Name</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -60,8 +62,8 @@
                             for (Permission p : rolePerms) {
                     %>
                     <tr>
-                        <td style="text-align:center;">
-                            <span class="badge badge-active">✓ Active</span>
+                        <td class="text-center">
+                            <span class="badge badge-active">Active</span>
                         </td>
                         <td><%= p.getName() %></td>
                     </tr>

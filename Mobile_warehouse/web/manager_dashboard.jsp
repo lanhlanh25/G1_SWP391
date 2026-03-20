@@ -9,10 +9,10 @@
 
 <div class="page-wrap-md manager-dashboard">
 
-    <div class="topbar">
+    <div class="topbar mb-20">
         <div>
-            <div class="title">Manager Dashboard</div>
-            <div class="small">Review approvals, monitor stock risks, and track warehouse operations.</div>
+            <h1 class="h1 m-0">Manager Dashboard</h1>
+<!--            <div class="small muted">Review approvals, monitor stock risks, and track warehouse operations.</div>-->
         </div>
         
     </div>
@@ -47,36 +47,27 @@
     </section>
 
     <!-- Inventory Summary (month-to-date) -->
-    <section class="kpi-grid" style="margin-bottom:20px;">
-        <div class="card kpi-card" style="border-left:4px solid #64748b;">
+    <section class="kpi-grid mb-20">
+        <div class="card kpi-card border-l-muted">
             <div class="kpi-label">Opening Stock</div>
-            <div class="kpi-value" style="color:#475569;">${invTotalOpening}</div>
+            <div class="kpi-value text-muted">${invTotalOpening}</div>
             <div class="kpi-note">${invMonthLabel} — beginning</div>
         </div>
-        <div class="card kpi-card" style="border-left:4px solid #22c55e;">
+        <div class="card kpi-card border-l-success">
             <div class="kpi-label">Total Import</div>
-            <div class="kpi-value" style="color:#16a34a;">+${invTotalImport}</div>
+            <div class="kpi-value text-success">+${invTotalImport}</div>
             <div class="kpi-note">Confirmed receipts</div>
         </div>
-        <div class="card kpi-card" style="border-left:4px solid #f59e0b;">
+        <div class="card kpi-card border-l-warning">
             <div class="kpi-label">Total Export</div>
-            <div class="kpi-value" style="color:#d97706;">-${invTotalExport}</div>
+            <div class="kpi-value text-warning">-${invTotalExport}</div>
             <div class="kpi-note">Issued in period</div>
         </div>
-        <div class="card kpi-card" style="border-left:4px solid #3b82f6;">
+        <div class="card kpi-card border-l-primary">
             <div class="kpi-label">Closing Stock</div>
-            <div class="kpi-value" style="color:#2563eb;">${invTotalClosing}</div>
+            <div class="kpi-value text-primary">${invTotalClosing}</div>
             <div class="kpi-note">Current on-hand</div>
         </div>
-            <%--<div class="card kpi-card" style="border-left:4px solid #a855f7; grid-column: span 1;">
-            <div class="kpi-label">View Full Report</div>
-            <div class="kpi-value" style="font-size:14px; font-weight:500; margin-top:8px;">
-                <a href="<%=ctx%>/inventory-report" class="btn btn-outline" style="width:100%; text-align:center;">
-                    Inventory Report
-                </a>
-            </div>
-            <div class="kpi-note">${invMonthLabel}</div>
-        </div>--%>
     </section>
 
     <section class="dashboard-main">
@@ -100,7 +91,7 @@
             </div>
 
             <div class="card-body">
-                <div class="tab-group" style="margin-bottom:14px;">
+                <div class="tab-group mb-12">
                     <button type="button"
                             class="tab-btn <%= "import".equals(approvalType) ? "active" : "" %>"
                             data-target="import">
@@ -236,7 +227,7 @@
                 <a href="<%=ctx%>/home?p=low-stock-report" class="link-lite">View All &gt;</a>
             </div>
 
-            <div class="card-body" style="padding-top:0;">
+            <div class="card-body p-0">
                 <div class="table-wrap">
                     <table class="table">
                         <thead>
@@ -308,7 +299,7 @@
                     <div class="card-subtitle">Latest import and export transactions.</div>
                 </div>
             </div>
-            <div class="card-body" style="padding-top:0;">
+            <div class="card-body p-0">
                 <div class="table-wrap">
                     <table class="table">
                         <thead>

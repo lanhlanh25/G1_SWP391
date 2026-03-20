@@ -58,11 +58,11 @@ public class ProductCRUDDAO {
 
     public boolean existsByName(String name) throws Exception {
 
-        String sql = "SELECT 1 FROM products WHERE product_name = ? LIMIT 1";
+        String sql = "SELECT 1 FROM products WHERE LOWER(product_name) = LOWER(?) LIMIT 1";
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setString(1, name);
+            ps.setString(1, name == null ? "" : name.trim());
 
             ResultSet rs = ps.executeQuery();
 

@@ -121,6 +121,38 @@ public class ProductSkuDAO {
         return list;
     }
 
+    public ProductSku getSkuById(int skuId) {
+        String sql = """
+        SELECT sku_id, product_id, sku_code, color, ram_gb, storage_gb,
+               price, supplier_id, status, created_at, updated_at
+        FROM product_skus
+        WHERE sku_id = ?
+    """;
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, skuId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                ProductSku sku = new ProductSku();
+                sku.setSkuId(rs.getInt("sku_id"));
+                sku.setProductId(rs.getInt("product_id"));
+                sku.setSkuCode(rs.getString("sku_code"));
+                sku.setColor(rs.getString("color"));
+                sku.setRamGb(rs.getInt("ram_gb"));
+                sku.setStorageGb(rs.getInt("storage_gb"));
+                sku.setPrice(rs.getDouble("price"));
+                sku.setSupplierId(rs.getInt("supplier_id"));
+                sku.setStatus(rs.getString("status"));
+                sku.setCreatedAt(rs.getTimestamp("created_at"));
+                sku.setUpdatedAt(rs.getTimestamp("updated_at"));
+                return sku;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public List<ProductSku> getSkusByProductId(int productId) {
         List<ProductSku> list = new ArrayList<>();
 
@@ -192,7 +224,7 @@ public class ProductSkuDAO {
     }
 
     public boolean existsSkuCode(String skuCode) throws Exception {
-        String sql = "SELECT 1 FROM product_skus WHERE sku_code=? LIMIT 1";
+        String sql = "SELECT 1 FROM product_skus WHERE LOWER(sku_code)=LOWER(?) LIMIT 1";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setString(1, skuCode == null ? "" : skuCode.trim());
             try (ResultSet rs = ps.executeQuery()) {
@@ -201,14 +233,54 @@ public class ProductSkuDAO {
         }
     }
 
+    public boolean existsSkuCodeOther(String skuCode, int currentSkuId) throws Exception {
+        String sql = "SELECT 1 FROM product_skus WHERE LOWER(sku_code)=LOWER(?) AND sku_id <> ? LIMIT 1";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, skuCode == null ? "" : skuCode.trim());
+            ps.setInt(2, currentSkuId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    public void updateSku(int skuId, String skuCode, String color, int ramGb, int storageGb, String status) throws Exception {
+        String sql = "UPDATE product_skus SET sku_code = ?, color = ?, ram_gb = ?, storage_gb = ?, status = ?, updated_at = NOW() WHERE sku_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, skuCode);
+            ps.setString(2, color);
+            ps.setInt(3, ramGb);
+            ps.setInt(4, storageGb);
+            ps.setString(5, status);
+            ps.setInt(6, skuId);
+            ps.executeUpdate();
+        }
+    }
+
     public boolean existsVariant(long productId, String color, int ramGb, int storageGb) throws Exception {
-        String sql = "SELECT 1 FROM product_skus WHERE product_id=? AND color=? AND ram_gb=? AND storage_gb=? LIMIT 1";
+        String sql = "SELECT 1 FROM product_skus WHERE product_id=? AND LOWER(color)=LOWER(?) AND ram_gb=? AND storage_gb=? LIMIT 1";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setLong(1, productId);
             ps.setString(2, color == null ? null : color.trim());
             ps.setInt(3, ramGb);
             ps.setInt(4, storageGb);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+    
+    public boolean existsVariantOther(long productId, String color, int ramGb, int storageGb, int currentSkuId) throws Exception {
+        String sql = "SELECT 1 FROM product_skus WHERE product_id=? AND LOWER(color)=LOWER(?) AND ram_gb=? AND storage_gb=? AND sku_id <> ? LIMIT 1";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+            ps.setString(2, color == null ? null : color.trim());
+            ps.setInt(3, ramGb);
+            ps.setInt(4, storageGb);
+            ps.setInt(5, currentSkuId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();

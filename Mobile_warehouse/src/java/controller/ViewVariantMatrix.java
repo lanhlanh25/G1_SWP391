@@ -55,12 +55,15 @@ public class ViewVariantMatrix {
         // --- Filter dropdowns ---
         List<ProductSku> allSkus = dao.getAllSkus();
 
-        Set<String> colors = new LinkedHashSet<>();
-        Set<Integer> storages = new LinkedHashSet<>();
-        Set<Integer> rams = new LinkedHashSet<>();
+        // Use TreeSet for automatic sorting and case-insensitive uniqueness
+        Set<String> colors = new java.util.TreeSet<>(String.CASE_INSENSITIVE_ORDER);
+        Set<Integer> storages = new java.util.TreeSet<>();
+        Set<Integer> rams = new java.util.TreeSet<>();
 
         for (ProductSku s : allSkus) {
-            colors.add(s.getColor());
+            if (s.getColor() != null && !s.getColor().trim().isEmpty()) {
+                colors.add(s.getColor().trim());
+            }
             storages.add(s.getStorageGb());
             rams.add(s.getRamGb());
         }

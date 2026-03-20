@@ -3,236 +3,182 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<style>
-  .ec-page {
-    display: grid;
-    gap: 16px;
-  }
-
-  .ec-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 14px 16px;
-  }
-
-  .ec-grid .span-2 {
-    grid-column: span 2;
-  }
-
-  .ec-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 8px;
-  }
-
-  .ec-box {
-    padding: 16px 18px;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    background: var(--surface);
-    box-shadow: var(--shadow);
-  }
-
-  .ec-kv {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 8px 14px;
-  }
-
-  .ec-kv div:nth-child(odd) {
-    color: var(--muted);
-    font-weight: 700;
-  }
-
-  .ec-note {
-    margin-top: 6px;
-    color: var(--muted);
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  @media (max-width: 900px) {
-    .ec-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .ec-grid .span-2 {
-      grid-column: span 1;
-    }
-
-    .ec-kv {
-      grid-template-columns: 1fr;
-    }
-  }
-</style>
-
-<div class="container page-wrap ec-page">
+<div class="page-wrap ec-page">
 
   <div class="topbar">
-    <div>
-      <div class="title">Report Export Center</div>
-      <div class="small">Preview and export reports to Excel or PDF from one shared screen.</div>
+    <div class="d-flex align-center gap-12">
+      <div>
+        <h1 class="h1">Export Center</h1>
+        <div class="text-muted fs-13">Preview and export consolidated reports to Excel or PDF</div>
+      </div>
+    </div>
+    <div class="d-flex gap-8 align-center">
+      <a class="btn btn-outline" href="${ctx}/home?p=dashboard">← Dashboard</a>
     </div>
   </div>
 
   <c:if test="${not empty err}">
-    <div class="msg-err">${fn:escapeXml(err)}</div>
+    <div class="msg-err mb-16">${fn:escapeXml(err)}</div>
   </c:if>
 
   <c:if test="${not empty msg}">
-    <div class="msg-ok">${fn:escapeXml(msg)}</div>
+    <div class="msg-ok mb-16">${fn:escapeXml(msg)}</div>
   </c:if>
 
-  <div class="card card-body">
-    <form method="get" action="${ctx}/export-center">
-      <div class="ec-grid">
+  <div class="card mb-16">
+    <div class="card-body">
+      <form method="get" action="${ctx}/export-center">
+        <div class="grid-12 gap-16 align-end">
 
-        <div class="field">
-          <label>Report Type</label>
-          <select class="select" name="reportType" id="reportType">
-            <option value="inventory" ${reportType == 'inventory' ? 'selected' : ''}>Inventory Report</option>
-            <option value="import" ${reportType == 'import' ? 'selected' : ''}>Import Report</option>
-            <option value="export" ${reportType == 'export' ? 'selected' : ''}>Export Report</option>
-            <option value="brand-statistic" ${reportType == 'brand-statistic' ? 'selected' : ''}>Brand Statistic</option>
-            <option value="low-stock" ${reportType == 'low-stock' ? 'selected' : ''}>Low Stock Report</option>
-          </select>
+          <div class="col-3">
+            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Report Type</label>
+            <select class="select" name="reportType" id="reportType">
+              <option value="inventory" ${reportType == 'inventory' ? 'selected' : ''}>Inventory Report</option>
+              <option value="import" ${reportType == 'import' ? 'selected' : ''}>Import Report</option>
+              <option value="export" ${reportType == 'export' ? 'selected' : ''}>Export Report</option>
+              <option value="brand-statistic" ${reportType == 'brand-statistic' ? 'selected' : ''}>Brand Statistic</option>
+              <option value="low-stock" ${reportType == 'low-stock' ? 'selected' : ''}>Low Stock Report</option>
+            </select>
+          </div>
+
+          <div class="col-3" id="brandWrap">
+            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Brand</label>
+            <select class="select" name="brandId" id="brandId">
+              <option value="">All Brands</option>
+              <c:forEach items="${allBrands}" var="b">
+                <option value="${b.brandId}" ${brandId == b.brandId || brandId == b.brandId.toString() ? 'selected' : ''}>
+                  ${b.brandName}
+                </option>
+              </c:forEach>
+            </select>
+          </div>
+
+          <div class="col-3" id="fromWrap">
+            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Date From</label>
+            <input class="input" type="date" name="from" value="${from}" />
+          </div>
+
+          <div class="col-3" id="toWrap">
+            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Date To</label>
+            <input class="input" type="date" name="to" value="${to}" />
+          </div>
+
+          <div class="col-6" id="keywordWrap">
+            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Search Product</label>
+            <input class="input" type="text" name="keyword" value="${keyword}" placeholder="Product name or code..." />
+          </div>
+
+          <div class="col-3" id="ropStatusWrap">
+            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">ROP Status Filter</label>
+            <select class="select" name="ropStatus" id="ropStatus">
+              <option value="" ${empty ropStatus ? 'selected' : ''}>All Below ROP</option>
+              <option value="Out Of Stock" ${ropStatus == 'Out Of Stock' ? 'selected' : ''}>Out Of Stock</option>
+              <option value="Reorder Needed" ${ropStatus == 'Reorder Needed' ? 'selected' : ''}>Reorder Needed</option>
+              <option value="At ROP Level" ${ropStatus == 'At ROP Level' ? 'selected' : ''}>At ROP Level</option>
+              <option value="OK" ${ropStatus == 'OK' ? 'selected' : ''}>OK</option>
+            </select>
+          </div>
+
+          <div class="col-2">
+            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Export Format</label>
+            <select class="select" name="format" id="format">
+              <option value="xlsx" ${format == 'xlsx' ? 'selected' : ''}>Excel (.xlsx)</option>
+              <option value="pdf" ${format == 'pdf' ? 'selected' : ''}>Adobe PDF (.pdf)</option>
+            </select>
+          </div>
+
+          <div class="col-2">
+            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Detail Level</label>
+            <select class="select" name="detailLevel" id="detailLevel">
+              <option value="summary" ${detailLevel == 'summary' ? 'selected' : ''}>Summary</option>
+              <option value="detail" ${detailLevel == 'detail' ? 'selected' : ''}>Detail</option>
+            </select>
+          </div>
+
+          <div class="col-2" id="pdfOrientationWrap">
+            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">PDF Orientation</label>
+            <select class="select" name="pdfOrientation" id="pdfOrientation">
+              <option value="portrait" ${pdfOrientation == 'portrait' ? 'selected' : ''}>Portrait</option>
+              <option value="landscape" ${pdfOrientation == 'landscape' ? 'selected' : ''}>Landscape</option>
+            </select>
+          </div>
+
+          <div class="col-6 d-flex gap-8">
+            <button class="btn btn-outline" type="submit" name="action" value="preview">Preview Data</button>
+            <button class="btn btn-primary" type="submit" name="action" value="export">Export File</button>
+            <a class="btn btn-outline" href="${ctx}/home?p=export-center">Reset</a>
+          </div>
         </div>
-
-        <div class="field" id="brandWrap">
-          <label>Brand</label>
-          <select class="select" name="brandId" id="brandId">
-            <option value="">All Brands</option>
-            <c:forEach items="${allBrands}" var="b">
-              <option value="${b.brandId}" ${brandId == b.brandId || brandId == b.brandId.toString() ? 'selected' : ''}>
-                ${b.brandName}
-              </option>
-            </c:forEach>
-          </select>
-          <div class="ec-note">Used for Inventory Report, Brand Statistic, and Low Stock Report.</div>
-        </div>
-
-        <div class="field" id="fromWrap">
-          <label>Date From</label>
-          <input class="input" type="date" name="from" value="${from}" />
-        </div>
-
-        <div class="field" id="toWrap">
-          <label>Date To</label>
-          <input class="input" type="date" name="to" value="${to}" />
-        </div>
-
-        <div class="field span-2" id="keywordWrap">
-          <label>Search Product</label>
-          <input class="input" type="text" name="keyword" value="${keyword}" placeholder="Enter product name or code" />
-          <div class="ec-note">Used mainly for Inventory Report.</div>
-        </div>
-
-        <div class="field" id="ropStatusWrap">
-          <label>ROP Status</label>
-          <select class="select" name="ropStatus" id="ropStatus">
-            <option value="" ${empty ropStatus ? 'selected' : ''}>All Below ROP</option>
-            <option value="Out Of Stock" ${ropStatus == 'Out Of Stock' ? 'selected' : ''}>Out Of Stock</option>
-            <option value="Reorder Needed" ${ropStatus == 'Reorder Needed' ? 'selected' : ''}>Reorder Needed</option>
-            <option value="At ROP Level" ${ropStatus == 'At ROP Level' ? 'selected' : ''}>At ROP Level</option>
-            <option value="OK" ${ropStatus == 'OK' ? 'selected' : ''}>OK</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Format</label>
-          <select class="select" name="format" id="format">
-            <option value="xlsx" ${format == 'xlsx' ? 'selected' : ''}>Excel (.xlsx)</option>
-            <option value="pdf" ${format == 'pdf' ? 'selected' : ''}>PDF</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Detail Level</label>
-          <select class="select" name="detailLevel" id="detailLevel">
-            <option value="summary" ${detailLevel == 'summary' ? 'selected' : ''}>Summary</option>
-            <option value="detail" ${detailLevel == 'detail' ? 'selected' : ''}>Detail</option>
-          </select>
-        </div>
-
-        <div class="field" id="pdfOrientationWrap">
-          <label>PDF Orientation</label>
-          <select class="select" name="pdfOrientation" id="pdfOrientation">
-            <option value="portrait" ${pdfOrientation == 'portrait' ? 'selected' : ''}>Portrait</option>
-            <option value="landscape" ${pdfOrientation == 'landscape' ? 'selected' : ''}>Landscape</option>
-          </select>
-          <div class="ec-note">Only applies when Format = PDF. Preview is data-only.</div>
-        </div>
-      </div>
-
-      <div class="ec-actions">
-        <a class="btn btn-outline" href="${ctx}/home?p=export-center">Reset</a>
-        <button class="btn" type="submit" name="action" value="preview">Preview Data</button>
-        <button class="btn btn-primary" type="submit" name="action" value="export">Export Now</button>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 
   <c:if test="${not empty previewTitle}">
-    <div class="card card-body">
-      <div class="h2">${previewTitle}</div>
-      <div class="card-subtitle">Preview shows report data only. Final PDF layout may differ.</div>
-
-      <div style="height:12px;"></div>
-
-      <div class="ec-box">
-        <div class="h2" style="font-size:15px; margin-bottom:10px;">Applied Filters</div>
-        <div class="ec-kv">
-          <c:forEach items="${filterLines}" var="entry">
-            <div>${entry.key}</div>
-            <div>${entry.value}</div>
-          </c:forEach>
+    <div class="card">
+      <div class="card-body">
+        <div class="d-flex justify-between align-center mb-16">
+            <div>
+                <div class="h2">${previewTitle}</div>
+                <div class="text-muted fs-13">Data-only preview. Final document styling may differ.</div>
+            </div>
         </div>
-      </div>
 
-      <div style="height:14px;"></div>
-
-      <div class="ec-box">
-        <div class="h2" style="font-size:15px; margin-bottom:10px;">Summary</div>
-        <div class="ec-kv">
-          <c:forEach items="${summaryLines}" var="entry">
-            <div>${entry.key}</div>
-            <div>${entry.value}</div>
-          </c:forEach>
+        <div class="grid-12 gap-16 mb-20">
+            <div class="col-6">
+                <div class="p-16 bg-surface-2 border-radius" style="border: 1px solid var(--border);">
+                    <div class="fw-700 fs-12 uppercase mb-8 text-primary">Applied Filters</div>
+                    <div class="grid-12 gap-8">
+                        <c:forEach items="${filterLines}" var="entry">
+                            <div class="col-4 fs-12 text-muted">${entry.key}</div>
+                            <div class="col-8 fs-12 fw-600 text-right">${entry.value}</div>
+                        </c:forEach>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="p-16 bg-surface-2 border-radius" style="border: 1px solid var(--border);">
+                    <div class="fw-700 fs-12 uppercase mb-8 text-primary">Report Summary</div>
+                    <div class="grid-12 gap-8">
+                        <c:forEach items="${summaryLines}" var="entry">
+                            <div class="col-6 fs-12 text-muted">${entry.key}</div>
+                            <div class="col-6 fs-12 fw-700 text-right text-primary">${entry.value}</div>
+                        </c:forEach>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
 
-      <div style="height:14px;"></div>
-
-      <div class="table-wrap">
-        <table class="table">
-          <thead>
-            <tr>
-              <c:forEach items="${previewHeaders}" var="h">
-                <th>${h}</th>
-              </c:forEach>
-            </tr>
-          </thead>
-          <tbody>
-            <c:choose>
-              <c:when test="${empty previewRows}">
-                <tr>
-                  <td colspan="${fn:length(previewHeaders)}" class="empty-row">No data</td>
-                </tr>
-              </c:when>
-              <c:otherwise>
-                <c:forEach items="${previewRows}" var="row">
-                  <tr>
-                    <c:forEach items="${row}" var="cell">
-                      <td>${cell}</td>
-                    </c:forEach>
-                  </tr>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <c:forEach items="${previewHeaders}" var="h">
+                  <th>${h}</th>
                 </c:forEach>
-              </c:otherwise>
-            </c:choose>
-          </tbody>
-        </table>
+              </tr>
+            </thead>
+            <tbody>
+              <c:choose>
+                <c:when test="${empty previewRows}">
+                  <tr>
+                    <td colspan="${fn:length(previewHeaders)}">
+                        <div class="p-40 text-center text-muted">No data found for these criteria.</div>
+                    </td>
+                  </tr>
+                </c:when>
+                <c:otherwise>
+                  <c:forEach items="${previewRows}" var="row">
+                    <tr>
+                      <c:forEach items="${row}" var="cell">
+                        <td>${cell}</td>
+                      </c:forEach>
+                    </tr>
+                  </c:forEach>
+                </c:otherwise>
+              </c:choose>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </c:if>

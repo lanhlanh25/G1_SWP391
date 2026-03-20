@@ -81,7 +81,9 @@ public class ManagerAddSku extends HttpServlet {
             if (!errors.isEmpty()) {
                 request.setAttribute("errors", errors);
                 request.setAttribute("products", new ProductDAO().listForSkuSelect());
-                request.getRequestDispatcher("/add_sku.jsp").forward(request, response);
+                request.setAttribute("contentPage", "add_sku.jsp");
+                request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+                request.getRequestDispatcher("/homepage.jsp").forward(request, response);
                 return;
             }
 
@@ -98,7 +100,9 @@ public class ManagerAddSku extends HttpServlet {
             if (!errors.isEmpty()) {
                 request.setAttribute("errors", errors);
                 request.setAttribute("products", new ProductDAO().listForSkuSelect());
-                request.getRequestDispatcher("/add_sku.jsp").forward(request, response);
+                request.setAttribute("contentPage", "add_sku.jsp");
+                request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+                request.getRequestDispatcher("/homepage.jsp").forward(request, response);
                 return;
             }
 

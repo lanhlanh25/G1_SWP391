@@ -92,6 +92,7 @@ public class View_List_Imei extends HttpServlet {
             request.setAttribute("pageNumber", page);
             request.setAttribute("pageSize", pageSize);
             request.setAttribute("totalPages", totalPages);
+            request.setAttribute("totalItems", totalItems);
 
             request.setAttribute("sidebarPage", resolveSidebar(role));
             request.setAttribute("contentPage", "view_imei_list.jsp");
