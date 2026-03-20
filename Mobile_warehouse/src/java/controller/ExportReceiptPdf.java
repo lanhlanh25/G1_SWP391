@@ -1,25 +1,22 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-/**
- *
- * @author Admin
- */
 package controller;
 
+import dal.DBContext;
 import dal.ExportReceiptDAO;
+import dal.ReportRequestDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import model.ExportReceiptDetailHeader;
 import model.ExportReceiptDetailLine;
+import model.User;
 
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -33,17 +30,15 @@ import org.openpdf.text.pdf.draw.LineSeparator;
 @WebServlet(name = "ExportReceiptPdf", urlPatterns = {"/export-receipt-pdf"})
 public class ExportReceiptPdf extends HttpServlet {
 
-    // ===== Company Info =====
-    private static final String COMPANY_NAME    = "DTLA Mobile Warehouse Management";
+    private static final String COMPANY_NAME = "DTLA Mobile Warehouse Management";
     private static final String COMPANY_ADDRESS = "1 Meta Way (formerly 1 Hacker Way), Menlo Park, California 94025, USA";
     private static final String COMPANY_CONTACT = "Phone: 0965298768  |  Email: minhduchoang2410@gmail.com";
 
-    private static final DateTimeFormatter UI_DTF  = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final DateTimeFormatter RPT_DTF = DateTimeFormatter.ofPattern("yyMMddHHmmss");
+    private static final DateTimeFormatter UI_DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
-    // ===== Footer =====
     private static class ReceiptFooter extends PdfPageEventHelper {
         private final Font f = new Font(Font.HELVETICA, 8, Font.NORMAL);
+
         @Override
         public void onEndPage(PdfWriter writer, Document document) {
             try {
@@ -55,30 +50,74 @@ public class ExportReceiptPdf extends HttpServlet {
                 c.setHorizontalAlignment(Element.ALIGN_CENTER);
                 footer.addCell(c);
                 footer.writeSelectedRows(0, -1, document.left(), document.bottom() - 10, writer.getDirectContent());
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String idRaw = req.getParameter("id");
-        if (idRaw == null || idRaw.isBlank()) { resp.sendError(400, "Missing id"); return; }
+        if (idRaw == null || idRaw.isBlank()) {
+            resp.sendError(400, "Missing id");
+            return;
+        }
 
         long exportId;
-        try { exportId = Long.parseLong(idRaw.trim()); }
-        catch (Exception e) { resp.sendError(400, "Invalid id"); return; }
+        try {
+            exportId = Long.parseLong(idRaw.trim());
+        } catch (Exception e) {
+            resp.sendError(400, "Invalid id");
+            return;
+        }
 
         ExportReceiptDAO dao = new ExportReceiptDAO();
         ExportReceiptDetailHeader header = dao.getDetailHeader(exportId);
         List<ExportReceiptDetailLine> lines = dao.getDetailLines(exportId);
 
-        if (header == null) { resp.sendError(404, "Export receipt not found"); return; }
+        if (header == null) {
+            resp.sendError(404, "Export receipt not found");
+            return;
+        }
 
-        String fileName = "export-receipt-" + safe(header.getExportCode()) + ".pdf";
-        String encoded  = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
+        String reportCode;
+        String fileName;
+
+        try (Connection con = DBContext.getConnection()) {
+            HttpSession session = req.getSession(false);
+            User u = (session == null) ? null : (User) session.getAttribute("authUser");
+            if (u == null) {
+                resp.sendRedirect(req.getContextPath() + "/login");
+                return;
+            }
+
+            dal.CodeGeneratorDAO codeDAO = new dal.CodeGeneratorDAO();
+            ReportRequestDAO reportDAO = new ReportRequestDAO();
+
+            reportCode = codeDAO.generateReportCode(con);
+            fileName = "export_receipt_" + reportCode + ".pdf";
+
+            reportDAO.createGeneratedReport(
+                    con,
+                    reportCode,
+                    "IMPORT_EXPORT",
+                    null,
+                    null,
+                    u.getUserId(),
+                    fileName,
+                    "Export receipt PDF - export_id=" + exportId
+            );
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
+
+        String encoded = URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
 
         resp.setContentType("application/pdf");
-        resp.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encoded);
+        resp.setHeader(
+                "Content-Disposition",
+                "attachment; filename=\"" + fileName + "\"; filename*=UTF-8''" + encoded
+        );
 
         Document doc = new Document(PageSize.A4, 36, 36, 36, 50);
 
@@ -86,23 +125,25 @@ public class ExportReceiptPdf extends HttpServlet {
             PdfWriter writer = PdfWriter.getInstance(doc, resp.getOutputStream());
             writer.setPageEvent(new ReceiptFooter());
             doc.open();
-            writePdf(doc, header, lines);
+            writePdf(doc, header, lines, reportCode);
         } catch (Exception e) {
             throw new ServletException(e);
         } finally {
-            if (doc.isOpen()) doc.close();
+            if (doc.isOpen()) {
+                doc.close();
+            }
         }
     }
 
-    private void writePdf(Document doc, ExportReceiptDetailHeader h, List<ExportReceiptDetailLine> lines)
-            throws DocumentException {
+    private void writePdf(Document doc, ExportReceiptDetailHeader h,
+                          List<ExportReceiptDetailLine> lines,
+                          String reportCode) throws DocumentException {
 
         Font fH2 = new Font(Font.HELVETICA, 11, Font.BOLD);
         Font fH1 = new Font(Font.HELVETICA, 14, Font.BOLD);
-        Font fN  = new Font(Font.HELVETICA, 9,  Font.NORMAL);
-        Font fB  = new Font(Font.HELVETICA, 9,  Font.BOLD);
+        Font fN = new Font(Font.HELVETICA, 9, Font.NORMAL);
+        Font fB = new Font(Font.HELVETICA, 9, Font.BOLD);
 
-        // ===== TOP HEADER: left company info | right report no + date =====
         PdfPTable header = new PdfPTable(2);
         header.setWidthPercentage(100);
         header.setWidths(new float[]{3.2f, 1.2f});
@@ -114,10 +155,9 @@ public class ExportReceiptPdf extends HttpServlet {
         left.addElement(new Paragraph(COMPANY_ADDRESS, fN));
         left.addElement(new Paragraph(COMPANY_CONTACT, fN));
 
-        String reportNo = "RPT-" + LocalDateTime.now().format(RPT_DTF);
         PdfPCell right = new PdfPCell();
         right.setBorder(Rectangle.NO_BORDER);
-        Paragraph pNo = new Paragraph("Report No: " + reportNo, fB);
+        Paragraph pNo = new Paragraph("Report No: " + reportCode, fB);
         pNo.setAlignment(Element.ALIGN_RIGHT);
         Paragraph pDate = new Paragraph("Date: " + LocalDate.now(), fB);
         pDate.setAlignment(Element.ALIGN_RIGHT);
@@ -130,7 +170,6 @@ public class ExportReceiptPdf extends HttpServlet {
 
         doc.add(blank(6));
 
-        // ===== CENTER TITLE =====
         Paragraph title = new Paragraph("EXPORT RECEIPT", fH1);
         title.setAlignment(Element.ALIGN_CENTER);
         doc.add(title);
@@ -142,11 +181,12 @@ public class ExportReceiptPdf extends HttpServlet {
 
         doc.add(dashLine());
 
-        // ===== INFO BLOCK 2 columns =====
-        String reqCode   = (h.getRequestCode() == null || h.getRequestCode().isBlank()) ? "N/A" : h.getRequestCode();
+        String reqCode = (h.getRequestCode() == null || h.getRequestCode().isBlank()) ? "N/A" : h.getRequestCode();
         String createdBy = "";
-        try { createdBy = safe((String) ExportReceiptDetailHeader.class.getMethod("getCreatedByName").invoke(h)); }
-        catch (Exception ignore) {}
+        try {
+            createdBy = safe((String) ExportReceiptDetailHeader.class.getMethod("getCreatedByName").invoke(h));
+        } catch (Exception ignore) {
+        }
 
         PdfPTable info = new PdfPTable(2);
         info.setWidthPercentage(100);
@@ -155,15 +195,15 @@ public class ExportReceiptPdf extends HttpServlet {
 
         PdfPCell infoL = new PdfPCell(new Phrase(
                 "Export Date: " + safe(h.getExportDateUi()) + "\n"
-              + "Request Code: " + reqCode + "\n"
-              + "Status: " + safe(h.getStatus()),
+                        + "Request Code: " + reqCode + "\n"
+                        + "Status: " + safe(h.getStatus()),
                 fN));
         infoL.setBorder(Rectangle.NO_BORDER);
 
         PdfPCell infoR = new PdfPCell(new Phrase(
                 "Created by: " + createdBy + "\n"
-              + "Generated at: " + LocalDateTime.now().format(UI_DTF) + "\n"
-              + "Note: " + safe(h.getNote()),
+                        + "Generated at: " + LocalDateTime.now().format(UI_DTF) + "\n"
+                        + "Note: " + safe(h.getNote()),
                 fN));
         infoR.setBorder(Rectangle.NO_BORDER);
 
@@ -174,7 +214,6 @@ public class ExportReceiptPdf extends HttpServlet {
         doc.add(blank(6));
         doc.add(dashLine());
 
-        // ===== ITEMS =====
         Paragraph itemsLabel = new Paragraph("ITEMS", fB);
         itemsLabel.setSpacingBefore(6f);
         itemsLabel.setSpacingAfter(6f);
@@ -217,12 +256,15 @@ public class ExportReceiptPdf extends HttpServlet {
         }
         doc.add(t);
 
-        // ===== SUMMARY (right side) =====
         doc.add(blank(8));
 
         int totalLines = (lines == null) ? 0 : lines.size();
-        int totalQty   = 0;
-        if (lines != null) for (ExportReceiptDetailLine it : lines) totalQty += it.getQty();
+        int totalQty = 0;
+        if (lines != null) {
+            for (ExportReceiptDetailLine it : lines) {
+                totalQty += it.getQty();
+            }
+        }
 
         PdfPTable sumWrap = new PdfPTable(2);
         sumWrap.setWidthPercentage(100);
@@ -250,7 +292,6 @@ public class ExportReceiptPdf extends HttpServlet {
         doc.add(blank(10));
         doc.add(dashLine());
 
-        // ===== SIGNATURES =====
         Paragraph sigTitle = new Paragraph("Signatures", fB);
         sigTitle.setSpacingBefore(8f);
         sigTitle.setSpacingAfter(8f);
@@ -264,7 +305,6 @@ public class ExportReceiptPdf extends HttpServlet {
         doc.add(sig);
     }
 
-    // ===== Helpers =====
     private static Element dashLine() {
         LineSeparator ls = new LineSeparator();
         ls.setLineWidth(1f);
@@ -315,7 +355,7 @@ public class ExportReceiptPdf extends HttpServlet {
     }
 
     private static String safe(String s) {
-        return (s == null) ? "" : s;
+        return s == null ? "" : s;
     }
 
     private static String formatImeis(List<String> imeis, int perLine) {
