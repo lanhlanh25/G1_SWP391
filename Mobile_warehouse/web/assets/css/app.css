@@ -4980,6 +4980,7 @@ table td .btn-sm.btn-outline:hover {
 .main {
   display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .page-content-shell {
@@ -4996,4 +4997,31 @@ table td .btn-sm.btn-outline:hover {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 -8px 22px rgba(28, 45, 74, 0.06);
+}
+ 
+/* Grid Utilities */
+.grid-12 { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+.grid-row-gap-0 { row-gap: 0; }
+.col-1  { grid-column: span 1;  }
+.col-2  { grid-column: span 2;  }
+.col-3  { grid-column: span 3;  }
+.col-4  { grid-column: span 4;  }
+.col-5  { grid-column: span 5;  }
+.col-6  { grid-column: span 6;  }
+.col-7  { grid-column: span 7;  }
+.col-8  { grid-column: span 8;  }
+.col-9  { grid-column: span 9;  }
+.col-10 { grid-column: span 10; }
+.col-11 { grid-column: span 11; }
+.col-12 { grid-column: span 12; }
+ 
+@media (max-width: 1024px) {
+  .col-2 { grid-column: span 4; }
+  .col-3 { grid-column: span 6; }
+}
+@media (max-width: 768px) {
+  .col-2, .col-3, .col-4 { grid-column: span 6; }
+}
+@media (max-width: 480px) {
+  .col-1, .col-2, .col-3, .col-4, .col-5, .col-6 { grid-column: span 12; }
 }
