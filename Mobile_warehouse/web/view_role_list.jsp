@@ -1,101 +1,99 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="java.util.List"%>
-<%@page import="model.Role"%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<%
-    List<Role> roles = (List<Role>) request.getAttribute("roles");
-    String q = request.getParameter("q") != null ? request.getParameter("q") : "";
-    String statusParam = request.getParameter("status");
-    if (statusParam == null) statusParam = "";
-%>
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">System /</span> Role Management
+</h4>
 
-<div class="page-wrap">
-    <div class="topbar">
-        <div class="d-flex align-center gap-12">
-            <a class="btn" href="<%=request.getContextPath()%>/home?p=dashboard">← Back</a>
-            <h1 class="h1">Role Management</h1>
-        </div>
-
-        <div class="d-flex gap-8 align-center">
-            <a class="btn btn-outline" href="<%=request.getContextPath()%>/home?p=role-toggle">Toggle Status</a>
-            <a class="btn btn-primary" href="<%=request.getContextPath()%>/home?p=role-add">+ Add Role</a>
-        </div>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="${ctx}/home" class="row g-3 px-1">
+            <input type="hidden" name="p" value="role-list"/>
+            
+            <div class="col-md-6">
+                <label class="form-label">Search Roles</label>
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="bx bx-search"></i></span>
+                    <input type="text" name="q" class="form-control" value="${fn:escapeXml(param.q)}" placeholder="Search roles..."/>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    <option value="" ${empty param.status ? 'selected' : ''}>All Statuses</option>
+                    <option value="1" ${param.status == '1' ? 'selected' : ''}>Active</option>
+                    <option value="0" ${param.status == '0' ? 'selected' : ''}>Inactive</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button class="btn btn-primary w-100" type="submit">Filter</button>
+                <a class="btn btn-outline-secondary" href="${ctx}/home?p=role-list"><i class="bx bx-refresh"></i></a>
+            </div>
+        </form>
     </div>
+</div>
 
-    <div class="card mb-16">
-        <div class="card-body">
-            <form action="<%=request.getContextPath()%>/home" method="get" class="filters">
-                <input type="hidden" name="p" value="role-list"/>
-
-                <div class="filter-group">
-                    <label class="label">Search</label>
-                    <input class="input" type="text" name="q" value="<%= q %>" placeholder="Role name...">
-                </div>
-
-                <div class="filter-group">
-                    <label class="label">Status</label>
-                    <select class="input" name="status">
-                        <option value=""  <%= statusParam.isEmpty() ? "selected" : "" %>>All Statuses</option>
-                        <option value="1" <%= "1".equals(statusParam) ? "selected" : "" %>>Active</option>
-                        <option value="0" <%= "0".equals(statusParam) ? "selected" : "" %>>Inactive</option>
-                    </select>
-                </div>
-
-                <div class="filter-actions d-flex gap-8 align-end">
-                    <button class="btn btn-primary" type="submit">Apply</button>
-                    <a class="btn btn-outline" href="<%=request.getContextPath()%>/home?p=role-list">Reset</a>
-                </div>
-            </form>
-        </div>
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between pb-0 mb-3">
+        <h5 class="m-0">Roles Database</h5>
+        <a class="btn btn-primary" href="${ctx}/home?p=role-add">
+            <i class="bx bx-plus me-1"></i> Add Role
+        </a>
     </div>
-
-            <table class="table">
-                <thead>
+    
+    <div class="table-responsive text-nowrap">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="text-center" style="width:70px;">#</th>
+                    <th>Role Name</th>
+                    <th>Description</th>
+                    <th class="text-center">Users</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                <c:if test="${empty roles}">
+                    <tr><td colspan="6" class="text-center p-5 text-muted">No roles found matching your criteria.</td></tr>
+                </c:if>
+                <c:forEach var="r" items="${roles}" varStatus="st">
                     <tr>
-                        <th style="width:100px;">ID</th>
-                        <th style="width:200px;">Role Name</th>
-                        <th>Description</th>
-                        <th style="width:100px;" class="text-center">Users</th>
-                        <th style="width:120px;" class="text-center">Status</th>
-                        <th style="width:160px;" class="text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <%
-                        if (roles == null || roles.isEmpty()) {
-                    %>
-                    <tr>
-                        <td colspan="6" class="text-center">No roles found.</td>
-                    </tr>
-                    <%
-                        } else {
-                            for (Role r : roles) {
-                    %>
-                    <tr>
-                        <td><%= r.getRoleId() %></td>
-                        <td class="fw-600"><%= r.getRoleName() %></td>
-                        <td><%= r.getDescription() == null ? "" : r.getDescription() %></td>
-                        <td class="text-center"><%= r.getUserCount() %></td>
+                        <td class="text-center text-muted small">${st.index + 1}</td>
+                        <td><strong>${fn:escapeXml(r.roleName)}</strong></td>
+                        <td><small class="text-muted text-wrap d-block" style="max-width: 300px;">${r.description == null ? '—' : fn:escapeXml(r.description)}</small></td>
                         <td class="text-center">
-                            <% if (r.getStatus() == 1) { %>
-                                <span class="badge badge-active">Active</span>
-                            <% } else { %>
-                                <span class="badge badge-inactive">Inactive</span>
-                            <% } %>
+                            <span class="badge bg-label-secondary font-monospace">${r.userCount}</span>
                         </td>
-                        <td>
-                            <div class="d-flex justify-center">
-                                <a class="btn btn-sm btn-info"
-                                   href="<%=request.getContextPath()%>/home?p=role-detail&roleId=<%=r.getRoleId()%>">
-                                    View Detail
-                                </a>
+                        <td class="text-center">
+                            <c:choose>
+                                <c:when test="${r.status == 1}">
+                                    <span class="badge bg-label-success">Active</span>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="badge bg-label-danger">Inactive</span>
+                                </c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="${ctx}/home?p=role-detail&roleId=${r.roleId}"><i class="bx bx-show-alt me-1"></i> View Detail</a>
+                                    <a class="dropdown-item" href="${ctx}/home?p=role-update&roleId=${r.roleId}"><i class="bx bx-shield-quarter me-1"></i> Permissions</a>
+                                </div>
                             </div>
                         </td>
                     </tr>
-                    <%
-                            }
-                        }
-                    %>
-        </tbody>
-    </table>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
 </div>
+

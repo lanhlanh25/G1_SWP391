@@ -3,144 +3,187 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <c:set var="isManager" value="${not empty sessionScope.roleName && fn:toUpperCase(sessionScope.roleName) == 'MANAGER'}"/>
 
-<div class="page-wrap">
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Warehouse /</span> Supplier Management
+</h4>
 
-    <div class="topbar">
-        <div class="d-flex align-center gap-12">
-            <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
-            <h1 class="h1">Supplier Management</h1>
-        </div>
-        <c:if test="${isManager}">
-            <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=add_supplier">+ Add Supplier</a>
-        </c:if>
+<c:if test="${not empty param.msg}">
+    <div class="alert alert-success alert-dismissible" role="alert">
+        ${param.msg}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+</c:if>
 
-    <c:if test="${not empty param.msg}">
-        <div class="msg-ok">${param.msg}</div>
-    </c:if>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="h2 mb-4">Manage Suppliers</div>
-            <div class="muted mb-16">Browse and search for existing suppliers in the system.</div>
-
-            <form method="get" action="${pageContext.request.contextPath}/home" class="filters mb-20">
-                <input type="hidden" name="p" value="view_supplier"/>
-                
-                <div class="filter-group">
-                    <label>Search Supplier</label>
-                    <input class="input" name="q" value="${q}" placeholder="Name, email, phone..."/>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="${pageContext.request.contextPath}/home" class="row g-3">
+            <input type="hidden" name="p" value="view_supplier"/>
+            <input type="hidden" name="page" value="1"/>
+            
+            <div class="col-md-4">
+                <label class="form-label">Search Supplier</label>
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="bx bx-search"></i></span>
+                    <input type="text" class="form-control" name="q" value="${q}" placeholder="Name, email, phone..."/>
                 </div>
-                
-                <div class="filter-group">
-                    <label>Status</label>
-                    <select class="select" name="status">
-                        <option value="" ${empty status ? 'selected' : ''}>All Status</option>
-                        <option value="active" ${status == 'active' ? 'selected' : ''}>Active</option>
-                        <option value="inactive" ${status == 'inactive' ? 'selected' : ''}>Inactive</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Sort By</label>
-                    <select class="select" name="sortBy">
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    <option value="" ${empty status ? 'selected' : ''}>All Status</option>
+                    <option value="active" ${status == 'active' ? 'selected' : ''}>Active</option>
+                    <option value="inactive" ${status == 'inactive' ? 'selected' : ''}>Inactive</option>
+                </select>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">Sort By</label>
+                <div class="input-group">
+                    <select class="form-select" name="sortBy">
                         <option value="newest" ${sortBy == 'newest' ? 'selected' : ''}>Newest</option>
                         <option value="name" ${sortBy == 'name' ? 'selected' : ''}>Name</option>
                         <option value="transactions" ${sortBy == 'transactions' ? 'selected' : ''}>Transactions</option>
                     </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>Order</label>
-                    <select class="select" name="sortOrder">
+                    <select class="form-select" name="sortOrder" style="max-width: 100px;">
                         <option value="DESC" ${sortOrder == 'DESC' ? 'selected' : ''}>DESC</option>
                         <option value="ASC" ${sortOrder == 'ASC' ? 'selected' : ''}>ASC</option>
                     </select>
                 </div>
-                
-                <div class="filter-actions h-38">
-                    <button class="btn btn-primary" type="submit">Apply</button>
-                </div>
-            </form>
+            </div>
+            
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button class="btn btn-primary w-100" type="submit">Apply Filters</button>
+                <a class="btn btn-outline-secondary" href="${pageContext.request.contextPath}/home?p=view_supplier"><i class="bx bx-refresh"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
 
-            <table class="table">
-                <thead>
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">Supplier List</h5>
+        <c:if test="${isManager}">
+            <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=add_supplier"><i class="bx bx-plus me-1"></i> Add Supplier</a>
+        </c:if>
+    </div>
+    <div class="table-responsive text-nowrap">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Supplier</th>
+                    <th>Contact</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Transactions</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                <c:if test="${empty suppliers}">
+                    <tr><td colspan="5" class="text-center p-4">No suppliers found matching your criteria.</td></tr>
+                </c:if>
+                <c:forEach var="s" items="${suppliers}">
                     <tr>
-                        <th style="width:240px;">Supplier</th>
-                        <th>Contact</th>
-                        <th style="width:110px;" class="text-center">Status</th>
-                        <th style="width:120px;" class="text-center">Transactions</th>
-                        <th style="width:240px;" class="text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:if test="${empty suppliers}">
-                        <tr><td colspan="5" style="text-align:center; padding:20px;">No suppliers found.</td></tr>
-                    </c:if>
-                    <c:forEach var="s" items="${suppliers}">
-                        <tr>
-                            <td>
-                                <div class="fw-600">${s.supplierName}</div>
-                                <div class="small text-muted">ID: ${s.supplierId}</div>
-                            </td>
-                            <td>
-                                <div>${s.email}</div>
-                                <div class="small text-muted">${s.phone}</div>
-                            </td>
-                            <td class="text-center">
-                                <c:choose>
-                                    <c:when test="${s.isActive == 1}"><span class="badge badge-active">Active</span></c:when>
-                                    <c:otherwise><span class="badge badge-inactive">Inactive</span></c:otherwise>
-                                </c:choose>
-                            </td>
-                            <td class="text-center fw-600">${s.totalTransactions}</td>
-                            <td>
-                                <div class="d-flex gap-8 align-center justify-center flex-nowrap">
-                                    <a class="btn btn-sm btn-info" href="${pageContext.request.contextPath}/home?p=supplier_detail&id=${s.supplierId}">View</a>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar avatar-xs me-2">
+                                    <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-buildings"></i></span>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 text-truncate" style="max-width: 200px;">${s.supplierName}</h6>
+                                    <small class="text-muted">ID: ${s.supplierId}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <small class="fw-semibold">${s.email}</small>
+                                <small class="text-muted">${s.phone}</small>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge ${s.isActive == 1 ? 'bg-label-success' : 'bg-label-secondary'}">
+                                ${s.isActive == 1 ? 'Active' : 'Inactive'}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="fw-bold">${s.totalTransactions}</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="${ctx}/home?p=supplier_detail&id=${s.supplierId}"><i class="bx bx-show-alt me-1"></i> View Detail</a>
                                     <c:if test="${isManager}">
-                                        <a class="btn btn-sm btn-warning" href="${pageContext.request.contextPath}/home?p=update_supplier&id=${s.supplierId}">Update</a>
+                                        <a class="dropdown-item" href="${ctx}/home?p=update_supplier&id=${s.supplierId}"><i class="bx bx-edit-alt me-1"></i> Edit Supplier</a>
                                         <c:choose>
                                             <c:when test="${s.isActive == 1}">
-                                                <a class="btn btn-sm btn-danger" href="${pageContext.request.contextPath}/home?p=supplier_inactive&id=${s.supplierId}">Disable</a>
+                                                <a class="dropdown-item text-danger" href="${ctx}/home?p=supplier_inactive&id=${s.supplierId}"><i class="bx bx-block me-1"></i> Deactivate</a>
                                             </c:when>
                                             <c:otherwise>
-                                                <form method="post" action="${pageContext.request.contextPath}/supplier-toggle" class="mb-0">
+                                                <form method="post" action="${ctx}/supplier-toggle" id="form-enable-${s.supplierId}" class="d-none">
                                                     <input type="hidden" name="supplierId" value="${s.supplierId}"/>
-                                                    <button type="submit" class="btn btn-sm btn-primary">Enable</button>
                                                 </form>
+                                                <a class="dropdown-item text-success" href="javascript:void(0);" onclick="document.getElementById('form-enable-${s.supplierId}').submit();"><i class="bx bx-check-circle me-1"></i> Activate</a>
                                             </c:otherwise>
                                         </c:choose>
                                     </c:if>
                                 </div>
-                            </td>
-                        </tr>
-                    </c:forEach>
-                </tbody>
-            </table>
+                            </div>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
+
+    <c:set var="safeTotal"      value="${empty totalItems  ? 0 : totalItems}"/>
+    <c:set var="safePage"       value="${empty page        ? 1 : page}"/>
+    <c:set var="safeTotalPages" value="${empty totalPages  ? 1 : totalPages}"/>
+    <c:set var="safePageSize"   value="${empty pageSize    ? 5 : pageSize}"/>
+    <c:set var="startRow" value="${safeTotal == 0 ? 0 : (safePage-1)*safePageSize+1}"/>
+    <c:set var="endRow"   value="${safeTotal == 0 ? 0 : (safePage*safePageSize > safeTotal ? safeTotal : safePage*safePageSize)}"/>
+    <c:set var="base" value="${ctx}/home?p=view_supplier&q=${q}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&page="/>
+
+    <div class="card-footer d-flex justify-content-between align-items-center">
+        <div class="text-muted small">
+            Page <strong>${safePage}</strong> of <strong>${safeTotalPages}</strong>
         </div>
+
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm mb-0">
+                <%-- Prev Button --%>
+                <li class="page-item ${safePage <= 1 ? 'disabled' : ''}">
+                    <a class="page-link" href="${safePage > 1 ? base.concat(safePage-1) : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
+                </li>
+
+                <%-- Dynamic Page Numbers --%>
+                <c:set var="startPage" value="${safePage - 1 > 1 ? safePage - 1 : 1}"/>
+                <c:set var="endPage" value="${safePage + 1 < safeTotalPages ? safePage + 1 : safeTotalPages}"/>
+                
+                <c:if test="${startPage > 1}">
+                    <li class="page-item"><a class="page-link" href="${base}1">1</a></li>
+                    <c:if test="${startPage > 2}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                </c:if>
+
+                <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                    <li class="page-item ${i == safePage ? 'active' : ''}">
+                        <a class="page-link" href="${base}${i}">${i}</a>
+                    </li>
+                </c:forEach>
+
+                <c:if test="${endPage < safeTotalPages}">
+                    <c:if test="${endPage < safeTotalPages - 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                    <li class="page-item"><a class="page-link" href="${base}${safeTotalPages}">${safeTotalPages}</a></li>
+                </c:if>
+
+                <%-- Next Button --%>
+                <li class="page-item ${safePage >= safeTotalPages ? 'disabled' : ''}">
+                    <a class="page-link" href="${safePage < safeTotalPages ? base.concat(safePage+1) : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
+                </li>
+            </ul>
+        </nav>
     </div>
-
-
-  <c:set var="safeTotal"      value="${empty totalItems  ? 0 : totalItems}"/>
-  <c:set var="safePage"       value="${empty page        ? 1 : page}"/>
-  <c:set var="safePageSize"   value="${empty pageSize    ? 5 : pageSize}"/>
-  <c:set var="safeTotalPages" value="${empty totalPages  ? 1 : totalPages}"/>
-  <c:set var="startRow" value="${safeTotal == 0 ? 0 : (safePage-1)*safePageSize+1}"/>
-  <c:set var="endRow"   value="${safeTotal == 0 ? 0 : (safePage*safePageSize > safeTotal ? safeTotal : safePage*safePageSize)}"/>
-  <c:set var="base" value="${pageContext.request.contextPath}/home?p=view_supplier&q=${q}&status=${status}&sortBy=${sortBy}&sortOrder=${sortOrder}&page="/>
-
-  <div class="paging-footer">
-    <div class="paging-info">Showing <b>${startRow}</b>–<b>${endRow}</b> of <b>${safeTotal}</b> suppliers</div>
-    <div class="paging">
-      <a class="paging-btn ${safePage==1 ? 'disabled' : ''}" href="${base}${safePage-1}">← Prev</a>
-      <c:forEach var="i" begin="1" end="${safeTotalPages}">
-        <c:choose>
-          <c:when test="${i==safePage}"><span class="paging-btn active">${i}</span></c:when>
-          <c:otherwise><a class="paging-btn" href="${base}${i}">${i}</a></c:otherwise>
-        </c:choose>
-      </c:forEach>
-      <a class="paging-btn ${safePage==safeTotalPages ? 'disabled' : ''}" href="${base}${safePage+1}">Next →</a>
-    </div>
-  </div>
-
-</div>
+</div>

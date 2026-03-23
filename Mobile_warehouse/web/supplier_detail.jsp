@@ -1,112 +1,146 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <c:set var="d" value="${supplierDetail}"/>
+<c:set var="isManager" value="${not empty sessionScope.roleName && sessionScope.roleName.toUpperCase() == 'MANAGER'}"/>
 
-<div class="page-wrap-md">
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Warehouse /</span> Supplier Detail
+</h4>
 
-    <div class="topbar">
-        <div class="d-flex align-center gap-12">
-            <h1 class="h1">Supplier Overview</h1>
-        </div>
-        <div class="d-flex gap-8 align-center">
-            <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=view_supplier">← Back</a>
-            <c:if test="${sessionScope.roleName != null && sessionScope.roleName.toUpperCase() == 'MANAGER'}">
-                <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=update_supplier&id=${d.supplierId}">Update Profile</a>
-                <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=view_history&supplierId=${d.supplierId}">Trade History</a>
-                <c:choose>
-                    <c:when test="${d.isActive == 1}">
-                        <a class="btn btn-warning" href="${pageContext.request.contextPath}/home?p=supplier_inactive&id=${d.supplierId}">Mark Inactive</a>
-                    </c:when>
-                    <c:otherwise>
-                        <form method="post" action="${pageContext.request.contextPath}/supplier-toggle" style="margin:0;">
-                            <input type="hidden" name="supplierId" value="${d.supplierId}"/>
-                            <button type="submit" class="btn btn-primary">Re-activate</button>
-                        </form>
-                    </c:otherwise>
-                </c:choose>
-            </c:if>
-        </div>
+<c:if test="${not empty msg}">
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        ${msg}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+</c:if>
 
-    <c:if test="${not empty msg}">
-        <p class="msg-err">${msg}</p>
-    </c:if>
-
-    <div class="grid-12 gap-16">
-        <div class="col-7">
-
-        <%-- Supplier info --%>
-        <div class="card">
+<div class="row g-4">
+    <!-- Left: Supplier Info -->
+    <div class="col-md-7">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0">Supplier Information</h5>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-outline-secondary btn-sm" href="${ctx}/home?p=view_supplier">
+                        <i class="bx bx-arrow-back me-1"></i> Back
+                    </a>
+                    <c:if test="${isManager}">
+                        <a class="btn btn-primary btn-sm" href="${ctx}/home?p=update_supplier&id=${d.supplierId}">
+                            <i class="bx bx-edit-alt me-1"></i> Update
+                        </a>
+                    </c:if>
+                </div>
+            </div>
             <div class="card-body">
-                <div class="h2 mb-16">Supplier Information</div>
-                <table class="table no-border-first">
+                <table class="table table-borderless">
                     <tbody>
                         <tr>
-                            <th style="width:160px;">ID</th>
-                            <td><span class="mono-text text-muted fs-12">${d.supplierId}</span></td>
+                            <th class="ps-0" style="width: 150px;">Supplier ID</th>
+                            <td class="text-muted">#${d.supplierId}</td>
                         </tr>
                         <tr>
-                            <th>Supplier Name</th>
-                            <td class="fw-700">${d.supplierName}</td>
+                            <th class="ps-0">Supplier Name</th>
+                            <td class="fw-bold fs-5">${d.supplierName}</td>
                         </tr>
                         <tr>
-                            <th>Phone</th>
-                            <td class="text-primary fw-600">${d.phone}</td>
+                            <th class="ps-0">Phone</th>
+                            <td><span class="badge bg-label-primary">${d.phone}</span></td>
                         </tr>
                         <tr>
-                            <th>Email</th>
-                            <td class="fw-600">${d.email}</td>
+                            <th class="ps-0">Email</th>
+                            <td>${d.email}</td>
                         </tr>
                         <tr>
-                            <th>Address</th>
-                            <td class="text-muted fs-14">${d.address}</td>
+                            <th class="ps-0">Address</th>
+                            <td>${d.address}</td>
                         </tr>
                         <tr>
-                            <th>Status</th>
+                            <th class="ps-0">Status</th>
                             <td>
-                                <c:choose>
-                                    <c:when test="${d.isActive == 1}">
-                                        <span class="badge badge-active">Active</span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="badge badge-inactive">Inactive</span>
-                                    </c:otherwise>
-                                </c:choose>
+                                <span class="badge ${d.isActive == 1 ? 'bg-label-success' : 'bg-label-secondary'}">
+                                    ${d.isActive == 1 ? 'Active' : 'Inactive'}
+                                </span>
                             </td>
                         </tr>
+                        <c:if test="${isManager}">
+                        <tr>
+                            <th class="ps-0">Action</th>
+                            <td class="pt-3">
+                                <c:choose>
+                                    <c:when test="${d.isActive == 1}">
+                                        <a class="btn btn-outline-danger btn-sm" href="${ctx}/home?p=supplier_inactive&id=${d.supplierId}">
+                                            <i class="bx bx-block me-1"></i> Deactivate
+                                        </a>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <form method="post" action="${ctx}/supplier-toggle" class="d-inline">
+                                            <input type="hidden" name="supplierId" value="${d.supplierId}"/>
+                                            <button type="submit" class="btn btn-outline-success btn-sm">
+                                                <i class="bx bx-check-circle me-1"></i> Re-activate
+                                            </button>
+                                        </form>
+                                    </c:otherwise>
+                                </c:choose>
+                                <a class="btn btn-outline-info btn-sm ms-2" href="${ctx}/home?p=view_history&supplierId=${d.supplierId}">
+                                    <i class="bx bx-history me-1"></i> Trade History
+                                </a>
+                            </td>
+                        </tr>
+                        </c:if>
                     </tbody>
                 </table>
             </div>
         </div>
-        </div>
+    </div>
 
-        <div class="col-5">
+    <!-- Right: Activity Summary -->
+    <div class="col-md-5">
+        <div class="card h-100">
+            <div class="card-header border-bottom">
+                <h5 class="mb-0">Activity Summary</h5>
+            </div>
+            <div class="card-body pt-4">
+                <div class="row g-4">
+                    <div class="col-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="avatar me-2">
+                                <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-receipt"></i></span>
+                            </div>
+                            <h4 class="ms-1 mb-0">${d.totalImportReceipts}</h4>
+                        </div>
+                        <p class="mb-0 small text-muted">Total Receipts</p>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center mb-2">
+                            <div class="avatar me-2">
+                                <span class="avatar-initial rounded bg-label-info"><i class="bx bx-package"></i></span>
+                            </div>
+                            <h4 class="ms-1 mb-0">${d.totalQtyImported}</h4>
+                        </div>
+                        <p class="mb-0 small text-muted">Total Qty</p>
+                    </div>
+                </div>
 
-        <%-- Summary --%>
-        <div class="card h-full">
-            <div class="card-body">
-                <div class="h2 mb-16">Activity Summary</div>
-                <div class="d-flex flex-column gap-12">
-                    <div class="card p-16 bg-light d-flex justify-between align-center">
-                        <div class="muted fs-12 uppercase">Total Receipts</div>
-                        <div class="h3 m-0">${d.totalImportReceipts}</div>
-                    </div>
-                    <div class="card p-16 bg-light d-flex justify-between align-center">
-                        <div class="muted fs-12 uppercase">Total Qty</div>
-                        <div class="h3 m-0">${d.totalQtyImported}</div>
-                    </div>
-                    <div class="card p-16 bg-light">
-                        <div class="muted fs-12 uppercase mb-4">Last Transaction</div>
-                        <div class="fs-14 fw-600">
-                            <c:choose>
-                                <c:when test="${d.lastTransaction != null}">${d.lastTransaction}</c:when>
-                                <c:otherwise><span class="text-muted">No transactions</span></c:otherwise>
-                            </c:choose>
+                <hr class="my-4">
+
+                <div>
+                    <h6 class="mb-3">Last Transaction</h6>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar avatar-sm me-3">
+                            <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-time"></i></span>
+                        </div>
+                        <div>
+                            <p class="mb-0 fw-bold">
+                                <c:choose>
+                                    <c:when test="${not empty d.lastTransaction}">${d.lastTransaction}</c:when>
+                                    <c:otherwise><span class="text-muted">No transactions found</span></c:otherwise>
+                                </c:choose>
+                            </p>
+                            <small class="text-muted">Recorded Date</small>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
         </div>
     </div>
 </div>

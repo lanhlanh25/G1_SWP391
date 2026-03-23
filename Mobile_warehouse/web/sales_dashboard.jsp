@@ -1,69 +1,126 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%
-    String ctx = request.getContextPath();
-%>
+<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="page-wrap">
-    <div class="topbar">
-        <div>
-            <h1 class="h1 m-0">Sales Dashboard</h1>
-            <!--<div class="muted">Fast access to request creation, follow-up and supplier information.</div>-->
-        </div>
-    </div>
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Home /</span> Sales Dashboard
+</h4>
 
-    <div class="stats-grid">
-        <div class="stat-card primary">
-            <div class="stat-label">Outbound</div>
-            <div class="h2 mb-8">Create Export Request</div>
-            <!--<div class="muted">Start a new outbound request for warehouse processing.</div>-->
-            <div class="hero-actions mt-16">
-                <a class="btn btn-primary" href="<%=ctx%>/home?p=create-export-request">Create Request</a>
-            </div>
-        </div>
-
-        <div class="stat-card info">
-            <div class="stat-label">Tracking</div>
-            <div class="h2 mb-8">Export Request List</div>
-            <!--<div class="muted">Monitor request progress and see which orders are ready for fulfillment.</div>-->
-            <div class="hero-actions mt-16">
-                <a class="btn btn-outline" href="<%=ctx%>/home?p=export-request-list">Open List</a>
-            </div>
-        </div>
-
-        <div class="stat-card warning">
-            <div class="stat-label">Inbound</div>
-            <div class="h2 mb-8">Create Import Request</div>
-            <!--<div class="muted">Request replenishment when stock or forecasted demand requires it.</div>-->
-            <div class="hero-actions mt-16">
-                <a class="btn btn-outline" href="<%=ctx%>/home?p=create-import-request">Create Request</a>
-            </div>
-        </div>
-
-        <div class="stat-card success">
-            <div class="stat-label">Reference</div>
-            <div class="h2 mb-8">Supplier Directory</div>
-            <!--<div class="muted">Browse supplier contacts and review supplier detail history.</div>-->
-            <div class="hero-actions mt-16">
-                <a class="btn btn-outline" href="<%=ctx%>/home?p=view_supplier">View Suppliers</a>
+<div class="row">
+    <div class="col-lg-12 mb-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body d-flex align-items-center justify-content-between p-4">
+                <div>
+                    <h5 class="card-title text-white mb-1">Welcome back, Sales Associate!</h5>
+                    <p class="mb-0 text-white opacity-75">Track your shipments and manage inventory movements today.</p>
+                </div>
+                <div class="avatar avatar-lg bg-white rounded">
+                    <i class="bx bx-trending-up text-primary fs-3"></i>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <div class="card">
-        <div class="card-header">
-            <div>
-                <div class="h2">Today&apos;s Workflow</div>
-                <div class="card-subtitle">A simple launchpad for the most common sales actions.</div>
+    <div class="row">
+        <!-- Outbound -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-top border-primary border-3">
+                <div class="card-body text-center">
+                    <div class="avatar avatar-lg mx-auto mb-3">
+                        <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-export fs-4"></i></span>
+                    </div>
+                    <h5 class="card-title">Outbound</h5>
+                    <p class="card-text small text-muted">Create new export requests for processing.</p>
+                    <a href="${ctx}/home?p=create-export-request" class="btn btn-sm btn-primary">Create Request</a>
+                </div>
             </div>
         </div>
-        <div class="card-body">
-            <div class="hero-actions">
-                <a class="btn btn-primary" href="<%=ctx%>/home?p=create-export-request">New Export Request</a>
-                <a class="btn btn-outline" href="<%=ctx%>/home?p=export-request-list">Review Export Requests</a>
-                <a class="btn btn-outline" href="<%=ctx%>/home?p=create-import-request">New Import Request</a>
-                <a class="btn btn-outline" href="<%=ctx%>/home?p=import-request-list">Review Import Requests</a>
-                <a class="btn btn-outline" href="<%=ctx%>/home?p=my-profile">My Profile</a>
+
+        <!-- Tracking -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-top border-info border-3">
+                <div class="card-body text-center">
+                    <div class="avatar avatar-lg mx-auto mb-3">
+                        <span class="avatar-initial rounded bg-label-info"><i class="bx bx-list-check fs-4"></i></span>
+                    </div>
+                    <h5 class="card-title">Tracking</h5>
+                    <p class="card-text small text-muted">Monitor fulfillment and shipment status.</p>
+                    <a href="${ctx}/home?p=export-request-list" class="btn btn-sm btn-info">Open List</a>
+                </div>
             </div>
         </div>
+
+        <!-- Inbound -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-top border-warning border-3">
+                <div class="card-body text-center">
+                    <div class="avatar avatar-lg mx-auto mb-3">
+                        <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-import fs-4"></i></span>
+                    </div>
+                    <h5 class="card-title">Inbound</h5>
+                    <p class="card-text small text-muted">Request stock replenishment when needed.</p>
+                    <a href="${ctx}/home?p=create-import-request" class="btn btn-sm btn-warning text-white">New Request</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reference -->
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-top border-success border-3">
+                <div class="card-body text-center">
+                    <div class="avatar avatar-lg mx-auto mb-3">
+                        <span class="avatar-initial rounded bg-label-success"><i class="bx bx-truck fs-4"></i></span>
+                    </div>
+                    <h5 class="card-title">Reference</h5>
+                    <p class="card-text small text-muted">Browse and manage supplier directory.</p>
+                    <a href="${ctx}/home?p=view_supplier" class="btn btn-sm btn-success">View Suppliers</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title m-0">Today's Workflow</h5>
+                    <small class="text-muted">Launch common sales actions</small>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4 col-sm-6">
+                            <a href="${ctx}/home?p=create-export-request" class="btn btn-outline-primary w-100 py-3">
+                                <i class="bx bx-plus-circle d-block fs-3 mb-1"></i> New Export Request
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <a href="${ctx}/home?p=export-request-list" class="btn btn-outline-info w-100 py-3">
+                                <i class="bx bx-list-ul d-block fs-3 mb-1"></i> Review Export List
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <a href="${ctx}/home?p=create-import-request" class="btn btn-outline-warning w-100 py-3">
+                                <i class="bx bx-send d-block fs-3 mb-1"></i> New Import Request
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <a href="${ctx}/home?p=import-request-list" class="btn btn-outline-secondary w-100 py-3">
+                                <i class="bx bx-history d-block fs-3 mb-1"></i> Review Import List
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <a href="${ctx}/home?p=view_profile" class="btn btn-outline-dark w-100 py-3">
+                                <i class="bx bx-user-circle d-block fs-3 mb-1"></i> My Profile
+                            </a>
+                        </div>
+                        <div class="col-md-4 col-sm-6">
+                            <a href="${ctx}/home?p=dashboard" class="btn btn-label-primary w-100 py-3">
+                                <i class="bx bx-home-alt d-block fs-3 mb-1"></i> Overview Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
 </div>

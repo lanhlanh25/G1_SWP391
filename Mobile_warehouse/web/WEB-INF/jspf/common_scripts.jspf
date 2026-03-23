@@ -1,0 +1,18 @@
+<!-- Core JS -->
+<!-- build:js assets/vendor/js/core.js -->
+<script src="<%=request.getContextPath()%>/assets/vendor/libs/jquery/jquery.js"></script>
+<script src="<%=request.getContextPath()%>/assets/vendor/libs/popper/popper.js"></script>
+<script src="<%=request.getContextPath()%>/assets/vendor/js/bootstrap.js"></script>
+<script src="<%=request.getContextPath()%>/assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js"></script>
+
+<script src="<%=request.getContextPath()%>/assets/vendor/js/menu.js"></script>
+<!-- endbuild -->
+
+<!-- Vendors JS -->
+<script src="<%=request.getContextPath()%>/assets/vendor/libs/apex-charts/apexcharts.js"></script>
+
+<!-- Main JS -->
+<script src="<%=request.getContextPath()%>/assets/js/main.js"></script>
+
+<!-- Build with Sneat Template -->
+<script async defer src="https://buttons.github.io/buttons.js"></script>

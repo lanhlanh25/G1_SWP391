@@ -1,26 +1,15 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%
-  java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm");
-  String nowStr = sdf.format(new java.util.Date());
   int year = java.time.Year.now().getValue();
 %>
 
-<footer class="footer">
-  <div class="footer-inner footer-center">
-    <div class="footer-line">
-      <b>DTLA Mobile WMS</b> · Warehouse Operations System
-    </div>
-
-    <div class="footer-line">
-      © <%=year%> DTLA company. All rights reserved.
-    </div>
-
-    <div class="footer-line">
-      Version: 2.7.367 · Environment: Development
-      <span class="dot">•</span>
-      Support: minhduchoang2410@gmail.com · +84 965 298 768
-      <span class="dot">•</span>
-      Server time: <%= nowStr %>
+<footer class="content-footer footer bg-footer-theme">
+  <div class="container-xxl d-flex flex-wrap justify-content-center py-3 flex-md-row flex-column">
+    <div class="mb-2 mb-md-0 text-center">
+      © <%=year%> 
+      <a href="javascript:void(0)" class="footer-link fw-bolder">Group 1 - SWP391</a>
+      <span class="d-none d-sm-inline-block"> · </span>
+      <span class="text-muted">Mobile Warehouse Management System</span>
     </div>
   </div>
 </footer>

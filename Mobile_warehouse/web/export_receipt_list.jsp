@@ -1,218 +1,209 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
-
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 <c:set var="role" value="${sessionScope.roleName}"/>
 
-<link rel="stylesheet" href="${ctx}/assets/css/app.css">
-<%-- Internal styles moved to app.css --%>
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Warehouse /</span> Export Management
+</h4>
 
-<div class="p-24">
-  <div class="topbar mb-20">
-    <div class="d-flex align-center gap-10">
-      <a class="btn btn-outline" href="${ctx}/home?p=dashboard">← Back</a>
-      <h1 class="h1">Export Management</h1>
+<c:if test="${not empty param.msg}">
+    <div class="alert alert-success alert-dismissible" role="alert">
+        ${fn:escapeXml(param.msg)}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-  </div>
-
-  <div class="erl-card">
-
-    <div class="er-toprow">
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <c:if test="${role eq 'STAFF'}">
-          <a class="er-btn" href="${ctx}/home?p=create-export-receipt">+ Create Export Receipt</a>
-        </c:if>
-      </div>
+</c:if>
+<c:if test="${not empty param.err}">
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        ${fn:escapeXml(param.err)}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+</c:if>
 
-    <c:if test="${not empty param.msg}">
-      <div class="alert alert-success mb-14">${fn:escapeXml(param.msg)}</div>
-    </c:if>
-    <c:if test="${not empty param.err}">
-      <div class="alert alert-danger mb-14">${fn:escapeXml(param.err)}</div>
-    </c:if>
-
-    <form method="get" action="${ctx}/home">
-      <input type="hidden" name="p" value="export-receipt-list"/>
-      <div class="filters mb-12">
-        <div class="d-flex gap-8 align-center flex-wrap">
-          <input type="text" name="q" class="input" value="${fn:escapeXml(q)}" placeholder="Search Receipt..." style="min-width:220px;"/>
-          <button class="btn btn-outline" type="submit">Search</button>
-        </div>
-        <div class="d-flex gap-8 align-center flex-wrap">
-          <input type="date" name="from" class="input" value="${fn:escapeXml(from)}"/>
-          <input type="date" name="to" class="input" value="${fn:escapeXml(to)}"/>
-          <button class="btn btn-outline" type="submit">Apply</button>
-        </div>
-      </div>
-    </form>
-
-    <c:url var="tabAllUrl" value="/home">
-      <c:param name="p" value="export-receipt-list"/><c:param name="page" value="1"/>
-      <c:param name="q" value="${q}"/><c:param name="status" value="all"/>
-      <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
-    </c:url>
-    <c:url var="tabPendingUrl" value="/home">
-      <c:param name="p" value="export-receipt-list"/><c:param name="page" value="1"/>
-      <c:param name="q" value="${q}"/><c:param name="status" value="pending"/>
-      <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
-    </c:url>
-    <c:url var="tabCompletedUrl" value="/home">
-      <c:param name="p" value="export-receipt-list"/><c:param name="page" value="1"/>
-      <c:param name="q" value="${q}"/><c:param name="status" value="completed"/>
-      <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
-    </c:url>
-    <c:url var="tabCancelledUrl" value="/home">
-      <c:param name="p" value="export-receipt-list"/><c:param name="page" value="1"/>
-      <c:param name="q" value="${q}"/><c:param name="status" value="cancelled"/>
-      <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
-    </c:url>
-
-    <div class="erl-tabs">
-      <a class="erl-tab ${status=='all' || empty status ? 'active' : ''}" href="${tabAllUrl}">
-        All <span class="cnt"><c:out value="${tabCounts['all']}"/></span>
-      </a>
-      <a class="erl-tab ${status=='pending' ? 'active' : ''}" href="${tabPendingUrl}">
-        Pending <span class="cnt"><c:out value="${empty tabCounts['pending'] ? 0 : tabCounts['pending']}"/></span>
-      </a>
-      <a class="erl-tab ${status=='completed' ? 'active' : ''}" href="${tabCompletedUrl}">
-        Completed <span class="cnt"><c:out value="${tabCounts['completed']}"/></span>
-      </a>
-      <a class="erl-tab ${status=='cancelled' ? 'active' : ''}" href="${tabCancelledUrl}">
-        Cancelled <span class="cnt"><c:out value="${empty tabCounts['cancelled'] ? 0 : tabCounts['cancelled']}"/></span>
-      </a>
-    </div>
-
-    <div class="table-wrap">
-      <table class="table">
-        <thead>
-          <tr>
-            <th style="width:50px;" class="text-center">No</th>
-            <th style="width:140px;">Receipt Code</th>
-            <th>Request Code</th>
-            <th>Created By</th>
-            <th style="width:140px;">Export Date</th>
-            <th style="width:80px;" class="text-center">Qty</th>
-            <th>Category</th>
-            <th style="width:120px;" class="text-center">Status</th>
-            <th style="width:180px;">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <c:if test="${empty rows}">
-            <tr>
-              <td colspan="9" class="muted-cell" style="padding:24px;">No data found</td>
-            </tr>
-          </c:if>
-
-          <c:forEach var="r" items="${rows}" varStatus="st">
-            <tr>
-              <td class="text-center text-muted">
-                <c:out value="${(page-1)*pageSize + st.index + 1}"/>
-              </td>
-              <td class="fw-600"><c:out value="${r.exportCode}"/></td>
-              <td>
-                <c:choose>
-                  <c:when test="${empty r.requestCode || r.requestCode == '-'}">
-                    <span style="color:var(--muted);">N/A</span>
-                  </c:when>
-                  <c:otherwise>
-                    <c:out value="${r.requestCode}"/>
-                  </c:otherwise>
-                </c:choose>
-              </td>
-              <td><c:out value="${r.createdByName}"/></td>
-              <td class="text-muted"><c:out value="${r.exportDateUi}"/></td>
-              <td class="text-center fw-700"><c:out value="${r.totalQty}"/></td>
-              <td class="text-center"><span class="badge badge-outline">Phone</span></td>
-              <td>
-                <c:choose>
-                  <c:when test="${r.status == 'CONFIRMED' || r.status == 'completed' || r.status == 'COMPLETED'}">
-                    <span class="badge badge-active">Completed</span>
-                  </c:when>
-                  <c:when test="${r.status == 'pending' || r.status == 'PENDING'}">
-                    <span class="badge badge-warning">Pending</span>
-                  </c:when>
-                  <c:when test="${r.status == 'cancelled' || r.status == 'CANCELLED' || r.status == 'CANCELED'}">
-                    <span class="badge badge-inactive">Cancelled</span>
-                  </c:when>
-                  <c:otherwise>
-                    <span class="badge badge-active"><c:out value="${r.status}"/></span>
-                  </c:otherwise>
-                </c:choose>
-              </td>
-              <td>
-                <div class="d-flex gap-8 align-center justify-center flex-nowrap">
-                  <a class="btn btn-sm btn-outline"
-                     href="${ctx}/home?p=export-receipt-detail&id=${r.exportId}">View</a>
-                  <a class="btn btn-sm btn-primary"
-                     href="${ctx}/export-receipt-pdf?id=${r.exportId}" target="_blank">PDF</a>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="${ctx}/home" class="row g-3 px-1">
+            <input type="hidden" name="p" value="export-receipt-list"/>
+            <input type="hidden" name="page" value="1"/>
+            <input type="hidden" name="status" value="${fn:escapeXml(status)}"/>
+            
+            <div class="col-md-4">
+                <label class="form-label">Search Receipt</label>
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="bx bx-search"></i></span>
+                    <input type="text" name="q" class="form-control" value="${fn:escapeXml(q)}" placeholder="Receipt or Request code..."/>
                 </div>
-              </td>
-            </tr>
-          </c:forEach>
-        </tbody>
-      </table>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">From Date</label>
+                <input type="date" name="from" class="form-control" value="${fn:escapeXml(from)}"/>
+            </div>
+            
+            <div class="col-md-3">
+                <label class="form-label">To Date</label>
+                <input type="date" name="to" class="form-control" value="${fn:escapeXml(to)}"/>
+            </div>
+            
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button class="btn btn-primary w-100" type="submit">Filter</button>
+                <a class="btn btn-outline-secondary" href="${ctx}/home?p=export-receipt-list"><i class="bx bx-refresh"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between pb-0">
+        <div class="card-title mb-0">
+            <h5 class="m-0 me-2">Export Receipts</h5>
+        </div>
+        <c:if test="${role eq 'STAFF'}">
+            <a class="btn btn-primary" href="${ctx}/home?p=create-export-receipt"><i class="bx bx-plus me-1"></i> Create Receipt</a>
+        </c:if>
     </div>
 
-    <c:url var="prevUrl" value="/home">
-      <c:param name="p" value="export-receipt-list"/><c:param name="page" value="${page-1}"/>
-      <c:param name="q" value="${q}"/><c:param name="status" value="${empty status ? 'all' : status}"/>
-      <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
-    </c:url>
-    <c:url var="nextUrl" value="/home">
-      <c:param name="p" value="export-receipt-list"/><c:param name="page" value="${page+1}"/>
-      <c:param name="q" value="${q}"/><c:param name="status" value="${empty status ? 'all' : status}"/>
-      <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
-    </c:url>
-
-      <div class="paging-footer">
-        <div class="paging-info">
-            Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
+    <div class="card-body">
+        <div class="nav-align-top mb-4">
+            <ul class="nav nav-tabs" role="tablist">
+                <c:set var="statusBaseUrl" value="${ctx}/home?p=export-receipt-list&page=1&q=${fn:escapeXml(q)}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
+                <li class="nav-item">
+                    <a class="nav-link ${status=='all' || empty status ? 'active' : ''}" href="${statusBaseUrl}&status=all">
+                        All <span class="badge badge-center rounded-pill bg-label-secondary ms-1">${tabCounts['all']}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link ${status=='pending' ? 'active' : ''}" href="${statusBaseUrl}&status=pending">
+                        Pending <span class="badge badge-center rounded-pill bg-label-warning ms-1">${empty tabCounts['pending'] ? 0 : tabCounts['pending']}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link ${status=='completed' ? 'active' : ''}" href="${statusBaseUrl}&status=completed">
+                        Completed <span class="badge badge-center rounded-pill bg-label-success ms-1">${tabCounts['completed']}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link ${status=='cancelled' ? 'active' : ''}" href="${statusBaseUrl}&status=cancelled">
+                        Cancelled <span class="badge badge-center rounded-pill bg-label-danger ms-1">${empty tabCounts['cancelled'] ? 0 : tabCounts['cancelled']}</span>
+                    </a>
+                </li>
+            </ul>
         </div>
-        <div class="paging">
-          <c:set var="pgStart" value="${page - 1 < 1 ? 1 : page - 1}" />
-          <c:set var="pgEnd" value="${pgStart + 2 > totalPages ? totalPages : pgStart + 2}" />
-          <c:if test="${pgEnd == totalPages}">
-              <c:set var="pgStart" value="${pgEnd - 2 < 1 ? 1 : pgEnd - 2}" />
-          </c:if>
 
-          <c:choose>
-            <c:when test="${page <= 1}">
-              <span class="paging-btn disabled">← Prev</span>
-            </c:when>
-            <c:otherwise>
-              <a class="paging-btn" href="${prevUrl}">← Prev</a>
-            </c:otherwise>
-          </c:choose>
-
-          <c:forEach begin="${pgStart}" end="${pgEnd}" var="i">
-            <c:choose>
-              <c:when test="${i == page}">
-                <span class="paging-btn active">${i}</span>
-              </c:when>
-              <c:otherwise>
-                <c:url var="pageUrl" value="/home">
-                  <c:param name="p" value="export-receipt-list"/><c:param name="page" value="${i}"/>
-                  <c:param name="q" value="${q}"/><c:param name="status" value="${empty status ? 'all' : status}"/>
-                  <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
-                </c:url>
-                <a class="paging-btn" href="${pageUrl}">${i}</a>
-              </c:otherwise>
-            </c:choose>
-          </c:forEach>
-
-          <c:choose>
-            <c:when test="${page >= totalPages}">
-              <span class="paging-btn disabled">Next →</span>
-            </c:when>
-            <c:otherwise>
-              <a class="paging-btn" href="${nextUrl}">Next →</a>
-            </c:otherwise>
-          </c:choose>
+        <div class="table-responsive text-nowrap">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>Receipt Code</th>
+                        <th>Request Code</th>
+                        <th>Created By</th>
+                        <th class="text-center">Export Date</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    <c:if test="${empty rows}">
+                        <tr><td colspan="8" class="text-center p-5">No export receipts found.</td></tr>
+                    </c:if>
+                    <c:forEach var="r" items="${rows}" varStatus="st">
+                        <tr>
+                            <td class="text-center text-muted small">${(page-1)*pageSize + st.index + 1}</td>
+                            <td><span class="badge bg-label-primary font-monospace fw-bold">${r.exportCode}</span></td>
+                            <td>
+                                <c:choose>
+                                    <c:when test="${empty r.requestCode || r.requestCode == '-'}">
+                                        <span class="text-muted small">N/A</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="fw-semibold">${r.requestCode}</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td>${fn:escapeXml(r.createdByName)}</td>
+                            <td class="text-center text-muted small">${r.exportDateUi}</td>
+                            <td class="text-center fw-bold text-primary">${r.totalQty}</td>
+                            <td class="text-center">
+                                <c:choose>
+                                    <c:when test="${r.status == 'CONFIRMED' || r.status == 'completed' || r.status == 'COMPLETED'}">
+                                        <span class="badge bg-label-success">Completed</span>
+                                    </c:when>
+                                    <c:when test="${r.status == 'pending' || r.status == 'PENDING'}">
+                                        <span class="badge bg-label-warning">Pending</span>
+                                    </c:when>
+                                    <c:when test="${r.status == 'cancelled' || r.status == 'CANCELLED' || r.status == 'CANCELED'}">
+                                        <span class="badge bg-label-danger">Cancelled</span>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="badge bg-label-secondary">${r.status}</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                            <td class="text-center">
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="${ctx}/home?p=export-receipt-detail&id=${r.exportId}"><i class="bx bx-show-alt me-1"></i> View Detail</a>
+                                        <a class="dropdown-item" href="${ctx}/export-receipt-pdf?id=${r.exportId}" target="_blank"><i class="bx bxs-file-pdf me-1"></i> Export PDF</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
         </div>
-      </div>
 
-  </div>
+        <c:if test="${totalPages > 1}">
+            <c:url var="baseUrl" value="/home">
+                <c:param name="p" value="export-receipt-list"/>
+                <c:param name="q" value="${q}"/><c:param name="status" value="${empty status ? 'all' : status}"/>
+                <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/>
+            </c:url>
+
+            <div class="card-footer d-flex justify-content-between align-items-center px-0 pb-0">
+                <div class="text-muted small">
+                    Page <strong>${page}</strong> of <strong>${totalPages}</strong>
+                </div>
+
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm mb-0">
+                        <%-- Prev Button --%>
+                        <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+                            <a class="page-link" href="${page > 1 ? baseUrl.concat('&page=').concat(page-1) : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
+                        </li>
+
+                        <%-- Sliding Window logic --%>
+                        <c:set var="startPage" value="${page - 1 > 1 ? page - 1 : 1}"/>
+                        <c:set var="endPage"   value="${page + 1 < totalPages ? page + 1 : totalPages}"/>
+
+                        <c:if test="${startPage > 1}">
+                            <li class="page-item"><a class="page-link" href="${baseUrl}&page=1">1</a></li>
+                            <c:if test="${startPage > 2}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                        </c:if>
+
+                        <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                            <li class="page-item ${i == page ? 'active' : ''}"><a class="page-link" href="${baseUrl}&page=${i}">${i}</a></li>
+                        </c:forEach>
+
+                        <c:if test="${endPage < totalPages}">
+                            <c:if test="${endPage < totalPages - 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                            <li class="page-item"><a class="page-link" href="${baseUrl}&page=${totalPages}">${totalPages}</a></li>
+                        </c:if>
+
+                        <%-- Next Button --%>
+                        <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
+                            <a class="page-link" href="${page < totalPages ? baseUrl.concat('&page=').concat(page+1) : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </c:if>
+    </div>
 </div>
+

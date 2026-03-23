@@ -1,156 +1,163 @@
-<%-- 
-    Document   : product_list
-    Created on : Jan 31, 2026, 10:16:26 PM
-    Author     : Lanhlanh
---%>
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 
-<%
-    Integer pageObj = (Integer) request.getAttribute("page");
-    Integer totalPagesObj = (Integer) request.getAttribute("totalPages");
-    int curPage = (pageObj == null) ? 1 : pageObj;
-    int totalPages = (totalPagesObj == null) ? 1 : totalPagesObj;
-%>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<div class="page-wrap">
-
-    <div class="topbar">
-        <div class="d-flex align-center gap-12">
-            <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
-            <h1 class="h1">View Product List</h1>
-        </div>
-        <c:if test="${sessionScope.roleName == 'MANAGER' || sessionScope.roleName == 'ADMIN'}">
-            <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=product-add">+ Add Product</a>
-        </c:if>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Product List</h5>
+        <c:choose>
+            <c:when test="${role == 'MANAGER' || role == 'manager' || role == 'ADMIN' || role == 'admin'}">
+                <a href="${ctx}/home?p=product-add" class="btn btn-primary btn-sm"><i class="bx bx-plus me-1"></i> Add Product</a>
+            </c:when>
+        </c:choose>
     </div>
 
-    <c:if test="${not empty param.msg}">
-        <div class="msg-ok">${param.msg}</div>
-    </c:if>
-    <c:if test="${sessionScope.msg != null}">
-        <div class="msg-ok">${sessionScope.msg}</div>
-        <c:remove var="msg" scope="session"/>
-    </c:if>
-
-    <div class="card">
-        <div class="card-body">
-            <div class="h2 mb-4">Manage Products</div>
-            <div class="muted mb-16">Search and filter products in the warehouse.</div>
-
-            <form method="get" action="${pageContext.request.contextPath}/home" class="filters mb-20">
-                <input type="hidden" name="p" value="product-list"/>
-                <input type="hidden" name="page" value="1"/>
-
-                <div class="filter-group">
-                    <label>Search Product</label>
-                    <input class="input" type="text" name="q" value="${q != null ? q : ''}" placeholder="Name, code...">
-                </div>
-
-                <div class="filter-group">
-                    <label>Brand</label>
-                    <select class="select" name="brandId">
-                        <option value="">All Brands</option>
-                        <c:forEach var="b" items="${allBrands}">
-                            <option value="${b.brandId}" ${brandId == (''+b.brandId) ? 'selected' : ''}>${b.brandName}</option>
-                        </c:forEach>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label>Status</label>
-                    <select class="select" name="status">
-                        <option value="">All Status</option>
-                        <option value="ACTIVE" ${status == 'ACTIVE' ? 'selected' : ''}>Active</option>
-                        <option value="INACTIVE" ${status == 'INACTIVE' ? 'selected' : ''}>Inactive</option>
-                    </select>
-                </div>
-
-                <div class="filter-actions h-38">
-                    <button class="btn btn-primary" type="submit">Search</button>
-                    <a class="btn" href="${pageContext.request.contextPath}/home?p=product-list">Reset</a>
-                </div>
-            </form>
-
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th style="width:140px;">Product Code</th>
-                        <th>Product Name</th>
-                        <th style="width:140px;">Brand</th>
-                        <th style="width:120px;" class="text-center">Status</th>
-                        <th style="width:160px;">Created At</th>
-                        <th style="width:240px;" class="text-center">Action</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    <c:forEach var="x" items="${products}">
-                        <tr>
-                            <td class="fw-600">${x.productCode}</td>
-                            <td>${x.productName}</td>
-                            <td class="text-muted">${x.brandName}</td>
-                            <td class="text-center">
-                                <c:choose>
-                                    <c:when test="${x.status == 'ACTIVE'}">
-                                        <span class="badge badge-active">Active</span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="badge badge-inactive">Inactive</span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                            <td class="text-muted"><fmt:formatDate value="${x.createdAt}" pattern="yyyy-MM-dd HH:mm"/></td>
-                            <td>
-                                <div class="d-flex gap-8 align-center justify-center flex-nowrap">
-                                    <a class="btn btn-sm btn-info" href="${pageContext.request.contextPath}/home?p=product-detail&id=${x.productId}">View</a>
-                                    <c:if test="${sessionScope.roleName == 'MANAGER' || sessionScope.roleName == 'ADMIN'}">
-                                        <a class="btn btn-sm btn-warning" href="${pageContext.request.contextPath}/manager/product/update?id=${x.productId}">Update</a>
-                                        <a class="btn btn-sm btn-danger" href="${pageContext.request.contextPath}/manager/product/delete?id=${x.productId}">Delete</a>
-                                    </c:if>
-                                </div>
-                            </td>
-                        </tr>
+    <div class="card-body">
+        <form action="${ctx}/home" method="get" class="row g-3">
+            <input type="hidden" name="p" value="product-list"/>
+            <div class="col-md-4">
+                <input type="text" name="q" class="form-control" placeholder="Search product name or code..." value="${fn:escapeXml(q)}"/>
+            </div>
+            <div class="col-md-3">
+                <select name="brandId" class="form-select">
+                    <option value="">All Brands</option>
+                    <c:forEach var="b" items="${brands}">
+                        <option value="${b.brandId}" ${b.brandId == brandId ? 'selected' : ''}>${fn:escapeXml(b.brandName)}</option>
                     </c:forEach>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="active" ${status == 'active' ? 'selected' : ''}>Active</option>
+                    <option value="inactive" ${status == 'inactive' ? 'selected' : ''}>Inactive</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
 
-                    <c:if test="${empty products}">
-                        <tr><td colspan="6" style="text-align:center;">No data</td></tr>
-                    </c:if>
-                </tbody>
-            </table>
+    <div class="table-responsive text-nowrap">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Brand</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Added At</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                <c:if test="${empty products}">
+                    <tr><td colspan="5" class="text-center p-4 text-muted">No products found.</td></tr>
+                </c:if>
+                <c:forEach var="p" items="${products}">
+                    <tr>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold">${fn:escapeXml(p.productName)}</span>
+                                <small class="text-muted font-monospace">${fn:escapeXml(p.productCode)}</small>
+                            </div>
+                        </td>
+                        <td>${fn:escapeXml(p.brandName)}</td>
+                        <td class="text-center">
+                            <c:set var="isActive" value="${p.isActive()}" />
+                            <span class="badge ${isActive ? 'bg-label-success' : 'bg-label-secondary'}">
+                                ${isActive ? 'Active' : 'Inactive'}
+                            </span>
+                        </td>
+                        <td class="text-center"><small>${p.createdAt}</small></td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown"><i class="bx bx-dots-vertical-rounded"></i></button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="${ctx}/home?p=product-detail&id=${p.productId}"><i class="bx bx-show me-1"></i> View</a>
+                                    <c:choose>
+                                        <c:when test="${role == 'MANAGER' || role == 'manager'}">
+                                            <a class="dropdown-item" href="${ctx}/manager/product/update?id=${p.productId}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                            <a class="dropdown-item text-danger" href="${ctx}/manager/product/delete?id=${p.productId}"><i class="bx bx-trash me-1"></i> Delete</a>
+                                        </c:when>
+                                    </c:choose>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
+    </div>
 
-            <c:if test="${totalPages > 1}">
-                <div class="paging-footer">
-                    <div class="paging-info">
-                        Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
-                    </div>
-                    <div class="paging">
-                        <c:set var="base" value="${pageContext.request.contextPath}/home?p=product-list&q=${q}&brandId=${brandId}&status=${status}"/>
+    <c:set var="cp" value="${empty curPage ? (empty page ? 1 : page) : curPage}" />
+    <c:set var="tp" value="${empty totalPages ? 1 : totalPages}" />
 
-                        <% if (curPage > 1) { %>
-                            <a class="paging-btn" href="<%= request.getContextPath() %>/home?p=product-list&q=${q}&brandId=${brandId}&status=${status}&page=<%= (curPage - 1) %>">Prev</a>
-                        <% } else { %>
-                            <span class="paging-btn disabled">Prev</span>
-                        <% } %>
-
-                        <% for (int i = 1; i <= totalPages; i++) { %>
-                            <% if (i == curPage) { %>
-                                <span class="paging-btn active"><%= i %></span>
-                            <% } else { %>
-                                <a class="paging-btn" href="<%= request.getContextPath() %>/home?p=product-list&q=${q}&brandId=${brandId}&status=${status}&page=<%= i %>"><%= i %></a>
-                            <% } %>
-                        <% } %>
-
-                        <% if (curPage < totalPages) { %>
-                            <a class="paging-btn" href="<%= request.getContextPath() %>/home?p=product-list&q=${q}&brandId=${brandId}&status=${status}&page=<%= (curPage + 1) %>">Next</a>
-                        <% } else { %>
-                            <span class="paging-btn disabled">Next</span>
-                        <% } %>
-                    </div>
-                </div>
-            </c:if>
-
+    <div class="card-footer d-flex justify-content-between align-items-center">
+        <div class="text-muted small">
+            Page <strong>${cp}</strong> of <strong>${tp}</strong>
         </div>
+
+        <nav aria-label="Page navigation">
+            <ul class="pagination pagination-sm mb-0">
+                <%-- Prev Button --%>
+                <li class="page-item ${cp <= 1 ? 'disabled' : ''}">
+                    <c:url var="prevLink" value="/home">
+                        <c:param name="p" value="product-list"/>
+                        <c:param name="q" value="${q}"/>
+                        <c:param name="brandId" value="${brandId}"/>
+                        <c:param name="status" value="${status}"/>
+                        <c:param name="page" value="${cp - 1}"/>
+                    </c:url>
+                    <a class="page-link" href="${cp > 1 ? prevLink : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
+                </li>
+                
+                <%-- Sliding Window logic --%>
+                <c:set var="winStart" value="${cp - 1 > 1 ? cp - 1 : 1}" />
+                <c:set var="winEnd" value="${winStart + 2 < tp ? winStart + 2 : tp}" />
+                <c:if test="${winEnd == tp}">
+                    <c:set var="winStart" value="${winEnd - 2 > 1 ? winEnd - 2 : 1}" />
+                </c:if>
+
+                <c:if test="${winStart > 1}">
+                    <c:url var="urlFirst" value="/home">
+                        <c:param name="p" value="product-list"/><c:param name="q" value="${q}"/><c:param name="brandId" value="${brandId}"/><c:param name="status" value="${status}"/><c:param name="page" value="1"/>
+                    </c:url>
+                    <li class="page-item"><a class="page-link" href="${urlFirst}">1</a></li>
+                    <c:if test="${winStart > 2}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                </c:if>
+
+                <c:forEach var="i" begin="${winStart}" end="${winEnd}">
+                    <c:url var="urlLoop" value="/home">
+                        <c:param name="p" value="product-list"/><c:param name="q" value="${q}"/><c:param name="brandId" value="${brandId}"/><c:param name="status" value="${status}"/><c:param name="page" value="${i}"/>
+                    </c:url>
+                    <li class="page-item ${i == cp ? 'active' : ''}">
+                        <a class="page-link" href="${urlLoop}">${i}</a>
+                    </li>
+                </c:forEach>
+
+                <c:if test="${winEnd < tp}">
+                    <c:if test="${winEnd < tp - 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                    <c:url var="urlLastP" value="/home">
+                        <c:param name="p" value="product-list"/><c:param name="q" value="${q}"/><c:param name="brandId" value="${brandId}"/><c:param name="status" value="${status}"/><c:param name="page" value="${tp}"/>
+                    </c:url>
+                    <li class="page-item"><a class="page-link" href="${urlLastP}">${tp}</a></li>
+                </c:if>
+
+                <%-- Next Button --%>
+                <li class="page-item ${cp >= tp ? 'disabled' : ''}">
+                    <c:url var="nextLink" value="/home">
+                        <c:param name="p" value="product-list"/>
+                        <c:param name="q" value="${q}"/>
+                        <c:param name="brandId" value="${brandId}"/>
+                        <c:param name="status" value="${status}"/>
+                        <c:param name="page" value="${cp + 1}"/>
+                    </c:url>
+                    <a class="page-link" href="${cp < tp ? nextLink : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
+                </li>
+            </ul>
+        </nav>
     </div>
 </div>
