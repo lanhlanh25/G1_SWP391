@@ -67,4 +67,8 @@ public class ProductListItem {
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
     }
+
+    public boolean isActive() {
+        return "ACTIVE".equalsIgnoreCase(status);
+    }
 }

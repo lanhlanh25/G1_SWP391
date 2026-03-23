@@ -1,198 +1,185 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+<%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="page-wrap">
-    <div class="topbar">
-        <div class="d-flex align-center gap-12">
-            <h1 class="h1">Stock Movement History</h1>
-            <span class="text-muted fs-14 mt-4">View confirmed stock movements</span>
-        </div>
-        <div class="d-flex gap-8 align-center">
-            <a href="${pageContext.request.contextPath}/home?p=dashboard" class="btn btn-outline btn-sm">← Dashboard</a>
-        </div>
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Reports /</span> Stock Movement History
+</h4>
+
+<c:if test="${not empty err}">
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <i class="bx bx-error me-1"></i> ${fn:escapeXml(err)}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+</c:if>
 
-    <c:if test="${not empty err}">
-        <div class="msg-err">${err}</div>
-    </c:if>
-
-    <div class="card mb-16">
-        <div class="card-body">
-            <form method="get" action="${pageContext.request.contextPath}/home" class="filters grid-5">
-                <input type="hidden" name="p" value="stock-movement-history"/>
-
-                <div class="filter-group">
-                    <label>Search Keyword</label>
-                    <input type="text" name="keyword" value="${keyword}" class="input" placeholder="Product name or code">
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="${ctx}/home" class="row g-3 px-1">
+            <input type="hidden" name="p" value="stock-movement-history"/>
+            <input type="hidden" name="page" value="1"/>
+            
+            <div class="col-md-3">
+                <label class="form-label">Search Keyword</label>
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="bx bx-search"></i></span>
+                    <input type="text" name="keyword" value="${fn:escapeXml(keyword)}" class="form-control" placeholder="Product name or code">
                 </div>
-
-                <div class="filter-group">
-                    <label>From Date</label>
-                    <input type="date" name="from" value="${from}" class="input">
-                </div>
-
-                <div class="filter-group">
-                    <label>To Date</label>
-                    <input type="date" name="to" value="${to}" class="input">
-                </div>
-
-                <div class="filter-group">
-                    <label>Type</label>
-                    <select name="movementType" class="select">
-                        <option value="ALL" ${movementType eq 'ALL' ? 'selected' : ''}>All Types</option>
-                        <option value="IMPORT" ${movementType eq 'IMPORT' ? 'selected' : ''}>Import</option>
-                        <option value="EXPORT" ${movementType eq 'EXPORT' ? 'selected' : ''}>Export</option>
-                    </select>
-                </div>
-
-                <div class="filter-group">
-                    <label>Ref Code</label>
-                    <input type="text" name="referenceCode" value="${referenceCode}" class="input" placeholder="IR... / ER...">
-                </div>
-
-                <div class="filter-actions d-flex gap-8">
-                    <button type="submit" class="btn btn-primary">Apply</button>
-                    <a href="${pageContext.request.contextPath}/home?p=stock-movement-history" class="btn btn-outline">Reset</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="card list-card">
-        <div class="card-header">
-            <div class="h2">Movement List</div>
-            <div class="paging-info">
-               Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
             </div>
-        </div>
-        <div class="card-body p-0">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th style="width:140px;">Date / Time</th>
-                        <th style="width:125px;">Product Code</th>
-                        <th>Product Name</th>
-                        <th style="width:100px;" class="text-center">Type</th>
-                        <th style="width:80px;" class="text-center">Qty</th>
-                        <th style="width:130px;">Ref Code</th>
-                        <th style="width:140px;">In Charge</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:choose>
-                        <c:when test="${empty rows}">
+
+            <div class="col-md-2">
+                <label class="form-label">From Date</label>
+                <input type="date" name="from" value="${fn:escapeXml(from)}" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">To Date</label>
+                <input type="date" name="to" value="${fn:escapeXml(to)}" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Type</label>
+                <select name="movementType" class="form-select">
+                    <option value="ALL" ${movementType eq 'ALL' ? 'selected' : ''}>All Types</option>
+                    <option value="IMPORT" ${movementType eq 'IMPORT' ? 'selected' : ''}>Import</option>
+                    <option value="EXPORT" ${movementType eq 'EXPORT' ? 'selected' : ''}>Export</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary w-100">Apply</button>
+                <a href="${ctx}/home?p=stock-movement-history" class="btn btn-outline-secondary"><i class="bx bx-refresh"></i></a>
+            </div>
+            
+            <div class="col-md-4">
+                <label class="form-label">Reference Code</label>
+                <input type="text" name="referenceCode" value="${fn:escapeXml(referenceCode)}" class="form-control" placeholder="IR... / ER...">
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between pb-0 mb-3">
+        <h5 class="m-0">Movement List</h5>
+        <div class="text-muted small">Total Found: <strong>${totalItems}</strong></div>
+    </div>
+    <div class="table-responsive text-nowrap">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th class="text-center">Date / Time</th>
+                    <th>Product Details</th>
+                    <th class="text-center">Type</th>
+                    <th class="text-center">Qty</th>
+                    <th class="text-center">Ref Code</th>
+                    <th class="text-center">In Charge</th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                <c:choose>
+                    <c:when test="${empty rows}">
+                        <tr><td colspan="6" class="text-center p-5 text-muted">No stock movement found.</td></tr>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="r" items="${rows}">
                             <tr>
-                                <td colspan="7" class="empty-state">
-                                    No stock movement found.
+                                <td class="text-center">
+                                    <small class="text-muted"><fmt:formatDate value="${r.movementTime}" pattern="dd/MM/yyyy HH:mm"/></small>
                                 </td>
+                                <td>
+                                    <span class="badge bg-label-info font-monospace small mb-1">${r.productCode}</span><br/>
+                                    <strong>${fn:escapeXml(r.productName)}</strong>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge ${r.movementType eq 'IMPORT' ? 'bg-label-success' : 'bg-label-info'}">
+                                        <i class="bx ${r.movementType eq 'IMPORT' ? 'bx-down-arrow-alt' : 'bx-up-arrow-alt'} me-1"></i>
+                                        ${r.movementType eq 'IMPORT' ? 'Import' : 'Export'}
+                                    </span>
+                                </td>
+                                <td class="text-center fw-bold">
+                                    <c:choose>
+                                        <c:when test="${r.qtyChange gt 0}">
+                                            <span class="text-success">+${r.qtyChange}</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="text-danger">${r.qtyChange}</span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td class="text-center">
+                                    <c:choose>
+                                        <c:when test="${r.movementType eq 'IMPORT'}">
+                                            <a class="fw-semibold text-primary" href="${ctx}/home?p=import-receipt-detail&id=${r.referenceId}">
+                                                ${r.referenceCode}
+                                            </a>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <a class="fw-semibold text-info" href="${ctx}/home?p=export-receipt-detail&id=${r.referenceId}">
+                                                ${r.referenceCode}
+                                            </a>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td class="text-center"><small class="fw-bold">${r.performedBy}</small></td>
                             </tr>
-                        </c:when>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
+            </tbody>
+        </table>
+    </div>
 
-                        <c:otherwise>
-                            <c:forEach var="r" items="${rows}">
-                                <tr>
-                                    <td class="text-muted fs-12">
-                                        <fmt:formatDate value="${r.movementTime}" pattern="dd/MM/yyyy HH:mm"/>
-                                    </td>
-                                    <td class="mono-text fs-12 text-primary">${r.productCode}</td>
-                                    <td class="fw-700">${r.productName}</td>
-                                    <td class="text-center">
-                                        <c:choose>
-                                            <c:when test="${r.movementType eq 'IMPORT'}">
-                                                <span class="badge badge-active">Import</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="badge badge-info">Export</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td class="text-center fw-700">
-                                        <c:choose>
-                                            <c:when test="${r.qtyChange gt 0}">
-                                                <span class="text-success">+${r.qtyChange}</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <span class="text-warning">${r.qtyChange}</span>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td class="mono-text fs-12">
-                                        <c:choose>
-                                            <c:when test="${r.movementType eq 'IMPORT'}">
-                                                <a class="text-primary text-underline" href="${pageContext.request.contextPath}/home?p=import-receipt-detail&id=${r.referenceId}">
-                                                    ${r.referenceCode}
-                                                </a>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <a class="text-primary text-underline" href="${pageContext.request.contextPath}/home?p=export-receipt-detail&id=${r.referenceId}">
-                                                    ${r.referenceCode}
-                                                </a>
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </td>
-                                    <td class="fs-12 text-muted fw-600">${r.performedBy}</td>
-                                </tr>
-                            </c:forEach>
-                        </c:otherwise>
-                    </c:choose>
-                </tbody>
-            </table>
-        </div>
+    <c:if test="${totalPages > 1}">
+        <c:url var="baseUrl" value="/home">
+            <c:param name="p" value="stock-movement-history"/>
+            <c:param name="keyword" value="${keyword}"/>
+            <c:param name="from" value="${from}"/>
+            <c:param name="to" value="${to}"/>
+            <c:param name="movementType" value="${movementType}"/>
+            <c:param name="referenceCode" value="${referenceCode}"/>
+            <c:param name="performedBy" value="${performedBy}"/>
+        </c:url>
 
-        <c:if test="${totalPages > 1}">
-            <div class="paging-footer p-16 border-t">
-                <div class="paging-info text-muted">
-                    Page <b>${page}</b> of <b>${totalPages}</b>
-                </div>
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <div class="text-muted small">
+                Page <strong>${page}</strong> of <strong>${totalPages}</strong>
+            </div>
 
-                <div class="paging d-flex gap-4">
-                    <c:url var="baseUrl" value="/home">
-                        <c:param name="p" value="stock-movement-history"/>
-                        <c:param name="keyword" value="${keyword}"/>
-                        <c:param name="from" value="${from}"/>
-                        <c:param name="to" value="${to}"/>
-                        <c:param name="movementType" value="${movementType}"/>
-                        <c:param name="referenceCode" value="${referenceCode}"/>
-                        <c:param name="performedBy" value="${performedBy}"/>
-                    </c:url>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <%-- Prev Button --%>
+                    <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="${page > 1 ? baseUrl.concat('&page=').concat(page-1) : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
+                    </li>
 
-                    <c:choose>
-                        <c:when test="${page > 1}">
-                            <a class="btn btn-sm btn-outline" href="${baseUrl}&page=${page - 1}">Prev</a>
-                        </c:when>
-                        <c:otherwise>
-                            <span class="btn btn-sm btn-outline disabled">Prev</span>
-                        </c:otherwise>
-                    </c:choose>
+                    <%-- Sliding Window logic --%>
+                    <c:set var="startPage" value="${page - 1 > 1 ? page - 1 : 1}"/>
+                    <c:set var="endPage"   value="${page + 1 < totalPages ? page + 1 : totalPages}"/>
 
-                    <c:set var="pgStart" value="${page - 1 < 1 ? 1 : page - 1}" />
-                    <c:set var="pgEnd" value="${pgStart + 2 > totalPages ? totalPages : pgStart + 2}" />
-                    <c:if test="${pgEnd == totalPages}">
-                        <c:set var="pgStart" value="${pgEnd - 2 < 1 ? 1 : pgEnd - 2}" />
+                    <c:if test="${startPage > 1}">
+                        <li class="page-item"><a class="page-link" href="${baseUrl}&page=1">1</a></li>
+                        <c:if test="${startPage > 2}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
                     </c:if>
 
-                    <c:forEach begin="${pgStart}" end="${pgEnd}" var="i">
-                        <c:choose>
-                            <c:when test="${i == page}">
-                                <span class="btn btn-sm btn-primary active">${i}</span>
-                            </c:when>
-                            <c:otherwise>
-                                <a class="btn btn-sm btn-outline" href="${baseUrl}&page=${i}">${i}</a>
-                            </c:otherwise>
-                        </c:choose>
+                    <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                        <li class="page-item ${i == page ? 'active' : ''}"><a class="page-link" href="${baseUrl}&page=${i}">${i}</a></li>
                     </c:forEach>
 
-                    <c:choose>
-                        <c:when test="${page < totalPages}">
-                            <a class="btn btn-sm btn-outline" href="${baseUrl}&page=${page + 1}">Next</a>
-                        </c:when>
-                        <c:otherwise>
-                            <span class="btn btn-sm btn-outline disabled">Next</span>
-                        </c:otherwise>
-                    </c:choose>
-                </div>
-            </div>
-        </c:if>
-    </div>
-</div>
+                    <c:if test="${endPage < totalPages}">
+                        <c:if test="${endPage < totalPages - 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                        <li class="page-item"><a class="page-link" href="${baseUrl}&page=${totalPages}">${totalPages}</a></li>
+                    </c:if>
+
+                    <%-- Next Button --%>
+                    <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="${page < totalPages ? baseUrl.concat('&page=').concat(page+1) : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </c:if>
+</div>
+

@@ -79,6 +79,7 @@ public class Home extends HttpServlet {
         request.setAttribute("contentPage", contentPage);
         request.setAttribute("currentPage", p);
         request.setAttribute("role", role);
+        request.setAttribute("ctx", request.getContextPath());
 
         request.getRequestDispatcher("homepage.jsp").forward(request, response);
     }

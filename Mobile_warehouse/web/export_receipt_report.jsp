@@ -118,42 +118,35 @@
       </table>
 
       <c:if test="${totalPages > 1}">
-        <div class="d-flex justify-between align-center mt-20">
-          <div class="fs-13 text-muted">Page <b>${page}</b> of <b>${totalPages}</b></div>
-          <div class="d-flex gap-4">
-            <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <div class="text-muted small">
+                Page <strong>${page}</strong> of <strong>${totalPages}</strong>
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
+                    
+                    <%-- Prev Button --%>
+                    <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="${page > 1 ? ctx.concat('/export-receipt-report?').concat(qsBase).concat('&page=').concat(page-1) : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
+                    </li>
 
-            <c:choose>
-              <c:when test="${page > 1}">
-                <a class="btn btn-sm btn-outline" href="${ctx}/export-receipt-report?${qsBase}&page=${page-1}">Prev</a>
-              </c:when>
-              <c:otherwise>
-                <span class="btn btn-sm btn-outline disabled">Prev</span>
-              </c:otherwise>
-            </c:choose>
+                    <%-- Page Numbers --%>
+                    <c:forEach var="p" begin="1" end="${totalPages}">
+                        <li class="page-item ${p == page ? 'active' : ''}">
+                            <a class="page-link" href="${ctx}/export-receipt-report?${qsBase}&page=${p}">${p}</a>
+                        </li>
+                    </c:forEach>
 
-            <c:forEach var="p" begin="1" end="${totalPages}">
-              <c:choose>
-                <c:when test="${p == page}">
-                  <span class="btn btn-sm btn-primary">${p}</span>
-                </c:when>
-                <c:otherwise>
-                  <a class="btn btn-sm btn-outline" href="${ctx}/export-receipt-report?${qsBase}&page=${p}">${p}</a>
-                </c:otherwise>
-              </c:choose>
-            </c:forEach>
-
-            <c:choose>
-              <c:when test="${page < totalPages}">
-                <a class="btn btn-sm btn-outline" href="${ctx}/export-receipt-report?${qsBase}&page=${page+1}">Next</a>
-              </c:when>
-              <c:otherwise>
-                <span class="btn btn-sm btn-outline disabled">Next</span>
-              </c:otherwise>
-            </c:choose>
-          </div>
+                    <%-- Next Button --%>
+                    <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="${page < totalPages ? ctx.concat('/export-receipt-report?').concat(qsBase).concat('&page=').concat(page+1) : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
         </div>
       </c:if>
+
     </div>
   </div>
 </div>

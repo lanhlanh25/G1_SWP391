@@ -34,8 +34,6 @@
                 <div class="dp-lb">Brand</div>
                 <div class="dp-val">${product.brandName}</div>
 
-                <div class="dp-lb">Model</div>
-                <div class="dp-val">${product.model}</div>
 
                 <div class="dp-lb">Status</div>
                 <div class="dp-val">${product.status}</div>

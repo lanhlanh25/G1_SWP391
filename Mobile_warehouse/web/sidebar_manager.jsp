@@ -15,246 +15,240 @@
     boolean inventoryReportActive = uri.equals(ctx + "/inventory-report");
     boolean importReportActive = uri.equals(ctx + "/import-receipt-report");
     boolean exportReportActive = uri.equals(ctx + "/export-receipt-report");
+    
+    boolean importActive = "import-receipt-list".equals(currentPage) ||
+                          "create-import-receipt".equals(currentPage) ||
+                          "import-receipt-detail".equals(currentPage) ||
+                          "request-delete-import-receipt-list".equals(currentPage) ||
+                          importReportActive;
+                          
+    boolean exportActive = "export-receipt-list".equals(currentPage) ||
+                          "export-receipt-detail".equals(currentPage) ||
+                          exportReportActive;
+                          
+    boolean importReqActive = "import-request-list".equals(currentPage) ||
+                             "import-request-detail".equals(currentPage);
+                             
+    boolean exportReqActive = "export-request-list".equals(currentPage) ||
+                             "export-request-detail".equals(currentPage);
+                             
+    boolean brandActive = "brand-add".equals(currentPage) ||
+                         "brand-list".equals(currentPage) ||
+                         "brand-detail".equals(currentPage) ||
+                         "brand-update".equals(currentPage) ||
+                         "brand-stats".equals(currentPage) ||
+                         "brand-stats-detail".equals(currentPage);
+                         
+    boolean supplierActive = "add_supplier".equals(currentPage) ||
+                            "view_supplier".equals(currentPage) ||
+                            "supplier_detail".equals(currentPage) ||
+                            "update_supplier".equals(currentPage) ||
+                            "supplier_inactive".equals(currentPage) ||
+                            "view_history".equals(currentPage);
+                            
+    boolean productActive = "product-add".equals(currentPage) ||
+                           "product-list".equals(currentPage) ||
+                           "product-detail".equals(currentPage) ||
+                           "sku-add".equals(currentPage);
 %>
 
-<div>
+<li class="menu-item <%= "dashboard".equals(currentPage) ? "active" : "" %>">
+    <a href="<%=ctx%>/home?p=dashboard" class="menu-link">
+        <div data-i18n="Dashboard">Dashboard</div>
+    </a>
+</li>
 
-    <div class="section-title">Overview</div>
-    <ul>
-        <li>
-            <a class="<%= "dashboard".equals(currentPage) ? "active" : "" %>"
-               href="<%=ctx%>/home?p=dashboard">
-                Dashboard
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Warehouse</span>
+</li>
+
+<li class="menu-item <%= inventoryOverviewActive ? "active" : "" %>">
+    <a href="<%=ctx%>/inventory" class="menu-link">
+        <div data-i18n="Inventory">Inventory Management</div>
+    </a>
+</li>
+
+<li class="menu-item <%= inventoryReportActive ? "active" : "" %>">
+    <a href="<%=ctx%>/inventory-report" class="menu-link">
+        <div data-i18n="Inventory Report">Inventory Report</div>
+    </a>
+</li>
+
+<li class="menu-item <%= inventoryCountActive ? "active" : "" %>">
+    <a href="<%=ctx%>/inventory-count" class="menu-link">
+        <div data-i18n="Inventory Count">Inventory Count</div>
+    </a>
+</li>
+
+<li class="menu-item <%= "variant-matrix".equals(currentPage) ? "active" : "" %>">
+    <a href="<%=ctx%>/home?p=variant-matrix" class="menu-link">
+        <div data-i18n="Variant Matrix">Variant Matrix</div>
+    </a>
+</li>
+
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Transactions</span>
+</li>
+
+<li class="menu-item <%= importActive ? "active open" : "" %>">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <div data-i18n="Import Receipts">Import Receipts</div>
+    </a>
+    <ul class="menu-sub">
+        <li class="menu-item <%= "import-receipt-list".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=import-receipt-list" class="menu-link">
+                <div data-i18n="Receipt List">Receipt List</div>
+            </a>
+        </li>
+        <li class="menu-item <%= importReportActive ? "active" : "" %>">
+            <a href="<%=ctx%>/import-receipt-report" class="menu-link">
+                <div data-i18n="Reports">Reports</div>
             </a>
         </li>
     </ul>
+</li>
 
-    <div class="section-title">Warehouse</div>
-    <ul>
-        <li>
-            <a class="<%= inventoryOverviewActive ? "active" : "" %>"
-               href="<%=ctx%>/inventory">
-                Inventory Management
+<li class="menu-item <%= exportActive ? "active open" : "" %>">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <div data-i18n="Export Receipts">Export Receipts</div>
+    </a>
+    <ul class="menu-sub">
+        <li class="menu-item <%= "export-receipt-list".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=export-receipt-list" class="menu-link">
+                <div data-i18n="Receipt List">Receipt List</div>
             </a>
         </li>
-        <li>
-            <a class="<%= inventoryReportActive ? "active" : "" %>"
-               href="<%=ctx%>/inventory-report">
-                Inventory Report
+        <li class="menu-item <%= exportReportActive ? "active" : "" %>">
+            <a href="<%=ctx%>/export-receipt-report" class="menu-link">
+                <div data-i18n="Reports">Reports</div>
             </a>
         </li>
-        <li>
-            <a class="<%= inventoryCountActive ? "active" : "" %>"
-               href="<%=ctx%>/inventory-count">
-                Inventory Count
-            </a>
-        </li>
-        <li>
-            <a class="<%= "variant-matrix".equals(currentPage) ? "active" : "" %>"
-               href="<%=ctx%>/home?p=variant-matrix">
-                Variant Matrix
-            </a>
-        </li>
-        <%--<li>
-            <a class="<%= "low-stock-report".equals(currentPage) ? "active" : "" %>"
-               href="<%=ctx%>/home?p=low-stock-report">
-                Low Stock Report
-            </a>
-</li>--%>
     </ul>
+</li>
 
-    <div class="section-title">Transactions</div>
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Requests</span>
+</li>
 
-    <details <%= (
-        "import-receipt-list".equals(currentPage) ||
-        "create-import-receipt".equals(currentPage) ||
-        "import-receipt-detail".equals(currentPage) ||
-        "request-delete-import-receipt-list".equals(currentPage) ||
-        importReportActive
-    ) ? "open" : "" %>>
-        <summary>Import Receipts</summary>
-        <ul>
-            <li>
-                <a class="<%= "import-receipt-list".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=import-receipt-list">
-                    Receipt List
-                </a>
-            </li>
-
-
-            <li>
-                <a class="<%= importReportActive ? "active" : "" %>"
-                   href="<%=ctx%>/import-receipt-report">
-                    Reports
-                </a>
-            </li>
-        </ul>
-    </details>
-
-    <details
-        <%= (
-        "export-receipt-list".equals(currentPage) ||
-        "export-receipt-detail".equals(currentPage) ||
-        exportReportActive
-    ) ? "open" : "" %>>
-        <summary>Export Receipts</summary>
-        <ul>
-            <li>
-                <a class="<%= "export-receipt-list".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=export-receipt-list">
-                    Receipt List
-                </a>
-            </li>
-            <li>
-                <a class="<%= exportReportActive ? "active" : "" %>"
-                   href="<%=ctx%>/export-receipt-report">
-                    Reports
-                </a>
-            </li>
-        </ul>
-    </details>
-
-    <div class="section-title">Requests</div>
-
-    <details <%= (
-        "import-request-list".equals(currentPage) ||
-        "import-request-detail".equals(currentPage)
-    ) ? "open" : "" %>>
-        <summary>Import Requests</summary>
-        <ul>
-            <li>
-                <a class="<%= "import-request-list".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=import-request-list">
-                    Request List
-                </a>
-            </li>
-        </ul>
-    </details>
-
-    <details <%= (
-        "export-request-list".equals(currentPage) ||
-        "export-request-detail".equals(currentPage)
-    ) ? "open" : "" %>>
-        <summary>Export Requests</summary>
-        <ul>
-            <li>
-                <a class="<%= "export-request-list".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=export-request-list">
-                    Request List
-                </a>
-            </li>
-        </ul>
-    </details>
-
-    <div class="section-title">Master Data</div>
-
-    <details <%= (
-        "brand-add".equals(currentPage) ||
-        "brand-list".equals(currentPage) ||
-        "brand-detail".equals(currentPage) ||
-        "brand-update".equals(currentPage) ||
-        "brand-disable".equals(currentPage) ||
-        "brand-stats".equals(currentPage) ||
-        "brand-stats-detail".equals(currentPage)
-    ) ? "open" : "" %>>
-        <summary>Brands</summary>
-        <ul>
-            <li>
-                <a class="<%= "brand-add".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=brand-add">
-                    Add Brand
-                </a>
-            </li>
-            <li>
-                <a class="<%= "brand-list".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=brand-list">
-                    Brand List
-                </a>
-            </li>
-            <li>
-                <a class="<%= ("brand-stats".equals(currentPage) || "brand-stats-detail".equals(currentPage)) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=brand-stats">
-                    Brand Statistics
-                </a>
-            </li>
-        </ul>
-    </details>
-
-    <details <%= (
-        "add_supplier".equals(currentPage) ||
-        "view_supplier".equals(currentPage) ||
-        "supplier_detail".equals(currentPage) ||
-        "update_supplier".equals(currentPage) ||
-        "supplier_inactive".equals(currentPage) ||
-        "view_history".equals(currentPage)
-    ) ? "open" : "" %>>
-        <summary>Suppliers</summary>
-        <ul>
-            <li>
-                <a class="<%= "add_supplier".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=add_supplier">
-                    Add Supplier
-                </a>
-            </li>
-            <li>
-                <a class="<%= ("view_supplier".equals(currentPage) || "supplier_detail".equals(currentPage)) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=view_supplier">
-                    Supplier List
-                </a>
-            </li>
-        </ul>
-    </details>
-
-    <details <%= (
-        "product-add".equals(currentPage) ||
-        "product-list".equals(currentPage) ||
-        "product-detail".equals(currentPage) ||
-        "sku-add".equals(currentPage)
-    ) ? "open" : "" %>>
-        <summary>Products</summary>
-        <ul>
-            <li>
-                <a class="<%= "product-add".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=product-add">
-                    Add Product
-                </a>
-            </li>
-            <li>
-                <a class="<%= "sku-add".equals(currentPage) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=sku-add">
-                    Add SKU
-                </a>
-            </li>
-            <li>
-                <a class="<%= ("product-list".equals(currentPage) || "product-detail".equals(currentPage)) ? "active" : "" %>"
-                   href="<%=ctx%>/home?p=product-list">
-                    Product List
-                </a>
-            </li>
-        </ul>
-
-
-
-
-    </details>
-    <ul>
-        <li>
-            <a class="<%= "export-center".equals(currentPage) ? "active" : "" %>"
-               href="<%=ctx%>/home?p=export-center">
-                Export Center
+<li class="menu-item <%= importReqActive ? "active open" : "" %>">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <div data-i18n="Import Requests">Import Requests</div>
+    </a>
+    <ul class="menu-sub">
+        <li class="menu-item <%= "import-request-list".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=import-request-list" class="menu-link">
+                <div data-i18n="Request List">Request List</div>
             </a>
         </li>
-    </ul>       
-    <a class="${currentPage == 'low-stock-report' ? 'active' : ''}"
-       href="${pageContext.request.contextPath}/home?p=low-stock-report">
-        Low Stock Report
-    </a> 
-    <a href="${pageContext.request.contextPath}/home?p=best-selling-product-statistics"
-       class="${currentPage == 'best-selling-product-statistics' ? 'active' : ''}">
-        Best-selling Product Statistics
+    </ul>
+</li>
+
+<li class="menu-item <%= exportReqActive ? "active open" : "" %>">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <div data-i18n="Export Requests">Export Requests</div>
     </a>
-    <a href="${pageContext.request.contextPath}/home?p=stock-movement-history"
-       class="${currentPage == 'stock-movement-history' ? 'active' : ''}">
-        Stock Movement History
+    <ul class="menu-sub">
+        <li class="menu-item <%= "export-request-list".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=export-request-list" class="menu-link">
+                <div data-i18n="Request List">Request List</div>
+            </a>
+        </li>
+    </ul>
+</li>
+
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Master Data</span>
+</li>
+
+<li class="menu-item <%= brandActive ? "active open" : "" %>">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <div data-i18n="Brands">Brands</div>
     </a>
-</div>
+    <ul class="menu-sub">
+        <li class="menu-item <%= "brand-list".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=brand-list" class="menu-link">
+                <div data-i18n="Brand List">Brand List</div>
+            </a>
+        </li>
+        <li class="menu-item <%= "brand-add".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=brand-add" class="menu-link">
+                <div data-i18n="Add Brand">Add Brand</div>
+            </a>
+        </li>
+        <li class="menu-item <%= ("brand-stats".equals(currentPage) || "brand-stats-detail".equals(currentPage)) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=brand-stats" class="menu-link">
+                <div data-i18n="Brand Statistics">Brand Statistics</div>
+            </a>
+        </li>
+    </ul>
+</li>
+
+<li class="menu-item <%= supplierActive ? "active open" : "" %>">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <div data-i18n="Suppliers">Suppliers</div>
+    </a>
+    <ul class="menu-sub">
+        <li class="menu-item <%= ("view_supplier".equals(currentPage) || "supplier_detail".equals(currentPage)) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=view_supplier" class="menu-link">
+                <div data-i18n="Supplier List">Supplier List</div>
+            </a>
+        </li>
+        <li class="menu-item <%= "add_supplier".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=add_supplier" class="menu-link">
+                <div data-i18n="Add Supplier">Add Supplier</div>
+            </a>
+        </li>
+    </ul>
+</li>
+
+<li class="menu-item <%= productActive ? "active open" : "" %>">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <div data-i18n="Products">Products</div>
+    </a>
+    <ul class="menu-sub">
+        <li class="menu-item <%= ("product-list".equals(currentPage) || "product-detail".equals(currentPage)) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=product-list" class="menu-link">
+                <div data-i18n="Product List">Product List</div>
+            </a>
+        </li>
+        <li class="menu-item <%= "product-add".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=product-add" class="menu-link">
+                <div data-i18n="Add Product">Add Product</div>
+            </a>
+        </li>
+        <li class="menu-item <%= "sku-add".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=sku-add" class="menu-link">
+                <div data-i18n="Add SKU">Add SKU</div>
+            </a>
+        </li>
+    </ul>
+</li>
+
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Advanced</span>
+</li>
+
+<li class="menu-item <%= "export-center".equals(currentPage) ? "active" : "" %>">
+    <a href="<%=ctx%>/home?p=export-center" class="menu-link">
+        <div data-i18n="Export Center">Export Center</div>
+    </a>
+</li>
+
+<li class="menu-item <%= "low-stock-report".equals(currentPage) ? "active" : "" %>">
+    <a href="<%=ctx%>/home?p=low-stock-report" class="menu-link">
+        <div data-i18n="Low Stock Report">Low Stock Report</div>
+    </a>
+</li>
+
+<li class="menu-item <%= "best-selling-product-statistics".equals(currentPage) ? "active" : "" %>">
+    <a href="<%=ctx%>/home?p=best-selling-product-statistics" class="menu-link">
+        <div data-i18n="Best-selling Products">Best-selling Products</div>
+    </a>
+</li>
+
+<li class="menu-item <%= "stock-movement-history".equals(currentPage) ? "active" : "" %>">
+    <a href="<%=ctx%>/home?p=stock-movement-history" class="menu-link">
+        <div data-i18n="Stock Movement">Stock Movement</div>
+    </a>
+</li>
+

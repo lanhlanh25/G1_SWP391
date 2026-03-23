@@ -3,158 +3,158 @@
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
-<div class="page-wrap">
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Warehouse /</span> Export Request Management
+</h4>
 
-    <div class="topbar">
-        <div class="d-flex align-center gap-12">
-            <a class="btn" href="${ctx}/home?p=dashboard">← Back</a>
-            <h1 class="h1">Export Request Management</h1>
-        </div>
-    </div>
-
-    <div class="card mb-16">
-        <div class="card-body">
-            <form method="get" action="${ctx}/home">
-                <input type="hidden" name="p" value="export-request-list"/>
-                <div class="filters">
-                    <div class="filter-group">
-                        <label class="label">Search</label>
-                        <input class="input" type="text" name="q" placeholder="Request code..." value="${fn:escapeXml(q)}"/>
-                    </div>
-                    <div class="filter-group">
-                        <label class="label">Status</label>
-                        <select class="input" name="status">
-                            <option value="">All Statuses</option>
-                            <option value="NEW" ${status eq 'NEW' ? 'selected' : ''}>New</option>
-                            <option value="COMPLETE" ${status eq 'COMPLETE' ? 'selected' : ''}>Complete</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="label">Request Date</label>
-                        <input class="input" type="date" name="reqDate" value="${reqDate}"/>
-                    </div>
-                    <div class="filter-group">
-                        <label class="label">Exp. Export Date</label>
-                        <input class="input" type="date" name="expDate" value="${expDate}"/>
-                    </div>
-                    <div class="filter-actions d-flex gap-8 align-end">
-                        <button class="btn btn-primary" type="submit">Apply</button>
-                        <a class="btn btn-outline" href="${ctx}/home?p=export-request-list">Reset</a>
-                    </div>
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="${ctx}/home" class="row g-3 px-1">
+            <input type="hidden" name="p" value="export-request-list"/>
+            <input type="hidden" name="page" value="1"/>
+            
+            <div class="col-md-3">
+                <label class="form-label">Search Request</label>
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="bx bx-search"></i></span>
+                    <input type="text" class="form-control" name="q" placeholder="Request code..." value="${fn:escapeXml(q)}"/>
                 </div>
-            </form>
-        </div>
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="NEW" ${status eq 'NEW' ? 'selected' : ''}>New</option>
+                    <option value="COMPLETE" ${status eq 'COMPLETE' ? 'selected' : ''}>Complete</option>
+                </select>
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label">Request Date</label>
+                <input class="form-control" type="date" name="reqDate" value="${reqDate}"/>
+            </div>
+            
+            <div class="col-md-2">
+                <label class="form-label">Expected Date</label>
+                <input class="form-control" type="date" name="expDate" value="${expDate}"/>
+            </div>
+            
+            <div class="col-md-3 d-flex align-items-end gap-2">
+                <button class="btn btn-primary w-100" type="submit">Apply</button>
+                <a class="btn btn-outline-secondary" href="${ctx}/home?p=export-request-list"><i class="bx bx-refresh"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">Export Requests</h5>
+        <div class="text-muted small">Total: <strong>${totalItems}</strong></div>
+    </div>
+    <div class="table-responsive text-nowrap">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Request Code</th>
+                    <th>Created By</th>
+                    <th class="text-center">Request Date</th>
+                    <th class="text-center">Expected Date</th>
+                    <th class="text-center">Items</th>
+                    <th class="text-center">Total Qty</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                <c:if test="${empty erList}">
+                    <tr><td colspan="8" class="text-center p-4">No export requests found.</td></tr>
+                </c:if>
+                <c:forEach var="r" items="${erList}">
+                    <tr>
+                        <td><span class="badge bg-label-secondary font-monospace fw-bold">${fn:escapeXml(r.requestCode)}</span></td>
+                        <td><strong>${fn:escapeXml(r.createdByName)}</strong></td>
+                        <td class="text-center"><small class="text-muted"><c:out value="${r.requestDate}"/></small></td>
+                        <td class="text-center"><small class="text-muted"><c:out value="${r.expectedExportDate}"/></small></td>
+                        <td class="text-center"><span class="fw-bold">${r.totalItems}</span></td>
+                        <td class="text-center"><span class="fw-bold text-primary">${r.totalQty}</span></td>
+                        <td class="text-center">
+                            <span class="badge ${r.status eq 'COMPLETE' ? 'bg-label-success' : 'bg-label-warning'}">
+                                ${r.status eq 'COMPLETE' ? 'Complete' : 'New'}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="dropdown">
+                                <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <i class="bx bx-dots-vertical-rounded"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item" href="${ctx}/home?p=export-request-detail&id=${r.requestId}"><i class="bx bx-show-alt me-1"></i> View Detail</a>
+                                    <c:if test="${role eq 'STAFF'}">
+                                        <c:choose>
+                                            <c:when test="${r.status eq 'COMPLETE'}">
+                                                <a class="dropdown-item disabled" href="javascript:void(0);"><i class="bx bx-check-circle me-1"></i> Receipt Created</a>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <a class="dropdown-item text-primary" href="${ctx}/home?p=create-export-receipt&requestId=${r.requestId}"><i class="bx bx-plus-circle me-1"></i> Create Receipt</a>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </c:if>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </c:forEach>
+            </tbody>
+        </table>
     </div>
 
-    <div class="card">
-        <div class="card-body" style="padding:0;">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th style="width:140px;">Request Code</th>
-                        <th>Created By</th>
-                        <th style="width:140px;">Request Date</th>
-                        <th style="width:140px;">Expected Date</th>
-                        <th style="width:100px;" class="text-center">Items</th>
-                        <th style="width:100px;" class="text-center">Total Qty</th>
-                        <th style="width:120px;" class="text-center">Status</th>
-                        <th style="width:180px;" class="text-center">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <c:if test="${empty erList}">
-                        <tr>
-                            <td colspan="8" class="small muted" style="padding:20px; text-align:center;">No requests found.</td>
-                        </tr>
+    <c:if test="${totalPages > 1}">
+        <c:url var="baseUrl" value="/home">
+            <c:param name="p" value="export-request-list"/>
+            <c:param name="q" value="${q}"/>
+            <c:param name="status" value="${status}"/>
+            <c:param name="reqDate" value="${reqDate}"/>
+            <c:param name="expDate" value="${expDate}"/>
+        </c:url>
+
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <div class="text-muted small">
+                Page <strong>${page}</strong> of <strong>${totalPages}</strong>
+            </div>
+
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <%-- Prev Button --%>
+                    <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="${page > 1 ? baseUrl.concat('&page=').concat(page-1) : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
+                    </li>
+
+                    <%-- Sliding Window logic --%>
+                    <c:set var="startPage" value="${page - 1 > 1 ? page - 1 : 1}"/>
+                    <c:set var="endPage"   value="${page + 1 < totalPages ? page + 1 : totalPages}"/>
+
+                    <c:if test="${startPage > 1}">
+                        <li class="page-item"><a class="page-link" href="${baseUrl}&page=1">1</a></li>
+                        <c:if test="${startPage > 2}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
                     </c:if>
 
-                    <c:forEach var="r" items="${erList}">
-                        <tr>
-                            <td class="fw-600">${fn:escapeXml(r.requestCode)}</td>
-                            <td>${fn:escapeXml(r.createdByName)}</td>
-                            <td class="text-muted"><c:out value="${r.requestDate}"/></td>
-                            <td class="text-muted"><c:out value="${r.expectedExportDate}"/></td>
-                            <td class="text-center fw-600">${r.totalItems}</td>
-                            <td class="text-center fw-700">${r.totalQty}</td>
-                            <td class="text-center">
-                                <c:choose>
-                                    <c:when test="${r.status eq 'COMPLETE'}">
-                                        <span class="badge badge-active">Complete</span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="badge badge-warning">New</span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
-                            <td style="text-align:center;">
-                                <c:if test="${role eq 'STAFF'}">
-                                    <c:choose>
-                                        <c:when test="${r.status eq 'COMPLETE'}">
-                                            <span class="btn btn-sm" style="pointer-events:none; opacity:.6;">Created</span>
-                                        </c:when>
-                                        <c:otherwise>
-                                            <a class="btn btn-sm" href="${ctx}/home?p=create-export-receipt&requestId=${r.requestId}">Create</a>
-                                        </c:otherwise>
-                                    </c:choose>
-                                </c:if>
-
-                                <a class="btn btn-sm" href="${ctx}/home?p=export-request-detail&id=${r.requestId}">View</a>
-                            </td>
-                        </tr>
+                    <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                        <li class="page-item ${i == page ? 'active' : ''}"><a class="page-link" href="${baseUrl}&page=${i}">${i}</a></li>
                     </c:forEach>
-                </tbody>
-            </table>
+
+                    <c:if test="${endPage < totalPages}">
+                        <c:if test="${endPage < totalPages - 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                        <li class="page-item"><a class="page-link" href="${baseUrl}&page=${totalPages}">${totalPages}</a></li>
+                    </c:if>
+
+                    <%-- Next Button --%>
+                    <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="${page < totalPages ? baseUrl.concat('&page=').concat(page+1) : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
         </div>
-    </div>
-
-    <c:url var="baseUrl" value="/home">
-        <c:param name="p" value="export-request-list"/>
-        <c:param name="q" value="${q}"/>
-        <c:param name="status" value="${status}"/>
-        <c:param name="reqDate" value="${reqDate}"/>
-        <c:param name="expDate" value="${expDate}"/>
-    </c:url>
-
-    <div class="paging-footer">
-        <div class="paging-info">
-            Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
-        </div>
-        <div class="paging">
-            <c:set var="pgStart" value="${page - 1 < 1 ? 1 : page - 1}" />
-            <c:set var="pgEnd" value="${pgStart + 2 > totalPages ? totalPages : pgStart + 2}" />
-            <c:if test="${pgEnd == totalPages}">
-                <c:set var="pgStart" value="${pgEnd - 2 < 1 ? 1 : pgEnd - 2}" />
-            </c:if>
-
-            <c:choose>
-                <c:when test="${page > 1}">
-                    <a class="paging-btn" href="${baseUrl}&page=${page-1}">← Prev</a>
-                </c:when>
-                <c:otherwise>
-                    <span class="paging-btn disabled">← Prev</span>
-                </c:otherwise>
-            </c:choose>
-
-            <c:forEach var="i" begin="${pgStart}" end="${pgEnd}">
-                <c:choose>
-                    <c:when test="${i==page}">
-                        <span class="paging-btn active">${i}</span>
-                    </c:when>
-                    <c:otherwise>
-                        <a class="paging-btn" href="${baseUrl}&page=${i}">${i}</a>
-                    </c:otherwise>
-                </c:choose>
-            </c:forEach>
-
-            <c:choose>
-                <c:when test="${page < totalPages}">
-                    <a class="paging-btn" href="${baseUrl}&page=${page+1}">Next →</a>
-                </c:when>
-                <c:otherwise>
-                    <span class="paging-btn disabled">Next →</span>
-                </c:otherwise>
-            </c:choose>
-        </div>
-    </div>
-
-</div>
+    </c:if>
+</div>

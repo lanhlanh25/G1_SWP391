@@ -1,66 +1,61 @@
-<%-- 
-    Document   : brand_detail
-    Created on : Jan 27, 2026, 11:19:55 PM
-    Author     : ADMIN
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
-<%
-  String ctx = request.getContextPath();
-%>
-<c:set var="role" value="${sessionScope.roleName}" />
 
-<div class="page-wrap-md">
-  <div class="topbar">
-    <div class="d-flex align-center gap-12">
-      <h1 class="h1">Brand Details</h1>
+<c:set var="isManager" value="${not empty sessionScope.roleName && sessionScope.roleName.toUpperCase() == 'MANAGER'}"/>
+
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Master Data / Brands /</span> Brand Details
+</h4>
+
+<c:if test="${not empty param.msg}">
+    <div class="alert alert-success alert-dismissible" role="alert">
+        ${param.msg}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <div class="d-flex gap-8 align-center">
-      <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
-        <a class="btn btn-primary" href="<%=ctx%>/home?p=brand-update&id=${brand.brandId}">Update</a>
-      </c:if>
-      <a class="btn btn-outline" href="<%=ctx%>/home?p=brand-list">← Back</a>
+</c:if>
+
+<div class="card mb-4">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">General Information</h5>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-secondary btn-sm" href="${ctx}/home?p=brand-list">
+                <i class="bx bx-arrow-back me-1"></i> Back to List
+            </a>
+            <c:if test="${isManager}">
+                <a class="btn btn-primary btn-sm" href="${ctx}/home?p=brand-update&id=${brand.brandId}">
+                    <i class="bx bx-edit-alt me-1"></i> Update
+                </a>
+            </c:if>
+        </div>
     </div>
-  </div>
-
-  <c:if test="${not empty param.msg}">
-    <div class="msg-ok">${param.msg}</div>
-  </c:if>
-
-  <div class="card">
     <div class="card-body">
-      <table class="table">
-        <tbody>
-          <tr>
-            <th style="width:180px;">Brand Name</th>
-            <td class="fw-600">${brand.brandName}</td>
-          </tr>
-          <tr>
-            <th>Description</th>
-            <td class="text-muted fs-14">${brand.description}</td>
-          </tr>
-          <tr>
-            <th>Status</th>
-            <td>
-              <span class="badge ${brand.active ? 'badge-active' : 'badge-inactive'}">
-                <c:choose>
-                  <c:when test="${brand.active}">Active</c:when>
-                  <c:otherwise>Inactive</c:otherwise>
-                </c:choose>
-              </span>
-            </td>
-          </tr>
-          <tr>
-            <th>Creation Date</th>
-            <td class="text-muted"><c:out value="${brand.createdAt}"/></td>
-          </tr>
-          <tr>
-            <th>Last Updated</th>
-            <td class="text-muted"><c:out value="${brand.updatedAt}"/></td>
-          </tr>
-        </tbody>
-      </table>
+        <table class="table table-borderless">
+            <tbody>
+                <tr>
+                    <th class="ps-0" style="width: 200px;">Brand Name</th>
+                    <td class="fw-bold fs-5">${brand.brandName}</td>
+                </tr>
+                <tr>
+                    <th class="ps-0">Status</th>
+                    <td>
+                        <span class="badge ${brand.active ? 'bg-label-success' : 'bg-label-secondary'}">
+                            ${brand.active ? 'Active' : 'Inactive'}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="ps-0">Description</th>
+                    <td class="text-muted">${empty brand.description ? 'No description provided' : brand.description}</td>
+                </tr>
+                <tr>
+                    <th class="ps-0">Created At</th>
+                    <td><span class="text-muted"><c:out value="${brand.createdAt}"/></span></td>
+                </tr>
+                <tr>
+                    <th class="ps-0">Last Updated</th>
+                    <td><span class="text-muted"><c:out value="${brand.updatedAt}"/></span></td>
+                </tr>
+            </tbody>
+        </table>
     </div>
-  </div>
 </div>

@@ -1,264 +1,257 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 
-<div class="page-wrap">
-    <div class="topbar">
-        <div class="d-flex align-center gap-12">
-            <h1 class="h1">Low Stock Report</h1>
-            <span class="text-muted fs-14 mt-4">Inventory below reorder levels</span>
-        </div>
-        <div class="d-flex gap-8 align-center">
-            <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=dashboard">← Dashboard</a>
-        </div>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Advanced /</span> Low Stock Report
+</h4>
+
+<%-- Alerts --%>
+<c:if test="${not empty err || not empty param.err}">
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        ${not empty err ? err : param.err}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
+</c:if>
 
-    <c:if test="${not empty err}">
-        <div class="msg-err mb-16">${err}</div>
-    </c:if>
-    <c:if test="${not empty param.err}">
-        <div class="msg-err mb-16">${param.err}</div>
-    </c:if>
-
-    <div class="stats-grid mb-16">
-        <div class="card report-stat-card report-tone-danger p-20 d-flex justify-between align-center">
-            <div>
-                <div class="muted fs-12 uppercase mb-4">Urgent Attention</div>
-                <div class="h2 m-0 text-danger">${summary.outOfStock}</div>
-                <div class="fs-10 text-muted mt-4">Totally Out of Stock</div>
-            </div>
-        </div>
-        <div class="card report-stat-card report-tone-warning p-20 d-flex justify-between align-center">
-            <div>
-                <div class="muted fs-12 uppercase mb-4">Below ROP</div>
-                <div class="h2 m-0 text-warning">${summary.productsBelowRop}</div>
-                <div class="fs-10 text-muted mt-4">Action Required</div>
-            </div>
-        </div>
-        <div class="card report-stat-card report-tone-primary p-20 d-flex justify-between align-center">
-            <div>
-                <div class="muted fs-12 uppercase mb-4">Pending Reorder</div>
-                <div class="h2 m-0 text-primary">${summary.reorderNeeded}</div>
-                <div class="fs-10 text-muted mt-4">In Pipeline</div>
-            </div>
-        </div>
-        <div class="card report-stat-card report-tone-info p-20 d-flex justify-between align-center">
-            <div>
-                <div class="muted fs-12 uppercase mb-4">Total Monitor</div>
-                <div class="h2 m-0">${summary.totalProducts}</div>
-                <div class="fs-10 text-muted mt-4">In Active Catalog</div>
+<%-- Stat Cards --%>
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-2">
+                        <span class="avatar-initial rounded bg-label-danger"><i class="bx bx-error fs-4"></i></span>
+                    </div>
+                    <h4 class="ms-1 mb-0 text-danger">${summary.outOfStock}</h4>
+                </div>
+                <p class="mb-0 small text-muted">Totally Out of Stock</p>
             </div>
         </div>
     </div>
-
-    <div class="card mb-16">
-        <div class="card-body">
-            <form method="get" action="${pageContext.request.contextPath}/home">
-                <input type="hidden" name="p" value="low-stock-report"/>
-
-                <div class="d-flex gap-16 align-end flex-wrap mb-16">
-                    <div style="flex:1; min-width:200px;">
-                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Search by Product</label>
-                        <input class="input" type="text" name="q" value="${q}" placeholder="Product name or code"/>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-2">
+                        <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-repost fs-4"></i></span>
                     </div>
-
-                    <div style="width:180px;">
-                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Supplier</label>
-                        <select class="select" name="supplierId">
-                            <option value="">All Suppliers</option>
-                            <c:forEach var="s" items="${suppliers}">
-                                <option value="${s.id}" <c:if test="${supplierId == '' + s.id}">selected</c:if>>
-                                    ${s.name}
-                                </option>
-                            </c:forEach>
-                        </select>
+                    <h4 class="ms-1 mb-0 text-warning">${summary.productsBelowRop}</h4>
+                </div>
+                <p class="mb-0 small text-muted">Action Required (Below ROP)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-2">
+                        <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-timer fs-4"></i></span>
                     </div>
-
-                    <div style="width:180px;">
-                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">ROP Status</label>
-                        <select class="select" name="ropStatus">
-                            <option value="">All Low Stock</option>
-                            <option value="All" ${ropStatus == 'All' ? 'selected' : ''}>All Products</option>
-                            <option value="Out Of Stock" ${ropStatus == 'Out Of Stock' ? 'selected' : ''}>Out Of Stock</option>
-                            <option value="Reorder Needed" ${ropStatus == 'Reorder Needed' ? 'selected' : ''}>Reorder Needed</option>
-                            <option value="At ROP Level" ${ropStatus == 'At ROP Level' ? 'selected' : ''}>At ROP Level</option>
-                            <option value="OK" ${ropStatus == 'OK' ? 'selected' : ''}>Standard Level</option>
-                        </select>
+                    <h4 class="ms-1 mb-0 text-primary">${summary.reorderNeeded}</h4>
+                </div>
+                <p class="mb-0 small text-muted">In Pipeline (Pending)</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-2">
+                    <div class="avatar me-2">
+                        <span class="avatar-initial rounded bg-label-info"><i class="bx bx-list-check fs-4"></i></span>
                     </div>
+                    <h4 class="ms-1 mb-0">${summary.totalProducts}</h4>
+                </div>
+                <p class="mb-0 small text-muted">Total Monitored Products</p>
+            </div>
+        </div>
+    </div>
+</div>
 
-                    <div style="width:100px;">
-                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Min Stock</label>
-                        <input class="input" type="number" min="0" name="minStock" value="${minStock}"/>
-                    </div>
-
-                    <div style="width:100px;">
-                        <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">Max Stock</label>
-                        <input class="input" type="number" min="0" name="maxStock" value="${maxStock}"/>
-                    </div>
-
-                    <div class="d-flex gap-8">
-                        <button class="btn btn-primary" type="submit">Apply Filters</button>
-                        <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=low-stock-report">Reset</a>
+<%-- Filter Card --%>
+<div class="card mb-4">
+    <div class="card-body pt-3 pb-3">
+        <form method="get" action="${ctx}/home">
+            <input type="hidden" name="p" value="low-stock-report"/>
+            <div class="row g-3 align-items-end">
+                <div class="col-md-4 col-lg-3">
+                    <label class="form-label small text-uppercase fw-semibold">Search by Product</label>
+                    <div class="input-group input-group-merge">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input type="text" class="form-control" name="q" value="${q}" placeholder="Product name or code..."/>
                     </div>
                 </div>
-            </form>
 
-            <div class="text-muted fs-13 mb-12">
-                Showing <b class="text-dark">${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b class="text-dark">${totalItems}</b> products requiring attention
+                <div class="col-md-3 col-lg-2">
+                    <label class="form-label small text-uppercase fw-semibold">Supplier</label>
+                    <select class="form-select" name="supplierId">
+                        <option value="">All Suppliers</option>
+                        <c:forEach var="s" items="${suppliers}">
+                            <option value="${s.id}" <c:if test="${supplierId == '' + s.id}">selected</c:if>>
+                                ${s.name}
+                            </option>
+                        </c:forEach>
+                    </select>
+                </div>
+
+                <div class="col-md-3 col-lg-2">
+                    <label class="form-label small text-uppercase fw-semibold">ROP Status</label>
+                    <select class="form-select" name="ropStatus">
+                        <option value="">All Low Stock</option>
+                        <option value="All" ${ropStatus == 'All' ? 'selected' : ''}>All Products</option>
+                        <option value="Out Of Stock" ${ropStatus == 'Out Of Stock' ? 'selected' : ''}>Out Of Stock</option>
+                        <option value="Reorder Needed" ${ropStatus == 'Reorder Needed' ? 'selected' : ''}>Reorder Needed</option>
+                        <option value="At ROP Level" ${ropStatus == 'At ROP Level' ? 'selected' : ''}>At ROP Level</option>
+                        <option value="OK" ${ropStatus == 'OK' ? 'selected' : ''}>Standard Level</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2 col-lg-1">
+                    <label class="form-label small text-uppercase fw-semibold">Min Stock</label>
+                    <input type="number" class="form-control" min="0" name="minStock" value="${minStock}"/>
+                </div>
+
+                <div class="col-md-2 col-lg-1">
+                    <label class="form-label small text-uppercase fw-semibold">Max Stock</label>
+                    <input type="number" class="form-control" min="0" name="maxStock" value="${maxStock}"/>
+                </div>
+
+                <div class="col-md-4 col-lg-3 d-flex gap-2">
+                    <button class="btn btn-primary px-4" type="submit">Apply Filters</button>
+                    <a class="btn btn-outline-secondary" href="${ctx}/home?p=low-stock-report">Reset</a>
+                </div>
             </div>
+        </form>
+    </div>
+</div>
 
-            <div class="table-wrap">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Product Information</th>
-                            <th>Supplier</th>
-                            <th class="text-center">Current</th>
-                            <th class="text-center">Avg/Day</th>
-                            <th class="text-center">LT</th>
-                            <th class="text-center">Safety</th>
-                            <th class="text-center">ROP</th>
-                            <th>Status</th>
-                            <th class="text-center">Suggested</th>
-                            <th class="text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <c:choose>
-                            <c:when test="${empty rows}">
-                                <tr>
-                                    <td colspan="10">
-                                        <div class="p-40 text-center text-muted">
-                                            No low stock products found matching these criteria.
-                                        </div>
-                                    </td>
-                                </tr>
-                            </c:when>
-                            <c:otherwise>
-                                <c:forEach var="item" items="${rows}">
-                                    <tr>
-                                        <td>
-                                            <div class="fw-600">${item.productName}</div>
-                                            <div class="fs-12 text-muted mono-text">${item.productCode}</div>
-                                        </td>
-                                        <td>${item.supplierName}</td>
-                                        <td class="text-center fw-600">${item.currentStock}</td>
-                                        <td class="text-center text-muted">${item.avgDailySales}</td>
-                                        <td class="text-center text-muted">${item.leadTimeDays}d</td>
-                                        <td class="text-center text-muted">${item.safetyStock}</td>
-                                        <td class="text-center fw-600">${item.rop}</td>
-                                        <td>
-                                            <c:choose>
-                                                <c:when test="${item.ropStatus == 'Out Of Stock'}">
-                                                    <span class="badge badge-inactive">Out Of Stock</span>
-                                                </c:when>
-                                                <c:when test="${item.ropStatus == 'Reorder Needed'}">
-                                                    <span class="badge badge-warning">Reorder Needed</span>
-                                                </c:when>
-                                                <c:when test="${item.ropStatus == 'At ROP Level'}">
-                                                    <span class="badge badge-info">At ROP Level</span>
-                                                </c:when>
-                                                <c:otherwise>
-                                                    <span class="badge badge-active">OK</span>
-                                                </c:otherwise>
-                                            </c:choose>
-                                        </td>
-                                        <td class="text-center text-primary fw-600">${item.suggestedReorderQty}</td>
-                                        <td class="text-right">
-                                            <div class="d-flex gap-8 justify-end">
-                                                <a class="btn btn-sm btn-outline"
-                                                   href="${pageContext.request.contextPath}/home?p=product-detail&id=${item.productId}">
-                                                    View
-                                                </a>
-
-                                                <c:choose>
-                                                    <c:when test="${item.ropStatus != 'OK' && !item.hasActiveImportRequest}">
-                                                        <a class="btn btn-sm btn-primary"
-                                                           href="${pageContext.request.contextPath}/home?p=create-import-request&productId=${item.productId}">
-                                                            Create Request
-                                                        </a>
-                                                    </c:when>
-                                                    <c:when test="${item.hasActiveImportRequest}">
-                                                        <span class="badge badge-info fs-10">Requested</span>
-                                                    </c:when>
-                                                </c:choose>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </c:forEach>
-                            </c:otherwise>
-                        </c:choose>
-                    </tbody>
-                </table>
-            </div>
-
-            <c:if test="${totalPages > 1}">
-                <div class="d-flex justify-end mt-20">
-
-                    <div class="d-flex gap-4">
-                        <c:set var="pgStart" value="${page - 1 < 1 ? 1 : page - 1}" />
-                        <c:set var="pgEnd" value="${pgStart + 2 > totalPages ? totalPages : pgStart + 2}" />
-                        <c:if test="${pgEnd == totalPages}">
-                            <c:set var="pgStart" value="${pgEnd - 2 < 1 ? 1 : pgEnd - 2}" />
-                        </c:if>
-
-                        <c:url var="prevUrl" value="/home">
-                            <c:param name="p" value="low-stock-report"/>
-                            <c:param name="page" value="${page - 1}"/>
-                            <c:param name="q" value="${q}"/>
-                            <c:param name="supplierId" value="${supplierId}"/>
-                            <c:param name="ropStatus" value="${ropStatus}"/>
-                            <c:param name="minStock" value="${minStock}"/>
-                            <c:param name="maxStock" value="${maxStock}"/>
-                        </c:url>
-                        <c:choose>
-                            <c:when test="${page > 1}">
-                                <a class="btn btn-sm btn-outline" href="${prevUrl}">Prev</a>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="btn btn-sm btn-outline disabled">Prev</span>
-                            </c:otherwise>
-                        </c:choose>
-
-                        <c:forEach begin="${pgStart}" end="${pgEnd}" var="pg">
-                            <c:url var="pageUrl" value="/home">
-                                <c:param name="p" value="low-stock-report"/>
-                                <c:param name="page" value="${pg}"/>
-                                <c:param name="q" value="${q}"/>
-                                <c:param name="supplierId" value="${supplierId}"/>
-                                <c:param name="ropStatus" value="${ropStatus}"/>
-                                <c:param name="minStock" value="${minStock}"/>
-                                <c:param name="maxStock" value="${maxStock}"/>
-                            </c:url>
+<%-- Results Card --%>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Inventory Requiring Attention</h5>
+        <div class="text-muted small">
+            Showing <strong>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</strong>–<strong>${page * pageSize < totalItems ? page * pageSize : totalItems}</strong> of <strong>${totalItems}</strong> products
+        </div>
+    </div>
+    <div class="table-responsive text-nowrap">
+        <table class="table table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th class="ps-3 text-uppercase small text-white">Product Information</th>
+                    <th class="text-uppercase small text-white">Supplier</th>
+                    <th class="text-center text-uppercase small text-white">Current</th>
+                    <th class="text-center text-uppercase small text-white">Avg/Day</th>
+                    <th class="text-center text-uppercase small text-white">LT</th>
+                    <th class="text-center text-uppercase small text-white">Safety</th>
+                    <th class="text-center text-uppercase small text-white">ROP</th>
+                    <th class="text-center text-uppercase small text-white">Status</th>
+                    <th class="text-center text-uppercase small text-white">Suggested</th>
+                    <th class="text-center text-uppercase small text-white pe-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                <c:forEach var="item" items="${rows}">
+                    <tr>
+                        <td class="ps-3">
+                            <div class="fw-bold text-heading">${item.productName}</div>
+                            <small class="text-muted mono-text fs-12">${item.productCode}</small>
+                        </td>
+                        <td>${item.supplierName}</td>
+                        <td class="text-center fw-bold fs-5">${item.currentStock}</td>
+                        <td class="text-center">${item.avgDailySales}</td>
+                        <td class="text-center">${item.leadTimeDays}d</td>
+                        <td class="text-center">${item.safetyStock}</td>
+                        <td class="text-center fw-semibold">${item.rop}</td>
+                        <td class="text-center">
                             <c:choose>
-                                <c:when test="${pg == page}">
-                                    <span class="btn btn-sm btn-primary">${pg}</span>
+                                <c:when test="${item.ropStatus == 'Out Of Stock'}">
+                                    <span class="badge bg-label-danger text-uppercase px-3">Out Of Stock</span>
+                                </c:when>
+                                <c:when test="${item.ropStatus == 'Reorder Needed'}">
+                                    <span class="badge bg-label-warning text-uppercase px-3">Reorder Needed</span>
+                                </c:when>
+                                <c:when test="${item.ropStatus == 'At ROP Level'}">
+                                    <span class="badge bg-label-info text-uppercase px-3">At ROP Level</span>
                                 </c:when>
                                 <c:otherwise>
-                                    <a class="btn btn-sm btn-outline" href="${pageUrl}">${pg}</a>
+                                    <span class="badge bg-label-success text-uppercase px-3">OK</span>
                                 </c:otherwise>
                             </c:choose>
-                        </c:forEach>
+                        </td>
+                        <td class="text-center fw-bold text-primary">${item.suggestedReorderQty}</td>
+                        <td class="text-center pe-3">
+                            <div class="d-flex gap-2 justify-content-center">
+                                <a class="btn btn-sm btn-outline-secondary py-1 px-3"
+                                   href="${ctx}/home?p=product-detail&id=${item.productId}">
+                                    View
+                                </a>
 
-                        <c:url var="nextUrl" value="/home">
-                            <c:param name="p" value="low-stock-report"/>
-                            <c:param name="page" value="${page + 1}"/>
-                            <c:param name="q" value="${q}"/>
-                            <c:param name="supplierId" value="${supplierId}"/>
-                            <c:param name="ropStatus" value="${ropStatus}"/>
-                            <c:param name="minStock" value="${minStock}"/>
-                            <c:param name="maxStock" value="${maxStock}"/>
-                        </c:url>
-                        <c:choose>
-                            <c:when test="${page < totalPages}">
-                                <a class="btn btn-sm btn-outline" href="${nextUrl}">Next</a>
-                            </c:when>
-                            <c:otherwise>
-                                <span class="btn btn-sm btn-outline disabled">Next</span>
-                            </c:otherwise>
-                        </c:choose>
-                    </div>
-                </div>
-            </c:if>
-        </div>
+                                <c:choose>
+                                    <c:when test="${item.ropStatus != 'OK' && !item.hasActiveImportRequest}">
+                                        <a class="btn btn-sm btn-primary py-1 px-2"
+                                           href="${ctx}/home?p=create-import-request&productId=${item.productId}">
+                                            Create Request
+                                        </a>
+                                    </c:when>
+                                    <c:when test="${item.hasActiveImportRequest}">
+                                        <span class="badge bg-label-info py-2 px-3">REQUESTED</span>
+                                    </c:when>
+                                </c:choose>
+                            </div>
+                        </td>
+                    </tr>
+                </c:forEach>
+                <c:if test="${empty rows}">
+                    <tr>
+                        <td colspan="10" class="text-center p-5 text-muted">
+                            <i class="bx bx-info-circle mb-2 d-block fs-1"></i>
+                            No low stock products found matching these criteria.
+                        </td>
+                    </tr>
+                </c:if>
+            </tbody>
+        </table>
     </div>
+
+    <%-- Pagination --%>
+    <c:if test="${totalPages > 1}">
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <div class="text-muted small">
+                Page <strong>${page}</strong> of <strong>${totalPages}</strong>
+            </div>
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <c:url var="basePageUrl" value="/home">
+                        <c:param name="p" value="low-stock-report"/>
+                        <c:param name="q" value="${q}"/>
+                        <c:param name="supplierId" value="${supplierId}"/>
+                        <c:param name="ropStatus" value="${ropStatus}"/>
+                        <c:param name="minStock" value="${minStock}"/>
+                        <c:param name="maxStock" value="${maxStock}"/>
+                    </c:url>
+
+                    <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+                        <a class="page-link" href="${basePageUrl}&page=${page-1}"><i class="bx bx-chevron-left"></i></a>
+                    </li>
+
+                    <c:forEach begin="1" end="${totalPages}" var="pg">
+                        <c:if test="${pg >= page - 1 && pg <= page + 1 || pg == 1 || pg == totalPages}">
+                            <c:if test="${pg == page - 1 && pg > 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                            <li class="page-item ${pg == page ? 'active' : ''}">
+                                <a class="page-link" href="${basePageUrl}&page=${pg}">${pg}</a>
+                            </li>
+                            <c:if test="${pg == page + 1 && pg < totalPages}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                        </c:if>
+                    </c:forEach>
+
+                    <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
+                        <a class="page-link" href="${basePageUrl}&page=${page+1}"><i class="bx bx-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </c:if>
 </div>

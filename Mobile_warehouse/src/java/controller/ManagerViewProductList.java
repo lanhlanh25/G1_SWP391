@@ -64,7 +64,7 @@ public class ManagerViewProductList {
         request.setAttribute("totalItems", totalItems);
         request.setAttribute("totalPages", totalPages);
 
-        request.setAttribute("allBrands",
+        request.setAttribute("brands",
                 brandDAO.list(null, "", "name", "ASC", 1, 1000));
     }
 }

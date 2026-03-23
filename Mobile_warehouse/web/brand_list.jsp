@@ -1,9 +1,3 @@
-<%-- 
-    Document   : brand_list
-    Created on : Jan 27, 2026, 11:19:16 PM
-    Author     : ADMIN
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
@@ -14,11 +8,13 @@
 <script>
     let _disableFormId = null;
 
-    function openDisableModal(formId, brandName, brandDesc, toValue) {
-        _disableFormId = formId;
+    function openDisableModalByEl(el) {
+        const formId = 'disableForm_' + el.dataset.id;
+        const brandName = el.dataset.name;
+        const toValue = el.dataset.to;
 
+        _disableFormId = formId;
         document.getElementById('disableBrandName').textContent = brandName || '';
-        document.getElementById('disableBrandDesc').textContent = brandDesc || '';
 
         const isToInactive = (toValue === '0');
         const actionText = isToInactive ? 'DEACTIVATE' : 'ACTIVATE';
@@ -30,6 +26,7 @@
         confirmBtn.textContent = 'Confirm ' + (isToInactive ? 'Deactivate' : 'Activate');
         confirmBtn.className = 'btn ' + (isToInactive ? 'btn-danger' : 'btn-primary');
 
+        // Use Bootstrap Modal if possible, but keeping current logic for now or converting to Sneat Modal
         document.getElementById('disableModalBackdrop').style.display = 'flex';
     }
 
@@ -55,278 +52,257 @@
     }
 </script>
 
-<div class="page-wrap">
-    <div class="topbar">
-        <div class="d-flex align-center gap-12">
-            <a class="btn" href="${pageContext.request.contextPath}/home?p=dashboard">← Back</a>
-            <h1 class="h1">Brand Management</h1>
-        </div>
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Master Data /</span> Brands
+</h4>
 
+<c:if test="${not empty param.msg}">
+    <div class="alert alert-success alert-dismissible" role="alert">
+        ${fn:escapeXml(param.msg)}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</c:if>
+<c:if test="${not empty param.err}">
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        ${fn:escapeXml(param.err)}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</c:if>
+
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">Brand List</h5>
         <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
             <c:url var="addUrl" value="/home">
                 <c:param name="p" value="brand-add"/>
-                <c:param name="q" value="${q}"/>
-                <c:param name="status" value="${status}"/>
-                <c:param name="sortBy" value="${sortBy}"/>
-                <c:param name="sortOrder" value="${sortOrder}"/>
-                <c:param name="page" value="${page}"/>
             </c:url>
-            <a class="btn btn-primary" href="${addUrl}">+ Add Brand</a>
+            <a class="btn btn-primary" href="${addUrl}"><i class="bx bx-plus me-1"></i> Add Brand</a>
         </c:if>
     </div>
 
-    <c:if test="${not empty param.msg}">
-        <div class="msg-ok">${fn:escapeXml(param.msg)}</div>
-    </c:if>
-    <c:if test="${not empty param.err}">
-        <div class="msg-err">${fn:escapeXml(param.err)}</div>
-    </c:if>
+    <div class="card-body">
+        <form method="get" action="${ctx}/home" class="row g-3 mb-4">
+            <input type="hidden" name="p" value="brand-list"/>
+            <input type="hidden" name="status" value="${fn:escapeXml(status)}"/>
 
-    <div class="card">
-        <div class="card-body">
-            <div class="h2" style="margin-bottom:6px;">Manage Brands</div>
-            <div class="muted" style="margin-bottom:14px;">Define and manage product brands in your catalog.</div>
-
-            <form method="get" action="${ctx}/home" class="filters" style="grid-template-columns: 1.5fr 1fr 1fr 1.5fr auto auto; gap: 12px; align-items: end;">
-                <input type="hidden" name="p" value="brand-list"/>
-
-                <div class="filter-group">
-                    <label>Search Brand</label>
-                    <input class="input" name="q" value="${fn:escapeXml(q)}" placeholder="Brand name..."/>
+            <div class="col-md-6 col-lg-4">
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text"><i class="bx bx-search"></i></span>
+                    <input type="text" class="form-control" name="q" value="${fn:escapeXml(q)}" placeholder="Search by brand name..."/>
                 </div>
+            </div>
 
-                <div class="filter-group">
-                    <label>Status</label>
-                    <select class="select" name="status">
-                        <option value="" ${empty status ? 'selected' : ''}>All Status</option>
-                        <option value="active" ${status=='active' ? 'selected' : ''}>Active</option>
-                        <option value="inactive" ${status=='inactive' ? 'selected' : ''}>Inactive</option>
-                    </select>
-                </div>
+            <div class="col-md-3 col-lg-2">
+                <select class="form-select" name="sortBy">
+                    <option value="name" ${sortBy=='name'?'selected':''}>Sort by Name</option>
+                    <option value="createdAt" ${sortBy=='createdAt'?'selected':''}>Sort by Date</option>
+                    <option value="status" ${sortBy=='status'?'selected':''}>Sort by Status</option>
+                </select>
+            </div>
 
-                <div class="filter-group">
-                    <label>Sort By</label>
-                    <select class="select" name="sortBy">
-                        <option value="name" ${sortBy=='name'?'selected':''}>Name</option>
-                        <option value="createdAt" ${sortBy=='createdAt'?'selected':''}>Created At</option>
-                        <option value="status" ${sortBy=='status'?'selected':''}>Status</option>
-                    </select>
-                </div>
+            <div class="col-md-3 col-lg-2">
+                <select class="form-select" name="sortOrder">
+                    <option value="ASC" ${sortOrder=='ASC'?'selected':''}>Ascending</option>
+                    <option value="DESC" ${sortOrder=='DESC'?'selected':''}>Descending</option>
+                </select>
+            </div>
 
-                <div class="filter-group">
-                    <label>Order</label>
-                    <select class="select" name="sortOrder">
-                        <option value="ASC" ${sortOrder=='ASC'?'selected':''}>Ascending (A-Z)</option>
-                        <option value="DESC" ${sortOrder=='DESC'?'selected':''}>Descending (Z-A)</option>
-                    </select>
-                </div>
+            <div class="col-md-3 col-lg-2">
+                <button class="btn btn-primary w-100" type="submit">Apply</button>
+            </div>
+            
+            <div class="col-md-1">
+                <a class="btn btn-outline-secondary w-100" href="${ctx}/home?p=brand-list"><i class="bx bx-refresh"></i></a>
+            </div>
+        </form>
 
-                <div class="filter-actions" style="display:contents;">
-                    <button class="btn btn-primary" type="submit" style="height: 38px;">Apply</button>
-                    <a class="btn" href="${ctx}/home?p=brand-list" style="height: 38px;">Reset</a>
-                </div>
-            </form>
+        <div class="nav-align-top mb-4">
+            <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link ${empty status ? 'active' : ''}" href="${ctx}/home?p=brand-list&status=">All Brands</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link ${status == 'active' ? 'active' : ''}" href="${ctx}/home?p=brand-list&status=active">Active</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link ${status == 'inactive' ? 'active' : ''}" href="${ctx}/home?p=brand-list&status=inactive">Inactive</a>
+                </li>
+            </ul>
+        </div>
 
-   
-    <c:set var="statusLabel"
-           value="${status=='active' ? 'Active'
-                    : status=='inactive' ? 'Inactive'
-                    : 'All'}" />
-
-    <c:set var="sortLabel"
-           value="${sortBy=='createdAt' ? 'Created At'
-                    : sortBy=='status' ? 'Status'
-                    : 'Name'}" />
-
-    <c:set var="orderLabel" value="${empty sortOrder ? 'DESC' : sortOrder}" />
-
-    <div style="color:#666; font-size:12px; margin:6px 0 10px;">
-        Applied:
-        Status = <b>${statusLabel}</b> •
-        Search = <b>${empty q ? '-' : q}</b> •
-        Sort = <b>${sortLabel}</b> <b>${orderLabel}</b>
-    </div>
-
-            <table class="table">
+        <div class="table-responsive text-nowrap">
+            <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th style="width:60px;" class="text-center">#</th>
-                        <th style="width:220px;">Brand Name</th>
+                        <th class="text-center">#</th>
+                        <th>Brand Details</th>
                         <th>Description</th>
-                        <th style="width:120px;" class="text-center">Status</th>
-                        <th style="width:180px;">Created At</th>
-                        <th style="width:240px;" class="text-center">Action</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
-
-                <tbody>
+                <tbody class="table-border-bottom-0">
                     <c:forEach items="${brands}" var="b" varStatus="st">
                         <tr>
-                            <td class="text-center text-muted">${(page - 1) * pageSize + st.index + 1}</td>
-
-                            <td class="fw-600">${fn:escapeXml(b.brandName)}</td>
-
-                            <td class="desc-cell text-muted" title="${fn:escapeXml(b.description)}">
+                            <td class="text-center">${(page - 1) * pageSize + st.index + 1}</td>
+                            <td>
+                                <strong>${fn:escapeXml(b.brandName)}</strong><br/>
+                                <small class="text-muted">${b.createdAt}</small>
+                            </td>
+                            <td>
                                 <c:choose>
                                     <c:when test="${not empty b.description && fn:length(b.description) > 60}">
-                                        ${fn:escapeXml(fn:substring(b.description, 0, 60))}...
-                                        <button type="button" class="desc-link"
-                                                data-title="${fn:escapeXml(b.brandName)}"
-                                                data-full="${fn:escapeXml(b.description)}"
-                                                onclick="openDescModal(this.dataset.title, this.dataset.full)">
-                                            View
-                                        </button>
+                                        <span class="cursor-pointer" 
+                                              data-title="${fn:escapeXml(b.brandName)}" 
+                                              data-fulltext="${fn:escapeXml(b.description)}"
+                                              onclick="openDescModal(this.getAttribute('data-title'), this.getAttribute('data-fulltext'))">
+                                            ${fn:escapeXml(fn:substring(b.description, 0, 60))}...
+                                        </span>
                                     </c:when>
-                                    <c:otherwise>
-                                        ${fn:escapeXml(b.description)}
-                                    </c:otherwise>
+                                    <c:otherwise>${fn:escapeXml(b.description)}</c:otherwise>
                                 </c:choose>
                             </td>
-
                             <td class="text-center">
-                                <span class="badge ${b.active ? 'badge-active' : 'badge-inactive'}">
+                                <span class="badge ${b.active ? 'bg-label-success' : 'bg-label-secondary'}">
                                     ${b.active ? 'Active' : 'Inactive'}
                                 </span>
                             </td>
-
-                            <td class="text-muted">${b.createdAt}</td>
-
-                            <td>
-                                <div class="d-flex gap-8 align-center justify-center flex-nowrap">
-                                    <c:url var="detailUrl" value="/home">
-                                        <c:param name="p" value="brand-detail"/>
-                                        <c:param name="id" value="${b.brandId}"/>
-                                    </c:url>
-                                    <a class="btn btn-sm btn-info" href="${detailUrl}">View</a>
-
-                                    <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
-                                        <c:url var="updateUrl" value="/home">
-                                            <c:param name="p" value="brand-update"/>
+                            <td class="text-center">
+                                <div class="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                        <i class="bx bx-dots-vertical-rounded"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <c:url var="detailUrl" value="/home">
+                                            <c:param name="p" value="brand-detail"/>
                                             <c:param name="id" value="${b.brandId}"/>
-                                            <c:param name="q" value="${q}"/>
-                                            <c:param name="status" value="${status}"/>
-                                            <c:param name="sortBy" value="${sortBy}"/>
-                                            <c:param name="sortOrder" value="${sortOrder}"/>
-                                            <c:param name="page" value="${page}"/>
                                         </c:url>
-                                        <a class="btn btn-sm btn-warning" href="${updateUrl}">Update</a>
-
-                                        <form id="disableForm_${b.brandId}" method="post"
-                                              action="${ctx}/manager/brand-disable"
-                                              style="margin:0;">
-                                            <input type="hidden" name="id" value="${b.brandId}"/>
-                                            <input type="hidden" name="to" value="${b.active ? '0' : '1'}"/>
-                                            <input type="hidden" name="q" value="${q}"/>
-                                            <input type="hidden" name="status" value="${status}"/>
-                                            <input type="hidden" name="sortBy" value="${sortBy}"/>
-                                            <input type="hidden" name="sortOrder" value="${sortOrder}"/>
-                                            <input type="hidden" name="page" value="${page}"/>
-
-                                            <button type="button" class="btn btn-sm ${b.active ? 'btn-danger' : 'btn-primary'}"
-                                                    onclick="openDisableModal('disableForm_${b.brandId}', '${fn:escapeXml(b.brandName)}', '${fn:escapeXml(b.description)}', '${b.active ? '0' : '1'}')">
-                                                ${b.active ? 'Deactivate' : 'Activate'}
-                                            </button>
-                                        </form>
-                                    </c:if>
+                                        <a class="dropdown-item" href="${detailUrl}"><i class="bx bx-show-alt me-1"></i> View</a>
+                                        
+                                        <c:if test="${role != null && role.toUpperCase() == 'MANAGER'}">
+                                            <c:url var="updateUrl" value="/home">
+                                                <c:param name="p" value="brand-update"/>
+                                                <c:param name="id" value="${b.brandId}"/>
+                                            </c:url>
+                                            <a class="dropdown-item" href="${updateUrl}"><i class="bx bx-edit-alt me-1"></i> Edit</a>
+                                            
+                                            <form id="disableForm_${b.brandId}" method="post" action="${ctx}/manager/brand-disable" style="display:none;">
+                                                <input type="hidden" name="id" value="${b.brandId}"/>
+                                                <input type="hidden" name="to" value="${b.active ? '0' : '1'}"/>
+                                                <input type="hidden" name="page" value="${page}"/>
+                                            </form>
+                                            <a class="dropdown-item ${b.active ? 'text-danger' : 'text-success'}" href="javascript:void(0);" 
+                                               data-id="${b.brandId}"
+                                               data-name="${fn:escapeXml(b.brandName)}"
+                                               data-to="${b.active ? '0' : '1'}"
+                                               onclick="openDisableModalByEl(this)">
+                                                <i class="bx ${b.active ? 'bx-trash' : 'bx-check'} me-1"></i> ${b.active ? 'Deactivate' : 'Activate'}
+                                            </a>
+                                        </c:if>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
                     </c:forEach>
-
                     <c:if test="${empty brands}">
-                        <tr>
-                            <td colspan="6" style="text-align:center;color:var(--muted);padding:24px;">No data found</td>
-                        </tr>
+                        <tr><td colspan="5" class="text-center p-4">No brands found matches your criteria.</td></tr>
                     </c:if>
                 </tbody>
             </table>
         </div>
-    </div>
 
-
-    <div class="paging-footer">
-        <div class="paging-info">
-            Showing <b>${totalItems == 0 ? 0 : (page - 1) * pageSize + 1}</b>–<b>${page * pageSize < totalItems ? page * pageSize : totalItems}</b> of <b>${totalItems}</b>
-        </div>
-        <div class="paging">
-            <c:choose>
-                <c:when test="${page <= 1}">
-                    <span class="paging-btn disabled">&laquo; Prev</span>
-                </c:when>
-                <c:otherwise>
-                    <c:url var="prevUrl" value="/home">
-                        <c:param name="p" value="brand-list"/>
-                        <c:param name="page" value="${page-1}"/>
-                        <c:param name="q" value="${q}"/>
-                        <c:param name="status" value="${status}"/>
-                        <c:param name="sortBy" value="${sortBy}"/>
-                        <c:param name="sortOrder" value="${sortOrder}"/>
-                    </c:url>
-                    <a class="paging-btn" href="${prevUrl}">&laquo; Prev</a>
-                </c:otherwise>
-            </c:choose>
-
-            <c:forEach begin="1" end="${totalPages}" var="i">
-                <c:choose>
-                    <c:when test="${i == page}">
-                        <span class="paging-btn active">${i}</span>
-                    </c:when>
-                    <c:otherwise>
-                        <c:url var="pageUrl" value="/home">
-                            <c:param name="p" value="brand-list"/>
-                            <c:param name="page" value="${i}"/>
-                            <c:param name="q" value="${q}"/>
-                            <c:param name="status" value="${empty status ? 'all' : status}"/>
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+            <div class="text-muted small">
+                Page <strong>${page}</strong> of <strong>${totalPages}</strong>
+            </div>
+            
+            <nav aria-label="Page navigation">
+                <ul class="pagination pagination-sm mb-0">
+                    <%-- Prev Button --%>
+                    <li class="page-item ${page <= 1 ? 'disabled' : ''}">
+                        <c:url var="prevUrl" value="/home">
+                            <c:param name="p" value="brand-list"/><c:param name="page" value="${page-1}"/><c:param name="q" value="${q}"/><c:param name="status" value="${status}"/>
                         </c:url>
-                        <a class="paging-btn" href="${pageUrl}">${i}</a>
-                    </c:otherwise>
-                </c:choose>
-            </c:forEach>
+                        <a class="page-link" href="${page > 1 ? prevUrl : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
+                    </li>
 
-            <c:choose>
-                <c:when test="${page >= totalPages}">
-                    <span class="paging-btn disabled">Next →</span>
-                </c:when>
-                <c:otherwise>
-                    <c:url var="nextUrl" value="/home">
-                        <c:param name="p" value="brand-list"/>
-                        <c:param name="page" value="${page+1}"/>
-                        <c:param name="q" value="${q}"/>
-                        <c:param name="status" value="${status}"/>
-                        <c:param name="sortBy" value="${sortBy}"/>
-                        <c:param name="sortOrder" value="${sortOrder}"/>
-                    </c:url>
-                    <a class="paging-btn" href="${nextUrl}">Next &raquo;</a>
-                </c:otherwise>
-            </c:choose>
+                    <%-- Sliding Window logic --%>
+                    <c:set var="startPage" value="${page - 1 > 1 ? page - 1 : 1}"/>
+                    <c:set var="endPage"   value="${page + 1 < totalPages ? page + 1 : totalPages}"/>
+
+                    <c:if test="${startPage > 1}">
+                        <c:url var="p1Url" value="/home">
+                            <c:param name="p" value="brand-list"/><c:param name="page" value="1"/><c:param name="q" value="${q}"/><c:param name="status" value="${status}"/>
+                        </c:url>
+                        <li class="page-item"><a class="page-link" href="${p1Url}">1</a></li>
+                        <c:if test="${startPage > 2}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                    </c:if>
+
+                    <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                        <c:url var="pageUrl" value="/home">
+                            <c:param name="p" value="brand-list"/><c:param name="page" value="${i}"/><c:param name="q" value="${q}"/><c:param name="status" value="${status}"/>
+                        </c:url>
+                        <li class="page-item ${i == page ? 'active' : ''}"><a class="page-link" href="${pageUrl}">${i}</a></li>
+                    </c:forEach>
+
+                    <c:if test="${endPage < totalPages}">
+                        <c:if test="${endPage < totalPages - 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                        <c:url var="pLastUrl" value="/home">
+                            <c:param name="p" value="brand-list"/><c:param name="page" value="${totalPages}"/><c:param name="q" value="${q}"/><c:param name="status" value="${status}"/>
+                        </c:url>
+                        <li class="page-item"><a class="page-link" href="${pLastUrl}">${totalPages}</a></li>
+                    </c:if>
+
+                    <%-- Next Button --%>
+                    <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
+                        <c:url var="nextUrl" value="/home">
+                            <c:param name="p" value="brand-list"/><c:param name="page" value="${page+1}"/><c:param name="q" value="${q}"/><c:param name="status" value="${status}"/>
+                        </c:url>
+                        <a class="page-link" href="${page < totalPages ? nextUrl : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
         </div>
+
+
     </div>
 </div>
- 
+
 <!-- Modal Confirm Toggle Action -->
-<div id="disableModalBackdrop" class="modal-backdrop" style="display:none;" onclick="if(event.target==this) closeDisableModal()">
-    <div class="modal">
-        <h3 id="disableModalTitle" class="h2 mb-14 uppercase" style="text-align:center;">Confirm Action</h3>
-        <p class="text-muted fs-14 mb-18" style="text-align:center;">
-            Are you sure you want to <b class="text-primary" id="disableActionText">action</b> brand 
-            <q class="fw-700 text-primary" id="disableBrandName"></q>?
+<div id="disableModalBackdrop" class="modal-backdrop-custom" style="display:none;" onclick="if(event.target==this) closeDisableModal()">
+    <div class="modal-content-custom card p-4" style="max-width: 400px; margin: auto; margin-top: 100px;">
+        <h5 id="disableModalTitle" class="card-title text-center mb-3">Confirm Action</h5>
+        <p class="text-center mb-4">
+            Are you sure you want to <span id="disableActionText" class="fw-bold">action</span> brand 
+            <span id="disableBrandName" class="text-primary fw-bold"></span>?
         </p>
-        <div id="disableBrandDesc" class="small muted mb-24" style="font-style:italic; background:#f9fafb; padding:12px; border-radius:10px; border:1px dashed #e5e7eb;"></div>
-        
-        <div class="d-flex gap-8 justify-center">
-            <button class="btn btn-outline" onclick="closeDisableModal()">Cancel</button>
+        <div class="d-flex justify-content-center gap-2">
+            <button class="btn btn-outline-secondary" onclick="closeDisableModal()">Cancel</button>
             <button id="disableConfirmBtn" class="btn btn-primary" onclick="submitDisableForm()">Confirm</button>
         </div>
     </div>
 </div>
- 
+
 <!-- Modal Description View -->
-<div id="descModalBackdrop" class="modal-backdrop" style="display:none;" onclick="if(event.target==this) closeDescModal()">
-    <div class="modal" style="width:min(600px, 94vw);">
-        <h3 id="descModalTitle" class="h2 mb-14">Description</h3>
-        <div id="descModalBody" class="fs-14 text-muted mb-20" style="white-space:pre-wrap; max-height:400px; overflow-y:auto; line-height:1.6; padding:12px; background:#f8fafc; border:1px solid #eef2f6; border-radius:10px;"></div>
-        <div class="d-flex justify-end">
+<div id="descModalBackdrop" class="modal-backdrop-custom" style="display:none;" onclick="if(event.target==this) closeDescModal()">
+    <div class="modal-content-custom card p-4" style="max-width: 600px; margin: auto; margin-top: 50px;">
+        <h5 id="descModalTitle" class="card-title mb-3">Description</h5>
+        <div id="descModalBody" class="mb-4" style="white-space: pre-wrap; max-height: 300px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 5px;"></div>
+        <div class="d-flex justify-content-end">
             <button class="btn btn-primary" onclick="closeDescModal()">Close</button>
         </div>
     </div>
 </div>
+
+<style>
+    .modal-backdrop-custom {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1090;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+    }
+    .cursor-pointer { cursor: pointer; color: #696cff; text-decoration: underline; }
+</style>

@@ -8,88 +8,80 @@
     if (uri == null) uri = "";
 
     boolean inventoryOverviewActive = uri.equals(ctx + "/inventory");
+    
+    boolean exportReqActive = "create-export-request".equals(currentPage) ||
+                             "export-request-list".equals(currentPage) ||
+                             "export-request-detail".equals(currentPage) ||
+                             "export-request-edit".equals(currentPage);
+                             
+    boolean importReqActive = "create-import-request".equals(currentPage) ||
+                             "import-request-list".equals(currentPage) ||
+                             "import-request-detail".equals(currentPage);
 %>
 
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Warehouse</span>
+</li>
 
-<%--<div class="section-title">Overview</div>
-<ul>
-    <li>
-        <a class="<%= "dashboard".equals(currentPage) ? "active" : "" %>"
-           href="<%=ctx%>/home?p=dashboard">
-            Dashboard
-        </a>
-    </li>
-</ul>--%>
+<li class="menu-item <%= inventoryOverviewActive ? "active" : "" %>">
+    <a href="<%=ctx%>/inventory" class="menu-link">
+        <div data-i18n="Inventory">Inventory Overview</div>
+    </a>
+</li>
 
-<div class="section-title">Warehouse</div>
-<ul>
-    <li>
-        <a class="<%= inventoryOverviewActive ? "active" : "" %>"
-           href="<%=ctx%>/inventory">
-            Inventory Overview
-        </a>
-    </li>
-</ul>
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Requests</span>
+</li>
 
-<div class="section-title">Requests</div>
-
-<details <%= (
-    "create-export-request".equals(currentPage) ||
-    "export-request-list".equals(currentPage) ||
-    "export-request-detail".equals(currentPage) ||
-    "export-request-edit".equals(currentPage)
-) ? "open" : "" %>>
-    <summary>Export Requests</summary>
-    <ul>
-        <li>
-            <a class="<%= "create-export-request".equals(currentPage) ? "active" : "" %>"
-               href="<%=ctx%>/home?p=create-export-request">
-                Create Request
+<li class="menu-item <%= exportReqActive ? "active open" : "" %>">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <div data-i18n="Export Requests">Export Requests</div>
+    </a>
+    <ul class="menu-sub">
+        <li class="menu-item <%= "create-export-request".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=create-export-request" class="menu-link">
+                <div data-i18n="Create Request">Create Request</div>
             </a>
         </li>
-        <li>
-            <a class="<%= "export-request-list".equals(currentPage) || "export-request-detail".equals(currentPage) || "export-request-edit".equals(currentPage) ? "active" : "" %>"
-               href="<%=ctx%>/home?p=export-request-list">
-                Request List
+        <li class="menu-item <%= "export-request-list".equals(currentPage) || "export-request-detail".equals(currentPage) || "export-request-edit".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=export-request-list" class="menu-link">
+                <div data-i18n="Request List">Request List</div>
             </a>
         </li>
     </ul>
-</details>
+</li>
 
-<details <%= (
-    "create-import-request".equals(currentPage) ||
-    "import-request-list".equals(currentPage) ||
-    "import-request-detail".equals(currentPage)
-) ? "open" : "" %>>
-    <summary>Import Requests</summary>
-    <ul>
-        <li>
-            <a class="<%= "create-import-request".equals(currentPage) ? "active" : "" %>"
-               href="<%=ctx%>/home?p=create-import-request">
-                Create Request
+<li class="menu-item <%= importReqActive ? "active open" : "" %>">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <div data-i18n="Import Requests">Import Requests</div>
+    </a>
+    <ul class="menu-sub">
+        <li class="menu-item <%= "create-import-request".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=create-import-request" class="menu-link">
+                <div data-i18n="Create Request">Create Request</div>
             </a>
         </li>
-        <li>
-            <a class="<%= "import-request-list".equals(currentPage) || "import-request-detail".equals(currentPage) ? "active" : "" %>"
-               href="<%=ctx%>/home?p=import-request-list">
-                Request List
+        <li class="menu-item <%= "import-request-list".equals(currentPage) || "import-request-detail".equals(currentPage) ? "active" : "" %>">
+            <a href="<%=ctx%>/home?p=import-request-list" class="menu-link">
+                <div data-i18n="Request List">Request List</div>
             </a>
         </li>
     </ul>
-</details>
+</li>
 
-<div class="section-title">Master Data</div>
-<ul>
-    <li>
-        <a class="<%= "brand-list".equals(currentPage) ? "active" : "" %>"
-           href="<%=ctx%>/home?p=brand-list">
-            Brand List
-        </a>
-    </li>
-    <li>
-        <a class="<%= "view_supplier".equals(currentPage) ? "active" : "" %>"
-           href="<%=ctx%>/home?p=view_supplier">
-            Supplier List
-        </a>
-    </li>
-</ul>
+<li class="menu-header small text-uppercase">
+    <span class="menu-header-text">Master Data</span>
+</li>
+
+<li class="menu-item <%= "brand-list".equals(currentPage) ? "active" : "" %>">
+    <a href="<%=ctx%>/home?p=brand-list" class="menu-link">
+        <div data-i18n="Brands">Brand List</div>
+    </a>
+</li>
+
+<li class="menu-item <%= "view_supplier".equals(currentPage) ? "active" : "" %>">
+    <a href="<%=ctx%>/home?p=view_supplier" class="menu-link">
+        <div data-i18n="Suppliers">Supplier List</div>
+    </a>
+</li>
+
