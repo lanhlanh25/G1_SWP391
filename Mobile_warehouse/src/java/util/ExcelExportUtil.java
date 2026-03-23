@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package util;
 
 import org.apache.poi.ss.usermodel.*;
@@ -9,13 +5,22 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.OutputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ExcelExportUtil {
 
+    private static final String COMPANY_NAME = "DTLA Mobile Warehouse Management";
+    private static final String COMPANY_ADDRESS = "1 Meta Way (formerly 1 Hacker Way), Menlo Park, California 94025, USA";
+    private static final String COMPANY_CONTACT = "Phone: 0965298768  |  Email: minhduchoang2410@gmail.com";
+    private static final DateTimeFormatter UI_DTF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     public static void export(
             OutputStream os,
+            String reportCode,
             String title,
             Map<String, String> filters,
             Map<String, String> summary,
@@ -26,7 +31,6 @@ public class ExcelExportUtil {
         try (Workbook wb = new XSSFWorkbook()) {
             Sheet sheet = wb.createSheet(buildSafeSheetName(title));
 
-            // ===== Fonts =====
             Font titleFont = wb.createFont();
             titleFont.setBold(true);
             titleFont.setFontHeightInPoints((short) 16);
@@ -44,14 +48,26 @@ public class ExcelExportUtil {
             Font normalFont = wb.createFont();
             normalFont.setFontHeightInPoints((short) 10);
 
-            // ===== Data formats =====
+            Font companyFont = wb.createFont();
+            companyFont.setBold(true);
+            companyFont.setFontHeightInPoints((short) 12);
+
             DataFormat dataFormat = wb.createDataFormat();
 
-            // ===== Styles =====
             CellStyle titleStyle = wb.createCellStyle();
             titleStyle.setFont(titleFont);
             titleStyle.setAlignment(HorizontalAlignment.CENTER);
             titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+            CellStyle companyStyle = wb.createCellStyle();
+            companyStyle.setFont(companyFont);
+            companyStyle.setAlignment(HorizontalAlignment.LEFT);
+            companyStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+
+            CellStyle infoTextStyle = wb.createCellStyle();
+            infoTextStyle.setFont(normalFont);
+            infoTextStyle.setAlignment(HorizontalAlignment.LEFT);
+            infoTextStyle.setVerticalAlignment(VerticalAlignment.CENTER);
 
             CellStyle sectionStyle = wb.createCellStyle();
             sectionStyle.setFont(sectionFont);
@@ -84,6 +100,7 @@ public class ExcelExportUtil {
             textCellStyle.setFont(normalFont);
             textCellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
             textCellStyle.setAlignment(HorizontalAlignment.LEFT);
+            textCellStyle.setWrapText(true);
             setAllBorders(textCellStyle, BorderStyle.THIN);
 
             CellStyle centerCellStyle = wb.createCellStyle();
@@ -102,19 +119,53 @@ public class ExcelExportUtil {
 
             int rowIdx = 0;
             int totalCols = Math.max(headers == null ? 0 : headers.size(), 6);
-            if (totalCols < 2) totalCols = 2;
+            if (totalCols < 2) {
+                totalCols = 2;
+            }
 
-            // ===== Title =====
+            Row companyRow = sheet.createRow(rowIdx++);
+            Cell companyCell = companyRow.createCell(0);
+            companyCell.setCellValue(COMPANY_NAME);
+            companyCell.setCellStyle(companyStyle);
+            sheet.addMergedRegion(new CellRangeAddress(companyRow.getRowNum(), companyRow.getRowNum(), 0, totalCols - 1));
+
+            Row addressRow = sheet.createRow(rowIdx++);
+            Cell addressCell = addressRow.createCell(0);
+            addressCell.setCellValue(COMPANY_ADDRESS);
+            addressCell.setCellStyle(infoTextStyle);
+            sheet.addMergedRegion(new CellRangeAddress(addressRow.getRowNum(), addressRow.getRowNum(), 0, totalCols - 1));
+
+            Row contactRow = sheet.createRow(rowIdx++);
+            Cell contactCell = contactRow.createCell(0);
+            contactCell.setCellValue(COMPANY_CONTACT);
+            contactCell.setCellStyle(infoTextStyle);
+            sheet.addMergedRegion(new CellRangeAddress(contactRow.getRowNum(), contactRow.getRowNum(), 0, totalCols - 1));
+
+            rowIdx++;
+
             Row titleRow = sheet.createRow(rowIdx++);
             titleRow.setHeightInPoints(24f);
             Cell titleCell = titleRow.createCell(0);
             titleCell.setCellValue(title == null ? "Report" : title);
             titleCell.setCellStyle(titleStyle);
-            sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, totalCols - 1));
+            sheet.addMergedRegion(new CellRangeAddress(titleRow.getRowNum(), titleRow.getRowNum(), 0, totalCols - 1));
 
             rowIdx++;
 
-            // ===== Filters section =====
+            Map<String, String> reportInfo = new LinkedHashMap<>();
+            reportInfo.put("Report No", safe(reportCode));
+            reportInfo.put("Generated At", LocalDateTime.now().format(UI_DTF));
+            reportInfo.put("Report Title", safe(title));
+
+            Row reportInfoSectionRow = sheet.createRow(rowIdx++);
+            Cell reportInfoSectionCell = reportInfoSectionRow.createCell(0);
+            reportInfoSectionCell.setCellValue("Report Information");
+            reportInfoSectionCell.setCellStyle(sectionStyle);
+
+            rowIdx = writeKeyValueBlock(sheet, rowIdx, reportInfo, metaLabelStyle, metaValueStyle);
+
+            rowIdx++;
+
             Row filterSectionRow = sheet.createRow(rowIdx++);
             Cell filterSectionCell = filterSectionRow.createCell(0);
             filterSectionCell.setCellValue("Filters");
@@ -124,7 +175,6 @@ public class ExcelExportUtil {
 
             rowIdx++;
 
-            // ===== Summary section =====
             Row summarySectionRow = sheet.createRow(rowIdx++);
             Cell summarySectionCell = summarySectionRow.createCell(0);
             summarySectionCell.setCellValue("Summary");
@@ -134,7 +184,6 @@ public class ExcelExportUtil {
 
             rowIdx++;
 
-            // ===== Data section =====
             Row dataSectionRow = sheet.createRow(rowIdx++);
             Cell dataSectionCell = dataSectionRow.createCell(0);
             dataSectionCell.setCellValue("Data");
@@ -150,7 +199,6 @@ public class ExcelExportUtil {
                 c.setCellStyle(tableHeaderStyle);
             }
 
-            // ===== Body rows =====
             if (rows != null) {
                 for (List<String> rowData : rows) {
                     Row r = sheet.createRow(rowIdx++);
@@ -173,7 +221,6 @@ public class ExcelExportUtil {
                 sheet.createFreezePane(0, headerRowIndex + 1);
             }
 
-            // ===== Column widths =====
             applyColumnWidths(sheet, headers);
 
             wb.write(os);
@@ -268,19 +315,25 @@ public class ExcelExportUtil {
     }
 
     private static boolean isInteger(String value) {
-        if (value == null || value.isBlank()) return false;
+        if (value == null || value.isBlank()) {
+            return false;
+        }
         String v = value.replace(",", "").trim();
         return v.matches("-?\\d+");
     }
 
     private static boolean isDecimal(String value) {
-        if (value == null || value.isBlank()) return false;
+        if (value == null || value.isBlank()) {
+            return false;
+        }
         String v = value.replace(",", "").trim();
         return v.matches("-?\\d+(\\.\\d+)?");
     }
 
     private static void applyColumnWidths(Sheet sheet, List<String> headers) {
-        if (headers == null || headers.isEmpty()) return;
+        if (headers == null || headers.isEmpty()) {
+            return;
+        }
 
         for (int i = 0; i < headers.size(); i++) {
             String h = safe(headers.get(i)).toLowerCase();
@@ -301,6 +354,11 @@ public class ExcelExportUtil {
                 sheet.setColumnWidth(i, 14 * 256);
             }
         }
+
+        if (headers.size() < 2) {
+            sheet.setColumnWidth(0, 18 * 256);
+            sheet.setColumnWidth(1, 28 * 256);
+        }
     }
 
     private static void setAllBorders(CellStyle style, BorderStyle borderStyle) {
@@ -312,7 +370,9 @@ public class ExcelExportUtil {
 
     private static String buildSafeSheetName(String title) {
         String s = safe(title).trim();
-        if (s.isEmpty()) s = "Report";
+        if (s.isEmpty()) {
+            s = "Report";
+        }
         s = s.replaceAll("[\\\\/?*\\[\\]:]", "_");
         return s.length() > 31 ? s.substring(0, 31) : s;
     }

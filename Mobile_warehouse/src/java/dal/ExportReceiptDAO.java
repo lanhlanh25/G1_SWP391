@@ -25,8 +25,7 @@ public class ExportReceiptDAO {
             WHERE er.export_id = ?
         """;
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setLong(1, exportId);
 
@@ -86,9 +85,7 @@ public class ExportReceiptDAO {
 
         List<ExportReceiptDetailLine> out = new ArrayList<>();
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             PreparedStatement psImei = con.prepareStatement(sqlImei)) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); PreparedStatement psImei = con.prepareStatement(sqlImei)) {
 
             ps.setLong(1, exportId);
 
@@ -164,8 +161,7 @@ public class ExportReceiptDAO {
             params.add(to);
         }
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
@@ -183,7 +179,7 @@ public class ExportReceiptDAO {
     }
 
     public List<ExportReceiptListItem> list(String q, String status, java.sql.Date from, java.sql.Date to,
-                                            int page, int pageSize) {
+            int page, int pageSize) {
 
         StringBuilder sql = new StringBuilder("""
             SELECT er.export_id, er.export_code, er.export_date, er.status,
@@ -236,8 +232,7 @@ public class ExportReceiptDAO {
 
         List<ExportReceiptListItem> out = new ArrayList<>();
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             for (int i = 0; i < params.size(); i++) {
                 ps.setObject(i + 1, params.get(i));
@@ -274,11 +269,11 @@ public class ExportReceiptDAO {
     // CREATE EXPORT RECEIPT
     // =========================
     public long createReceipt(Connection con,
-                              Long requestId,
-                              long createdBy,
-                              Timestamp exportDate,
-                              String note,
-                              String status) throws SQLException {
+            Long requestId,
+            long createdBy,
+            Timestamp exportDate,
+            String note,
+            String status) throws SQLException {
 
         String sql = """
             INSERT INTO export_receipts(request_id, export_code, created_by, export_date, note, status)
@@ -325,29 +320,16 @@ public class ExportReceiptDAO {
     }
 
     public String generateExportCode(Connection con) throws SQLException {
-        String day = new java.text.SimpleDateFormat("yyyyMMdd").format(new java.util.Date());
-        String prefix = "ER-" + day + "-";
-        String sql = "SELECT COUNT(*) FROM export_receipts WHERE export_code LIKE ?";
-        int count = 0;
-
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, prefix + "%");
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    count = rs.getInt(1);
-                }
-            }
-        }
-
-        return prefix + String.format("%04d", count + 1);
+        CodeGeneratorDAO codeDAO = new CodeGeneratorDAO();
+        return codeDAO.generateExportReceiptCode(con);
     }
 
     public long createLine(Connection con,
-                           long exportId,
-                           long productId,
-                           long skuId,
-                           int qty,
-                           String itemNote) throws SQLException {
+            long exportId,
+            long productId,
+            long skuId,
+            int qty,
+            String itemNote) throws SQLException {
 
         String sql = """
             INSERT INTO export_receipt_lines(export_id, product_id, sku_id, qty, item_note)
