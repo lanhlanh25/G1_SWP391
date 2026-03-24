@@ -8,14 +8,23 @@ package dal;
  *
  * @author Admin
  */
+
+
 import model.IdName;
 import model.InventoryCountRow;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+
+
+import java.util.List;
 
 public class ConductInventoryCountDAO {
 
@@ -25,45 +34,40 @@ public class ConductInventoryCountDAO {
 
     public List<IdName> getActiveBrands() {
         List<IdName> list = new ArrayList<>();
-        String sql = "SELECT brand_id, brand_name FROM brands WHERE is_active = 1 ORDER BY brand_name";
+        String sql = "SELECT brand_id, brand_name " +
+                     "FROM brands " +
+                     "WHERE is_active = 1 " +
+                     "ORDER BY brand_name";
+
         try (Connection con = getConn();
-                PreparedStatement ps = con.prepareStatement(sql);
-                ResultSet rs = ps.executeQuery()) {
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-
                 list.add(new IdName(rs.getLong("brand_id"), rs.getString("brand_name")));
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return list;
     }
 
     public int countRows(String q, String brandId) {
-        StringBuilder where = new StringBuilder(" WHERE s.status='ACTIVE' AND p.status='ACTIVE' ");
+        StringBuilder where = new StringBuilder(" WHERE s.status = 'ACTIVE' AND p.status = 'ACTIVE' ");
         List<Object> params = new ArrayList<>();
+        appendFilters(where, params, q, brandId);
 
-        if (q != null && !q.trim().isEmpty()) {
-            where.append(" AND (p.product_name LIKE ? OR s.sku_code LIKE ? OR p.product_code LIKE ?) ");
-            String like = "%" + q.trim() + "%";
-            params.add(like);
-            params.add(like);
-            params.add(like);
-        }
-        if (brandId != null && !brandId.trim().isEmpty()) {
-            where.append(" AND p.brand_id = ? ");
-            params.add(parseLongSafe(brandId));
-        }
+        String sql = "SELECT COUNT(*) " +
+                     "FROM product_skus s " +
+                     "JOIN products p ON p.product_id = s.product_id " +
+                     where;
 
-        String sql = "SELECT COUNT(*) "
-                + "FROM product_skus s "
-                + "JOIN products p ON p.product_id = s.product_id "
-                + where;
-
-        try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = getConn();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             bind(ps, params);
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
@@ -72,51 +76,71 @@ public class ConductInventoryCountDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return 0;
     }
 
-    public List<InventoryCountRow> listRows(String q, String brandId, int page, int pageSize) {
+    public List<InventoryCountRow> listRows(int userId, String q, String brandId, int page, int pageSize) {
         List<InventoryCountRow> list = new ArrayList<>();
         int offset = (page - 1) * pageSize;
 
-        StringBuilder where = new StringBuilder(" WHERE s.status='ACTIVE' AND p.status='ACTIVE' ");
+        StringBuilder where = new StringBuilder(" WHERE s.status = 'ACTIVE' AND p.status = 'ACTIVE' ");
         List<Object> params = new ArrayList<>();
+        appendFilters(where, params, q, brandId);
 
-        if (q != null && !q.trim().isEmpty()) {
-            where.append(" AND (p.product_name LIKE ? OR s.sku_code LIKE ? OR p.product_code LIKE ?) ");
-            String like = "%" + q.trim() + "%";
-            params.add(like);
-            params.add(like);
-            params.add(like);
-        }
-        if (brandId != null && !brandId.trim().isEmpty()) {
-            where.append(" AND p.brand_id = ? ");
-            params.add(parseLongSafe(brandId));
-        }
+        String sql =
+            "SELECT " +
+            "    s.sku_id, " +
+            "    s.sku_code, " +
+            "    p.product_name, " +
+            "    s.color, " +
+            "    s.ram_gb, " +
+            "    s.storage_gb, " +
+            "    (" +
+            "        SELECT COUNT(*) " +
+            "        FROM product_units pu " +
+            "        WHERE pu.sku_id = s.sku_id " +
+            "          AND pu.unit_status = 'ACTIVE'" +
+            "    ) AS system_qty, " +
+            "    (" +
+            "        SELECT scl.counted_qty " +
+            "        FROM stock_count_lines scl " +
+            "        JOIN stock_counts sc ON sc.count_id = scl.count_id " +
+            "        WHERE scl.sku_id = s.sku_id " +
+            "          AND sc.created_by = ? " +
+            "          AND sc.status = 'DRAFT' " +
+            "        ORDER BY sc.count_id DESC " +
+            "        LIMIT 1" +
+            "    ) AS counted_qty " +
+            "FROM product_skus s " +
+            "JOIN products p ON p.product_id = s.product_id " +
+            where +
+            "ORDER BY s.sku_code " +
+            "LIMIT ? OFFSET ?";
 
-        String sql = "SELECT "
-                + "  s.sku_id, s.sku_code, p.product_name, s.color, s.ram_gb, s.storage_gb, "
-                + "  COALESCE(("
-                + "    SELECT COUNT(*) FROM product_units pu "
-                + "    WHERE pu.sku_id = s.sku_id AND pu.unit_status = 'ACTIVE'"
-                + "  ), 0) AS system_qty, "
-                + "  ib.qty_on_hand AS counted_qty "
-                + "FROM product_skus s "
-                + "JOIN products p ON p.product_id = s.product_id "
-                + "LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id "
-                + where
-                + "ORDER BY s.sku_code "
-                + "LIMIT ? OFFSET ?";
+        try (Connection con = getConn();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-        try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
+            int idx = 1;
+            ps.setInt(idx++, userId);
 
-            int idx = bind(ps, params);
+            for (Object o : params) {
+                if (o instanceof String) {
+                    ps.setString(idx++, (String) o);
+                } else if (o instanceof Long) {
+                    ps.setLong(idx++, (Long) o);
+                } else {
+                    ps.setObject(idx++, o);
+                }
+            }
+
             ps.setInt(idx++, pageSize);
-            ps.setInt(idx++, offset);
+            ps.setInt(idx, offset);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     InventoryCountRow r = new InventoryCountRow();
+
                     r.setSkuId(rs.getLong("sku_id"));
                     r.setSkuCode(rs.getString("sku_code"));
                     r.setProductName(rs.getString("product_name"));
@@ -124,11 +148,12 @@ public class ConductInventoryCountDAO {
                     r.setRamGb(rs.getInt("ram_gb"));
                     r.setStorageGb(rs.getInt("storage_gb"));
 
-                    int sys = rs.getInt("system_qty");
-                    r.setSystemQty(sys);
+                    int systemQty = rs.getInt("system_qty");
+                    Object countedObj = rs.getObject("counted_qty");
+                    int countedQty = (countedObj == null) ? systemQty : rs.getInt("counted_qty");
 
-                    Integer counted = (Integer) rs.getObject("counted_qty");
-                    r.setCountedQty(counted != null ? counted : sys);
+                    r.setSystemQty(systemQty);
+                    r.setCountedQty(countedQty);
 
                     list.add(r);
                 }
@@ -140,28 +165,166 @@ public class ConductInventoryCountDAO {
         return list;
     }
 
-    public boolean saveCountedQty(Map<Long, Integer> skuToCountedQty) {
-        String sql = "INSERT INTO inventory_balance (sku_id, qty_on_hand, updated_at) "
-                + "VALUES (?, ?, NOW()) "
-                + "ON DUPLICATE KEY UPDATE qty_on_hand = VALUES(qty_on_hand), updated_at = NOW()";
+    public boolean saveCountedQty(int createdBy, Map<Long, Integer> skuToCountedQty) {
+        if (skuToCountedQty == null || skuToCountedQty.isEmpty()) {
+            return false;
+        }
 
-        try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
+        String findDraftSql =
+            "SELECT count_id " +
+            "FROM stock_counts " +
+            "WHERE created_by = ? AND status = 'DRAFT' " +
+            "ORDER BY count_id DESC " +
+            "LIMIT 1";
 
+        String insertDraftSql =
+            "INSERT INTO stock_counts (count_code, status, count_date, created_by) " +
+            "VALUES (?, 'DRAFT', NOW(), ?)";
+
+        String getSystemQtySql =
+            "SELECT COUNT(*) " +
+            "FROM product_units " +
+            "WHERE sku_id = ? AND unit_status = 'ACTIVE'";
+
+        String upsertLineSql =
+            "INSERT INTO stock_count_lines (count_id, sku_id, system_qty, counted_qty, difference, result) " +
+            "VALUES (?, ?, ?, ?, ?, ?) " +
+            "ON DUPLICATE KEY UPDATE " +
+            "    system_qty = VALUES(system_qty), " +
+            "    counted_qty = VALUES(counted_qty), " +
+            "    difference = VALUES(difference), " +
+            "    result = VALUES(result)";
+
+        Connection con = null;
+
+        try {
+            con = getConn();
             con.setAutoCommit(false);
 
-            for (Map.Entry<Long, Integer> e : skuToCountedQty.entrySet()) {
-                ps.setLong(1, e.getKey());
-                ps.setInt(2, e.getValue());
-                ps.addBatch();
+            long countId = findLatestDraftCountId(con, createdBy);
+
+            if (countId <= 0) {
+                countId = createNewDraft(con, insertDraftSql, createdBy);
             }
 
-            ps.executeBatch();
+            try (PreparedStatement psSystemQty = con.prepareStatement(getSystemQtySql);
+                 PreparedStatement psUpsertLine = con.prepareStatement(upsertLineSql)) {
+
+                for (Map.Entry<Long, Integer> entry : skuToCountedQty.entrySet()) {
+                    long skuId = entry.getKey();
+                    int countedQty = entry.getValue();
+
+                    if (countedQty < 0) {
+                        countedQty = 0;
+                    }
+
+                    int systemQty = 0;
+
+                    psSystemQty.setLong(1, skuId);
+                    try (ResultSet rs = psSystemQty.executeQuery()) {
+                        if (rs.next()) {
+                            systemQty = rs.getInt(1);
+                        }
+                    }
+
+                    int difference = systemQty - countedQty;
+                    String result = (countedQty == systemQty) ? "ENOUGH" : "MISSING";
+
+                    psUpsertLine.setLong(1, countId);
+                    psUpsertLine.setLong(2, skuId);
+                    psUpsertLine.setInt(3, systemQty);
+                    psUpsertLine.setInt(4, countedQty);
+                    psUpsertLine.setInt(5, difference);
+                    psUpsertLine.setString(6, result);
+                    psUpsertLine.addBatch();
+                }
+
+                psUpsertLine.executeBatch();
+            }
+
             con.commit();
             return true;
 
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        } catch (Exception e) {
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (Exception ignore) {
+                }
+            }
+            e.printStackTrace();
             return false;
+
+        } finally {
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true);
+                    con.close();
+                } catch (Exception ignore) {
+                }
+            }
+        }
+    }
+
+    private long findLatestDraftCountId(Connection con, int createdBy) throws Exception {
+        String sql =
+            "SELECT count_id " +
+            "FROM stock_counts " +
+            "WHERE created_by = ? AND status = 'DRAFT' " +
+            "ORDER BY count_id DESC " +
+            "LIMIT 1";
+
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, createdBy);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("count_id");
+                }
+            }
+        }
+
+        return -1;
+    }
+
+    private long createNewDraft(Connection con, String insertDraftSql, int createdBy) throws Exception {
+        String countCode = generateCountCode();
+
+        try (PreparedStatement ps = con.prepareStatement(insertDraftSql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, countCode);
+            ps.setInt(2, createdBy);
+            ps.executeUpdate();
+
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getLong(1);
+                }
+            }
+        }
+
+        throw new SQLException("Cannot create stock count draft");
+    }
+
+    private String generateCountCode() {
+        return "SC-" +
+               java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.BASIC_ISO_DATE) +
+               "-" + (System.currentTimeMillis() % 100000);
+    }
+
+    private void appendFilters(StringBuilder where, List<Object> params, String q, String brandId) {
+        if (q != null && !q.trim().isEmpty()) {
+            where.append(" AND (p.product_name LIKE ? OR s.sku_code LIKE ? OR p.product_code LIKE ?) ");
+            String like = "%" + q.trim() + "%";
+            params.add(like);
+            params.add(like);
+            params.add(like);
+        }
+
+        if (brandId != null && !brandId.trim().isEmpty()) {
+            long brandLong = parseLongSafe(brandId);
+            if (brandLong > 0) {
+                where.append(" AND p.brand_id = ? ");
+                params.add(brandLong);
+            }
         }
     }
 

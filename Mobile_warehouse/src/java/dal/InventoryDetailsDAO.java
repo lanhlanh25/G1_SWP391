@@ -8,74 +8,126 @@ package dal;
  *
  * @author Admin
  */
-import model.SkuInventoryRow;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class InventoryDetailsDAO {
+
+    private static final int LOW_STOCK_THRESHOLD = 10;
 
     public static class ProductBrief {
 
         public long productId;
         public String productCode;
         public String productName;
-
-        public ProductBrief(long productId, String productCode, String productName) {
-            this.productId = productId;
-            this.productCode = productCode;
-            this.productName = productName;
-        }
     }
 
-    private Connection getConn() throws Exception {
-        return DBContext.getConnection();
+    public static class SkuRow {
+        private long skuId;
+        private String skuCode;
+        private String color;
+        private int ramGb;
+        private int storageGb;
+        private int qty;
+        private String stockStatus;
+
+        public long getSkuId() {
+            return skuId;
+        }
+
+        public void setSkuId(long skuId) {
+            this.skuId = skuId;
+        }
+
+        public String getSkuCode() {
+            return skuCode;
+        }
+
+        public void setSkuCode(String skuCode) {
+            this.skuCode = skuCode;
+        }
+
+        public String getColor() {
+            return color;
+        }
+
+        public void setColor(String color) {
+            this.color = color;
+        }
+
+        public int getRamGb() {
+            return ramGb;
+        }
+
+        public void setRamGb(int ramGb) {
+            this.ramGb = ramGb;
+        }
+
+        public int getStorageGb() {
+            return storageGb;
+        }
+
+        public void setStorageGb(int storageGb) {
+            this.storageGb = storageGb;
+        }
+
+        public int getQty() {
+            return qty;
+        }
+
+        public void setQty(int qty) {
+            this.qty = qty;
+        }
+
+        public String getStockStatus() {
+            return stockStatus;
+        }
+
+        public void setStockStatus(String stockStatus) {
+            this.stockStatus = stockStatus;
+        }
     }
 
     public ProductBrief getProductByCode(String productCode) {
-        String sql = "SELECT product_id, product_code, product_name "
-                + "FROM products WHERE product_code = ? AND status='ACTIVE'";
-        try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
+        String sql = "SELECT product_id, product_code, product_name " +
+                     "FROM products " +
+                     "WHERE product_code = ? AND status = 'ACTIVE' " +
+                     "LIMIT 1";
+
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setString(1, productCode);
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return new ProductBrief(
-                            rs.getLong("product_id"),
-                            rs.getString("product_code"),
-                            rs.getString("product_name")
-                    );
+                    ProductBrief p = new ProductBrief();
+                    p.productId = rs.getLong("product_id");
+                    p.productCode = rs.getString("product_code");
+                    p.productName = rs.getString("product_name");
+                    return p;
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return null;
     }
 
-    public int sumQtyByProduct(long productId) {
-        String sql
-                = "SELECT COALESCE(SUM(COALESCE(ib.qty_on_hand,0)),0) AS total_qty "
-                + "FROM product_skus s "
-                + "LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id "
-                + "WHERE s.product_id = ? AND s.status='ACTIVE'";
-        try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setLong(1, productId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("total_qty");
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
     public int countSkus(long productId) {
-        String sql = "SELECT COUNT(*) FROM product_skus WHERE product_id=? AND status='ACTIVE'";
-        try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
+        String sql = "SELECT COUNT(*) " +
+                     "FROM product_skus " +
+                     "WHERE product_id = ? AND status = 'ACTIVE'";
+
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
             ps.setLong(1, productId);
+
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt(1);
@@ -84,90 +136,81 @@ public class InventoryDetailsDAO {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return 0;
     }
 
-    /**
-     * Tính stock_status theo ROP của product: rop = CEIL(avg_daily_sales *
-     * lead_time_days + safety_stock)
-     *
-     * OUT : qty_on_hand = 0 LOW : 0 < qty_on_hand <= rop (tức là current_stock <= ROP — cần đặt hàng)
-     *   OK  : qty_on_hand > rop
-     *
-     * ROP là thuộc tính product-level nên tất cả SKU của cùng product dùng
-     * chung ROP.
-     */
-    public List<SkuInventoryRow> listSkuRows(long productId, int page, int pageSize) {
-        List<SkuInventoryRow> list = new ArrayList<>();
+    public int sumQtyByProduct(long productId) {
+        String sql =
+            "SELECT COALESCE(COUNT(pu.unit_id), 0) AS total_qty " +
+            "FROM product_skus sk " +
+            "LEFT JOIN product_units pu ON pu.sku_id = sk.sku_id AND pu.unit_status = 'ACTIVE' " +
+            "WHERE sk.product_id = ? AND sk.status = 'ACTIVE'";
+
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setLong(1, productId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("total_qty");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return 0;
+    }
+
+    public List<SkuRow> listSkuRows(long productId, int page, int pageSize) {
+        List<SkuRow> list = new ArrayList<>();
         int offset = (page - 1) * pageSize;
 
-        String sql
-                = "SELECT "
-                + "  s.sku_id, s.sku_code, s.color, s.ram_gb, s.storage_gb, "
-                + "  COALESCE(ib.qty_on_hand, 0) AS qty, "
-                + "  DATE_FORMAT(s.updated_at, '%Y-%m-%d') AS last_updated "
-                + "FROM product_skus s "
-                + "LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id "
-                + "WHERE s.product_id = ? AND s.status = 'ACTIVE' "
-                + "ORDER BY s.sku_code "
-                + "LIMIT ? OFFSET ?";
+        String sql =
+            "SELECT " +
+            "   sk.sku_id, " +
+            "   sk.sku_code, " +
+            "   sk.color, " +
+            "   sk.ram_gb, " +
+            "   sk.storage_gb, " +
+            "   COALESCE(COUNT(pu.unit_id), 0) AS qty, " +
+            "   CASE " +
+            "       WHEN COALESCE(COUNT(pu.unit_id), 0) = 0 THEN 'OUT' " +
+            "       WHEN COALESCE(COUNT(pu.unit_id), 0) < ? THEN 'LOW' " +
+            "       ELSE 'OK' " +
+            "   END AS stock_status " +
+            "FROM product_skus sk " +
+            "LEFT JOIN product_units pu ON pu.sku_id = sk.sku_id AND pu.unit_status = 'ACTIVE' " +
+            "WHERE sk.product_id = ? AND sk.status = 'ACTIVE' " +
+            "GROUP BY sk.sku_id, sk.sku_code, sk.color, sk.ram_gb, sk.storage_gb " +
+            "ORDER BY sk.sku_code " +
+            "LIMIT ? OFFSET ?";
 
-        try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setLong(1, productId);
-            ps.setInt(2, pageSize);
-            ps.setInt(3, offset);
+        try (Connection con = DBContext.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, LOW_STOCK_THRESHOLD);
+            ps.setLong(2, productId);
+            ps.setInt(3, pageSize);
+            ps.setInt(4, offset);
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    SkuInventoryRow row = new SkuInventoryRow();
-                    row.setSkuId(rs.getLong("sku_id"));
-                    row.setSkuCode(rs.getString("sku_code"));
-                    row.setColor(rs.getString("color"));
-                    row.setRamGb(rs.getInt("ram_gb"));
-                    row.setStorageGb(rs.getInt("storage_gb"));
-
-                    int qty = rs.getInt("qty");
-                    row.setQty(qty);
-                    row.setRop(10);
-
-                    if (qty == 0) {
-                        row.setStockStatus("OUT");
-                    } else if (qty <= 10) {
-                        row.setStockStatus("LOW");
-                    } else if (qty == 10) {
-                        row.setStockStatus("AT_THRESHOLD");
-                    } else {
-                        row.setStockStatus("OK");
-                    }
-
-                    row.setLastUpdated(rs.getString("last_updated"));
-                    list.add(row);
+                    SkuRow s = new SkuRow();
+                    s.setSkuId(rs.getLong("sku_id"));
+                    s.setSkuCode(rs.getString("sku_code"));
+                    s.setColor(rs.getString("color"));
+                    s.setRamGb(rs.getInt("ram_gb"));
+                    s.setStorageGb(rs.getInt("storage_gb"));
+                    s.setQty(rs.getInt("qty"));
+                    s.setStockStatus(rs.getString("stock_status"));
+                    list.add(s);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return list;
-    }
 
-    public boolean saveQuantities(Map<Long, Integer> updates) {
-        String sql
-                = "INSERT INTO inventory_balance (sku_id, qty_on_hand, updated_at) "
-                + "VALUES (?, ?, NOW()) "
-                + "ON DUPLICATE KEY UPDATE qty_on_hand = VALUES(qty_on_hand), updated_at = NOW()";
-        try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
-            con.setAutoCommit(false);
-            for (Map.Entry<Long, Integer> e : updates.entrySet()) {
-                ps.setLong(1, e.getKey());
-                ps.setInt(2, e.getValue());
-                ps.addBatch();
-            }
-            ps.executeBatch();
-            con.commit();
-            return true;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return false;
-        }
+        return list;
     }
 }

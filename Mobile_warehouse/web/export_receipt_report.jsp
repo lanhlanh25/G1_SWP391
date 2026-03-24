@@ -10,9 +10,9 @@
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
 <div class="page-wrap">
-  <div class="topbar">
+  <div class="report-page-head mb-16">
     <div class="d-flex align-center gap-12">
-      <h1 class="h1">Export Receipt Report</h1>
+      <h1 class="report-title">Export Receipt Report</h1>
       <span class="text-muted fs-14 mt-4">Inventory outflow analytics</span>
     </div>
     <div class="d-flex gap-8 align-center">
@@ -94,7 +94,7 @@
           <c:choose>
             <c:when test="${empty rows}">
               <tr>
-                <td colspan="5">
+                <td colspan="6">
                   <div class="p-40 text-center text-muted">
                     No export receipts found in this period.
                   </div>

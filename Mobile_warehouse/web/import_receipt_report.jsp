@@ -89,47 +89,82 @@
     <div class="table-responsive text-nowrap">
         <table class="table table-hover">
             <thead>
-                <tr>
-                    <th>Receipt Code</th>
-                    <th>Created Date</th>
-                    <th>Supplier</th>
-                    <th class="text-center">Total Quantity</th>
-                    <th class="text-center">Status</th>
-                    <th class="text-center">Action</th>
-                </tr>
+                 <tr>
+        <th>Receipt Code</th>
+        <th>Created Date</th>
+        <th>Supplier</th>
+        <th class="text-center">Total Quantity</th>
+        <th class="text-center">Status</th>
+        <th class="text-center">Action</th>
+    </tr>
             </thead>
             <tbody class="table-border-bottom-0">
-                <c:choose>
-                    <c:when test="${empty rows}">
-                        <tr><td colspan="5" class="text-center p-5">No import receipts found in this period.</td></tr>
-                    </c:when>
-                    <c:otherwise>
-                        <c:forEach var="r" items="${rows}">
-                            <tr>
-                                <td><span class="badge bg-label-primary font-monospace fw-bold">${r.importCode}</span></td>
-                                <td>
-                                    <small class="text-muted">
-                                        <c:choose>
-                                            <c:when test="${not empty r.receiptDate}">
-                                                <fmt:formatDate value="${r.receiptDate}" pattern="yyyy-MM-dd HH:mm"/>
-                                            </c:when>
-                                            <c:otherwise>—</c:otherwise>
-                                        </c:choose>
-                                    </small>
-                                </td>
-                                <td><strong><c:out value="${r.supplierName}"/></strong></td>
-                                <td class="text-center"><span class="fw-bold">${r.totalQuantity}</span> <small class="text-muted">Phones</small></td>
-                                <td class="text-center"><span class="badge bg-label-success">Completed</span></td>
-                                <td class="text-center">
-                                    <a class="btn btn-icon btn-sm btn-outline-primary" href="${ctx}/home?p=import-receipt-detail&id=${r.importId}">
-                                        <i class="bx bx-show"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                    </c:otherwise>
-                </c:choose>
-            </tbody>
+    <c:choose>
+        <c:when test="${empty rows}">
+            <tr>
+                <td colspan="6" class="text-center p-5">No import receipts found in this period.</td>
+            </tr>
+        </c:when>
+        <c:otherwise>
+            <c:forEach var="r" items="${rows}">
+                <tr>
+                    <td>
+                        <span class="badge bg-label-primary font-monospace fw-bold">
+                            ${r.importCode}
+                        </span>
+                    </td>
+
+                    <td>
+                        <small class="text-muted">
+                            <c:choose>
+                                <c:when test="${not empty r.receiptDate}">
+                                    <fmt:formatDate value="${r.receiptDate}" pattern="yyyy-MM-dd HH:mm"/>
+                                </c:when>
+                                <c:otherwise>—</c:otherwise>
+                            </c:choose>
+                        </small>
+                    </td>
+
+                    <td>
+                        <strong><c:out value="${r.supplierName}"/></strong>
+                    </td>
+
+                    <td class="text-center">
+                        <span class="fw-bold">${r.totalQuantity}</span>
+                        <small class="text-muted">Phones</small>
+                    </td>
+
+                    <td class="text-center">
+                        <c:set var="statusUp" value="${fn:toUpperCase(r.status)}"/>
+                        <c:choose>
+                            <c:when test="${statusUp == 'CONFIRMED'}">
+                                <span class="badge bg-label-success">Completed</span>
+                            </c:when>
+                            <c:when test="${statusUp == 'PENDING' || statusUp == 'DRAFT'}">
+                                <span class="badge bg-label-warning">Pending</span>
+                            </c:when>
+                            <c:when test="${statusUp == 'CANCELED' || statusUp == 'CANCELLED'}">
+                                <span class="badge bg-label-danger">Cancelled</span>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="badge bg-label-secondary">
+                                    <c:out value="${r.status}"/>
+                                </span>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
+
+                    <td class="text-center">
+                        <a class="btn btn-sm btn-outline-primary"
+                           href="${ctx}/import-receipt-detail?id=${r.importId}">
+                            View
+                        </a>
+                    </td>
+                </tr>
+            </c:forEach>
+        </c:otherwise>
+    </c:choose>
+</tbody>
         </table>
     </div>
 

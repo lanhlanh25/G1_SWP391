@@ -59,24 +59,19 @@
               <td class="text-center">${fn:escapeXml(s.color)}</td>
               <td class="text-center">${s.ramGb} GB</td>
               <td class="text-center">${s.storageGb} GB</td>
-              <td class="text-center">
-                <c:choose>
-                  <c:when test="${s.stockStatus == 'OK'}">
-                    <span class="badge badge-success">In Stock</span>
-                  </c:when>
-                  <c:when test="${s.stockStatus == 'LOW'}">
-                    <span class="badge badge-warning" title="Stock (${s.qty}) < Threshold (10)">Low Stock</span>
-                  </c:when>
-                  <c:when test="${s.stockStatus == 'AT_THRESHOLD'}">
-                    <span class="badge badge-info">At Threshold</span>
-                  </c:when>
-                  <c:otherwise>
-                    <span class="badge badge-danger">Out of Stock</span>
-                  </c:otherwise>
-                </c:choose>
-                <div class="rop-hint">Threshold: ${s.rop}</div>
-              </td>
-              <td class="text-right font-bold">
+         <td class="text-center">
+  <c:choose>
+    <c:when test="${s.stockStatus == 'OK'}">
+      <span class="badge badge-success">In Stock</span>
+    </c:when>
+    <c:when test="${s.stockStatus == 'LOW'}">
+      <span class="badge badge-warning">Low Stock</span>
+    </c:when>
+    <c:otherwise>
+      <span class="badge badge-danger">Out of Stock</span>
+    </c:otherwise>
+  </c:choose>
+</td>      <td class="text-right font-bold">
                 ${s.qty}
                 <span style="font-size:11px;color:var(--muted);margin-left:2px;">Phone</span>
               </td>

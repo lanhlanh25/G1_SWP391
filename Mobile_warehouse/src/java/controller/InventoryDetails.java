@@ -12,14 +12,10 @@ import dal.InventoryDetailsDAO;
 import dal.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
-
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 
@@ -30,21 +26,18 @@ public class InventoryDetails extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("authUser") == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
 
-        
         String role = getRole(session).toUpperCase();
         if (!"STAFF".equals(role) && !"MANAGER".equals(role) && !"SALE".equals(role)) {
             response.sendError(403, "Forbidden");
             return;
         }
 
-        
         String productCode = request.getParameter("productCode");
         if (productCode == null || productCode.isBlank()) {
             response.sendRedirect(request.getContextPath() + "/inventory?err=Missing productCode");
@@ -56,7 +49,6 @@ public class InventoryDetails extends HttpServlet {
         if (page < 1) page = 1;
         if (pageSize <= 0) pageSize = 10;
 
-       
         InventoryDetailsDAO dao = new InventoryDetailsDAO();
 
         InventoryDetailsDAO.ProductBrief p = dao.getProductByCode(productCode);
@@ -69,13 +61,14 @@ public class InventoryDetails extends HttpServlet {
         int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
         if (totalPages < 1) totalPages = 1;
         if (page > totalPages) page = totalPages;
-        int windowSize = 5;
-int pgStart = Math.max(1, page - windowSize / 2);
-int pgEnd   = Math.min(totalPages, pgStart + windowSize - 1);
-pgStart = Math.max(1, pgEnd - windowSize + 1);
 
-request.setAttribute("pgStart", pgStart);
-request.setAttribute("pgEnd",   pgEnd);
+        int windowSize = 5;
+        int pgStart = Math.max(1, page - windowSize / 2);
+        int pgEnd = Math.min(totalPages, pgStart + windowSize - 1);
+        pgStart = Math.max(1, pgEnd - windowSize + 1);
+
+        request.setAttribute("pgStart", pgStart);
+        request.setAttribute("pgEnd", pgEnd);
 
         request.setAttribute("productCode", p.productCode);
         request.setAttribute("productModel", p.productName);
@@ -86,21 +79,17 @@ request.setAttribute("pgEnd",   pgEnd);
         request.setAttribute("pageSize", pageSize);
         request.setAttribute("totalPages", totalPages);
 
-        
         request.setAttribute("sidebarPage", resolveSidebar(role));
-        request.setAttribute("contentPage", "inventory_details.jsp"); 
+        request.setAttribute("contentPage", "inventory_details.jsp");
         request.setAttribute("currentPage", "inventory");
 
         request.getRequestDispatcher("homepage.jsp").forward(request, response);
     }
 
-    
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         response.sendError(405, "Method Not Allowed");
     }
-
-  
 
     private String getRole(HttpSession session) {
         String role = (String) session.getAttribute("roleName");
