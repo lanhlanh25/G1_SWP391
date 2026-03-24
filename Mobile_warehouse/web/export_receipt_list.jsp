@@ -73,21 +73,13 @@
                         All <span class="badge badge-center rounded-pill bg-label-secondary ms-1">${tabCounts['all']}</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link ${status=='pending' ? 'active' : ''}" href="${statusBaseUrl}&status=pending">
-                        Pending <span class="badge badge-center rounded-pill bg-label-warning ms-1">${empty tabCounts['pending'] ? 0 : tabCounts['pending']}</span>
-                    </a>
-                </li>
+              
                 <li class="nav-item">
                     <a class="nav-link ${status=='completed' ? 'active' : ''}" href="${statusBaseUrl}&status=completed">
                         Completed <span class="badge badge-center rounded-pill bg-label-success ms-1">${tabCounts['completed']}</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link ${status=='cancelled' ? 'active' : ''}" href="${statusBaseUrl}&status=cancelled">
-                        Cancelled <span class="badge badge-center rounded-pill bg-label-danger ms-1">${empty tabCounts['cancelled'] ? 0 : tabCounts['cancelled']}</span>
-                    </a>
-                </li>
+               
             </ul>
         </div>
 

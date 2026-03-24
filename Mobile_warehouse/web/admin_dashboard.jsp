@@ -52,7 +52,7 @@
         </div>
 
         <!-- Logs -->
-        <div class="col-md-4 mb-4">
+        <%--<div class="col-md-4 mb-4">
             <div class="card h-100">
                 <div class="card-body text-center">
                     <div class="avatar avatar-md mx-auto mb-3">
@@ -63,6 +63,6 @@
                     <a href="javascript:void(0);" class="btn btn-sm btn-secondary disabled">Coming Soon</a>
                 </div>
             </div>
-        </div>
+        </div>--%>
     </div>
 </div>

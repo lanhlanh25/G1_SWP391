@@ -69,7 +69,7 @@
     </ul>
 </li>
 
-<li class="menu-header small text-uppercase">
+<%--<li class="menu-header small text-uppercase">
     <span class="menu-header-text">Master Data</span>
 </li>
 
@@ -84,4 +84,4 @@
         <div data-i18n="Suppliers">Supplier List</div>
     </a>
 </li>
-
+--%>
