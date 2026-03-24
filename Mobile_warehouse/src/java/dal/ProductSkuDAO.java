@@ -396,7 +396,7 @@ public class ProductSkuDAO {
                     } else if (stock <= 10) {
                         item.setStockStatus("Low Stock");
                     } else {
-                        item.setStockStatus("In Stock");
+                        item.setStockStatus("OK");
                     }
 
                     list.add(item);

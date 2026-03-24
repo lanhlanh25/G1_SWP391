@@ -36,10 +36,9 @@ public class InventoryDAO {
     }
 
     /**
-     * Summary cards dùng ngưỡng 10:
-     *   Out Of Stock  : current_stock = 0
-     *   Low Stock     : 0 < current_stock < 10
-     *   At Threshold  : current_stock = 10
+     * Summary cards dùng ROP formula: rop = CEIL(avg_daily_sales *
+     * lead_time_days + safety_stock) Out Of Stock : current_stock = 0 Low Stock
+     * : 0 < current_stock <= rop
      */
     public Map<String, Integer> getSummary(String q, String brandId) {
         Map<String, Integer> m = new HashMap<>();
@@ -54,7 +53,9 @@ public class InventoryDAO {
         if (q != null && !q.trim().isEmpty()) {
             where.append(" AND (p.product_name LIKE ? OR p.product_code LIKE ? OR sk.sku_code LIKE ?) ");
             String like = "%" + q.trim() + "%";
-            params.add(like); params.add(like); params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
         }
         if (brandId != null && !brandId.trim().isEmpty()) {
             where.append(" AND p.brand_id = ? ");
@@ -62,30 +63,30 @@ public class InventoryDAO {
         }
 
         // Total products & qty
-        String sql1 =
-            "SELECT COUNT(DISTINCT p.product_id) AS total_products, " +
-            "       COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS total_qty " +
-            "FROM products p " +
-            "JOIN brands b ON b.brand_id = p.brand_id " +
-            "LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' " +
-            "LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id " +
-            where;
+        String sql1
+                = "SELECT COUNT(DISTINCT p.product_id) AS total_products, "
+                + "       COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS total_qty "
+                + "FROM products p "
+                + "JOIN brands b ON b.brand_id = p.brand_id "
+                + "LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' "
+                + "LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id "
+                + where;
 
         // Low / Out counts using ROP
-        String sql2 =
-            "SELECT " +
-            "  SUM(CASE WHEN t.current_stock = 0 THEN 1 ELSE 0 END) AS out_items, " +
-            "  SUM(CASE WHEN t.current_stock > 0 AND t.current_stock < 10 THEN 1 ELSE 0 END) AS low_items " +
-            "FROM ( " +
-            "  SELECT p.product_id, " +
-            "    COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock " +
-            "  FROM products p " +
-            "  JOIN brands b ON b.brand_id = p.brand_id " +
-            "  LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' " +
-            "  LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id " +
-            where +
-            "  GROUP BY p.product_id " +
-            ") t";
+        String sql2
+                = "SELECT "
+                + "  SUM(CASE WHEN t.current_stock = 0 THEN 1 ELSE 0 END) AS out_items, "
+                + "  SUM(CASE WHEN t.current_stock > 0 AND t.current_stock <= 10 THEN 1 ELSE 0 END) AS low_items "
+                + "FROM ( "
+                + "  SELECT p.product_id, "
+                + "    COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock "
+                + "  FROM products p "
+                + "  JOIN brands b ON b.brand_id = p.brand_id "
+                + "  LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' "
+                + "  LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id "
+                + where
+                + "  GROUP BY p.product_id "
+                + ") t";
 
         try (Connection con = getConn()) {
             try (PreparedStatement ps = con.prepareStatement(sql1)) {
@@ -119,7 +120,9 @@ public class InventoryDAO {
         if (q != null && !q.trim().isEmpty()) {
             where.append(" AND (p.product_name LIKE ? OR p.product_code LIKE ? OR sk.sku_code LIKE ?) ");
             String like = "%" + q.trim() + "%";
-            params.add(like); params.add(like); params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
         }
         if (brandId != null && !brandId.trim().isEmpty()) {
             where.append(" AND p.brand_id = ? ");
@@ -128,23 +131,25 @@ public class InventoryDAO {
 
         String having = buildHaving(stockStatus);
 
-        String sql =
-            "SELECT COUNT(*) FROM ( " +
-            "  SELECT p.product_id, " +
-            "    COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock " +
-            "  FROM products p " +
-            "  JOIN brands b ON b.brand_id = p.brand_id " +
-            "  LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' " +
-            "  LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id " +
-            where +
-            "  GROUP BY p.product_id " +
-            having +
-            ") x";
+        String sql
+                = "SELECT COUNT(*) FROM ( "
+                + "  SELECT p.product_id, "
+                + "    COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock "
+                + "  FROM products p "
+                + "  JOIN brands b ON b.brand_id = p.brand_id "
+                + "  LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' "
+                + "  LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id "
+                + where
+                + "  GROUP BY p.product_id "
+                + having
+                + ") x";
 
         try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
             bindParams(ps, params, 1);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt(1);
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -163,7 +168,9 @@ public class InventoryDAO {
         if (q != null && !q.trim().isEmpty()) {
             where.append(" AND (p.product_name LIKE ? OR p.product_code LIKE ? OR sk.sku_code LIKE ?) ");
             String like = "%" + q.trim() + "%";
-            params.add(like); params.add(like); params.add(like);
+            params.add(like);
+            params.add(like);
+            params.add(like);
         }
         if (brandId != null && !brandId.trim().isEmpty()) {
             where.append(" AND p.brand_id = ? ");
@@ -172,32 +179,31 @@ public class InventoryDAO {
 
         String having = buildHaving(stockStatus);
 
-        // stock_status dùng ngưỡng cố định 10
-        String sql =
-            "SELECT " +
-            "  p.product_code, p.product_name, b.brand_name, " +
-            "  COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock, " +
-            "  CASE " +
-            "    WHEN COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) = 0 THEN 'OUT' " +
-            "    WHEN COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) < 10 THEN 'LOW' " +
-            "    WHEN COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) = 10 THEN 'AT_THRESHOLD' " +
-            "    ELSE 'OK' " +
-            "  END AS stock_status, " +
-            "  DATE_FORMAT( " +
-            "    GREATEST( " +
-            "      COALESCE(MAX(ib.updated_at), '1970-01-01'), " +
-            "      COALESCE(p.updated_at, p.created_at) " +
-            "    ), '%Y-%m-%d' " +
-            "  ) AS last_updated " +
-            "FROM products p " +
-            "JOIN brands b ON b.brand_id = p.brand_id " +
-            "LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' " +
-            "LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id " +
-            where +
-            "GROUP BY p.product_id, p.product_code, p.product_name, b.brand_name " +
-            having +
-            "ORDER BY p.product_name " +
-            "LIMIT ? OFFSET ?";
+        // stock_status dùng ROP formula thay cho ngưỡng cứng 10
+        String sql
+                = "SELECT "
+                + "  p.product_code, p.product_name, b.brand_name, "
+                + "  COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock, "
+                + "  CASE "
+                + "    WHEN COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) = 0 THEN 'OUT' "
+                + "    WHEN COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) <= 10 THEN 'LOW' "
+                + "    ELSE 'OK' "
+                + "  END AS stock_status, "
+                + "  DATE_FORMAT( "
+                + "    GREATEST( "
+                + "      COALESCE(MAX(ib.updated_at), '1970-01-01'), "
+                + "      COALESCE(p.updated_at, p.created_at) "
+                + "    ), '%Y-%m-%d' "
+                + "  ) AS last_updated "
+                + "FROM products p "
+                + "JOIN brands b ON b.brand_id = p.brand_id "
+                + "LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' "
+                + "LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id "
+                + where
+                + "GROUP BY p.product_id, p.product_code, p.product_name, b.brand_name "
+                + having
+                + "ORDER BY p.product_name "
+                + "LIMIT ? OFFSET ?";
 
         try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
             int idx = bindParams(ps, params, 1);
@@ -222,42 +228,55 @@ public class InventoryDAO {
     }
 
     /**
-     * buildHaving dùng ngưỡng cố định 10.
-     * Với filter "OK"  : current_stock > 10
-     * Với filter "LOW" : 0 < current_stock < 10
-     * Với filter "OUT" : current_stock = 0
+     * buildHaving dùng cột rop (đã tính trong subquery) thay ngưỡng cứng. Với
+     * filter "OK" : current_stock > rop Với filter "LOW" : 0 < current_stock <=
+     * rop Với filter "OUT" : current_stock = 0
      */
     private String buildHaving(String stockStatus) {
-        if (stockStatus == null || stockStatus.trim().isEmpty()) return "";
+        if (stockStatus == null || stockStatus.trim().isEmpty()) {
+            return "";
+        }
         switch (stockStatus.trim().toUpperCase()) {
-            case "OK":  return " HAVING current_stock > 10 ";
-            case "LOW": return " HAVING current_stock > 0 AND current_stock < 10 ";
-            case "OUT": return " HAVING current_stock = 0 ";
-            default:    return "";
+            case "OK":
+                return " HAVING current_stock > 10 ";
+            case "LOW":
+                return " HAVING current_stock > 0 AND current_stock <= 10 ";
+            case "OUT":
+                return " HAVING current_stock = 0 ";
+            default:
+                return "";
         }
     }
 
     private int bindParams(PreparedStatement ps, List<Object> params, int startIndex) throws SQLException {
         int idx = startIndex;
         for (Object o : params) {
-            if (o instanceof String)      ps.setString(idx++, (String) o);
-            else if (o instanceof Long)   ps.setLong(idx++, (Long) o);
-            else                          ps.setObject(idx++, o);
+            if (o instanceof String) {
+                ps.setString(idx++, (String) o);
+            } else if (o instanceof Long) {
+                ps.setLong(idx++, (Long) o);
+            } else {
+                ps.setObject(idx++, o);
+            }
         }
         return idx;
     }
 
     private long parseLongSafe(String s) {
-        try { return Long.parseLong(s.trim()); } catch (Exception e) { return -1; }
+        try {
+            return Long.parseLong(s.trim());
+        } catch (Exception e) {
+            return -1;
+        }
     }
 
     public Map<Long, Integer> mapQtyOnHand() throws Exception {
         String sql = "SELECT sku_id, qty_on_hand FROM inventory_balance";
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
             Map<Long, Integer> map = new HashMap<>();
-            while (rs.next()) map.put(rs.getLong("sku_id"), rs.getInt("qty_on_hand"));
+            while (rs.next()) {
+                map.put(rs.getLong("sku_id"), rs.getInt("qty_on_hand"));
+            }
             return map;
         }
     }

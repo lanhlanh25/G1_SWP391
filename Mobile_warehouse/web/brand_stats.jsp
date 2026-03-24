@@ -225,7 +225,7 @@
             </thead>
             <tbody class="table-border-bottom-0">
                 <c:forEach items="${rows}" var="r" varStatus="st">
-                    <tr class="${r.lowStockProducts > 0 ? 'table-danger table-opacity-10' : ''}">
+                    <tr>
                         <td>${(page - 1) * pageSize + st.index + 1}</td>
                         <td>
                             <div class="d-flex align-items-center">

@@ -582,7 +582,7 @@ public class Home extends HttpServlet {
                     if (dashboardRecentActivities.size() > 6) {
                         dashboardRecentActivities = new ArrayList<>(dashboardRecentActivities.subList(0, 6));
                     }
-
+                    int lowThreshold =10;
                     // =========================
                     // SET ATTRIBUTES
                     // =========================
@@ -605,7 +605,7 @@ public class Home extends HttpServlet {
 
                     request.setAttribute("alertsComingSoon", true);
                     request.setAttribute("lowStockComingSoon", false);
-
+                    request.setAttribute("lowThreshold", lowThreshold);
                     // =========================
                     // INVENTORY REPORT SUMMARY (month-to-date)
                     // =========================
@@ -915,6 +915,7 @@ public class Home extends HttpServlet {
                     return;
                 }
                 request.setAttribute("brand", b);
+                
                 break;
             }
 
@@ -993,7 +994,7 @@ public class Home extends HttpServlet {
                 }
 
                 int pageSize = 5;
-                int lowThreshold = 5;
+                int lowThreshold = 10;
 
                 int totalItems = statsDAO.countBrands(q, brandStatus, brandId, fromDate, toDate);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
@@ -1036,7 +1037,7 @@ public class Home extends HttpServlet {
                 }
                 long brandId = Long.parseLong(brandIdRaw);
 
-                int lowThreshold = 5;
+                int lowThreshold = 10;
 
                 String dSortBy = request.getParameter("dSortBy");
                 String dSortOrder = request.getParameter("dSortOrder");
@@ -1091,7 +1092,7 @@ public class Home extends HttpServlet {
                     return;
                 }
 
-                BrandStatsSummary detailSummary = statsDAO.getBrandDetailSummary(brandId, lowThreshold, fromDate, toDate);
+                BrandStatsSummary detailSummary = statsDAO.getBrandDetailSummary(brandId, 10, fromDate, toDate);
                 List<ProductStatsRow> products = statsDAO.listBrandDetail(brandId, lowThreshold, fromDate, toDate, dSortBy, dSortOrder);
 
                 request.setAttribute("brand", b);
@@ -1100,6 +1101,7 @@ public class Home extends HttpServlet {
                 request.setAttribute("dSortOrder", dSortOrder);
                 request.setAttribute("detailSummary", detailSummary);
                 request.setAttribute("range", range);
+                request.setAttribute("lowThreshold", lowThreshold);
                 break;
             }
 
