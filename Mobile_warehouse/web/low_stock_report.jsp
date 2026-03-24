@@ -52,7 +52,7 @@
                     </div>
                     <h4 class="ms-1 mb-0 text-primary">${summary.reorderNeeded}</h4>
                 </div>
-                <p class="mb-0 small text-muted">In Pipeline (Pending)</p>
+                <p class="mb-0 small text-muted">Reorder Needed</p>
             </div>
         </div>
     </div>
