@@ -121,20 +121,7 @@
                             <td class="text-center text-muted small">${r.receiptDate}</td>
                             <td class="text-center fw-bold text-primary">${r.totalQuantity}</td>
                             <td class="text-center">
-                                <c:choose>
-                                    <c:when test="${r.statusUi == 'CONFIRMED' || r.statusUi == 'completed' || r.statusUi == 'COMPLETED'}">
-                                        <span class="badge bg-label-success">Completed</span>
-                                    </c:when>
-                                    <c:when test="${r.statusUi == 'pending' || r.statusUi == 'PENDING'}">
-                                        <span class="badge bg-label-warning">Pending</span>
-                                    </c:when>
-                                    <c:when test="${r.statusUi == 'cancelled' || r.statusUi == 'CANCELLED' || r.statusUi == 'CANCELED'}">
-                                        <span class="badge bg-label-danger">Cancelled</span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="badge bg-label-secondary">${r.statusUi}</span>
-                                    </c:otherwise>
-                                </c:choose>
+
                             </td>
                             <td class="text-center">
                                 <div class="dropdown">
@@ -199,4 +186,4 @@
             </div>
         </c:if>
     </div>
-</div>
+</div>

@@ -166,7 +166,7 @@
 
                     <c:url var="detailUrl" value="/home">
                         <c:param name="p" value="product-detail"/>
-                        <c:param name="code" value="${r.productCode}"/>
+                        <c:param name="id" value="${r.productId}"/>
                     </c:url>
 
                     <tr>

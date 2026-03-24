@@ -73,12 +73,6 @@
                         All <span class="badge badge-center rounded-pill bg-label-secondary ms-1">${tabCounts['all']}</span>
                     </a>
                 </li>
-              
-                <li class="nav-item">
-                    <a class="nav-link ${status=='completed' ? 'active' : ''}" href="${statusBaseUrl}&status=completed">
-                        Completed <span class="badge badge-center rounded-pill bg-label-success ms-1">${tabCounts['completed']}</span>
-                    </a>
-                </li>
                
             </ul>
         </div>
@@ -119,20 +113,7 @@
                             <td class="text-center text-muted small">${r.exportDateUi}</td>
                             <td class="text-center fw-bold text-primary">${r.totalQty}</td>
                             <td class="text-center">
-                                <c:choose>
-                                    <c:when test="${r.status == 'CONFIRMED' || r.status == 'completed' || r.status == 'COMPLETED'}">
-                                        <span class="badge bg-label-success">Completed</span>
-                                    </c:when>
-                                    <c:when test="${r.status == 'pending' || r.status == 'PENDING'}">
-                                        <span class="badge bg-label-warning">Pending</span>
-                                    </c:when>
-                                    <c:when test="${r.status == 'cancelled' || r.status == 'CANCELLED' || r.status == 'CANCELED'}">
-                                        <span class="badge bg-label-danger">Cancelled</span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="badge bg-label-secondary">${r.status}</span>
-                                    </c:otherwise>
-                                </c:choose>
+                          
                             </td>
                             <td class="text-center">
                                 <div class="dropdown">

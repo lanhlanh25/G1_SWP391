@@ -76,9 +76,84 @@ public class ProductCRUDDAO {
             ps.setInt(1, productId);
             ps.executeUpdate();
         }
+        inactivateSkusByProduct(productId);
     }
 
     public String getBlockReasonForInactivate(int productId) throws Exception {
+        try (Connection con = DBContext.getConnection()) {
+
+            // 1. Check Export Requests (Not completed/cancelled/rejected)
+            String sqlExpReq = """
+                SELECT er.request_code 
+                FROM export_request_lines erl
+                JOIN export_requests er ON erl.request_id = er.request_id
+                WHERE erl.product_id = ? 
+                  AND er.status NOT IN ('COMPLETED', 'CANCELLED', 'REJECTED')
+                LIMIT 1
+            """;
+            try (PreparedStatement ps = con.prepareStatement(sqlExpReq)) {
+                ps.setInt(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return "Sản phẩm đang nằm trong Yêu cầu xuất kho đang xử lý: " + rs.getString(1);
+                    }
+                }
+            }
+
+            // 2. Check Import Requests (Not completed/cancelled/rejected)
+            String sqlImpReq = """
+                SELECT ir.request_code 
+                FROM import_request_lines irl
+                JOIN import_requests ir ON irl.request_id = ir.request_id
+                WHERE irl.product_id = ? 
+                  AND ir.status NOT IN ('COMPLETED', 'CANCELLED', 'REJECTED')
+                LIMIT 1
+            """;
+            try (PreparedStatement ps = con.prepareStatement(sqlImpReq)) {
+                ps.setInt(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return "Sản phẩm đang nằm trong Yêu cầu nhập kho đang xử lý: " + rs.getString(1);
+                    }
+                }
+            }
+
+            // 3. Check Export Receipts (Draft or Pending)
+            String sqlExpRec = """
+                SELECT er.export_code 
+                FROM export_receipt_lines erl
+                JOIN export_receipts er ON erl.export_id = er.export_id
+                WHERE erl.product_id = ? 
+                  AND er.status IN ('DRAFT', 'PENDING')
+                LIMIT 1
+            """;
+            try (PreparedStatement ps = con.prepareStatement(sqlExpRec)) {
+                ps.setInt(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return "Sản phẩm đang nằm trong Phiếu xuất kho chưa hoàn tất: " + rs.getString(1);
+                    }
+                }
+            }
+
+            // 4. Check Import Receipts (Draft or Pending)
+            String sqlImpRec = """
+                SELECT ir.import_code 
+                FROM import_receipt_lines irl
+                JOIN import_receipts ir ON irl.import_id = ir.import_id
+                WHERE irl.product_id = ? 
+                  AND ir.status IN ('DRAFT', 'PENDING')
+                LIMIT 1
+            """;
+            try (PreparedStatement ps = con.prepareStatement(sqlImpRec)) {
+                ps.setInt(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return "Sản phẩm đang nằm trong Phiếu nhập kho chưa hoàn tất: " + rs.getString(1);
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -141,6 +216,10 @@ public class ProductCRUDDAO {
             ps.setString(4, status);
             ps.setInt(5, id);
             ps.executeUpdate();
+
+            if ("INACTIVE".equalsIgnoreCase(status)) {
+                inactivateSkusByProduct(id);
+            }
         }
     }
 
