@@ -71,12 +71,17 @@ public class ProductCRUDDAO {
     }
 
     public void inactivateProduct(int productId) throws Exception {
-        String sql = "UPDATE products SET status = 'INACTIVE' WHERE product_id = ?";
+        inactivateProduct(productId, "INACTIVE");
+    }
+
+    public void inactivateProduct(int productId, String status) throws Exception {
+        String sql = "UPDATE products SET status = ? WHERE product_id = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, productId);
+            ps.setString(1, status);
+            ps.setInt(2, productId);
             ps.executeUpdate();
         }
-        inactivateSkusByProduct(productId);
+        syncSkuStatusByProduct(productId, status);
     }
 
     public String getBlockReasonForInactivate(int productId) throws Exception {
@@ -217,9 +222,8 @@ public class ProductCRUDDAO {
             ps.setInt(5, id);
             ps.executeUpdate();
 
-            if ("INACTIVE".equalsIgnoreCase(status)) {
-                inactivateSkusByProduct(id);
-            }
+            // Đồng bộ trạng thái xuống tất cả SKU
+            syncSkuStatusByProduct(id, status);
         }
     }
 
@@ -264,10 +268,11 @@ public class ProductCRUDDAO {
         }
     }
 
-    public void inactivateSkusByProduct(int productId) throws Exception {
-        String sql = "UPDATE product_skus SET status = 'INACTIVE' WHERE product_id = ?";
+    public void syncSkuStatusByProduct(int productId, String status) throws Exception {
+        String sql = "UPDATE product_skus SET status = ? WHERE product_id = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, productId);
+            ps.setString(1, status);
+            ps.setInt(2, productId);
             ps.executeUpdate();
         }
     }

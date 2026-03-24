@@ -1922,7 +1922,15 @@ public class Home extends HttpServlet {
                     toRaw = "";
                 }
 
-                int totalItems = dao.count(keyword, movementType, referenceCode, performedBy, from, to);
+                String productIdRaw = request.getParameter("productId");
+                Long productId = null;
+                try {
+                    if (productIdRaw != null && !productIdRaw.isBlank()) {
+                        productId = Long.parseLong(productIdRaw.trim());
+                    }
+                } catch (Exception e) {}
+
+                int totalItems = dao.count(keyword, movementType, referenceCode, performedBy, from, to, productId);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
                 if (totalPages < 1) {
                     totalPages = 1;
@@ -1932,8 +1940,9 @@ public class Home extends HttpServlet {
                 }
 
                 List<StockMovementHistoryItem> rows
-                        = dao.list(keyword, movementType, referenceCode, performedBy, from, to, page, pageSize);
+                        = dao.list(keyword, movementType, referenceCode, performedBy, from, to, productId, page, pageSize);
 
+                request.setAttribute("productId", productId);
                 request.setAttribute("rows", rows);
 
                 request.setAttribute("keyword", keyword);

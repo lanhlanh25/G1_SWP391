@@ -15,7 +15,8 @@ public class StockMovementHistoryDAO {
             String referenceCode,
             String performedBy,
             Date from,
-            Date to) throws Exception {
+            Date to,
+            Long productId) throws Exception {
 
         StringBuilder sql = new StringBuilder();
         List<Object> params = new ArrayList<>();
@@ -31,7 +32,7 @@ public class StockMovementHistoryDAO {
                 WHERE ir.status = 'CONFIRMED'
             """);
 
-        appendFilters(sql, params, keyword, "IMPORT", movementType, referenceCode, performedBy, from, to);
+        appendFilters(sql, params, keyword, "IMPORT", movementType, referenceCode, performedBy, from, to, productId);
 
         sql.append("""
                 UNION ALL
@@ -44,7 +45,7 @@ public class StockMovementHistoryDAO {
                 WHERE er.status = 'CONFIRMED'
             """);
 
-        appendFilters(sql, params, keyword, "EXPORT", movementType, referenceCode, performedBy, from, to);
+        appendFilters(sql, params, keyword, "EXPORT", movementType, referenceCode, performedBy, from, to, productId);
 
         sql.append("""
             ) x
@@ -70,6 +71,7 @@ public class StockMovementHistoryDAO {
             String performedBy,
             Date from,
             Date to,
+            Long productId,
             int page,
             int pageSize) throws Exception {
 
@@ -106,7 +108,7 @@ public class StockMovementHistoryDAO {
                 WHERE ir.status = 'CONFIRMED'
             """);
 
-        appendFilters(sql, params, keyword, "IMPORT", movementType, referenceCode, performedBy, from, to);
+        appendFilters(sql, params, keyword, "IMPORT", movementType, referenceCode, performedBy, from, to, productId);
 
         sql.append("""
                 UNION ALL
@@ -129,7 +131,7 @@ public class StockMovementHistoryDAO {
                 WHERE er.status = 'CONFIRMED'
             """);
 
-        appendFilters(sql, params, keyword, "EXPORT", movementType, referenceCode, performedBy, from, to);
+        appendFilters(sql, params, keyword, "EXPORT", movementType, referenceCode, performedBy, from, to, productId);
 
         sql.append("""
             ) x
@@ -175,12 +177,18 @@ public class StockMovementHistoryDAO {
             String referenceCode,
             String performedBy,
             Date from,
-            Date to) {
+            Date to,
+            Long productId) {
 
         if (selectedType != null && !selectedType.isBlank() && !"ALL".equalsIgnoreCase(selectedType)) {
             if (!rowType.equalsIgnoreCase(selectedType.trim())) {
                 sql.append(" AND 1 = 0 ");
             }
+        }
+
+        if (productId != null) {
+            sql.append(" AND p.product_id = ? ");
+            params.add(productId);
         }
 
         if (keyword != null && !keyword.isBlank()) {

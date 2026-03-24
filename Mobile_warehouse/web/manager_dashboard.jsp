@@ -166,7 +166,6 @@
                                     <th>Code</th>
                                     <th>Requested By</th>
                                     <th>Time</th>
-                                    <th class="text-center">Status</th>
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
@@ -179,7 +178,6 @@
                                                     <td><span class="fw-bold text-primary">${r.code}</span></td>
                                                     <td><small>${r.requestedBy}</small></td>
                                                     <td class="small text-muted">${r.requestedTime}</td>
-                                                    <td class="text-center"><span class="badge bg-label-info">${r.status}</span></td>
                                                     <td class="text-center">
                                                         <a class="btn btn-xs btn-primary" href="${ctx}/home?p=import-request-detail&id=${r.id}">View</a>
                                                     </td>
@@ -187,7 +185,7 @@
                                             </c:forEach>
                                         </c:when>
                                         <c:otherwise>
-                                            <tr><td colspan="5" class="text-center p-4 text-muted">No pending import requests.</td></tr>
+                                            <tr><td colspan="4" class="text-center p-4 text-muted">No pending import requests.</td></tr>
                                         </c:otherwise>
                                     </c:choose>
                                 </c:if>
@@ -199,7 +197,6 @@
                                                     <td><span class="fw-bold text-info">${r.code}</span></td>
                                                     <td><small>${r.requestedBy}</small></td>
                                                     <td class="small text-muted">${r.requestedTime}</td>
-                                                    <td class="text-center"><span class="badge bg-label-info">${r.status}</span></td>
                                                     <td class="text-center">
                                                         <a class="btn btn-xs btn-primary" href="${ctx}/home?p=export-request-detail&id=${r.id}">View</a>
                                                     </td>
@@ -207,7 +204,7 @@
                                             </c:forEach>
                                         </c:when>
                                         <c:otherwise>
-                                            <tr><td colspan="5" class="text-center p-4 text-muted">No pending export requests.</td></tr>
+                                            <tr><td colspan="4" class="text-center p-4 text-muted">No pending export requests.</td></tr>
                                         </c:otherwise>
                                     </c:choose>
                                 </c:if>

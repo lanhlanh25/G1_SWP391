@@ -254,6 +254,39 @@ public class ProductSkuDAO {
             ps.setString(5, status);
             ps.setInt(6, skuId);
             ps.executeUpdate();
+
+            // Đồng bộ trạng thái lên sản phẩm cha
+            int productId = getSkuById(skuId).getProductId();
+            syncProductStatusBySku(productId, status);
+        }
+    }
+
+    private void syncProductStatusBySku(int productId, String status) throws Exception {
+        try (Connection con = DBContext.getConnection()) {
+            if ("ACTIVE".equalsIgnoreCase(status)) {
+                // Nếu 1 SKU bật, SP cha BUỘC phải bật
+                String sql = "UPDATE products SET status = 'ACTIVE' WHERE product_id = ?";
+                try (PreparedStatement ps = con.prepareStatement(sql)) {
+                    ps.setInt(1, productId);
+                    ps.executeUpdate();
+                }
+            } else {
+                // Nếu 1 SKU tắt, kiểm tra xem còn SKU nào của SP này đang bật không
+                String checkSql = "SELECT COUNT(*) FROM product_skus WHERE product_id = ? AND status = 'ACTIVE'";
+                try (PreparedStatement ps = con.prepareStatement(checkSql)) {
+                    ps.setInt(1, productId);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        if (rs.next() && rs.getInt(1) == 0) {
+                            // Không còn SKU nào bật -> Tắt luôn SP cha
+                            String updateSql = "UPDATE products SET status = 'INACTIVE' WHERE product_id = ?";
+                            try (PreparedStatement ps2 = con.prepareStatement(updateSql)) {
+                                ps2.setInt(1, productId);
+                                ps2.executeUpdate();
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

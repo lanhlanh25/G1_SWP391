@@ -165,13 +165,19 @@
                     <c:set var="sumClose" value="${sumClose + r.closingQty}"/>
 
                     <c:url var="detailUrl" value="/home">
-                        <c:param name="p" value="product-detail"/>
-                        <c:param name="id" value="${r.productId}"/>
+                        <c:param name="p" value="stock-movement-history"/>
+                        <c:param name="productId" value="${r.productId}"/>
+                        <c:param name="from" value="${from}"/>
+                        <c:param name="to" value="${to}"/>
                     </c:url>
 
                     <tr>
                         <td><span class="badge bg-label-secondary font-monospace">${fn:escapeXml(r.productCode)}</span></td>
-                        <td><strong>${fn:escapeXml(r.productName)}</strong></td>
+                        <td>
+                            <a href="${ctx}/home?p=product-detail&id=${r.productId}" class="text-dark">
+                                <strong>${fn:escapeXml(r.productName)}</strong>
+                            </a>
+                        </td>
                         <td><small class="text-muted">${fn:escapeXml(r.brandName)}</small></td>
                         <td class="text-center">Phone</td>
                         <td class="text-end fw-semibold">${r.openingQty}</td>
