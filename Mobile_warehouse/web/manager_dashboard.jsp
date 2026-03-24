@@ -18,7 +18,7 @@
                             You have <span class="fw-bold">${pendingApprovals}</span> pending requests in your queue. 
                             Check the newest updates in the approval center below.
                         </p>
-                        <a href="${ctx}/home?p=import-request-list&status=NEW" class="btn btn-sm btn-outline-primary">View Requests</a>
+                       
                     </div>
                 </div>
                 <div class="col-sm-5 text-center text-sm-left">

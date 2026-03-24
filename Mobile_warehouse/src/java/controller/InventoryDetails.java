@@ -69,6 +69,13 @@ public class InventoryDetails extends HttpServlet {
         int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
         if (totalPages < 1) totalPages = 1;
         if (page > totalPages) page = totalPages;
+        int windowSize = 5;
+int pgStart = Math.max(1, page - windowSize / 2);
+int pgEnd   = Math.min(totalPages, pgStart + windowSize - 1);
+pgStart = Math.max(1, pgEnd - windowSize + 1);
+
+request.setAttribute("pgStart", pgStart);
+request.setAttribute("pgEnd",   pgEnd);
 
         request.setAttribute("productCode", p.productCode);
         request.setAttribute("productModel", p.productName);

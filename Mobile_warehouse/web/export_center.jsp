@@ -23,11 +23,15 @@
     </div>
 </c:if>
 
-<div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Export Configuration</h5>
-        <small class="text-muted float-end">Consolidated reports to Excel or PDF</small>
-    </div>
+  <c:if test="${not empty err}">
+    <div class="msg-err mb-16">${fn:escapeXml(err)}</div>
+  </c:if>
+
+  <c:if test="${not empty msg}">
+    <div class="msg-ok mb-16">${fn:escapeXml(msg)}</div>
+  </c:if>
+  <%--summary--%>
+  <div class="card mb-16">
     <div class="card-body">
         <form method="get" action="${ctx}/export-center">
             <div class="row g-3">

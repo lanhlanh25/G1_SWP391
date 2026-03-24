@@ -9,8 +9,8 @@
 <div class="p-24">
 
   <div class="topbar mb-22">
-    <a href="${ctx}/inventory" class="btn btn-sm btn-outline">← Back</a>
-    <a href="${ctx}/home"      class="btn btn-sm btn-outline">Home</a>
+      <a href="${ctx}/inventory" class="btn btn-sm btn-outline">← Back</a>
+    
     <h1 class="h1">Inventory Details</h1>
   </div>
 
