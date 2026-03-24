@@ -57,14 +57,14 @@
                         <div class="muted-label">Current Stock</div>
                         <div>${selectedLowStockItem.currentStock}</div>
 
-                        <div class="muted-label">ROP</div>
-                        <div>${selectedLowStockItem.rop}</div>
+                        <div class="muted-label">Threshold</div>
+                        <div>${selectedLowStockItem.threshold}</div>
 
                         <div class="muted-label">Suggested Qty</div>
                         <div><b>${selectedLowStockItem.suggestedReorderQty}</b></div>
 
                         <div class="muted-label">Status</div>
-                        <div>${fn:escapeXml(selectedLowStockItem.ropStatus)}</div>
+                        <div>${fn:escapeXml(selectedLowStockItem.stockStatus)}</div>
                     </div>
                 </div>
             </div>
@@ -163,7 +163,7 @@
         <div id="prefillData"
              data-product-id="${selectedLowStockItem.productId}"
              data-current-stock="${selectedLowStockItem.currentStock}"
-             data-rop="${selectedLowStockItem.rop}"
+             data-threshold="${selectedLowStockItem.threshold}"
              data-suggested-qty="${selectedLowStockItem.suggestedReorderQty}"
              style="display:none;"></div>
     </c:if>
@@ -286,7 +286,7 @@
         return {
             productId: el.dataset.productId || "",
             currentStock: el.dataset.currentStock || "0",
-            rop: el.dataset.rop || "0",
+            threshold: el.dataset.threshold || "10",
             qty: el.dataset.suggestedQty || "1"
         };
     }

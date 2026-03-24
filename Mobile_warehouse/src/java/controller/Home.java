@@ -598,7 +598,7 @@ public class Home extends HttpServlet {
                     request.setAttribute("dashboardDeleteRequests", dashboardDeleteRequests);
 
                     request.setAttribute("lowStockProducts",
-                            lowStockSummary != null ? lowStockSummary.getProductsBelowRop() : 0);
+                            lowStockSummary != null ? lowStockSummary.getProductsAtOrBelowThreshold() : 0);
                     request.setAttribute("dashboardLowStockRows", dashboardLowStockRows);
 
                     request.setAttribute("dashboardRecentActivities", dashboardRecentActivities);
@@ -1566,7 +1566,7 @@ public class Home extends HttpServlet {
                             return;
                         }
 
-                        if ("OK".equalsIgnoreCase(selectedItem.getRopStatus())) {
+                        if ("OK".equalsIgnoreCase(selectedItem.getStockStatus())) {
                             response.sendRedirect(request.getContextPath() + "/home?p=low-stock-report&err=This+product+does+not+need+restocking");
                             return;
                         }
@@ -1718,7 +1718,7 @@ public class Home extends HttpServlet {
                 SupplierDAO supplierDAO = new SupplierDAO();
 
                 String q = request.getParameter("q");
-                String ropStatus = request.getParameter("ropStatus");
+                String stockStatus = request.getParameter("stockStatus");
 
                 String supplierIdRaw = request.getParameter("supplierId");
                 Long supplierId = null;
@@ -1764,7 +1764,7 @@ public class Home extends HttpServlet {
                     maxStock = null;
                 }
 
-                int totalItems = dao.countLowStockReport(q, supplierId, ropStatus, minStock, maxStock);
+                int totalItems = dao.countLowStockReport(q, supplierId, stockStatus, minStock, maxStock);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
                 if (totalPages < 1) {
                     totalPages = 1;
@@ -1773,7 +1773,7 @@ public class Home extends HttpServlet {
                     page = totalPages;
                 }
 
-                List<LowStockReportItem> rows = dao.getLowStockReport(q, supplierId, ropStatus, minStock, maxStock, page, pageSize);
+                List<LowStockReportItem> rows = dao.getLowStockReport(q, supplierId, stockStatus, minStock, maxStock, page, pageSize);
                 LowStockSummaryDTO summary = dao.getSummary();
                 List<IdName> suppliers = supplierDAO.listActive();
 
@@ -1782,7 +1782,7 @@ public class Home extends HttpServlet {
                 request.setAttribute("suppliers", suppliers);
 
                 request.setAttribute("q", q);
-                request.setAttribute("ropStatus", ropStatus);
+                request.setAttribute("stockStatus", stockStatus);
                 request.setAttribute("supplierId", supplierIdRaw);
                 request.setAttribute("minStock", minStockRaw);
                 request.setAttribute("maxStock", maxStockRaw);

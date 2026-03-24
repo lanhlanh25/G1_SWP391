@@ -2,17 +2,17 @@ package model;
 
 public class LowStockSummaryDTO {
 
-    private int productsBelowRop;
+    private int productsAtOrBelowThreshold;
     private int outOfStock;
     private int reorderNeeded;
     private int totalProducts;
 
-    public int getProductsBelowRop() {
-        return productsBelowRop;
+    public int getProductsAtOrBelowThreshold() {
+        return productsAtOrBelowThreshold;
     }
 
-    public void setProductsBelowRop(int productsBelowRop) {
-        this.productsBelowRop = productsBelowRop;
+    public void setProductsAtOrBelowThreshold(int productsAtOrBelowThreshold) {
+        this.productsAtOrBelowThreshold = productsAtOrBelowThreshold;
     }
 
     public int getOutOfStock() {

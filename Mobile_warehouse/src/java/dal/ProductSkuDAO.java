@@ -271,7 +271,7 @@ public class ProductSkuDAO {
             }
         }
     }
-    
+
     public boolean existsVariantOther(long productId, String color, int ramGb, int storageGb, int currentSkuId) throws Exception {
         String sql = "SELECT 1 FROM product_skus WHERE product_id=? AND LOWER(color)=LOWER(?) AND ram_gb=? AND storage_gb=? AND sku_id <> ? LIMIT 1";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -360,7 +360,7 @@ public class ProductSkuDAO {
 
                     if (stock == 0) {
                         item.setStockStatus("Out Of Stock");
-                    } else if (stock <= 3) {
+                    } else if (stock <= 10) {
                         item.setStockStatus("Low Stock");
                     } else {
                         item.setStockStatus("In Stock");

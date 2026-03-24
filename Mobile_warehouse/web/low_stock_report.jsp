@@ -37,9 +37,9 @@
                     <div class="avatar me-2">
                         <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-repost fs-4"></i></span>
                     </div>
-                    <h4 class="ms-1 mb-0 text-warning">${summary.productsBelowRop}</h4>
+                    <h4 class="ms-1 mb-0 text-warning">${summary.productsAtOrBelowThreshold}</h4>
                 </div>
-                <p class="mb-0 small text-muted">Action Required (Below ROP)</p>
+                <p class="mb-0 small text-muted">At or Below Threshold</p>
             </div>
         </div>
     </div>
@@ -98,14 +98,14 @@
                 </div>
 
                 <div class="col-md-3 col-lg-2">
-                    <label class="form-label small text-uppercase fw-semibold">ROP Status</label>
-                    <select class="form-select" name="ropStatus">
+                    <label class="form-label small text-uppercase fw-semibold">Stock Status</label>
+                    <select class="form-select" name="stockStatus">
                         <option value="">All Low Stock</option>
-                        <option value="All" ${ropStatus == 'All' ? 'selected' : ''}>All Products</option>
-                        <option value="Out Of Stock" ${ropStatus == 'Out Of Stock' ? 'selected' : ''}>Out Of Stock</option>
-                        <option value="Reorder Needed" ${ropStatus == 'Reorder Needed' ? 'selected' : ''}>Reorder Needed</option>
-                        <option value="At ROP Level" ${ropStatus == 'At ROP Level' ? 'selected' : ''}>At ROP Level</option>
-                        <option value="OK" ${ropStatus == 'OK' ? 'selected' : ''}>Standard Level</option>
+                        <option value="All" ${stockStatus == 'All' ? 'selected' : ''}>All Products</option>
+                        <option value="Out Of Stock" ${stockStatus == 'Out Of Stock' ? 'selected' : ''}>Out Of Stock</option>
+                        <option value="Reorder Needed" ${stockStatus == 'Reorder Needed' ? 'selected' : ''}>Reorder Needed</option>
+                        <option value="At Threshold" ${stockStatus == 'At Threshold' ? 'selected' : ''}>At Threshold</option>
+                        <option value="OK" ${stockStatus == 'OK' ? 'selected' : ''}>Standard Level</option>
                     </select>
                 </div>
 
@@ -143,10 +143,7 @@
                     <th class="ps-3 text-uppercase small text-white">Product Information</th>
                     <th class="text-uppercase small text-white">Supplier</th>
                     <th class="text-center text-uppercase small text-white">Current</th>
-                    <th class="text-center text-uppercase small text-white">Avg/Day</th>
-                    <th class="text-center text-uppercase small text-white">LT</th>
-                    <th class="text-center text-uppercase small text-white">Safety</th>
-                    <th class="text-center text-uppercase small text-white">ROP</th>
+                    <th class="text-center">Threshold</th>
                     <th class="text-center text-uppercase small text-white">Status</th>
                     <th class="text-center text-uppercase small text-white">Suggested</th>
                     <th class="text-center text-uppercase small text-white pe-3">Actions</th>
@@ -161,20 +158,17 @@
                         </td>
                         <td>${item.supplierName}</td>
                         <td class="text-center fw-bold fs-5">${item.currentStock}</td>
-                        <td class="text-center">${item.avgDailySales}</td>
-                        <td class="text-center">${item.leadTimeDays}d</td>
-                        <td class="text-center">${item.safetyStock}</td>
-                        <td class="text-center fw-semibold">${item.rop}</td>
+                        <td class="text-center fw-semibold">${item.threshold}</td>
                         <td class="text-center">
                             <c:choose>
-                                <c:when test="${item.ropStatus == 'Out Of Stock'}">
+                                <c:when test="${item.stockStatus == 'Out Of Stock'}">
                                     <span class="badge bg-label-danger text-uppercase px-3">Out Of Stock</span>
                                 </c:when>
-                                <c:when test="${item.ropStatus == 'Reorder Needed'}">
+                                <c:when test="${item.stockStatus == 'Reorder Needed'}">
                                     <span class="badge bg-label-warning text-uppercase px-3">Reorder Needed</span>
                                 </c:when>
-                                <c:when test="${item.ropStatus == 'At ROP Level'}">
-                                    <span class="badge bg-label-info text-uppercase px-3">At ROP Level</span>
+                                <c:when test="${item.stockStatus == 'At Threshold'}">
+                                    <span class="badge bg-label-info">At Threshold</span>
                                 </c:when>
                                 <c:otherwise>
                                     <span class="badge bg-label-success text-uppercase px-3">OK</span>
@@ -190,7 +184,7 @@
                                 </a>
 
                                 <c:choose>
-                                    <c:when test="${item.ropStatus != 'OK' && !item.hasActiveImportRequest}">
+                                    <c:when test="${item.stockStatus != 'OK' && !item.hasActiveImportRequest}">
                                         <a class="btn btn-sm btn-primary py-1 px-2"
                                            href="${ctx}/home?p=create-import-request&productId=${item.productId}">
                                             Create Request
@@ -228,7 +222,7 @@
                         <c:param name="p" value="low-stock-report"/>
                         <c:param name="q" value="${q}"/>
                         <c:param name="supplierId" value="${supplierId}"/>
-                        <c:param name="ropStatus" value="${ropStatus}"/>
+                        <c:param name="stockStatus" value="${stockStatus}"/>
                         <c:param name="minStock" value="${minStock}"/>
                         <c:param name="maxStock" value="${maxStock}"/>
                     </c:url>
@@ -244,8 +238,8 @@
                                 <a class="page-link" href="${basePageUrl}&page=${pg}">${pg}</a>
                             </li>
                             <c:if test="${pg == page + 1 && pg < totalPages}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
-                        </c:if>
-                    </c:forEach>
+                            </c:if>
+                        </c:forEach>
 
                     <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
                         <a class="page-link" href="${basePageUrl}&page=${page+1}"><i class="bx bx-chevron-right"></i></a>

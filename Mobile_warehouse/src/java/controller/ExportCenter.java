@@ -435,52 +435,90 @@ public class ExportCenter extends HttpServlet {
     private void buildLowStockPayload(
             ExportPayload p,
             Long brandId,
-            String ropStatus,
+            String stockStatus,
             String detailLevel,
             int page,
             int pageSize
     ) throws Exception {
 
         LowStockReportDAO dao = new LowStockReportDAO();
-        List<LowStockReportItem> rows = dao.getLowStockReportByBrand(
-                null, brandId, ropStatus, page, pageSize
+
+        List<LowStockReportItem> rows = dao.getLowStockReport(
+                null, // q
+                null, // supplierId
+                stockStatus, // stockStatus
+                null, // minStock
+                null, // maxStock
+                page,
+                pageSize
         );
+
+        if (brandId != null) {
+            List<LowStockReportItem> filtered = new ArrayList<>();
+            for (LowStockReportItem r : rows) {
+                if (r.getBrandName() != null) {
+                    filtered.add(r);
+                }
+            }
+            rows = filtered;
+        }
+
         LowStockSummaryDTO summary = dao.getSummary();
 
         p.reportTitle = "Low Stock Report";
-        p.summaryLines.put("Products Below ROP", String.valueOf(summary.getProductsBelowRop()));
-        p.summaryLines.put("Out Of Stock", String.valueOf(summary.getOutOfStock()));
-        p.summaryLines.put("Reorder Needed", String.valueOf(summary.getReorderNeeded()));
-        p.summaryLines.put("Total Products", String.valueOf(summary.getTotalProducts()));
+        p.summaryLines.put("Products At Or Below Threshold",
+                String.valueOf(summary != null ? summary.getProductsAtOrBelowThreshold() : 0));
+        p.summaryLines.put("Out Of Stock",
+                String.valueOf(summary != null ? summary.getOutOfStock() : 0));
+        p.summaryLines.put("Reorder Needed",
+                String.valueOf(summary != null ? summary.getReorderNeeded() : 0));
+        p.summaryLines.put("Total Products",
+                String.valueOf(summary != null ? summary.getTotalProducts() : 0));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
-            p.headers = Arrays.asList("Product Code", "Product Name", "Brand", "Current Stock", "ROP Status");
+            p.headers = Arrays.asList(
+                    "Product Code",
+                    "Product Name",
+                    "Brand",
+                    "Current Stock",
+                    "Threshold",
+                    "Stock Status"
+            );
+
             for (LowStockReportItem r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getProductCode()),
                         nn(r.getProductName()),
                         nn(r.getBrandName()),
                         String.valueOf(r.getCurrentStock()),
-                        nn(r.getRopStatus())
+                        String.valueOf(r.getThreshold()),
+                        nn(r.getStockStatus())
                 ));
             }
         } else {
             p.headers = Arrays.asList(
-                    "Product Code", "Product Name", "Brand", "Current Stock", "Avg Daily Sales",
-                    "Lead Time Days", "Safety Stock", "ROP", "ROP Status", "Suggested Reorder Qty"
+                    "Product Code",
+                    "Product Name",
+                    "Brand",
+                    "Supplier",
+                    "Current Stock",
+                    "Threshold",
+                    "Stock Status",
+                    "Suggested Reorder Qty",
+                    "Has Active Import Request"
             );
+
             for (LowStockReportItem r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getProductCode()),
                         nn(r.getProductName()),
                         nn(r.getBrandName()),
+                        nn(r.getSupplierName()),
                         String.valueOf(r.getCurrentStock()),
-                        String.valueOf(r.getAvgDailySales()),
-                        String.valueOf(r.getLeadTimeDays()),
-                        String.valueOf(r.getSafetyStock()),
-                        String.valueOf(r.getRop()),
-                        nn(r.getRopStatus()),
-                        String.valueOf(r.getSuggestedReorderQty())
+                        String.valueOf(r.getThreshold()),
+                        nn(r.getStockStatus()),
+                        String.valueOf(r.getSuggestedReorderQty()),
+                        r.isHasActiveImportRequest() ? "Yes" : "No"
                 ));
             }
         }
@@ -506,6 +544,7 @@ public class ExportCenter extends HttpServlet {
     }
 
     private static class ExportPayload {
+
         String reportTitle;
         String generatedAt;
         Map<String, String> filterLines = new LinkedHashMap<>();
@@ -523,7 +562,9 @@ public class ExportCenter extends HttpServlet {
     }
 
     private String trim(String s) {
-        if (s == null) return null;
+        if (s == null) {
+            return null;
+        }
         s = s.trim();
         return s.isEmpty() ? null : s;
     }
