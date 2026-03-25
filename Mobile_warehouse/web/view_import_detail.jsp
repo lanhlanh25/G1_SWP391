@@ -11,7 +11,7 @@
 <div class="page-wrap">
   <div class="topbar">
     <div class="d-flex align-center gap-12">
-      <h1 class="h1">Import Receipt Detail</h1>
+      <h1 class="h1">Import Receipt Details</h1>
     </div>
     <div class="d-flex gap-8 align-center">
       <a class="btn btn-outline" href="${ctx}/home?p=import-receipt-list">← Back to List</a>

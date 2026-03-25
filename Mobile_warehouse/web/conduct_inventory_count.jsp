@@ -12,7 +12,7 @@
   <div class="ic-topbar">
     <div style="display:flex;align-items:center;gap:14px;">
       <a href="${ctx}/home?p=dashboard" class="btn btn-sm">← Back</a>
-      <h1 class="ic-title">Conduct Inventory Count</h1>
+      <h1 class="ic-title">Inventory Count</h1>
     </div>
     <button type="button" class="btn btn-primary" id="btnSave">Save Count</button>
   </div>
