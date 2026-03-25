@@ -23,6 +23,11 @@
     <span class="menu-header-text">Warehouse</span>
 </li>
 
+<li class="menu-item <%= "dashboard".equals(currentPage) ? "active" : "" %>">
+    <a href="<%=ctx%>/home?p=dashboard" class="menu-link">
+        <div data-i18n="Dashboard">Dashboard</div>
+    </a>
+</li>
 <li class="menu-item <%= inventoryOverviewActive ? "active" : "" %>">
     <a href="<%=ctx%>/inventory" class="menu-link">
         <div data-i18n="Inventory">Inventory Management</div>
@@ -69,7 +74,7 @@
     </ul>
 </li>
 
-<%--<li class="menu-header small text-uppercase">
+<li class="menu-header small text-uppercase">
     <span class="menu-header-text">Master Data</span>
 </li>
 
@@ -84,4 +89,4 @@
         <div data-i18n="Suppliers">Supplier List</div>
     </a>
 </li>
---%>
+
