@@ -77,8 +77,7 @@
             </ul>
         </div>
 
-        <div class="table-responsive text-nowrap">
-            <table class="table table-hover">
+        <table class="table table-hover text-nowrap">
                 <thead>
                     <tr>
                         <th class="text-center">#</th>
@@ -117,10 +116,10 @@
                             </td>
                             <td class="text-center">
                                 <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" data-bs-boundary="viewport">
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
-                                    <div class="dropdown-menu">
+                                    <div class="dropdown-menu dropdown-menu-end">
                                         <a class="dropdown-item" href="${ctx}/home?p=export-receipt-detail&id=${r.exportId}"><i class="bx bx-show-alt me-1"></i> View Detail</a>
                                         <a class="dropdown-item" href="${ctx}/export-receipt-pdf?id=${r.exportId}" target="_blank"><i class="bx bxs-file-pdf me-1"></i> Export PDF</a>
                                     </div>
@@ -130,7 +129,6 @@
                     </c:forEach>
                 </tbody>
             </table>
-        </div>
 
         <c:if test="${totalPages > 1}">
             <c:url var="baseUrl" value="/home">

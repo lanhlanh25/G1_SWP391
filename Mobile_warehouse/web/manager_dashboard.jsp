@@ -261,7 +261,7 @@
                             <tr>
                                 <th>Product Details</th>
                                 <th>Supplier</th>
-                                <th class="text-center">Stock / ROP</th>
+                                <th class="text-center">Stock / Threshold</th>
                                 <th class="text-center">Status</th>
                                 <th class="text-center">Suggested</th>
                                 <th class="text-center">Action</th>
@@ -285,20 +285,23 @@
                                             </td>
                                             <td><small>${item.supplierName}</small></td>
                                             <td class="text-center">
-                                                <span class="fw-bold ${item.currentStock <= item.rop ? 'text-danger' : ''}">${item.currentStock}</span>
+                                                <span class="fw-bold ${item.currentStock <= item.threshold ? 'text-danger' : ''}">${item.currentStock}</span>
                                                 <span class="text-muted mx-1">/</span>
-                                                <span class="small">${item.rop}</span>
+                                                <span class="small">${item.threshold}</span>
                                             </td>
                                             <td class="text-center">
                                                 <c:choose>
-                                                    <c:when test="${item.ropStatus == 'Out Of Stock'}">
+                                                    <c:when test="${item.stockStatus == 'Out Of Stock'}">
                                                         <span class="badge bg-danger">OOS</span>
                                                     </c:when>
-                                                    <c:when test="${item.ropStatus == 'Reorder Needed'}">
+                                                    <c:when test="${item.stockStatus == 'Reorder Needed'}">
                                                         <span class="badge bg-warning">Low</span>
                                                     </c:when>
+                                                    <c:when test="${item.stockStatus == 'At Threshold'}">
+                                                        <span class="badge bg-info">At Threshold</span>
+                                                    </c:when>
                                                     <c:otherwise>
-                                                        <span class="badge bg-info">At ROP</span>
+                                                        <span class="badge bg-success">OK</span>
                                                     </c:otherwise>
                                                 </c:choose>
                                             </td>

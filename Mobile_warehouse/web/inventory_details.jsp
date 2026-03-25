@@ -65,13 +65,16 @@
                     <span class="badge badge-success">In Stock</span>
                   </c:when>
                   <c:when test="${s.stockStatus == 'LOW'}">
-                    <span class="badge badge-warning" title="Stock (${s.qty}) ≤ ROP (${s.rop})">Low Stock</span>
+                    <span class="badge badge-warning" title="Stock (${s.qty}) < Threshold (10)">Low Stock</span>
+                  </c:when>
+                  <c:when test="${s.stockStatus == 'AT_THRESHOLD'}">
+                    <span class="badge badge-info">At Threshold</span>
                   </c:when>
                   <c:otherwise>
                     <span class="badge badge-danger">Out of Stock</span>
                   </c:otherwise>
                 </c:choose>
-                <div class="rop-hint">ROP: ${s.rop}</div>
+                <div class="rop-hint">Threshold: ${s.rop}</div>
               </td>
               <td class="text-right font-bold">
                 ${s.qty}

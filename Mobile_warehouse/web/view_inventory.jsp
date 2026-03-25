@@ -58,7 +58,7 @@
                 </div>
                 <span class="fw-semibold d-block mb-1 text-muted small uppercase">Low Stock</span>
                 <h3 class="card-title mb-2 text-warning">${lowStockItems}</h3>
-                <small class="text-muted">Below reorder point</small>
+                <small class="text-muted">Below threshold</small>
             </div>
         </div>
     </div>
@@ -168,7 +168,10 @@
                                     <span class="badge bg-label-success">In Stock</span>
                                 </c:when>
                                 <c:when test="${st == 'LOW'}">
-                                    <span class="badge bg-label-warning" title="Stock ≤ ROP">Low Stock</span>
+                                    <span class="badge bg-label-warning" title="Stock < 10">Low Stock</span>
+                                </c:when>
+                                <c:when test="${st == 'AT_THRESHOLD'}">
+                                    <span class="badge bg-label-info">At Threshold</span>
                                 </c:when>
                                 <c:otherwise>
                                     <span class="badge bg-label-danger">Out of Stock</span>

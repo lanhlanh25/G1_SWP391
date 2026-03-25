@@ -36,10 +36,10 @@ public class InventoryDAO {
     }
 
     /**
-     * Summary cards dùng ROP formula:
-     *   rop = CEIL(avg_daily_sales * lead_time_days + safety_stock)
+     * Summary cards dùng ngưỡng 10:
      *   Out Of Stock  : current_stock = 0
-     *   Low Stock     : 0 < current_stock <= rop
+     *   Low Stock     : 0 < current_stock < 10
+     *   At Threshold  : current_stock = 10
      */
     public Map<String, Integer> getSummary(String q, String brandId) {
         Map<String, Integer> m = new HashMap<>();
@@ -75,17 +75,16 @@ public class InventoryDAO {
         String sql2 =
             "SELECT " +
             "  SUM(CASE WHEN t.current_stock = 0 THEN 1 ELSE 0 END) AS out_items, " +
-            "  SUM(CASE WHEN t.current_stock > 0 AND t.current_stock <= t.rop THEN 1 ELSE 0 END) AS low_items " +
+            "  SUM(CASE WHEN t.current_stock > 0 AND t.current_stock < 10 THEN 1 ELSE 0 END) AS low_items " +
             "FROM ( " +
             "  SELECT p.product_id, " +
-            "    COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock, " +
-            "    CEIL(COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0) + COALESCE(p.safety_stock, 0)) AS rop " +
+            "    COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock " +
             "  FROM products p " +
             "  JOIN brands b ON b.brand_id = p.brand_id " +
             "  LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' " +
             "  LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id " +
             where +
-            "  GROUP BY p.product_id, p.avg_daily_sales, p.lead_time_days, p.safety_stock " +
+            "  GROUP BY p.product_id " +
             ") t";
 
         try (Connection con = getConn()) {
@@ -132,14 +131,13 @@ public class InventoryDAO {
         String sql =
             "SELECT COUNT(*) FROM ( " +
             "  SELECT p.product_id, " +
-            "    COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock, " +
-            "    CEIL(COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0) + COALESCE(p.safety_stock, 0)) AS rop " +
+            "    COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock " +
             "  FROM products p " +
             "  JOIN brands b ON b.brand_id = p.brand_id " +
             "  LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' " +
             "  LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id " +
             where +
-            "  GROUP BY p.product_id, p.avg_daily_sales, p.lead_time_days, p.safety_stock " +
+            "  GROUP BY p.product_id " +
             having +
             ") x";
 
@@ -174,17 +172,15 @@ public class InventoryDAO {
 
         String having = buildHaving(stockStatus);
 
-        // stock_status dùng ROP formula thay cho ngưỡng cứng 10
+        // stock_status dùng ngưỡng cố định 10
         String sql =
             "SELECT " +
             "  p.product_code, p.product_name, b.brand_name, " +
             "  COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) AS current_stock, " +
-            "  CEIL(COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0) + COALESCE(p.safety_stock, 0)) AS rop, " +
             "  CASE " +
             "    WHEN COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) = 0 THEN 'OUT' " +
-            "    WHEN COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) <= " +
-            "         CEIL(COALESCE(p.avg_daily_sales,0) * COALESCE(p.lead_time_days,0) + COALESCE(p.safety_stock,0)) " +
-            "    THEN 'LOW' " +
+            "    WHEN COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) < 10 THEN 'LOW' " +
+            "    WHEN COALESCE(SUM(COALESCE(ib.qty_on_hand, 0)), 0) = 10 THEN 'AT_THRESHOLD' " +
             "    ELSE 'OK' " +
             "  END AS stock_status, " +
             "  DATE_FORMAT( " +
@@ -198,8 +194,7 @@ public class InventoryDAO {
             "LEFT JOIN product_skus sk ON sk.product_id = p.product_id AND sk.status='ACTIVE' " +
             "LEFT JOIN inventory_balance ib ON ib.sku_id = sk.sku_id " +
             where +
-            "GROUP BY p.product_id, p.product_code, p.product_name, b.brand_name, " +
-            "         p.avg_daily_sales, p.lead_time_days, p.safety_stock " +
+            "GROUP BY p.product_id, p.product_code, p.product_name, b.brand_name " +
             having +
             "ORDER BY p.product_name " +
             "LIMIT ? OFFSET ?";
@@ -227,16 +222,16 @@ public class InventoryDAO {
     }
 
     /**
-     * buildHaving dùng cột rop (đã tính trong subquery) thay ngưỡng cứng.
-     * Với filter "OK"  : current_stock > rop
-     * Với filter "LOW" : 0 < current_stock <= rop
+     * buildHaving dùng ngưỡng cố định 10.
+     * Với filter "OK"  : current_stock > 10
+     * Với filter "LOW" : 0 < current_stock < 10
      * Với filter "OUT" : current_stock = 0
      */
     private String buildHaving(String stockStatus) {
         if (stockStatus == null || stockStatus.trim().isEmpty()) return "";
         switch (stockStatus.trim().toUpperCase()) {
-            case "OK":  return " HAVING current_stock > rop ";
-            case "LOW": return " HAVING current_stock > 0 AND current_stock <= rop ";
+            case "OK":  return " HAVING current_stock > 10 ";
+            case "LOW": return " HAVING current_stock > 0 AND current_stock < 10 ";
             case "OUT": return " HAVING current_stock = 0 ";
             default:    return "";
         }

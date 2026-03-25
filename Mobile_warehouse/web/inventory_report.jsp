@@ -192,8 +192,8 @@
                                 <c:when test="${r.ropStatus eq 'Reorder Needed'}">
                                     <span class="badge bg-label-warning">Reorder Needed</span>
                                 </c:when>
-                                <c:when test="${r.ropStatus eq 'At ROP Level'}">
-                                    <span class="badge bg-label-info">At ROP Level</span>
+                                <c:when test="${r.ropStatus eq 'At Threshold'}">
+                                    <span class="badge bg-label-info">At Threshold</span>
                                 </c:when>
                                 <c:otherwise>
                                     <span class="badge bg-label-success">OK</span>

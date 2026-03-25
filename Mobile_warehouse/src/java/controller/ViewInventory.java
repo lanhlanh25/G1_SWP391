@@ -17,7 +17,7 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.util.Map;
 
-@WebServlet(name = "ViewInventoryServlet", urlPatterns = {"/inventory"})
+@WebServlet(name = "ViewInventoryServlet", urlPatterns = { "/inventory" })
 public class ViewInventory extends HttpServlet {
 
     @Override
@@ -34,7 +34,8 @@ public class ViewInventory extends HttpServlet {
         if (role == null || role.isBlank()) {
             model.User u = (model.User) session.getAttribute("authUser");
             role = UserDAO.getRoleNameByUserId(u.getUserId());
-            if (role == null) role = "STAFF";
+            if (role == null)
+                role = "STAFF";
             session.setAttribute("roleName", role);
         }
         role = role.toUpperCase();
@@ -50,8 +51,10 @@ public class ViewInventory extends HttpServlet {
 
         int page = parseInt(request.getParameter("page"), 1);
         int pageSize = parseInt(request.getParameter("pageSize"), 10);
-        if (page < 1) page = 1;
-        if (pageSize <= 0) pageSize = 10;
+        if (page < 1)
+            page = 1;
+        if (pageSize <= 0)
+            pageSize = 10;
 
         InventoryDAO dao = new InventoryDAO();
 
@@ -65,8 +68,10 @@ public class ViewInventory extends HttpServlet {
 
         int totalItems = dao.countModels(q, brandId, stockStatus);
         int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
-        if (totalPages < 1) totalPages = 1;
-        if (page > totalPages) page = totalPages;
+        if (totalPages < 1)
+            totalPages = 1;
+        if (page > totalPages)
+            page = totalPages;
 
         request.setAttribute("inventoryModels",
                 dao.listModels(q, brandId, stockStatus, page, pageSize));
@@ -89,7 +94,8 @@ public class ViewInventory extends HttpServlet {
 
     private int parseInt(String raw, int def) {
         try {
-            if (raw == null || raw.isBlank()) return def;
+            if (raw == null || raw.isBlank())
+                return def;
             return Integer.parseInt(raw.trim());
         } catch (Exception e) {
             return def;
@@ -97,17 +103,22 @@ public class ViewInventory extends HttpServlet {
     }
 
     private String trimToNull(String s) {
-        if (s == null) return null;
+        if (s == null)
+            return null;
         s = s.trim();
         return s.isEmpty() ? null : s;
     }
 
     private String resolveSidebar(String role) {
         switch (role) {
-            case "ADMIN": return "sidebar_admin.jsp";
-            case "MANAGER": return "sidebar_manager.jsp";
-            case "SALE": return "sidebar_sales.jsp";
-            default: return "sidebar_staff.jsp";
+            case "ADMIN":
+                return "sidebar_admin.jsp";
+            case "MANAGER":
+                return "sidebar_manager.jsp";
+            case "SALE":
+                return "sidebar_sales.jsp";
+            default:
+                return "sidebar_staff.jsp";
         }
     }
 }

@@ -116,10 +116,7 @@ public class BrandStatsDAO {
               COUNT(DISTINCT p.product_id) AS total_products,
               COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
               COUNT(DISTINCT CASE
-                  WHEN COALESCE(prod_qty.product_qty, 0) <= CEIL(
-                      COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0)
-                      + COALESCE(p.safety_stock, 0)
-                  ) THEN p.product_id
+                  WHEN COALESCE(prod_qty.product_qty, 0) < 10 THEN p.product_id
               END) AS low_stock_products
             FROM brands b
             LEFT JOIN products p ON p.brand_id = b.brand_id
@@ -279,10 +276,7 @@ public class BrandStatsDAO {
                   COUNT(DISTINCT p.product_id) AS total_products,
                   COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
                   COUNT(DISTINCT CASE
-                      WHEN COALESCE(prod_qty.product_qty, 0) <= CEIL(
-                          COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0)
-                          + COALESCE(p.safety_stock, 0)
-                      ) THEN p.product_id
+                      WHEN COALESCE(prod_qty.product_qty, 0) < 10 THEN p.product_id
                   END) AS low_stock_products
                 FROM products p
                 LEFT JOIN product_skus s ON s.product_id = p.product_id
@@ -422,9 +416,9 @@ public class BrandStatsDAO {
               COALESCE(exp.exported_units, 0) AS exported_units,
               imp.last_import_at,
               exp.last_export_at,
-              COALESCE(p.avg_daily_sales, 0) AS avg_daily_sales,
-              COALESCE(p.lead_time_days, 0) AS lead_time_days,
-              COALESCE(p.safety_stock, 0) AS safety_stock
+              0 AS avg_daily_sales,
+              0 AS lead_time_days,
+              0 AS safety_stock
             FROM products p
 
             LEFT JOIN (
@@ -516,18 +510,15 @@ public class BrandStatsDAO {
                     r.setLastImportAt(rs.getTimestamp("last_import_at"));
                     r.setLastExportAt(rs.getTimestamp("last_export_at"));
 
-                    double avgDailySales = rs.getDouble("avg_daily_sales");
-                    int leadTimeDays = rs.getInt("lead_time_days");
-                    int safetyStock = rs.getInt("safety_stock");
-                    int rop = (int) Math.ceil(avgDailySales * leadTimeDays + safetyStock);
+                    int threshold = 10;
 
                     String status;
                     if (stock == 0) {
                         status = "Out Of Stock";
-                    } else if (stock < rop) {
+                    } else if (stock < threshold) {
                         status = "Reorder Needed";
-                    } else if (stock == rop) {
-                        status = "At ROP Level";
+                    } else if (stock == threshold) {
+                        status = "At Threshold";
                     } else {
                         status = "OK";
                     }
@@ -586,9 +577,9 @@ public class BrandStatsDAO {
               COALESCE(stock.total_stock_units, 0) AS total_stock_units,
               COALESCE(imp.imported_units, 0)      AS imported_units,
               COALESCE(exp.exported_units, 0)      AS exported_units,
-              COALESCE(p.avg_daily_sales, 0)       AS avg_daily_sales,
-              COALESCE(p.lead_time_days, 0)        AS lead_time_days,
-              COALESCE(p.safety_stock, 0)          AS safety_stock
+              0       AS avg_daily_sales,
+              0        AS lead_time_days,
+              0          AS safety_stock
             FROM products p
 
             LEFT JOIN (
@@ -674,18 +665,15 @@ public class BrandStatsDAO {
                     r.setImportedUnits(rs.getInt("imported_units"));
                     r.setExportedUnits(rs.getInt("exported_units"));
 
-                    double avgDailySales = rs.getDouble("avg_daily_sales");
-                    int leadTimeDays = rs.getInt("lead_time_days");
-                    int safetyStock = rs.getInt("safety_stock");
-                    int rop = (int) Math.ceil(avgDailySales * leadTimeDays + safetyStock);
+                    int threshold = 10;
 
                     String status;
                     if (stock == 0) {
                         status = "Out Of Stock";
-                    } else if (stock < rop) {
+                    } else if (stock < threshold) {
                         status = "Reorder Needed";
-                    } else if (stock == rop) {
-                        status = "At ROP Level";
+                    } else if (stock == threshold) {
+                        status = "At Threshold";
                     } else {
                         status = "OK";
                     }
@@ -711,10 +699,7 @@ public class BrandStatsDAO {
               COUNT(DISTINCT p.product_id) AS total_products,
               COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
               COUNT(DISTINCT CASE
-                  WHEN COALESCE(prod_qty.product_qty, 0) <= CEIL(
-                      COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0)
-                      + COALESCE(p.safety_stock, 0)
-                  ) THEN p.product_id
+                  WHEN COALESCE(prod_qty.product_qty, 0) < 10 THEN p.product_id
               END) AS low_stock_products
             FROM products p
             LEFT JOIN product_skus s ON s.product_id = p.product_id

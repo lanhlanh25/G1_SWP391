@@ -95,6 +95,7 @@
                     <th>Supplier</th>
                     <th class="text-center">Total Quantity</th>
                     <th class="text-center">Status</th>
+                    <th class="text-center">Action</th>
                 </tr>
             </thead>
             <tbody class="table-border-bottom-0">
@@ -119,6 +120,11 @@
                                 <td><strong><c:out value="${r.supplierName}"/></strong></td>
                                 <td class="text-center"><span class="fw-bold">${r.totalQuantity}</span> <small class="text-muted">Phones</small></td>
                                 <td class="text-center"><span class="badge bg-label-success">Completed</span></td>
+                                <td class="text-center">
+                                    <a class="btn btn-icon btn-sm btn-outline-primary" href="${ctx}/home?p=import-receipt-detail&id=${r.importId}">
+                                        <i class="bx bx-show"></i>
+                                    </a>
+                                </td>
                             </tr>
                         </c:forEach>
                     </c:otherwise>

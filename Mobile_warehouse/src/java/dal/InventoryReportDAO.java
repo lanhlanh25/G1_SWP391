@@ -1,18 +1,10 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package dal;
 
-/**
- *
- * @author Lanhlanh
- */
 import model.InventoryReportRow;
 import model.IdName;
 
 import java.sql.Connection;
-import java.sql.Date;          // java.sql.Date — dùng duy nhất loại này
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -50,57 +42,70 @@ public class InventoryReportDAO {
         m.put("totalBelowRop", 0);
         m.put("totalOutOfStock", 0);
 
-        // Calculate all metrics in one query by summing product-level transactions
+        // Subqueries to sum transactions. We consider 'CONFIRMED', 'COMPLETED', and 'DONE' as inventory movements.
         String sql = "SELECT "
                 + "  SUM(opening_qty) AS tot_opening, "
                 + "  SUM(import_period) AS tot_import, "
                 + "  SUM(export_period) AS tot_export, "
-                + "  SUM(opening_qty + import_period - export_period) AS tot_closing, "
-                + "  SUM(CASE WHEN (opening_qty + import_period - export_period) < rop THEN 1 ELSE 0 END) AS below_rop, "
-                + "  SUM(CASE WHEN (opening_qty + import_period - export_period) <= 0 THEN 1 ELSE 0 END) AS out_of_stock "
+                + "  SUM(closing_qty) AS tot_closing, "
+                + "  SUM(CASE WHEN closing_qty < threshold THEN 1 ELSE 0 END) AS below_rop, "
+                + "  SUM(CASE WHEN closing_qty <= 0 THEN 1 ELSE 0 END) AS out_of_stock "
                 + "FROM ( "
                 + "  SELECT p.product_id, "
-                + "    CEIL(COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0) + COALESCE(p.safety_stock, 0)) AS rop, "
-                + "    (COALESCE(oi.qty, 0) - COALESCE(oe.qty, 0)) AS opening_qty, "
+                + "    COALESCE(p.min_stock, 10) AS threshold, "
+                + "    COALESCE(cur.total_qty, 0) AS cur_qty, "
                 + "    COALESCE(ci.qty, 0) AS import_period, "
-                + "    COALESCE(ce.qty, 0) AS export_period "
+                + "    COALESCE(ce.qty, 0) AS export_period, "
+                + "    COALESCE(fi.qty, 0) AS future_imp, "
+                + "    COALESCE(fe.qty, 0) AS future_exp, "
+                + "    (COALESCE(cur.total_qty, 0) - COALESCE(fi.qty, 0) + COALESCE(fe.qty, 0)) AS closing_qty, "
+                + "    (COALESCE(cur.total_qty, 0) - COALESCE(fi.qty, 0) + COALESCE(fe.qty, 0) - COALESCE(ci.qty, 0) + COALESCE(ce.qty, 0)) AS opening_qty "
                 + "  FROM products p "
+                + "  /* Current real-time balance */ "
+                + "  LEFT JOIN ( "
+                + "    SELECT s.product_id, SUM(ib.qty_on_hand) AS total_qty FROM inventory_balance ib "
+                + "    JOIN product_skus s ON s.sku_id = ib.sku_id GROUP BY s.product_id "
+                + "  ) cur ON cur.product_id = p.product_id "
+                + "  /* Period Import */ "
                 + "  LEFT JOIN ( "
                 + "    SELECT s.product_id, SUM(irl.qty) AS qty FROM import_receipt_lines irl "
                 + "    JOIN import_receipts ir ON ir.import_id = irl.import_id "
                 + "    JOIN product_skus s ON s.sku_id = irl.sku_id "
-                + "    WHERE UPPER(ir.status) = 'CONFIRMED' AND DATE(ir.receipt_date) < ? GROUP BY s.product_id "
-                + "  ) oi ON oi.product_id = p.product_id "
-                + "  LEFT JOIN ( "
-                + "    SELECT s.product_id, SUM(erl.qty) AS qty FROM export_receipt_lines erl "
-                + "    JOIN export_receipts er ON er.export_id = erl.export_id "
-                + "    JOIN product_skus s ON s.sku_id = erl.sku_id "
-                + "    WHERE UPPER(er.status) = 'CONFIRMED' AND DATE(er.export_date) < ? GROUP BY s.product_id "
-                + "  ) oe ON oe.product_id = p.product_id "
-                + "  LEFT JOIN ( "
-                + "    SELECT s.product_id, SUM(irl.qty) AS qty FROM import_receipt_lines irl "
-                + "    JOIN import_receipts ir ON ir.import_id = irl.import_id "
-                + "    JOIN product_skus s ON s.sku_id = irl.sku_id "
-                + "    WHERE UPPER(ir.status) = 'CONFIRMED' AND DATE(ir.receipt_date) >= ? AND DATE(ir.receipt_date) <= ? GROUP BY s.product_id "
+                + "    WHERE UPPER(ir.status) IN ('CONFIRMED','COMPLETED','DONE') AND DATE(ir.receipt_date) >= ? AND DATE(ir.receipt_date) <= ? GROUP BY s.product_id "
                 + "  ) ci ON ci.product_id = p.product_id "
+                + "  /* Period Export */ "
                 + "  LEFT JOIN ( "
                 + "    SELECT s.product_id, SUM(erl.qty) AS qty FROM export_receipt_lines erl "
                 + "    JOIN export_receipts er ON er.export_id = erl.export_id "
                 + "    JOIN product_skus s ON s.sku_id = erl.sku_id "
-                + "    WHERE UPPER(er.status) = 'CONFIRMED' AND DATE(er.export_date) >= ? AND DATE(er.export_date) <= ? GROUP BY s.product_id "
+                + "    WHERE UPPER(er.status) IN ('CONFIRMED','COMPLETED','DONE') AND DATE(er.export_date) >= ? AND DATE(er.export_date) <= ? GROUP BY s.product_id "
                 + "  ) ce ON ce.product_id = p.product_id "
+                + "  /* Future Import (after 'to' date) */ "
+                + "  LEFT JOIN ( "
+                + "    SELECT s.product_id, SUM(irl.qty) AS qty FROM import_receipt_lines irl "
+                + "    JOIN import_receipts ir ON ir.import_id = irl.import_id "
+                + "    JOIN product_skus s ON s.sku_id = irl.sku_id "
+                + "    WHERE UPPER(ir.status) IN ('CONFIRMED','COMPLETED','DONE') AND DATE(ir.receipt_date) > ? GROUP BY s.product_id "
+                + "  ) fi ON fi.product_id = p.product_id "
+                + "  /* Future Export (after 'to' date) */ "
+                + "  LEFT JOIN ( "
+                + "    SELECT s.product_id, SUM(erl.qty) AS qty FROM export_receipt_lines erl "
+                + "    JOIN export_receipts er ON er.export_id = erl.export_id "
+                + "    JOIN product_skus s ON s.sku_id = erl.sku_id "
+                + "    WHERE UPPER(er.status) IN ('CONFIRMED','COMPLETED','DONE') AND DATE(er.export_date) > ? GROUP BY s.product_id "
+                + "  ) fe ON fe.product_id = p.product_id "
                 + "  WHERE p.status = 'ACTIVE' "
                 + (brandId != null ? " AND p.brand_id = ? " : "")
                 + ") t";
 
         try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
             int idx = 1;
-            ps.setDate(idx++, from); // oi
-            ps.setDate(idx++, from); // oe
             ps.setDate(idx++, from); // ci
             ps.setDate(idx++, to);   // ci
             ps.setDate(idx++, from); // ce
             ps.setDate(idx++, to);   // ce
+            ps.setDate(idx++, to);   // fi (after to)
+            ps.setDate(idx++, to);   // fe (after to)
             if (brandId != null) {
                 ps.setLong(idx++, brandId);
             }
@@ -116,7 +121,6 @@ public class InventoryReportDAO {
                 }
             }
         }
-
         return m;
     }
 
@@ -148,7 +152,7 @@ public class InventoryReportDAO {
         }
     }
 
-    /* ───── List with ROP ───── */
+    /* ───── List ───── */
     public List<InventoryReportRow> list(Date from, Date to, Long brandId,
             String keyword, int page, int pageSize)
             throws Exception {
@@ -156,39 +160,42 @@ public class InventoryReportDAO {
         int offset = (page - 1) * pageSize;
         String sql = "SELECT "
                 + "  p.product_id, p.product_code, p.product_name, b.brand_name, "
-                + "  (COALESCE(oi.qty, 0) - COALESCE(oe.qty, 0)) AS opening_qty, "
-                + "  COALESCE(ci.qty, 0) AS import_qty, "
-                + "  COALESCE(ce.qty, 0) AS export_qty, "
-                + "  COALESCE(p.avg_daily_sales, 0) AS avg_daily_sales, "
-                + "  COALESCE(p.lead_time_days, 0) AS lead_time_days, "
-                + "  COALESCE(p.safety_stock, 0) AS safety_stock, "
-                + "  CEIL(COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0) + COALESCE(p.safety_stock, 0)) AS rop "
+                + "  COALESCE(cur.total_qty, 0) AS current_qty, "
+                + "  COALESCE(ci.qty, 0) AS import_period, "
+                + "  COALESCE(ce.qty, 0) AS export_period, "
+                + "  COALESCE(fi.qty, 0) AS future_imp, "
+                + "  COALESCE(fe.qty, 0) AS future_exp, "
+                + "  COALESCE(p.min_stock, 10) AS threshold "
                 + "FROM products p "
                 + "JOIN brands b ON b.brand_id = p.brand_id "
                 + "LEFT JOIN ( "
-                + "  SELECT s.product_id, SUM(irl.qty) AS qty FROM import_receipt_lines irl "
-                + "  JOIN import_receipts ir ON ir.import_id = irl.import_id "
-                + "  JOIN product_skus s ON s.sku_id = irl.sku_id "
-                + "  WHERE UPPER(ir.status) = 'CONFIRMED' AND DATE(ir.receipt_date) < ? GROUP BY s.product_id "
-                + ") oi ON oi.product_id = p.product_id "
-                + "LEFT JOIN ( "
-                + "  SELECT s.product_id, SUM(erl.qty) AS qty FROM export_receipt_lines erl "
-                + "  JOIN export_receipts er ON er.export_id = erl.export_id "
-                + "  JOIN product_skus s ON s.sku_id = erl.sku_id "
-                + "  WHERE UPPER(er.status) = 'CONFIRMED' AND DATE(er.export_date) < ? GROUP BY s.product_id "
-                + ") oe ON oe.product_id = p.product_id "
+                + "  SELECT s.product_id, SUM(ib.qty_on_hand) AS total_qty FROM inventory_balance ib "
+                + "  JOIN product_skus s ON s.sku_id = ib.sku_id GROUP BY s.product_id "
+                + ") cur ON cur.product_id = p.product_id "
                 + "LEFT JOIN ( "
                 + "  SELECT s.product_id, SUM(irl.qty) AS qty FROM import_receipt_lines irl "
                 + "  JOIN import_receipts ir ON ir.import_id = irl.import_id "
                 + "  JOIN product_skus s ON s.sku_id = irl.sku_id "
-                + "  WHERE UPPER(ir.status) = 'CONFIRMED' AND DATE(ir.receipt_date) >= ? AND DATE(ir.receipt_date) <= ? GROUP BY s.product_id "
+                + "  WHERE UPPER(ir.status) IN ('CONFIRMED','COMPLETED','DONE') AND DATE(ir.receipt_date) >= ? AND DATE(ir.receipt_date) <= ? GROUP BY s.product_id "
                 + ") ci ON ci.product_id = p.product_id "
                 + "LEFT JOIN ( "
                 + "  SELECT s.product_id, SUM(erl.qty) AS qty FROM export_receipt_lines erl "
                 + "  JOIN export_receipts er ON er.export_id = erl.export_id "
                 + "  JOIN product_skus s ON s.sku_id = erl.sku_id "
-                + "  WHERE UPPER(er.status) = 'CONFIRMED' AND DATE(er.export_date) >= ? AND DATE(er.export_date) <= ? GROUP BY s.product_id "
+                + "  WHERE UPPER(er.status) IN ('CONFIRMED','COMPLETED','DONE') AND DATE(er.export_date) >= ? AND DATE(er.export_date) <= ? GROUP BY s.product_id "
                 + ") ce ON ce.product_id = p.product_id "
+                + "LEFT JOIN ( "
+                + "  SELECT s.product_id, SUM(irl.qty) AS qty FROM import_receipt_lines irl "
+                + "  JOIN import_receipts ir ON ir.import_id = irl.import_id "
+                + "  JOIN product_skus s ON s.sku_id = irl.sku_id "
+                + "  WHERE UPPER(ir.status) IN ('CONFIRMED','COMPLETED','DONE') AND DATE(ir.receipt_date) > ? GROUP BY s.product_id "
+                + ") fi ON fi.product_id = p.product_id "
+                + "LEFT JOIN ( "
+                + "  SELECT s.product_id, SUM(erl.qty) AS qty FROM export_receipt_lines erl "
+                + "  JOIN export_receipts er ON er.export_id = erl.export_id "
+                + "  JOIN product_skus s ON s.sku_id = erl.sku_id "
+                + "  WHERE UPPER(er.status) IN ('CONFIRMED','COMPLETED','DONE') AND DATE(er.export_date) > ? GROUP BY s.product_id "
+                + ") fe ON fe.product_id = p.product_id "
                 + "WHERE p.status = 'ACTIVE' AND b.is_active = 1 ";
 
         if (brandId != null) {
@@ -202,12 +209,12 @@ public class InventoryReportDAO {
         List<InventoryReportRow> list = new ArrayList<>();
         try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
             int idx = 1;
-            ps.setDate(idx++, from); // oi
-            ps.setDate(idx++, from); // oe
             ps.setDate(idx++, from); // ci
             ps.setDate(idx++, to);   // ci
             ps.setDate(idx++, from); // ce
             ps.setDate(idx++, to);   // ce
+            ps.setDate(idx++, to);   // fi
+            ps.setDate(idx++, to);   // fe
 
             if (brandId != null) {
                 ps.setLong(idx++, brandId);
@@ -222,23 +229,30 @@ public class InventoryReportDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    int op = rs.getInt("opening_qty");
-                    int imp = rs.getInt("import_qty");
-                    int exp = rs.getInt("export_qty");
-                    int clo = op + imp - exp;
-                    int rop = rs.getInt("rop");
+                    int curQty = rs.getInt("current_qty");
+                    int imp = rs.getInt("import_period");
+                    int exp = rs.getInt("export_period");
+                    int futImp = rs.getInt("future_imp");
+                    int futExp = rs.getInt("future_exp");
+
+                    // Backtracking logic:
+                    // Closing (at 'to' date) = CurrentQty - AllImportsAfter('to') + AllExportsAfter('to')
+                    int clo = curQty - futImp + futExp;
+                    // Opening (at 'from' date) = Closing - ImportDuringPeriod + ExportDuringPeriod
+                    int op = clo - imp + exp;
+                    int threshold = rs.getInt("threshold");
 
                     String ropStatus;
                     int suggestedReorderQty = 0;
 
                     if (clo <= 0) {
                         ropStatus = "Out Of Stock";
-                        suggestedReorderQty = rop;
-                    } else if (clo < rop) {
+                        suggestedReorderQty = threshold;
+                    } else if (clo < threshold) {
                         ropStatus = "Reorder Needed";
-                        suggestedReorderQty = rop - clo;
-                    } else if (clo == rop) {
-                        ropStatus = "At ROP Level";
+                        suggestedReorderQty = threshold - clo;
+                    } else if (clo == threshold) {
+                        ropStatus = "At Threshold";
                     } else {
                         ropStatus = "OK";
                     }
@@ -253,12 +267,14 @@ public class InventoryReportDAO {
                     row.setImportQty(imp);
                     row.setExportQty(exp);
                     row.setClosingQty(clo);
-                    row.setAvgDailySales(rs.getDouble("avg_daily_sales"));
-                    row.setLeadTimeDays(rs.getInt("lead_time_days"));
-                    row.setSafetyStock(rs.getInt("safety_stock"));
-                    row.setRop(rop);
+                    row.setRop(threshold);
                     row.setRopStatus(ropStatus);
                     row.setSuggestedReorderQty(suggestedReorderQty);
+
+                    // These fields are legacy/removed from DB, setting to 0
+                    row.setAvgDailySales(0);
+                    row.setLeadTimeDays(0);
+                    row.setSafetyStock(0);
 
                     list.add(row);
                 }
@@ -274,7 +290,6 @@ public class InventoryReportDAO {
             if (o instanceof String) {
                 ps.setString(idx++, (String) o);
             } else if (o instanceof Date) {
-                // java.sql.Date — unambiguous
                 ps.setDate(idx++, (Date) o);
             } else if (o instanceof Long) {
                 ps.setLong(idx++, (Long) o);

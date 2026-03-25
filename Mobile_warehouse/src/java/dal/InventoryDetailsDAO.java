@@ -82,14 +82,12 @@ public class InventoryDetailsDAO {
     }
 
     /**
-     * Tính stock_status theo ROP của product:
-     *   rop = CEIL(avg_daily_sales * lead_time_days + safety_stock)
+     * Tính stock_status theo ngưỡng 10:
      *
      *   OUT : qty_on_hand = 0
-     *   LOW : 0 < qty_on_hand <= rop   (tức là current_stock <= ROP — cần đặt hàng)
-     *   OK  : qty_on_hand > rop
-     *
-     * ROP là thuộc tính product-level nên tất cả SKU của cùng product dùng chung ROP.
+     *   LOW : 0 < qty_on_hand < 10
+     *   AT_THRESHOLD : qty_on_hand = 10
+     *   OK  : qty_on_hand > 10
      */
     public List<SkuInventoryRow> listSkuRows(long productId, int page, int pageSize) {
         List<SkuInventoryRow> list = new ArrayList<>();
@@ -99,8 +97,6 @@ public class InventoryDetailsDAO {
             "SELECT " +
             "  s.sku_id, s.sku_code, s.color, s.ram_gb, s.storage_gb, " +
             "  COALESCE(ib.qty_on_hand, 0) AS qty, " +
-            "  CEIL(COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0) " +
-            "       + COALESCE(p.safety_stock, 0)) AS rop, " +
             "  DATE_FORMAT(s.updated_at, '%Y-%m-%d') AS last_updated " +
             "FROM product_skus s " +
             "JOIN products p ON p.product_id = s.product_id " +
@@ -124,15 +120,15 @@ public class InventoryDetailsDAO {
                     row.setStorageGb(rs.getInt("storage_gb"));
 
                     int qty = rs.getInt("qty");
-                    int rop = rs.getInt("rop");
                     row.setQty(qty);
-                    row.setRop(rop);
+                    row.setRop(10); // Dùng 10 làm ngưỡng cố định
 
-                    // Áp dụng công thức ROP thay ngưỡng cứng
                     if (qty == 0) {
                         row.setStockStatus("OUT");
-                    } else if (qty <= rop) {
+                    } else if (qty < 10) {
                         row.setStockStatus("LOW");
+                    } else if (qty == 10) {
+                        row.setStockStatus("AT_THRESHOLD");
                     } else {
                         row.setStockStatus("OK");
                     }
