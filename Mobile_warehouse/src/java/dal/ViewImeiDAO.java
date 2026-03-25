@@ -81,29 +81,11 @@ public class ViewImeiDAO {
         int offset = (page - 1) * pageSize;
 
         String sql
-                = "SELECT "
-                + "  pu.imei, "
-                + "  pu.unit_status, "
-                + "  ( "
-                + "    SELECT ir.receipt_date "
-                + "    FROM import_receipt_units iru "
-                + "    JOIN import_receipt_lines irl ON irl.line_id = iru.line_id "
-                + "    JOIN import_receipts ir ON ir.import_id = irl.import_id "
-                + "    WHERE iru.imei = pu.imei AND ir.status = 'CONFIRMED' "
-                + "    ORDER BY ir.receipt_date DESC LIMIT 1 "
-                + "  ) AS latest_import_date, "
-                + "  ( "
-                + "    SELECT er.export_date "
-                + "    FROM export_receipt_units eru "
-                + "    JOIN export_receipt_lines erl ON erl.line_id = eru.line_id "
-                + "    JOIN export_receipts er ON er.export_id = erl.export_id "
-                + "    WHERE eru.imei = pu.imei AND er.status = 'CONFIRMED' "
-                + "    ORDER BY er.export_date DESC LIMIT 1 "
-                + "  ) AS latest_export_date "
-                + "FROM product_units pu "
-                + "WHERE pu.sku_id = ? "
-                + (q != null && !q.trim().isEmpty() ? "  AND pu.imei LIKE ? " : "")
-                + "ORDER BY pu.imei "
+                = "SELECT imei, unit_status "
+                + "FROM product_units "
+                + "WHERE sku_id = ? "
+                + (q != null && !q.trim().isEmpty() ? " AND imei LIKE ? " : "")
+                + "ORDER BY imei "
                 + "LIMIT ? OFFSET ?";
 
         try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -122,18 +104,9 @@ public class ViewImeiDAO {
                 while (rs.next()) {
                     ImeiRow r = new ImeiRow();
                     r.setImei(rs.getString("imei"));
-
-                    Timestamp importDate = rs.getTimestamp("latest_import_date");
-                    r.setImportDate(importDate);
-
-                    String status = rs.getString("unit_status");
-                    if ("INACTIVE".equalsIgnoreCase(status)) {
-                        Timestamp exportDate = rs.getTimestamp("latest_export_date");
-                        r.setExportDate(exportDate);
-                    } else {
-                        r.setExportDate(null);
-                    }
-
+                    r.setStatus(rs.getString("unit_status")); 
+                    r.setImportDate(null);
+                    r.setExportDate(null);
                     list.add(r);
                 }
             }

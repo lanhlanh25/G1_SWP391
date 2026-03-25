@@ -214,16 +214,21 @@ public class ProductCRUDDAO {
     public void updateProductByManager(int id, String productName, String model, String description, String status) throws Exception {
         String sql = "UPDATE products SET product_name = ?, model = ?, description = ?, status = ? WHERE product_id = ?";
 
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, productName);
-            ps.setString(2, model);
-            ps.setString(3, description);
-            ps.setString(4, status);
-            ps.setInt(5, id);
-            ps.executeUpdate();
+        try (Connection con = DBContext.getConnection()) {
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, productName);
+                ps.setString(2, model);
+                ps.setString(3, description);
+                ps.setString(4, status);
+                ps.setInt(5, id);
+                ps.executeUpdate();
+            }
 
-            // Đồng bộ trạng thái xuống tất cả SKU
-            syncSkuStatusByProduct(id, status);
+            // Chỉ đồng bộ xuống SKU nếu trạng thái là INACTIVE
+            // Nếu ACTIVE, chúng ta giữ nguyên trạng thái riêng lẻ của từng SKU
+            if ("INACTIVE".equalsIgnoreCase(status)) {
+                syncSkuStatusByProduct(id, status);
+            }
         }
     }
 
@@ -269,9 +274,20 @@ public class ProductCRUDDAO {
     }
 
     public void syncSkuStatusByProduct(int productId, String status) throws Exception {
-        String sql = "UPDATE product_skus SET status = ? WHERE product_id = ?";
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        // 1. Đồng bộ trạng thái xuống tất cả SKU của sản phẩm này
+        String sqlSkus = "UPDATE product_skus SET status = ?, updated_at = NOW() WHERE product_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sqlSkus)) {
             ps.setString(1, status);
+            ps.setInt(2, productId);
+            ps.executeUpdate();
+        }
+
+        // 2. Đồng bộ trạng thái xuống tất cả IMEI của các SKU thuộc sản phẩm này
+        String unitStatus = "ACTIVE".equalsIgnoreCase(status) ? "ACTIVE" : "INACTIVE";
+        String sqlUnits = "UPDATE product_units SET unit_status = ?, updated_at = NOW() "
+                + "WHERE sku_id IN (SELECT sku_id FROM product_skus WHERE product_id = ?)";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sqlUnits)) {
+            ps.setString(1, unitStatus);
             ps.setInt(2, productId);
             ps.executeUpdate();
         }

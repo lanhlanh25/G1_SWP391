@@ -18,6 +18,7 @@ public class ViewVariantMatrix {
         String storage = request.getParameter("storage");
         String ram = request.getParameter("ram");
         String sku = request.getParameter("sku");
+        String q = request.getParameter("q"); // Product search
         String status = request.getParameter("status");
         String productIdRaw = request.getParameter("productId");
         Integer productId = null;
@@ -27,7 +28,7 @@ public class ViewVariantMatrix {
         }
         ProductSkuDAO dao = new ProductSkuDAO();
 
-        List<ProductSku> allFiltered = dao.filterVariants(productId, color, storage, ram, status, sku);
+        List<ProductSku> allFiltered = dao.filterVariants(productId, color, storage, ram, status, sku, q);
 
         // --- Pagination ---
         int totalItems = allFiltered.size();
@@ -49,6 +50,8 @@ public class ViewVariantMatrix {
         request.setAttribute("skus", skus);
         request.setAttribute("page", page);
         request.setAttribute("pageSize", PAGE_SIZE);
+        long activeSkus = allFiltered.stream().filter(s -> "ACTIVE".equalsIgnoreCase(s.getStatus())).count();
+        request.setAttribute("activeSkus", activeSkus);
         request.setAttribute("totalItems", totalItems);
         request.setAttribute("totalPages", totalPages);
 
@@ -71,5 +74,14 @@ public class ViewVariantMatrix {
         request.setAttribute("colors", colors);
         request.setAttribute("storages", storages);
         request.setAttribute("rams", rams);
+
+        // Pass back filters for pagination links
+        request.setAttribute("color", color);
+        request.setAttribute("storage", storage);
+        request.setAttribute("ram", ram);
+        request.setAttribute("sku", sku);
+        request.setAttribute("q", q);
+        request.setAttribute("status", status);
+        request.setAttribute("productId", productId);
     }
 }

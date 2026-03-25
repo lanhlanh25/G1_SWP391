@@ -61,10 +61,10 @@
     <div class="col-md-6">
       <div class="card p-20 d-flex justify-between align-center h-full mb-0">
         <div>
-          <div class="muted fs-12 uppercase mb-4">Total Phone Quantity</div>
+          <div class="muted fs-12 uppercase mb-4">Total Item Quantity</div>
           <div class="h2 m-0 text-primary">
-            <c:out value="${reportSummary.totalPhoneQuantity}" default="0"/>
-            <span class="fs-14 fw-600 text-muted ml-4">Phones</span>
+            <c:out value="${reportSummary.totalItemQty}" default="0"/>
+            <span class="fs-14 fw-600 text-muted ml-4">Items</span>
           </div>
           <div class="fs-10 text-muted mt-4">Successfully exported</div>
         </div>
@@ -107,7 +107,7 @@
                   <td class="fw-600 text-primary"><c:out value="${r.exportCode}"/></td>
                   <td class="text-muted fs-13"><c:out value="${r.exportDateUi}"/></td>
                   <td><c:out value="${r.createdByName}"/></td>
-                  <td class="text-center fw-700"><c:out value="${r.totalQuantity}"/> <span class="fs-12 text-muted fw-400">Phone</span></td>
+                  <td class="text-center fw-700"><c:out value="${r.totalQuantity}"/> <span class="fs-12 text-muted fw-400">Item</span></td>
                   <td class="text-center"><span class="badge badge-active"><c:out value="${r.status}"/></span></td>
                   <td class="text-center">
                     <a class="btn btn-icon btn-sm btn-outline-primary" href="${ctx}/home?p=export-receipt-detail&id=${r.exportId}">

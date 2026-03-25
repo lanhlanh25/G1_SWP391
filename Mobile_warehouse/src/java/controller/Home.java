@@ -2228,8 +2228,6 @@ public class Home extends HttpServlet {
                         return "product_detail.jsp";
                     case "variant-matrix":
                         return "variant_matrix.jsp";
-                    case "imei-list":
-                        return "view_imei_list.jsp";
 
                     case "my-profile":
                     case "profile":

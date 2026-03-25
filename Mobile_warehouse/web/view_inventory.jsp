@@ -44,7 +44,7 @@
                 </div>
                 <span class="fw-semibold d-block mb-1 text-muted small uppercase">Total Quantity</span>
                 <h3 class="card-title mb-2 text-primary">${totalQty}</h3>
-                <small class="text-muted">Phone in stock</small>
+                <small class="text-muted">Items in stock</small>
             </div>
         </div>
     </div>
@@ -160,7 +160,7 @@
                         <td><span class="badge bg-label-secondary font-monospace">${fn:escapeXml(it.productCode)}</span></td>
                         <td><strong>${fn:escapeXml(it.productName)}</strong></td>
                         <td><small class="text-muted">${fn:escapeXml(it.brandName)}</small></td>
-                        <td class="text-center"><span class="fw-bold">${it.totalQty}</span> <small class="text-muted">Phone</small></td>
+                        <td class="text-center"><span class="fw-bold">${it.totalQty}</span> <small class="text-muted">Item</small></td>
                         <td class="text-center">
                             <c:set var="st" value="${it.status}"/>
                             <c:choose>

@@ -66,7 +66,7 @@ public class ExportReceiptReportDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     s.setTotalExportReceipts(rs.getInt("total_receipts"));
-                    s.setTotalPhoneQuantity(rs.getInt("total_qty"));
+                    s.setTotalItemQty(rs.getInt("total_qty"));
                 }
             }
         } catch (Exception e) {

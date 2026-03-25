@@ -16,10 +16,18 @@ public class ProductSku {
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
-    // extra fields for inventory / detail view
+    private String productName;
     private String supplierName;
     private int stock;
     private String stockStatus;
+
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
 
     public ProductSku() {
     }

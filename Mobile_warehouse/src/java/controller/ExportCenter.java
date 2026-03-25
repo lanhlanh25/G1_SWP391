@@ -312,7 +312,7 @@ public class ExportCenter extends HttpServlet {
 
         p.reportTitle = "Import Report";
         p.summaryLines.put("Total Receipts", String.valueOf(summary.getTotalReceipts()));
-        p.summaryLines.put("Total Phone Quantity", String.valueOf(summary.getTotalPhoneQty()));
+        p.summaryLines.put("Total Item Quantity", String.valueOf(summary.getTotalItemQty()));
         p.summaryLines.put("Completed Count", String.valueOf(summary.getCompletedCount()));
         p.summaryLines.put("Cancelled Count", String.valueOf(summary.getCancelledCount()));
 
@@ -355,7 +355,7 @@ public class ExportCenter extends HttpServlet {
 
         p.reportTitle = "Export Report";
         p.summaryLines.put("Total Export Receipts", String.valueOf(summary.getTotalExportReceipts()));
-        p.summaryLines.put("Total Phone Quantity", String.valueOf(summary.getTotalPhoneQuantity()));
+        p.summaryLines.put("Total Item Quantity", String.valueOf(summary.getTotalItemQty()));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
             p.headers = Arrays.asList("Receipt Code", "Created Date", "Total Quantity");

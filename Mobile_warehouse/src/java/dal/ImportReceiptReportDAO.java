@@ -43,7 +43,7 @@ public class ImportReceiptReportDAO {
         StringBuilder sql = new StringBuilder(
                 "SELECT "
                 + "  COUNT(*) AS total_receipts, "
-                + "  COALESCE(SUM(x.total_qty),0) AS total_phone_qty, "
+                + "  COALESCE(SUM(x.total_qty),0) AS total_item_qty, "
                 + "  SUM(CASE WHEN UPPER(ir.status) = 'CONFIRMED' THEN 1 ELSE 0 END) AS completed_count, "
                 + "  SUM(CASE WHEN UPPER(ir.status) IN ('CANCELED','CANCELLED') THEN 1 ELSE 0 END) AS cancelled_count "
                 + "FROM import_receipts ir "
@@ -66,7 +66,7 @@ public class ImportReceiptReportDAO {
                 ImportReceiptReportSummary s = new ImportReceiptReportSummary();
                 if (rs.next()) {
                     s.setTotalReceipts(rs.getInt("total_receipts"));
-                    s.setTotalPhoneQty(rs.getInt("total_phone_qty"));
+                    s.setTotalItemQty(rs.getInt("total_item_qty"));
                     s.setCompletedCount(rs.getInt("completed_count"));
                     s.setCancelledCount(rs.getInt("cancelled_count"));
                 }

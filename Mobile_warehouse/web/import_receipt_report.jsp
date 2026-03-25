@@ -39,10 +39,10 @@
                         <span class="avatar-initial rounded bg-label-info"><i class="bx bx-mobile-alt"></i></span>
                     </div>
                 </div>
-                <span class="fw-semibold d-block mb-1 text-muted small uppercase">Total Phone Quantity</span>
+                <span class="fw-semibold d-block mb-1 text-muted small uppercase">Total Item Quantity</span>
                 <h3 class="card-title mb-2 text-primary">
-                    <c:out value="${reportSummary.totalPhoneQty}" default="0"/>
-                    <span class="fs-6 fw-normal text-muted">Phones</span>
+                    <c:out value="${reportSummary.totalItemQty}" default="0"/>
+                    <span class="fs-6 fw-normal text-muted">Items</span>
                 </h3>
                 <small class="text-muted">Successfully imported units</small>
             </div>
@@ -131,7 +131,7 @@
 
                     <td class="text-center">
                         <span class="fw-bold">${r.totalQuantity}</span>
-                        <small class="text-muted">Phones</small>
+                        <small class="text-muted">Items</small>
                     </td>
 
                     <td class="text-center">

@@ -23,7 +23,9 @@ public class InventoryReportDAO {
         List<IdName> list = new ArrayList<>();
         String sql = "SELECT brand_id, brand_name FROM brands "
                 + "WHERE is_active = 1 ORDER BY brand_name";
-        try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection con = getConn();
+                PreparedStatement ps = con.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(new IdName(rs.getLong("brand_id"), rs.getString("brand_name")));
             }
@@ -42,7 +44,8 @@ public class InventoryReportDAO {
         m.put("totalBelowRop", 0);
         m.put("totalOutOfStock", 0);
 
-        // Subqueries to sum transactions. We consider 'CONFIRMED', 'COMPLETED', and 'DONE' as inventory movements.
+        // Subqueries to sum transactions. We consider 'CONFIRMED', 'COMPLETED', and
+        // 'DONE' as inventory movements.
         String sql = "SELECT "
                 + "  SUM(opening_qty) AS tot_opening, "
                 + "  SUM(import_period) AS tot_import, "
@@ -63,8 +66,9 @@ public class InventoryReportDAO {
                 + "  FROM products p "
                 + "  /* Current real-time balance */ "
                 + "  LEFT JOIN ( "
-                + "    SELECT s.product_id, SUM(ib.qty_on_hand) AS total_qty FROM inventory_balance ib "
-                + "    JOIN product_skus s ON s.sku_id = ib.sku_id GROUP BY s.product_id "
+                + "    SELECT s.product_id, COUNT(*) AS total_qty FROM product_units pu "
+                + "    JOIN product_skus s ON s.sku_id = pu.sku_id "
+                + "    WHERE pu.unit_status = 'ACTIVE' GROUP BY s.product_id "
                 + "  ) cur ON cur.product_id = p.product_id "
                 + "  /* Period Import */ "
                 + "  LEFT JOIN ( "
@@ -101,11 +105,11 @@ public class InventoryReportDAO {
         try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
             int idx = 1;
             ps.setDate(idx++, from); // ci
-            ps.setDate(idx++, to);   // ci
+            ps.setDate(idx++, to); // ci
             ps.setDate(idx++, from); // ce
-            ps.setDate(idx++, to);   // ce
-            ps.setDate(idx++, to);   // fi (after to)
-            ps.setDate(idx++, to);   // fe (after to)
+            ps.setDate(idx++, to); // ce
+            ps.setDate(idx++, to); // fi (after to)
+            ps.setDate(idx++, to); // fe (after to)
             if (brandId != null) {
                 ps.setLong(idx++, brandId);
             }
@@ -128,10 +132,9 @@ public class InventoryReportDAO {
     public int count(Date from, Date to, Long brandId, String keyword) throws Exception {
         StringBuilder sql = new StringBuilder(
                 "SELECT COUNT(DISTINCT p.product_id) "
-                + "FROM products p "
-                + "JOIN brands b ON b.brand_id = p.brand_id "
-                + "WHERE p.status = 'ACTIVE' AND b.is_active = 1 "
-        );
+                        + "FROM products p "
+                        + "JOIN brands b ON b.brand_id = p.brand_id "
+                        + "WHERE p.status = 'ACTIVE' AND b.is_active = 1 ");
         List<Object> params = new ArrayList<>();
         if (brandId != null) {
             sql.append(" AND p.brand_id = ? ");
@@ -169,8 +172,9 @@ public class InventoryReportDAO {
                 + "FROM products p "
                 + "JOIN brands b ON b.brand_id = p.brand_id "
                 + "LEFT JOIN ( "
-                + "  SELECT s.product_id, SUM(ib.qty_on_hand) AS total_qty FROM inventory_balance ib "
-                + "  JOIN product_skus s ON s.sku_id = ib.sku_id GROUP BY s.product_id "
+                + "  SELECT s.product_id, COUNT(*) AS total_qty FROM product_units pu "
+                + "  JOIN product_skus s ON s.sku_id = pu.sku_id "
+                + "  WHERE pu.unit_status = 'ACTIVE' GROUP BY s.product_id "
                 + ") cur ON cur.product_id = p.product_id "
                 + "LEFT JOIN ( "
                 + "  SELECT s.product_id, SUM(irl.qty) AS qty FROM import_receipt_lines irl "
@@ -210,11 +214,11 @@ public class InventoryReportDAO {
         try (Connection con = getConn(); PreparedStatement ps = con.prepareStatement(sql)) {
             int idx = 1;
             ps.setDate(idx++, from); // ci
-            ps.setDate(idx++, to);   // ci
+            ps.setDate(idx++, to); // ci
             ps.setDate(idx++, from); // ce
-            ps.setDate(idx++, to);   // ce
-            ps.setDate(idx++, to);   // fi
-            ps.setDate(idx++, to);   // fe
+            ps.setDate(idx++, to); // ce
+            ps.setDate(idx++, to); // fi
+            ps.setDate(idx++, to); // fe
 
             if (brandId != null) {
                 ps.setLong(idx++, brandId);
@@ -236,7 +240,8 @@ public class InventoryReportDAO {
                     int futExp = rs.getInt("future_exp");
 
                     // Backtracking logic:
-                    // Closing (at 'to' date) = CurrentQty - AllImportsAfter('to') + AllExportsAfter('to')
+                    // Closing (at 'to' date) = CurrentQty - AllImportsAfter('to') +
+                    // AllExportsAfter('to')
                     int clo = curQty - futImp + futExp;
                     // Opening (at 'from' date) = Closing - ImportDuringPeriod + ExportDuringPeriod
                     int op = clo - imp + exp;
@@ -262,7 +267,7 @@ public class InventoryReportDAO {
                     row.setProductCode(rs.getString("product_code"));
                     row.setProductName(rs.getString("product_name"));
                     row.setBrandName(rs.getString("brand_name"));
-                    row.setUnit("Phone");
+                    row.setUnit("Item");
                     row.setOpeningQty(op);
                     row.setImportQty(imp);
                     row.setExportQty(exp);

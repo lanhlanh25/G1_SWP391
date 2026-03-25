@@ -20,104 +20,70 @@ import model.ProductSku;
 public class ProductSkuDAO {
 
     public List<ProductSku> getAllSkus() throws Exception {
-
         List<ProductSku> list = new ArrayList<>();
-
         String sql = "SELECT * FROM product_skus";
 
-        PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
-
-        ResultSet rs = ps.executeQuery();
-
-        while (rs.next()) {
-
-            ProductSku s = new ProductSku();
-
-            s.setSkuCode(rs.getString("sku_code"));
-            s.setColor(rs.getString("color"));
-            s.setStorageGb(rs.getInt("storage_gb"));
-            s.setRamGb(rs.getInt("ram_gb"));
-            s.setStatus(rs.getString("status"));
-
-            list.add(s);
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductSku s = new ProductSku();
+                    s.setSkuId(rs.getInt("sku_id"));
+                    s.setProductId(rs.getInt("product_id"));
+                    s.setSkuCode(rs.getString("sku_code"));
+                    s.setColor(rs.getString("color"));
+                    s.setStorageGb(rs.getInt("storage_gb"));
+                    s.setRamGb(rs.getInt("ram_gb"));
+                    s.setStatus(rs.getString("status"));
+                    list.add(s);
+                }
+            }
         }
-
         return list;
     }
 
-    public List<ProductSku> filterVariants(Integer productId, String color, String storage, String ram, String status, String sku) throws Exception {
-
+    public List<ProductSku> filterVariants(Integer productId, String color, String storage, String ram, String status, String sku, String q) throws Exception {
         List<ProductSku> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT s.*, p.product_name " +
+            "FROM product_skus s " +
+            "JOIN products p ON s.product_id = p.product_id " +
+            "WHERE 1=1"
+        );
 
-        String sql = "SELECT * FROM product_skus WHERE 1=1";
+        if (productId != null) sql.append(" AND s.product_id = ?");
+        if (color != null && !color.isEmpty()) sql.append(" AND s.color = ?");
+        if (storage != null && !storage.isEmpty()) sql.append(" AND s.storage_gb = ?");
+        if (ram != null && !ram.isEmpty()) sql.append(" AND s.ram_gb = ?");
+        if (status != null && !status.isEmpty()) sql.append(" AND s.status = ?");
+        if (sku != null && !sku.isEmpty()) sql.append(" AND s.sku_code LIKE ?");
+        if (q != null && !q.isEmpty()) sql.append(" AND p.product_name LIKE ?");
 
-        if (productId != null) {
-            sql += " AND product_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
+            int index = 1;
+
+            if (productId != null) ps.setInt(index++, productId);
+            if (color != null && !color.isEmpty()) ps.setString(index++, color);
+            if (storage != null && !storage.isEmpty()) ps.setInt(index++, Integer.parseInt(storage));
+            if (ram != null && !ram.isEmpty()) ps.setInt(index++, Integer.parseInt(ram));
+            if (status != null && !status.isEmpty()) ps.setString(index++, status);
+            if (sku != null && !sku.isEmpty()) ps.setString(index++, "%" + sku + "%");
+            if (q != null && !q.isEmpty()) ps.setString(index++, "%" + q + "%");
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ProductSku s = new ProductSku();
+                    s.setSkuId(rs.getInt("sku_id"));
+                    s.setProductId(rs.getInt("product_id"));
+                    s.setSkuCode(rs.getString("sku_code"));
+                    s.setProductName(rs.getString("product_name"));
+                    s.setColor(rs.getString("color"));
+                    s.setStorageGb(rs.getInt("storage_gb"));
+                    s.setRamGb(rs.getInt("ram_gb"));
+                    s.setStatus(rs.getString("status"));
+                    list.add(s);
+                }
+            }
         }
-
-        if (color != null && !color.isEmpty()) {
-            sql += " AND color = ?";
-        }
-
-        if (storage != null && !storage.isEmpty()) {
-            sql += " AND storage_gb = ?";
-        }
-
-        if (ram != null && !ram.isEmpty()) {
-            sql += " AND ram_gb = ?";
-        }
-
-        if (status != null && !status.isEmpty()) {
-            sql += " AND status = ?";
-        }
-
-        if (sku != null && !sku.isEmpty()) {
-            sql += " AND sku_code LIKE ?";
-        }
-
-        PreparedStatement ps = DBContext.getConnection().prepareStatement(sql);
-
-        int index = 1;
-
-        if (productId != null) {
-            ps.setInt(index++, productId);
-        }
-
-        if (color != null && !color.isEmpty()) {
-            ps.setString(index++, color);
-        }
-
-        if (storage != null && !storage.isEmpty()) {
-            ps.setInt(index++, Integer.parseInt(storage));
-        }
-
-        if (ram != null && !ram.isEmpty()) {
-            ps.setInt(index++, Integer.parseInt(ram));
-        }
-
-        if (status != null && !status.isEmpty()) {
-            ps.setString(index++, status);
-        }
-
-        if (sku != null && !sku.isEmpty()) {
-            ps.setString(index++, "%" + sku + "%");
-        }
-
-        ResultSet rs = ps.executeQuery();
-
-        while (rs.next()) {
-
-            ProductSku s = new ProductSku();
-
-            s.setSkuCode(rs.getString("sku_code"));
-            s.setColor(rs.getString("color"));
-            s.setStorageGb(rs.getInt("storage_gb"));
-            s.setRamGb(rs.getInt("ram_gb"));
-            s.setStatus(rs.getString("status"));
-
-            list.add(s);
-        }
-
         return list;
     }
 
@@ -196,6 +162,12 @@ public class ProductSkuDAO {
             ps.setInt(1, productId);
             ps.executeUpdate();
         }
+        // Đồng bộ xuống IMEI: Vô hiệu hóa tất cả IMEI thuộc các SKU của sản phẩm này
+        String syncUnitsSql = "UPDATE product_units SET unit_status = 'INACTIVE' WHERE sku_id IN (SELECT sku_id FROM product_skus WHERE product_id = ?)";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(syncUnitsSql)) {
+            ps.setInt(1, productId);
+            ps.executeUpdate();
+        }
     }
 
     public long insertSku(long productId, String skuCode, String color, int ramGb, int storageGb, String status) throws Exception {
@@ -245,48 +217,166 @@ public class ProductSkuDAO {
     }
 
     public void updateSku(int skuId, String skuCode, String color, int ramGb, int storageGb, String status) throws Exception {
-        String sql = "UPDATE product_skus SET sku_code = ?, color = ?, ram_gb = ?, storage_gb = ?, status = ?, updated_at = NOW() WHERE sku_id = ?";
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, skuCode);
-            ps.setString(2, color);
-            ps.setInt(3, ramGb);
-            ps.setInt(4, storageGb);
-            ps.setString(5, status);
-            ps.setInt(6, skuId);
-            ps.executeUpdate();
+        // Normalize status to upper case
+        String normalizedStatus = (status == null) ? "ACTIVE" : status.trim().toUpperCase();
 
-            // Đồng bộ trạng thái lên sản phẩm cha
-            int productId = getSkuById(skuId).getProductId();
-            syncProductStatusBySku(productId, status);
+        try (Connection con = DBContext.getConnection()) {
+            con.setAutoCommit(false); // Use transaction for data consistency
+
+            try {
+                // 1. Check block reason if trying to inactivate
+                if ("INACTIVE".equals(normalizedStatus)) {
+                    String blockReason = getBlockReasonForInactivateSku(con, skuId);
+                    if (blockReason != null) {
+                        throw new Exception("Không thể vô hiệu hóa: " + blockReason);
+                    }
+                }
+
+                // 2. Perform the update
+                String sql = "UPDATE product_skus SET sku_code = ?, color = ?, ram_gb = ?, storage_gb = ?, status = ?, updated_at = NOW() WHERE sku_id = ?";
+                try (PreparedStatement ps = con.prepareStatement(sql)) {
+                    ps.setString(1, skuCode);
+                    ps.setString(2, color);
+                    ps.setInt(3, ramGb);
+                    ps.setInt(4, storageGb);
+                    ps.setString(5, normalizedStatus);
+                    ps.setInt(6, skuId);
+                    ps.executeUpdate();
+                }
+
+                // 3. Get Product ID for synchronization
+                int productId = -1;
+                String sqlId = "SELECT product_id FROM product_skus WHERE sku_id = ?";
+                try (PreparedStatement psId = con.prepareStatement(sqlId)) {
+                    psId.setInt(1, skuId);
+                    try (ResultSet rsId = psId.executeQuery()) {
+                        if (rsId.next()) {
+                            productId = rsId.getInt("product_id");
+                        }
+                    }
+                }
+
+                if (productId != -1) {
+                    // 4. Synchronize status Upwards to Product
+                    syncProductStatusBySku(con, productId, normalizedStatus);
+
+                    // 5. Synchronize status Downwards to Units (IMEI)
+                    syncUnitStatusBySku(con, skuId, normalizedStatus);
+                }
+
+                con.commit();
+            } catch (Exception e) {
+                con.rollback();
+                throw e;
+            }
         }
     }
 
-    private void syncProductStatusBySku(int productId, String status) throws Exception {
-        try (Connection con = DBContext.getConnection()) {
-            if ("ACTIVE".equalsIgnoreCase(status)) {
-                // Nếu 1 SKU bật, SP cha BUỘC phải bật
-                String sql = "UPDATE products SET status = 'ACTIVE' WHERE product_id = ?";
-                try (PreparedStatement ps = con.prepareStatement(sql)) {
-                    ps.setInt(1, productId);
-                    ps.executeUpdate();
+    public String getBlockReasonForInactivateSku(Connection con, int skuId) throws Exception {
+        // Check Export Requests
+        String sqlExpReq = """
+            SELECT er.request_code 
+            FROM export_request_lines erl
+            JOIN export_requests er ON erl.request_id = er.request_id
+            WHERE erl.sku_id = ? 
+              AND er.status NOT IN ('COMPLETED', 'CANCELLED', 'REJECTED')
+            LIMIT 1
+        """;
+        try (PreparedStatement ps = con.prepareStatement(sqlExpReq)) {
+            ps.setInt(1, skuId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return "SKU is part of a pending Export Request: " + rs.getString(1);
                 }
-            } else {
-                // Nếu 1 SKU tắt, kiểm tra xem còn SKU nào của SP này đang bật không
-                String checkSql = "SELECT COUNT(*) FROM product_skus WHERE product_id = ? AND status = 'ACTIVE'";
-                try (PreparedStatement ps = con.prepareStatement(checkSql)) {
-                    ps.setInt(1, productId);
-                    try (ResultSet rs = ps.executeQuery()) {
-                        if (rs.next() && rs.getInt(1) == 0) {
-                            // Không còn SKU nào bật -> Tắt luôn SP cha
-                            String updateSql = "UPDATE products SET status = 'INACTIVE' WHERE product_id = ?";
-                            try (PreparedStatement ps2 = con.prepareStatement(updateSql)) {
-                                ps2.setInt(1, productId);
-                                ps2.executeUpdate();
-                            }
+            }
+        }
+
+        // Check Import Requests
+        String sqlImpReq = """
+            SELECT ir.request_code 
+            FROM import_request_lines irl
+            JOIN import_requests ir ON irl.request_id = ir.request_id
+            WHERE irl.sku_id = ? 
+              AND ir.status NOT IN ('COMPLETED', 'CANCELLED', 'REJECTED')
+            LIMIT 1
+        """;
+        try (PreparedStatement ps = con.prepareStatement(sqlImpReq)) {
+            ps.setInt(1, skuId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return "SKU is part of a pending Import Request: " + rs.getString(1);
+                }
+            }
+        }
+
+        // Check Export Receipts
+        String sqlExpRec = "SELECT er.export_code " +
+                         "FROM export_receipt_lines erl " +
+                         "JOIN export_receipts er ON erl.export_id = er.export_id " +
+                         "WHERE erl.sku_id = ? " +
+                         "  AND er.status IN ('DRAFT', 'PENDING') " +
+                         "LIMIT 1";
+        try (PreparedStatement ps = con.prepareStatement(sqlExpRec)) {
+            ps.setInt(1, skuId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return "SKU is part of an incomplete Export Receipt: " + rs.getString(1);
+                }
+            }
+        }
+
+        // Check Import Receipts
+        String sqlImpRec = "SELECT ir.import_code " +
+                         "FROM import_receipt_lines irl " +
+                         "JOIN import_receipts ir ON irl.import_id = ir.import_id " +
+                         "WHERE irl.sku_id = ? " +
+                         "  AND ir.status IN ('DRAFT', 'PENDING') " +
+                         "LIMIT 1";
+        try (PreparedStatement ps = con.prepareStatement(sqlImpRec)) {
+            ps.setInt(1, skuId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return "SKU is part of an incomplete Import Receipt: " + rs.getString(1);
+                }
+            }
+        }
+        return null;
+    }
+
+    private void syncProductStatusBySku(Connection con, int productId, String status) throws Exception {
+        if ("ACTIVE".equalsIgnoreCase(status)) {
+            // If any variant is active, product must be active
+            String sql = "UPDATE products SET status = 'ACTIVE' WHERE product_id = ?";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setInt(1, productId);
+                ps.executeUpdate();
+            }
+        } else {
+            // If variant is inactivated, check if any other variant of this product is still active
+            String checkSql = "SELECT COUNT(*) FROM product_skus WHERE product_id = ? AND status = 'ACTIVE'";
+            try (PreparedStatement ps = con.prepareStatement(checkSql)) {
+                ps.setInt(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next() && rs.getInt(1) == 0) {
+                        // No more active variants, turn off product
+                        String updateSql = "UPDATE products SET status = 'INACTIVE' WHERE product_id = ?";
+                        try (PreparedStatement ps2 = con.prepareStatement(updateSql)) {
+                            ps2.setInt(1, productId);
+                            ps2.executeUpdate();
                         }
                     }
                 }
             }
+        }
+    }
+
+    private void syncUnitStatusBySku(Connection con, int skuId, String status) throws Exception {
+        String unitStatus = "ACTIVE".equalsIgnoreCase(status) ? "ACTIVE" : "INACTIVE";
+        String sql = "UPDATE product_units SET unit_status = ?, updated_at = NOW() WHERE sku_id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, unitStatus);
+            ps.setInt(2, skuId);
+            ps.executeUpdate();
         }
     }
 
@@ -345,27 +435,25 @@ public class ProductSkuDAO {
     public List<ProductSku> getSkuStockByProductId(long productId) throws Exception {
         List<ProductSku> list = new ArrayList<>();
 
-        String sql = """
-        SELECT
-            ps.sku_id,
-            ps.product_id,
-            ps.sku_code,
-            ps.color,
-            ps.ram_gb,
-            ps.storage_gb,
-            ps.supplier_id,
-            ps.status,
-            ps.created_at,
-            ps.updated_at,
-            COALESCE(s.supplier_name, 'N/A') AS supplier_name,
-            COALESCE(ib.qty_on_hand, 0) AS stock
-        FROM product_skus ps
-        LEFT JOIN suppliers s ON s.supplier_id = ps.supplier_id
-        LEFT JOIN inventory_balance ib ON ib.sku_id = ps.sku_id
-        WHERE ps.product_id = ?
-          AND ps.status = 'ACTIVE'
-        ORDER BY ps.sku_code ASC
-    """;
+        String sql = "SELECT " +
+                    "    ps.sku_id, " +
+                    "    ps.product_id, " +
+                    "    ps.sku_code, " +
+                    "    ps.color, " +
+                    "    ps.ram_gb, " +
+                    "    ps.storage_gb, " +
+                    "    ps.supplier_id, " +
+                    "    ps.status, " +
+                    "    ps.created_at, " +
+                    "    ps.updated_at, " +
+                    "    COALESCE(s.supplier_name, 'N/A') AS supplier_name, " +
+                    "    COALESCE(ib.qty_on_hand, 0) AS stock " +
+                    "FROM product_skus ps " +
+                    "LEFT JOIN suppliers s ON s.supplier_id = ps.supplier_id " +
+                    "LEFT JOIN inventory_balance ib ON ib.sku_id = ps.sku_id " +
+                    "WHERE ps.product_id = ? " +
+                    "  AND ps.status = 'ACTIVE' " +
+                    "ORDER BY ps.sku_code ASC";
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 

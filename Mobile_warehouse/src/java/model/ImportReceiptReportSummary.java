@@ -11,15 +11,15 @@ package model;
 
 public class ImportReceiptReportSummary {
     private int totalReceipts;
-    private int totalPhoneQty;
+    private int totalItemQty;
     private int completedCount;
     private int cancelledCount;
 
     public int getTotalReceipts() { return totalReceipts; }
     public void setTotalReceipts(int totalReceipts) { this.totalReceipts = totalReceipts; }
 
-    public int getTotalPhoneQty() { return totalPhoneQty; }
-    public void setTotalPhoneQty(int totalPhoneQty) { this.totalPhoneQty = totalPhoneQty; }
+    public int getTotalItemQty() { return totalItemQty; }
+    public void setTotalItemQty(int totalItemQty) { this.totalItemQty = totalItemQty; }
 
     public int getCompletedCount() { return completedCount; }
     public void setCompletedCount(int completedCount) { this.completedCount = completedCount; }

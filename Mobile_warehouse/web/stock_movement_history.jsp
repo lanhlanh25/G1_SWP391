@@ -192,5 +192,3 @@
         </div>
     </c:if>
 </div>
->>>>>>> 2865d1c (fix inventory_report)
-

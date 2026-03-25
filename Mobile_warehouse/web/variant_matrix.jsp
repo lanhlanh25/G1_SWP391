@@ -1,10 +1,8 @@
-<%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
-<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn"%>
+<%@page contentType="text/html" pageEncoding="UTF-8" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
-<c:set var="cp"  value="${empty page ? 1 : page}" />
-<c:set var="tp"  value="${empty totalPages ? 1 : totalPages}" />
 
 <!-- Breadcrumb/Back button -->
 <div class="mb-4">
@@ -13,164 +11,223 @@
     </a>
 </div>
 
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Product Variants Matrix</h5>
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+        <h5 class="mb-0 text-primary fw-bold">
+            <i class="bx bx-grid-alt me-2"></i>Product Variants Matrix
+        </h5>
         <div class="text-muted small">
-            Product ID: <span class="fw-bold">${param.productId}</span>
+            Product ID: <span class="badge bg-label-primary px-2">${param.productId}</span>
         </div>
     </div>
 
-    <div class="card-body">
+    <div class="card-body pt-4">
         <form method="get" action="${ctx}/home" class="row g-3 mb-4">
             <input type="hidden" name="p" value="variant-matrix">
             <input type="hidden" name="productId" value="${param.productId}">
 
+
             <div class="col-md-2">
-                <label class="form-label">Color</label>
-                <select class="form-select" name="color">
+                <label class="form-label fw-semibold small text-uppercase">Color</label>
+                <select class="form-select border-light shadow-none" name="color">
                     <option value="">All Colors</option>
                     <c:forEach items="${colors}" var="c">
-                        <option value="${c}" ${param.color==c?"selected":""}>${c}</option>
+                        <option value="${c}" ${param.color == c ? "selected" : ""}>${c}</option>
                     </c:forEach>
                 </select>
             </div>
 
             <div class="col-md-2">
-                <label class="form-label">Storage</label>
-                <select class="form-select" name="storage">
+                <label class="form-label fw-semibold small text-uppercase">Storage</label>
+                <select class="form-select border-light shadow-none" name="storage">
                     <option value="">All Storage</option>
                     <c:forEach items="${storages}" var="s">
-                        <option value="${s}" ${param.storage==s?"selected":""}>${s}GB</option>
+                        <option value="${s}" ${param.storage == s ? "selected" : ""}>${s}GB</option>
                     </c:forEach>
                 </select>
             </div>
 
             <div class="col-md-2">
-                <label class="form-label">RAM</label>
-                <select class="form-select" name="ram">
+                <label class="form-label fw-semibold small text-uppercase">RAM</label>
+                <select class="form-select border-light shadow-none" name="ram">
                     <option value="">All RAM</option>
                     <c:forEach items="${rams}" var="r">
-                        <option value="${r}" ${param.ram==r?"selected":""}>${r}GB</option>
+                        <option value="${r}" ${param.ram == r ? "selected" : ""}>${r}GB</option>
                     </c:forEach>
                 </select>
             </div>
 
             <div class="col-md-2">
-                <label class="form-label">Status</label>
-                <select class="form-select" name="status">
+                <label class="form-label fw-semibold small text-uppercase">Status</label>
+                <select class="form-select border-light shadow-none" name="status">
                     <option value="">All Status</option>
-                    <option value="ACTIVE" ${param.status=="ACTIVE"?"selected":""}>Active</option>
-                    <option value="INACTIVE" ${param.status=="INACTIVE"?"selected":""}>Inactive</option>
+                    <option value="ACTIVE" ${param.status == "ACTIVE" ? "selected" : ""}>Active</option>
+                    <option value="INACTIVE" ${param.status == "INACTIVE" ? "selected" : ""}>Inactive</option>
                 </select>
             </div>
-
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button class="btn btn-primary flex-grow-1 shadow-sm" type="submit">Filter</button>
+                <a href="${ctx}/home?p=variant-matrix&productId=${param.productId}" class="btn btn-outline-secondary shadow-sm" title="Reset Filters">
+                    <i class="bx bx-refresh"></i>
+                </a>
+            </div>
             <div class="col-md-3">
-                <label class="form-label">Search SKU</label>
+                <label class="form-label fw-semibold small text-uppercase">Search SKU</label>
                 <div class="input-group input-group-merge">
-                    <span class="input-group-text"><i class="bx bx-search"></i></span>
-                    <input type="text" class="form-control" name="sku" value="${fn:escapeXml(param.sku)}" placeholder="SKU code...">
+                    <span class="input-group-text bg-light border-light"><i class="bx bx-search"></i></span>
+                    <input type="text" class="form-control border-light shadow-none" name="sku" 
+                           value="${fn:escapeXml(param.sku)}" placeholder="SKU code...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small text-uppercase">Search Product</label>
+                <div class="input-group input-group-merge">
+                    <span class="input-group-text bg-light border-light"><i class="bx bx-search"></i></span>
+                    <input type="text" class="form-control border-light shadow-none" name="q" 
+                           value="${fn:escapeXml(q)}" placeholder="Product name...">
                 </div>
             </div>
 
-            <div class="col-md-1 d-flex align-items-end">
-                <button class="btn btn-primary w-100" type="submit">Filter</button>
-            </div>
+
+
         </form>
 
-        <div class="table-responsive text-nowrap mt-2">
-            <table class="table table-hover">
-                <thead>
+        <div class="table-responsive text-nowrap mt-2 rounded">
+            <table class="table table-hover align-middle">
+                <thead class="bg-light">
                     <tr>
-                        <th>SKU Code</th>
-                        <th>Color</th>
-                        <th class="text-center">Storage</th>
-                        <th class="text-center">RAM</th>
-                        <th class="text-center">Status</th>
+                        <th class="py-3">SKU Code</th>
+                        <th class="py-3">Product</th>
+                        <th class="py-3 text-center">Color</th>
+                        <th class="py-3 text-center">Storage</th>
+                        <th class="py-3 text-center">RAM</th>
+                        <th class="py-3 text-center">Status</th>
+                        <th class="py-3 text-center">Action</th>
                     </tr>
                 </thead>
                 <tbody class="table-border-bottom-0">
                     <c:forEach items="${skus}" var="s">
                         <tr>
-                            <td><span class="badge bg-label-secondary font-monospace">${s.skuCode}</span></td>
-                            <td><strong>${s.color}</strong></td>
+                            <td>
+                                <span class="badge bg-label-secondary font-monospace px-2">${s.skuCode}</span>
+                            </td>
+                            <td><span class="fw-bold text-dark">${fn:escapeXml(s.productName)}</span></td>
+                            <td class="text-center"><span class="fw-semibold">${s.color}</span></td>
                             <td class="text-center">${s.storageGb}GB</td>
                             <td class="text-center">${s.ramGb}GB</td>
                             <td class="text-center">
                                 <c:choose>
-                                    <c:when test="${s.status=='ACTIVE'}">
-                                        <span class="badge bg-label-success">Active</span>
+                                    <c:when test="${s.status == 'ACTIVE'}">
+                                        <span class="badge bg-label-success">ACTIVE</span>
                                     </c:when>
                                     <c:otherwise>
-                                        <span class="badge bg-label-secondary">Inactive</span>
+                                        <span class="badge bg-label-secondary">INACTIVE</span>
                                     </c:otherwise>
                                 </c:choose>
+                            </td>
+                            <td class="text-center">
+                                <div class="d-flex justify-content-center gap-2">
+                                    <c:if test="${sessionScope.roleName == 'MANAGER' || role == 'MANAGER'}">
+                                        <a href="${ctx}/manager/sku/toggle?id=${s.skuId}"
+                                           class="btn btn-icon btn-sm ${s.status == 'ACTIVE' ? 'btn-outline-danger' : 'btn-outline-success'}"
+                                           data-bs-toggle="tooltip" 
+                                           title="${s.status == 'ACTIVE' ? 'Deactivate' : 'Activate'}"
+                                           onclick="return confirm('${s.status == 'ACTIVE' ? 'Deactivate' : 'Activate'} SKU ${fn:escapeXml(s.skuCode)}?');">
+                                            <i class="bx ${s.status == 'ACTIVE' ? 'bx-toggle-left' : 'bx-toggle-right'}"></i>
+                                        </a>
+                                    </c:if>
+                                    <button type="button" class="btn btn-sm btn-outline-primary px-3"
+                                            onclick="showImeiModal('${s.skuId}', '${fn:escapeXml(s.skuCode)}')">
+                                        <i class="bx bx-list-ul me-1"></i> View IMEI
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </c:forEach>
 
                     <c:if test="${empty skus}">
-                        <tr><td colspan="5" class="text-center p-5 text-muted">No variants found matching your criteria.</td></tr>
+                        <tr>
+                            <td colspan="7" class="text-center p-5 text-muted bg-light">
+                                <i class="bx bx-info-circle fs-3 d-block mb-2"></i>
+                                No variants found matching your criteria.
+                            </td>
+                        </tr>
                     </c:if>
                 </tbody>
             </table>
         </div>
-
-        <%-- Pagination --%>
-        <div class="card-footer d-flex justify-content-between align-items-center px-0 pb-0 pt-4">
-            <div class="text-muted small">
-                Page <strong>${cp}</strong> of <strong>${tp}</strong>
-            </div>
-            <nav aria-label="Page navigation">
-                <ul class="pagination pagination-sm mb-0">
-                    <%-- Prev Button --%>
-                    <li class="page-item ${cp <= 1 ? 'disabled' : ''}">
-                        <c:url var="pL" value="/home">
-                            <c:param name="p" value="variant-matrix"/><c:param name="productId" value="${param.productId}"/><c:param name="color" value="${param.color}"/><c:param name="storage" value="${param.storage}"/><c:param name="ram" value="${param.ram}"/><c:param name="status" value="${param.status}"/><c:param name="sku" value="${param.sku}"/><c:param name="page" value="${cp - 1}"/>
-                        </c:url>
-                        <a class="page-link" href="${cp > 1 ? pL : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
-                    </li>
-
-                    <c:set var="ws" value="${cp - 1 > 1 ? cp - 1 : 1}" />
-                    <c:set var="we" value="${ws + 2 < tp ? ws + 2 : tp}" />
-                    <c:if test="${we == tp}">
-                        <c:set var="ws" value="${we - 2 > 1 ? we - 2 : 1}" />
-                    </c:if>
-
-                    <c:if test="${ws > 1}">
-                        <c:url var="u1" value="/home">
-                            <c:param name="p" value="variant-matrix"/><c:param name="productId" value="${param.productId}"/><c:param name="color" value="${param.color}"/><c:param name="storage" value="${param.storage}"/><c:param name="ram" value="${param.ram}"/><c:param name="status" value="${param.status}"/><c:param name="sku" value="${param.sku}"/><c:param name="page" value="1"/>
-                        </c:url>
-                        <li class="page-item"><a class="page-link" href="${u1}">1</a></li>
-                        <c:if test="${ws > 2}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
-                    </c:if>
-
-                    <c:forEach var="i" begin="${ws}" end="${we}">
-                        <c:url var="uiI" value="/home">
-                            <c:param name="p" value="variant-matrix"/><c:param name="productId" value="${param.productId}"/><c:param name="color" value="${param.color}"/><c:param name="storage" value="${param.storage}"/><c:param name="ram" value="${param.ram}"/><c:param name="status" value="${param.status}"/><c:param name="sku" value="${param.sku}"/><c:param name="page" value="${i}"/>
-                        </c:url>
-                        <li class="page-item ${i == cp ? 'active' : ''}">
-                            <a class="page-link" href="${uiI}">${i}</a>
-                        </li>
-                    </c:forEach>
-
-                    <c:if test="${we < tp}">
-                        <c:if test="${we < tp - 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
-                        <c:url var="uLast" value="/home">
-                            <c:param name="p" value="variant-matrix"/><c:param name="productId" value="${param.productId}"/><c:param name="color" value="${param.color}"/><c:param name="storage" value="${param.storage}"/><c:param name="ram" value="${param.ram}"/><c:param name="status" value="${param.status}"/><c:param name="sku" value="${param.sku}"/><c:param name="page" value="${tp}"/>
-                        </c:url>
-                        <li class="page-item"><a class="page-link" href="${uLast}">${tp}</a></li>
-                    </c:if>
-
-                    <%-- Next Button --%>
-                    <li class="page-item ${cp >= tp ? 'disabled' : ''}">
-                        <c:url var="nL" value="/home">
-                            <c:param name="p" value="variant-matrix"/><c:param name="productId" value="${param.productId}"/><c:param name="color" value="${param.color}"/><c:param name="storage" value="${param.storage}"/><c:param name="ram" value="${param.ram}"/><c:param name="status" value="${param.status}"/><c:param name="sku" value="${param.sku}"/><c:param name="page" value="${cp + 1}"/>
-                        </c:url>
-                        <a class="page-link" href="${cp < tp ? nL : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
     </div>
+
+    <%-- Pagination Footer --%>
+    <c:if test="${not empty skus}">
+        <div class="card-footer px-4 py-3 border-top bg-light mt-auto">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div class="text-muted small">
+                    Showing <b>${(page - 1) * pageSize + 1}</b> to 
+                    <b>${(page * pageSize) > totalItems ? totalItems : (page * pageSize)}</b> 
+                    of <b>${totalItems}</b> variants
+                </div>
+
+                <c:if test="${totalPages > 1}">
+                    <nav aria-label="Variant navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            <%-- First --%>
+                            <c:url var="firstUrl" value="/home">
+                                <c:param name="p" value="variant-matrix"/><c:param name="page" value="1"/>
+                                <c:param name="color" value="${color}"/><c:param name="storage" value="${storage}"/><c:param name="ram" value="${ram}"/><c:param name="sku" value="${sku}"/><c:param name="status" value="${status}"/><c:param name="productId" value="${productId}"/><c:param name="q" value="${q}"/>
+                            </c:url>
+                            <li class="page-item ${page == 1 ? 'disabled' : ''}">
+                                <a class="page-link shadow-none" href="${firstUrl}"><i class="bx bx-chevrons-left"></i></a>
+                            </li>
+
+                            <c:url var="prevUrl" value="/home">
+                                <c:param name="p" value="variant-matrix"/><c:param name="page" value="${page - 1}"/>
+                                <c:param name="color" value="${color}"/><c:param name="storage" value="${storage}"/><c:param name="ram" value="${ram}"/><c:param name="sku" value="${sku}"/><c:param name="status" value="${status}"/><c:param name="productId" value="${productId}"/><c:param name="q" value="${q}"/>
+                            </c:url>
+                            <li class="page-item ${page == 1 ? 'disabled' : ''}">
+                                <a class="page-link shadow-none" href="${prevUrl}"><i class="bx bx-chevron-left"></i></a>
+                            </li>
+
+                            <c:forEach begin="${page - 2 < 1 ? 1 : page - 2}" end="${(page + 2 > totalPages) ? totalPages : (page + 2)}" var="i">
+                                <c:url var="pageUrl" value="/home">
+                                    <c:param name="p" value="variant-matrix"/><c:param name="page" value="${i}"/>
+                                    <c:param name="color" value="${color}"/><c:param name="storage" value="${storage}"/><c:param name="ram" value="${ram}"/><c:param name="sku" value="${sku}"/><c:param name="status" value="${status}"/><c:param name="productId" value="${productId}"/><c:param name="q" value="${q}"/>
+                                </c:url>
+                                <li class="page-item ${page == i ? 'active shadow-sm' : ''}">
+                                    <a class="page-link shadow-none" href="${pageUrl}">${i}</a>
+                                </li>
+                            </c:forEach>
+
+                            <c:url var="nextUrl" value="/home">
+                                <c:param name="p" value="variant-matrix"/><c:param name="page" value="${page + 1}"/>
+                                <c:param name="color" value="${color}"/><c:param name="storage" value="${storage}"/><c:param name="ram" value="${ram}"/><c:param name="sku" value="${sku}"/><c:param name="status" value="${status}"/><c:param name="productId" value="${productId}"/><c:param name="q" value="${q}"/>
+                            </c:url>
+                            <li class="page-item ${page == totalPages ? 'disabled' : ''}">
+                                <a class="page-link shadow-none" href="${nextUrl}"><i class="bx bx-chevron-right"></i></a>
+                            </li>
+
+                            <c:url var="lastUrl" value="/home">
+                                <c:param name="p" value="variant-matrix"/><c:param name="page" value="${totalPages}"/>
+                                <c:param name="color" value="${color}"/><c:param name="storage" value="${storage}"/><c:param name="ram" value="${ram}"/><c:param name="sku" value="${sku}"/><c:param name="status" value="${status}"/><c:param name="productId" value="${productId}"/><c:param name="q" value="${q}"/>
+                            </c:url>
+                            <li class="page-item ${page == totalPages ? 'disabled' : ''}">
+                                <a class="page-link shadow-none" href="${lastUrl}"><i class="bx bx-chevrons-right"></i></a>
+                            </li>
+                        </ul>
+                    </nav>
+                </c:if>
+            </div>
+        </div>
+    </c:if>
 </div>
+
+<%@ include file="/WEB-INF/jspf/imei_modal.jspf" %>
+<script>
+    // Initializing tooltips for the reverted design
+    document.addEventListener('DOMContentLoaded', function () {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
