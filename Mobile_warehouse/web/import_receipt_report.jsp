@@ -140,12 +140,8 @@
                             <c:when test="${statusUp == 'CONFIRMED'}">
                                 <span class="badge bg-label-success">Completed</span>
                             </c:when>
-                            <c:when test="${statusUp == 'PENDING' || statusUp == 'DRAFT'}">
-                                <span class="badge bg-label-warning">Pending</span>
-                            </c:when>
-                            <c:when test="${statusUp == 'CANCELED' || statusUp == 'CANCELLED'}">
-                                <span class="badge bg-label-danger">Cancelled</span>
-                            </c:when>
+                         
+                          
                             <c:otherwise>
                                 <span class="badge bg-label-secondary">
                                     <c:out value="${r.status}"/>

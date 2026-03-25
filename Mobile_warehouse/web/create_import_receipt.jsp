@@ -126,14 +126,14 @@
                                         <table class="table table-sm table-hover" id="itemsTable">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th style="width:50px" class="text-center">#</th>
-                                                    <th style="width:250px">Product</th>
-                                                    <th style="width:150px">Code</th>
-                                                    <th style="width:150px">SKU</th>
-                                                    <th style="width:100px" class="text-center">Qty</th>
+                                                    <th style="width:20px" class="text-center">#</th>
+                                                    <th style="width:180px">Product</th>
+                                                    <th style="width:120px">Code</th>
+                                                    <th style="width:250px">SKU</th>
+                                                    <th style="width:120px" class="text-center">Qty</th>
                                                     <th style="width:300px">IMEI Details</th>
-                                                    <th>Note</th>
-                                                    <th style="width:50px" class="text-center">Del</th>
+                                                    <th style="width:250px">Note</th>
+                                                    <th style="width:20px" class="text-center">Delete</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="itemsTbody"></tbody>

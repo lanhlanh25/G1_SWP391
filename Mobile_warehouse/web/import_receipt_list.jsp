@@ -119,9 +119,21 @@
                             <td><small>${fn:escapeXml(r.createdByName)}</small></td>
                             <td class="text-center text-muted small">${r.receiptDate}</td>
                             <td class="text-center fw-bold text-primary">${r.totalQuantity}</td>
-                            <td class="text-center">
-
-                            </td>
+                             <td class="text-center">
+                        <c:set var="statusUp" value="${fn:toUpperCase(r.status)}"/>
+                        <c:choose>
+                            <c:when test="${statusUp == 'CONFIRMED'}">
+                                <span class="badge bg-label-success">Completed</span>
+                            </c:when>
+                         
+                          
+                            <c:otherwise>
+                                <span class="badge bg-label-secondary">
+                                    <c:out value="${r.status}"/>
+                                </span>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                             <td class="text-center">
                                 <div class="dropdown">
                                     <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" data-bs-boundary="viewport">
