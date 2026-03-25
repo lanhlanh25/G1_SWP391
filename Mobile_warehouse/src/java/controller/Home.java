@@ -582,7 +582,7 @@ public class Home extends HttpServlet {
                     if (dashboardRecentActivities.size() > 6) {
                         dashboardRecentActivities = new ArrayList<>(dashboardRecentActivities.subList(0, 6));
                     }
-                    int lowThreshold =10;
+                    int lowThreshold = 10;
                     // =========================
                     // SET ATTRIBUTES
                     // =========================
@@ -915,7 +915,7 @@ public class Home extends HttpServlet {
                     return;
                 }
                 request.setAttribute("brand", b);
-                
+
                 break;
             }
 
@@ -1509,7 +1509,7 @@ public class Home extends HttpServlet {
                 ProductSkuDAO skdao = new ProductSkuDAO();
                 CodeGeneratorDAO codeDAO = new CodeGeneratorDAO();
 
-                request.setAttribute("erProducts", pdao.listForExportRequest());
+                request.setAttribute("erProducts", pdao.listActive());
                 request.setAttribute("erSkus", skdao.listActive());
 
                 try (Connection con = DBContext.getConnection()) {
@@ -1534,7 +1534,7 @@ public class Home extends HttpServlet {
                 ProductSkuDAO skdao = new ProductSkuDAO();
                 CodeGeneratorDAO codeDAO = new CodeGeneratorDAO();
 
-                request.setAttribute("irProducts", pdao.listForExportRequest());
+                request.setAttribute("irProducts", pdao.listActive());
                 request.setAttribute("irSkus", skdao.listActive());
 
                 try (Connection con = DBContext.getConnection()) {
@@ -1580,8 +1580,21 @@ public class Home extends HttpServlet {
 
                         request.setAttribute("selectedLowStockItem", selectedItem);
 
-                        // NEW: load SKU stock breakdown for selected product
-                        List<ProductSku> selectedProductSkuStocks = skdao.getSkuStockByProductId(productId);
+                        List<ProductSku> allSkuStocks = skdao.getSkuStockByProductId(productId);
+                        List<ProductSku> selectedProductSkuStocks = new ArrayList<>();
+
+                        if (allSkuStocks != null) {
+                            for (ProductSku s : allSkuStocks) {
+                                if (s == null) {
+                                    continue;
+                                }
+                                String skuStatus = s.getStockStatus();
+                                if ("Out Of Stock".equalsIgnoreCase(skuStatus) || "Low Stock".equalsIgnoreCase(skuStatus)) {
+                                    selectedProductSkuStocks.add(s);
+                                }
+                            }
+                        }
+
                         request.setAttribute("selectedProductSkuStocks", selectedProductSkuStocks);
 
                     } catch (Exception e) {
@@ -1930,7 +1943,8 @@ public class Home extends HttpServlet {
                     if (productIdRaw != null && !productIdRaw.isBlank()) {
                         productId = Long.parseLong(productIdRaw.trim());
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
 
                 int totalItems = dao.count(keyword, movementType, referenceCode, performedBy, from, to, productId);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);

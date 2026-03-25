@@ -18,6 +18,7 @@
             <input type="hidden" name="sourcePage" value="low-stock-report"/>
             <input type="hidden" name="sourceProductId" value="${selectedLowStockItem.productId}"/>
         </c:if>
+
         <div class="card" style="margin-bottom:14px;">
             <div class="card-header"><span class="h2">Request Information</span></div>
             <div class="card-body">
@@ -69,6 +70,7 @@
                 </div>
             </div>
         </c:if>
+
         <c:if test="${not empty selectedProductSkuStocks}">
             <div class="card" style="margin-bottom:14px;">
                 <div class="card-header"><span class="h2">SKU Stock Breakdown</span></div>
@@ -89,11 +91,11 @@
                             <tbody>
                                 <c:forEach var="s" items="${selectedProductSkuStocks}">
                                     <tr>
-                                        <td><b>${s.skuCode}</b></td>
-                                        <td>${s.color}</td>
+                                        <td><b>${fn:escapeXml(s.skuCode)}</b></td>
+                                        <td>${fn:escapeXml(s.color)}</td>
                                         <td>${s.ramGb} GB</td>
                                         <td>${s.storageGb} GB</td>
-                                        <td>${s.supplierName}</td>
+                                        <td>${fn:escapeXml(s.supplierName)}</td>
                                         <td>${s.stock}</td>
                                         <td>
                                             <c:choose>
@@ -116,13 +118,17 @@
                 </div>
             </div>
         </c:if>
+
         <div class="card">
             <div class="card-header">
                 <span class="h2">Items</span>
-                <div style="display:flex; gap:8px;">
-                    <button class="btn btn-outline" type="button" onclick="addRow()">+ Add Item</button>
-                    <button class="btn" type="button" onclick="clearRows()">Clear</button>
-                </div>
+
+                <c:if test="${empty selectedLowStockItem}">
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-outline" type="button" onclick="addRow()">+ Add Item</button>
+                        <button class="btn" type="button" onclick="clearRows()">Clear</button>
+                    </div>
+                </c:if>
             </div>
 
             <div class="card-body" style="padding:0;">
@@ -130,7 +136,7 @@
                     <thead>
                         <tr>
                             <th style="text-align:center; width:60px;">No</th>
-                            <th>Product Code</th>
+                            <th>Product Name</th>
                             <th>SKU</th>
                             <th style="width:140px; text-align:center;">Request Qty</th>
                             <th style="width:100px; text-align:center;">Remove</th>
@@ -146,9 +152,9 @@
     </form>
 
     <select id="tplProductOptions" style="display:none">
-        <option value="">Select Product Code</option>
+        <option value="">Select Product Name</option>
         <c:forEach var="p" items="${irProducts}">
-            <option value="${p.productId}">${fn:escapeXml(p.productCode)}</option>
+            <option value="${p.productId}">${fn:escapeXml(p.productName)}</option>
         </c:forEach>
     </select>
 
@@ -160,16 +166,36 @@
     </select>
 
     <c:if test="${not empty selectedLowStockItem}">
-        <div id="prefillData"
-             data-product-id="${selectedLowStockItem.productId}"
-             data-current-stock="${selectedLowStockItem.currentStock}"
-             data-threshold="${selectedLowStockItem.threshold}"
-             data-suggested-qty="${selectedLowStockItem.suggestedReorderQty}"
-             style="display:none;"></div>
+        <div id="prefillRows" style="display:none;">
+            <c:forEach var="s" items="${selectedProductSkuStocks}">
+                <c:if test="${s.stockStatus == 'Out Of Stock' || s.stockStatus == 'Low Stock'}">
+                    <div class="prefill-row"
+                         data-product-id="${selectedLowStockItem.productId}"
+                         data-product-name="${fn:escapeXml(selectedLowStockItem.productName)}"
+                         data-sku-id="${s.skuId}"
+                         data-sku-code="${fn:escapeXml(s.skuCode)}"
+                         data-current-stock="${s.stock}"
+                         data-threshold="${selectedLowStockItem.threshold}"
+                         data-qty="${s.stock < selectedLowStockItem.threshold ? (selectedLowStockItem.threshold - s.stock) : 1}">
+                    </div>
+                </c:if>
+            </c:forEach>
+        </div>
     </c:if>
 </div>
 
 <script>
+    function escapeHtml(str) {
+        if (str === null || str === undefined)
+            return "";
+        return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#39;");
+    }
+
     function productOptionsHtml(selectedValue) {
         const tpl = document.getElementById("tplProductOptions");
         const clone = tpl.cloneNode(true);
@@ -229,7 +255,35 @@
                 '</select>' +
                 '</td>' +
                 '<td>' +
-                '<input class="input" name="qty" value="' + qtyValue + '" style="text-align:center;" oninput="recalcTotal()"/>' +
+                '<input class="input" type="number" min="1" name="qty" value="' + qtyValue + '" style="text-align:center;" oninput="recalcTotal()"/>' +
+                '</td>' +
+                '<td style="text-align:center;">' +
+                '<button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">✕</button>' +
+                '</td>';
+
+        tb.appendChild(tr);
+        renumber();
+        recalcTotal();
+    }
+
+    function addReadonlyPrefillRow(prefill) {
+        const tb = document.getElementById("tbody");
+        const tr = document.createElement("tr");
+
+        const qtyValue = calcSuggestedQty(prefill);
+
+        tr.innerHTML =
+                '<td class="no" style="text-align:center;"></td>' +
+                '<td>' +
+                '<input type="hidden" name="productId" value="' + escapeHtml(prefill.productId) + '"/>' +
+                '<input class="input readonly" type="text" value="' + escapeHtml(prefill.productName) + '" readonly/>' +
+                '</td>' +
+                '<td>' +
+                '<input type="hidden" name="skuId" value="' + escapeHtml(prefill.skuId) + '"/>' +
+                '<input class="input readonly" type="text" value="' + escapeHtml(prefill.skuCode) + '" readonly/>' +
+                '</td>' +
+                '<td>' +
+                '<input class="input" type="number" min="1" name="qty" value="' + qtyValue + '" style="text-align:center;" oninput="recalcTotal()"/>' +
                 '</td>' +
                 '<td style="text-align:center;">' +
                 '<button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">✕</button>' +
@@ -278,32 +332,41 @@
         document.getElementById("totalQty").innerText = t;
     }
 
-    function getPrefillFromLowStock() {
-        const el = document.getElementById("prefillData");
-        if (!el)
-            return null;
+    function getPrefillRowsFromLowStock() {
+        const nodes = document.querySelectorAll("#prefillRows .prefill-row");
+        if (!nodes || nodes.length === 0)
+            return [];
 
-        return {
-            productId: el.dataset.productId || "",
-            currentStock: el.dataset.currentStock || "0",
-            threshold: el.dataset.threshold || "10",
-            qty: el.dataset.suggestedQty || "1"
-        };
+        const arr = [];
+        nodes.forEach(function (el) {
+            arr.push({
+                productId: el.dataset.productId || "",
+                productName: el.dataset.productName || "",
+                skuId: el.dataset.skuId || "",
+                skuCode: el.dataset.skuCode || "",
+                qty: el.dataset.qty || "1"
+            });
+        });
+        return arr;
     }
 
     function addDefaultRowOnEmpty() {
-        const prefill = getPrefillFromLowStock();
-        if (prefill) {
-            addRow(prefill);
+        const prefillRows = getPrefillRowsFromLowStock();
+        if (prefillRows.length > 0) {
+            prefillRows.forEach(function (r) {
+                addReadonlyPrefillRow(r);
+            });
         } else {
             addRow();
         }
     }
 
     (function initForm() {
-        const prefill = getPrefillFromLowStock();
-        if (prefill) {
-            addRow(prefill);
+        const prefillRows = getPrefillRowsFromLowStock();
+        if (prefillRows.length > 0) {
+            prefillRows.forEach(function (r) {
+                addReadonlyPrefillRow(r);
+            });
         } else {
             addRow();
         }

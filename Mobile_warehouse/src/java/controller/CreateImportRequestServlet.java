@@ -23,7 +23,6 @@ public class CreateImportRequestServlet extends HttpServlet {
         HttpSession session = request.getSession(false);
         String roleName = (session == null) ? null : (String) session.getAttribute("roleName");
 
-        // ✅ allow MANAGER and SALE
         if (roleName == null || !("SALE".equalsIgnoreCase(roleName) || "MANAGER".equalsIgnoreCase(roleName))) {
             response.sendError(403, "Forbidden");
             return;
@@ -55,14 +54,12 @@ public class CreateImportRequestServlet extends HttpServlet {
         try {
             ImportRequestCreateDAO dao = new ImportRequestCreateDAO();
 
-            // expected import date
             if (expected == null) {
                 errs.add("Expected Import Date is required.");
             } else if (expected.before(today)) {
                 errs.add("Expected Import Date cannot be in the past.");
             }
 
-            // source product from low stock report
             Long sourceProductId = null;
             if (fromLowStock) {
                 sourceProductId = parseLongObj(sourceProductIdRaw);
@@ -76,7 +73,6 @@ public class CreateImportRequestServlet extends HttpServlet {
                 }
             }
 
-            // item arrays
             if (productIds == null || skuIds == null || qtys == null
                     || productIds.length == 0 || skuIds.length == 0 || qtys.length == 0) {
                 errs.add("Please add at least 1 item.");
@@ -85,6 +81,7 @@ public class CreateImportRequestServlet extends HttpServlet {
             } else {
 
                 Set<Long> productSet = new LinkedHashSet<>();
+                Set<Long> uniqueSkuSet = new LinkedHashSet<>();
 
                 for (int i = 0; i < productIds.length; i++) {
                     String productIdRaw = productIds[i] == null ? "" : productIds[i].trim();
@@ -105,25 +102,13 @@ public class CreateImportRequestServlet extends HttpServlet {
                         continue;
                     }
 
-                    // ✅ if from low stock, only allow request for that source product
                     if (fromLowStock && sourceProductId != null && pid != sourceProductId.longValue()) {
                         errs.add("Item #" + (i + 1) + ": Product must match the selected low stock product.");
                         continue;
                     }
 
-                    // ✅ qty > 0
-                    if (q <= 0) {
-                        errs.add("Item #" + (i + 1) + ": Qty must be > 0.");
-                        continue;
-                    }
-
-                    // ✅ sku required, especially from low stock
                     if (sid <= 0) {
-                        if (fromLowStock) {
-                            errs.add("Item #" + (i + 1) + ": SKU is required when creating request from Low Stock Report.");
-                        } else {
-                            errs.add("Item #" + (i + 1) + ": SKU is required.");
-                        }
+                        errs.add("Item #" + (i + 1) + ": SKU is required.");
                         continue;
                     }
 
@@ -132,18 +117,30 @@ public class CreateImportRequestServlet extends HttpServlet {
                         continue;
                     }
 
-                    // ✅ sku must belong to product
                     if (!dao.isSkuBelongsToProduct(sid, pid)) {
                         errs.add("Item #" + (i + 1) + ": SKU does not belong to selected product.");
                         continue;
                     }
 
+                    if (q <= 0) {
+                        errs.add("Item #" + (i + 1) + ": Qty must be > 0.");
+                        continue;
+                    }
+
+                    if (uniqueSkuSet.contains(sid)) {
+                        errs.add("Item #" + (i + 1) + ": Duplicate SKU is not allowed.");
+                        continue;
+                    }
+
                     productSet.add(pid);
+                    uniqueSkuSet.add(sid);
                     items.add(new ImportRequestItemCreate(pid, sid, q));
                 }
 
-                if (fromLowStock && sourceProductId != null && !productSet.isEmpty()) {
-                    if (productSet.size() != 1 || !productSet.contains(sourceProductId)) {
+                if (fromLowStock && sourceProductId != null) {
+                    if (productSet.isEmpty()) {
+                        errs.add("Import request from Low Stock Report must contain at least 1 SKU.");
+                    } else if (productSet.size() != 1 || !productSet.contains(sourceProductId)) {
                         errs.add("Import request from Low Stock Report must contain only the selected product.");
                     }
                 }
@@ -160,7 +157,6 @@ public class CreateImportRequestServlet extends HttpServlet {
                         .append("&expected_import_date=").append(safe(expected == null ? "" : expected.toString()))
                         .append("&note=").append(safe(note == null ? "" : note));
 
-                // keep prefill if came from low stock
                 if (fromLowStock && sourceProductIdRaw != null && !sourceProductIdRaw.isBlank()) {
                     url.append("&productId=").append(safe(sourceProductIdRaw));
                 }

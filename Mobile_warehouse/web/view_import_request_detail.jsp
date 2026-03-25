@@ -54,7 +54,7 @@
         <thead>
           <tr>
             <th style="width:60px;" class="text-center">#</th>
-            <th style="width:150px;">Code</th>
+            <th style="width:150px;">Product Name</th>
             <th>SKU</th>
             <th style="width:140px;" class="text-center">Request Qty</th>
           </tr>
@@ -66,7 +66,7 @@
           <c:forEach var="it" items="${irItems}">
             <tr>
               <td class="text-center text-muted fs-12">${it.no}</td>
-              <td class="mono-text fs-12">${fn:escapeXml(it.productCode)}</td>
+              <td class="mono-text fs-12">${fn:escapeXml(it.productName)}</td>
               <td class="fw-600">${fn:escapeXml(it.skuCode)}</td>
               <td class="text-center fw-700">${it.requestQty}</td>
             </tr>
