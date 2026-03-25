@@ -17,7 +17,7 @@
   <div class="id-chips">
     <div class="id-chip">
       <div class="chip-label">Quantity</div>
-      <div class="chip-val">${totalQty} Phone</div>
+      <div class="chip-val">${totalQty} Item</div>
     </div>
     <div class="id-chip">
       <div class="chip-label">Product Code</div>
@@ -45,7 +45,8 @@
             <th class="text-center">RAM</th>
             <th class="text-center">Storage</th>
             <th class="text-center">Inventory Status</th>
-            <th class="text-right">Quantity</th>
+            <th class="text-center">Quantity</th>
+            <th class="text-center">Unit</th>
             <th class="text-center">Action</th>
           </tr>
         </thead>
@@ -71,10 +72,11 @@
       <span class="badge badge-danger">Out of Stock</span>
     </c:otherwise>
   </c:choose>
-</td>      <td class="text-right font-bold">
+</td>      <td class="text-center font-bold">
                 ${s.qty}
-                <span style="font-size:11px;color:var(--muted);margin-left:2px;">Phone</span>
+                
               </td>
+              <td class="text-center"><small class="text-muted">Item</small></td>
               <td class="tc">
                 <c:url var="imeiUrl" value="/imei-list">
                   <c:param name="skuId"    value="${s.skuId}"/>
@@ -82,7 +84,7 @@
                   <c:param name="pageSize" value="10"/>
                   <c:param name="back"     value="${backToDetails}"/>
                 </c:url>
-                <a class="btn btn-sm btn-outline" href="${imeiUrl}">View List IMEI</a>
+                <a class="btn btn-sm btn-outline " href="${imeiUrl}">View List IMEI</a>
               </td>
             </tr>
           </c:forEach>
