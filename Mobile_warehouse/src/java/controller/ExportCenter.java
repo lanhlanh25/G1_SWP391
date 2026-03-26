@@ -264,7 +264,6 @@ public class ExportCenter extends HttpServlet {
         p.summaryLines.put("Total Import", String.valueOf(summary.getOrDefault("totalImport", 0)));
         p.summaryLines.put("Total Export", String.valueOf(summary.getOrDefault("totalExport", 0)));
         p.summaryLines.put("Closing Stock", String.valueOf(summary.getOrDefault("totalClosing", 0)));
-        p.summaryLines.put("Variance", String.valueOf(summary.getOrDefault("totalVariance", 0)));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
             p.headers = Arrays.asList("Product Code", "Product Name", "Brand", "Closing Stock");
@@ -279,8 +278,9 @@ public class ExportCenter extends HttpServlet {
         } else {
             p.headers = Arrays.asList(
                     "Product Code", "Product Name", "Brand", "Unit",
-                    "Opening Stock", "Import", "Export", "Closing Stock", "Variance"
+                    "Opening Stock", "Import", "Export", "Closing Stock"
             );
+
             for (InventoryReportRow r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getProductCode()),
@@ -290,8 +290,7 @@ public class ExportCenter extends HttpServlet {
                         String.valueOf(r.getOpeningQty()),
                         String.valueOf(r.getImportQty()),
                         String.valueOf(r.getExportQty()),
-                        String.valueOf(r.getClosingQty()),
-                        String.valueOf(r.getVariance())
+                        String.valueOf(r.getClosingQty())
                 ));
             }
         }
@@ -546,6 +545,7 @@ public class ExportCenter extends HttpServlet {
     }
 
     private static class ExportPayload {
+
         String reportTitle;
         String generatedAt;
         Map<String, String> filterLines = new LinkedHashMap<>();
