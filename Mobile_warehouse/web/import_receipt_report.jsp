@@ -151,9 +151,9 @@
                     </td>
 
                     <td class="text-center">
-                        <a class="btn btn-sm btn-outline-primary"
+                        <a class="btn btn-icon btn-sm btn-outline-primary"
                            href="${ctx}/import-receipt-detail?id=${r.importId}">
-                            View
+                            <i class="bx bx-show"></i>
                         </a>
                     </td>
                 </tr>
