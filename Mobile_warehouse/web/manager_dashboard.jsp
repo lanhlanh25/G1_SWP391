@@ -42,10 +42,10 @@
                             <div class="avatar flex-shrink-0">
                                 <img src="${ctx}/assets/img/icons/unicons/chart-success.png" alt="chart success" class="rounded" />
                             </div>
-                            <span class="fw-semibold d-block mb-1">Today Imported</span>
-                            <h3 class="card-title mb-2 text-success">${todayImportedUnits}</h3>
-                            <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Units</small>
                         </div>
+                        <span class="fw-semibold d-block mb-1">Today Imported</span>
+                        <h3 class="card-title mb-2 text-success">${todayImportedUnits}</h3>
+                        <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Units</small>
                     </div>
                 </div>
             </div>
@@ -56,72 +56,30 @@
                             <div class="avatar flex-shrink-0">
                                 <img src="${ctx}/assets/img/icons/unicons/wallet-info.png" alt="Credit Card" class="rounded" />
                             </div>
-                            <span class="fw-semibold d-block mb-1">Today Exported</span>
-                            <h3 class="card-title text-nowrap mb-1 text-info">${todayExportedUnits}</h3>
-                            <small class="text-info fw-semibold"><i class="bx bx-down-arrow-alt"></i> Units</small>
                         </div>
+                        <span class="fw-semibold d-block mb-1">Today Exported</span>
+                        <h3 class="card-title text-nowrap mb-1 text-info">${todayExportedUnits}</h3>
+                        <small class="text-info fw-semibold"><i class="bx bx-down-arrow-alt"></i> Units</small>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Inventory Summary Row -->
-    <div class="row">
-        <div class="col-md-3 col-6 mb-4">
-            <div class="card h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="avatar flex-shrink-0">
-                            <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-archive-in"></i></span>
-                        </div>
+<!-- Inventory Summary Row -->
+<div class="row">
+    <div class="col-md-3 col-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-secondary"><i class="bx bx-archive-in"></i></span>
                     </div>
-                    <span class="d-block mb-1 text-muted">Opening Stock</span>
-                    <h4 class="card-title mb-1">${invTotalOpening}</h4>
-                    <div class="text-muted small">${invMonthLabel}</div>
                 </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-4">
-            <div class="card h-100 border-bottom border-success border-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="avatar flex-shrink-0">
-                            <span class="avatar-initial rounded bg-label-success"><i class="bx bx-plus-circle"></i></span>
-                        </div>
-                    </div>
-                    <span class="d-block mb-1 text-muted">Total Import</span>
-                    <h4 class="card-title mb-1 text-success">+${invTotalImport}</h4>
-                    <div class="text-success small">MTD</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-4">
-            <div class="card h-100 border-bottom border-warning border-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="avatar flex-shrink-0">
-                            <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-minus-circle"></i></span>
-                        </div>
-                    </div>
-                    <span class="d-block mb-1 text-muted">Total Export</span>
-                    <h4 class="card-title mb-1 text-warning">-${invTotalExport}</h4>
-                    <div class="text-warning small">MTD</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3 col-6 mb-4">
-            <div class="card h-100 border-bottom border-primary border-3">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <div class="avatar flex-shrink-0">
-                            <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-package"></i></span>
-                        </div>
-                    </div>
-                    <span class="d-block mb-1 text-muted">Closing Stock</span>
-                    <h4 class="card-title mb-1 text-primary">${invTotalClosing}</h4>
-                    <div class="text-primary small">Current On-hand</div>
-                </div>
+                <span class="d-block mb-1 text-muted">Opening Stock</span>
+                <h4 class="card-title mb-1">${invTotalOpening}</h4>
+                <div class="text-muted small">${invMonthLabel}</div>
             </div>
         </div>
     </div>
@@ -206,7 +164,7 @@
                 </ul>
 
                 <div class="table-responsive text-nowrap">
-                    <table class="table table-hover">
+                    <table class="table table-hover table-sm">
                         <thead>
                             <tr>
                                 <th>Code</th>
