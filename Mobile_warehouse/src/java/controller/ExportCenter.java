@@ -24,6 +24,7 @@ import util.PdfExportUtil;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -65,6 +66,15 @@ public class ExportCenter extends HttpServlet {
         String reportType = nv(request.getParameter("reportType"), "inventory");
         String fromRaw = trim(request.getParameter("from"));
         String toRaw = trim(request.getParameter("to"));
+
+        if ("inventory".equalsIgnoreCase(reportType) && fromRaw == null && toRaw == null) {
+            LocalDate today = LocalDate.now();
+            LocalDate fromDefault = today.minusMonths(1);
+
+            fromRaw = fromDefault.toString();
+            toRaw = today.toString();
+        }
+
         String brandIdRaw = trim(request.getParameter("brandId"));
         String keyword = trim(request.getParameter("keyword"));
         String stockStatus = trim(request.getParameter("ropStatus"));
