@@ -11,7 +11,7 @@
     <div class="card-body">
         <form method="get" action="${ctx}/home" class="row g-3 px-1">
             <input type="hidden" name="p" value="role-list"/>
-            
+
             <div class="col-md-6">
                 <label class="form-label">Search Roles</label>
                 <div class="input-group input-group-merge">
@@ -19,7 +19,7 @@
                     <input type="text" name="q" class="form-control" value="${fn:escapeXml(param.q)}" placeholder="Search roles..."/>
                 </div>
             </div>
-            
+
             <div class="col-md-3">
                 <label class="form-label">Status</label>
                 <select class="form-select" name="status">
@@ -28,7 +28,7 @@
                     <option value="0" ${param.status == '0' ? 'selected' : ''}>Inactive</option>
                 </select>
             </div>
-            
+
             <div class="col-md-3 d-flex align-items-end gap-2">
                 <button class="btn btn-primary w-100" type="submit">Filter</button>
                 <a class="btn btn-outline-secondary" href="${ctx}/home?p=role-list"><i class="bx bx-refresh"></i></a>
@@ -40,11 +40,12 @@
 <div class="card">
     <div class="card-header d-flex align-items-center justify-content-between pb-0 mb-3">
         <h5 class="m-0">Roles Database</h5>
-        <a class="btn btn-primary" href="${ctx}/home?p=role-add">
-            <i class="bx bx-plus me-1"></i> Add Role
-        </a>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-primary" href="${ctx}/home?p=role-toggle"><i class="bx bx-toggle-right me-1"></i> Role Toggle</a>
+            <a class="btn btn-primary" href="${ctx}/home?p=role-add"><i class="bx bx-plus me-1"></i> Add Role</a>
+        </div>
     </div>
-    
+
     <div class="table-responsive text-nowrap">
         <table class="table table-hover">
             <thead>
@@ -86,7 +87,7 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item" href="${ctx}/home?p=role-detail&roleId=${r.roleId}"><i class="bx bx-show-alt me-1"></i> View Detail</a>
-                                    <a class="dropdown-item" href="${ctx}/home?p=role-update&roleId=${r.roleId}"><i class="bx bx-shield-quarter me-1"></i> Permissions</a>
+                                    <a class="dropdown-item" href="${ctx}/home?p=role-permissions&roleId=${r.roleId}"><i class="bx bx-shield-quarter me-1"></i> Permissions</a>
                                 </div>
                             </div>
                         </td>
@@ -96,4 +97,4 @@
         </table>
     </div>
 </div>
-
+
