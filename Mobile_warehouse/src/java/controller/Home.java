@@ -582,7 +582,7 @@ public class Home extends HttpServlet {
                     if (dashboardRecentActivities.size() > 6) {
                         dashboardRecentActivities = new ArrayList<>(dashboardRecentActivities.subList(0, 6));
                     }
-                    int lowThreshold =10;
+                    int lowThreshold = 10;
                     // =========================
                     // SET ATTRIBUTES
                     // =========================
@@ -915,7 +915,7 @@ public class Home extends HttpServlet {
                     return;
                 }
                 request.setAttribute("brand", b);
-                
+
                 break;
             }
 
@@ -1272,27 +1272,6 @@ public class Home extends HttpServlet {
                 break;
             }
 
-            case "supplier_inactive": {
-                String idRaw = request.getParameter("id");
-                if (idRaw == null || idRaw.isBlank()) {
-                    response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Please select a supplier");
-                    return;
-                }
-
-                long supplierId = Long.parseLong(idRaw.trim());
-
-                SupplierDAO supplierDAO = new SupplierDAO();
-                Supplier supplier = supplierDAO.getById(supplierId);
-
-                if (supplier == null) {
-                    response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Supplier not found");
-                    return;
-                }
-
-                request.setAttribute("supplier", supplier);
-                break;
-            }
-
             case "view_history": {
                 String sidRaw = request.getParameter("supplierId");
                 if (sidRaw == null || sidRaw.isBlank()) {
@@ -1313,6 +1292,12 @@ public class Home extends HttpServlet {
 
                 String q = request.getParameter("q");
                 String status = request.getParameter("status");
+                if (status != null) {
+                    status = status.trim().toUpperCase();
+                    if (status.isEmpty() || "ALL".equals(status)) {
+                        status = null;
+                    }
+                }
                 String fromRaw = request.getParameter("from");
                 String toRaw = request.getParameter("to");
 
@@ -1509,7 +1494,7 @@ public class Home extends HttpServlet {
                 ProductSkuDAO skdao = new ProductSkuDAO();
                 CodeGeneratorDAO codeDAO = new CodeGeneratorDAO();
 
-                request.setAttribute("erProducts", pdao.listForExportRequest());
+                request.setAttribute("erProducts", pdao.listActive());
                 request.setAttribute("erSkus", skdao.listActive());
 
                 try (Connection con = DBContext.getConnection()) {
@@ -1534,7 +1519,7 @@ public class Home extends HttpServlet {
                 ProductSkuDAO skdao = new ProductSkuDAO();
                 CodeGeneratorDAO codeDAO = new CodeGeneratorDAO();
 
-                request.setAttribute("irProducts", pdao.listForExportRequest());
+                request.setAttribute("irProducts", pdao.listActive());
                 request.setAttribute("irSkus", skdao.listActive());
 
                 try (Connection con = DBContext.getConnection()) {
@@ -1580,8 +1565,21 @@ public class Home extends HttpServlet {
 
                         request.setAttribute("selectedLowStockItem", selectedItem);
 
-                        // NEW: load SKU stock breakdown for selected product
-                        List<ProductSku> selectedProductSkuStocks = skdao.getSkuStockByProductId(productId);
+                        List<ProductSku> allSkuStocks = skdao.getSkuStockByProductId(productId);
+                        List<ProductSku> selectedProductSkuStocks = new ArrayList<>();
+
+                        if (allSkuStocks != null) {
+                            for (ProductSku s : allSkuStocks) {
+                                if (s == null) {
+                                    continue;
+                                }
+                                String skuStatus = s.getStockStatus();
+                                if ("Out Of Stock".equalsIgnoreCase(skuStatus) || "Low Stock".equalsIgnoreCase(skuStatus)) {
+                                    selectedProductSkuStocks.add(s);
+                                }
+                            }
+                        }
+
                         request.setAttribute("selectedProductSkuStocks", selectedProductSkuStocks);
 
                     } catch (Exception e) {
@@ -1930,7 +1928,8 @@ public class Home extends HttpServlet {
                     if (productIdRaw != null && !productIdRaw.isBlank()) {
                         productId = Long.parseLong(productIdRaw.trim());
                     }
-                } catch (Exception e) {}
+                } catch (Exception e) {
+                }
 
                 int totalItems = dao.count(keyword, movementType, referenceCode, performedBy, from, to, productId);
                 int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
@@ -2097,8 +2096,6 @@ public class Home extends HttpServlet {
                         return "supplier_detail.jsp";
                     case "update_supplier":
                         return "update_supplier.jsp";
-                    case "supplier_inactive":
-                        return "inactive_supplier.jsp";
                     case "view_history":
                         return "supplier_history.jsp";
                     case "import-receipt-detail":

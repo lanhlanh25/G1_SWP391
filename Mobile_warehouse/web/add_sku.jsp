@@ -18,10 +18,7 @@
     </c:if>
 
     <div class="card">
-        <div class="card-header">
-            <div class="h2">SKU Specifications</div>
-            <div class="fs-13 text-muted">Define the hardware variant and base properties.</div>
-        </div>
+      
         <div class="card-body">
             <form action="${pageContext.request.contextPath}/manager/sku/add" method="post" novalidate autocomplete="off">
                 

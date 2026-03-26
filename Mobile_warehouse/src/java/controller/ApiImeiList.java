@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 
-@WebServlet(name = "ApiImeiList", urlPatterns = {"/imei-list", "/api/imei-list"})
+@WebServlet(name = "ApiImeiList", urlPatterns = { "/api/imei-list"})
 public class ApiImeiList extends HttpServlet {
 
     @Override

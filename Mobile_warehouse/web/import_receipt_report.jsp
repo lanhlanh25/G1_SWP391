@@ -140,12 +140,8 @@
                             <c:when test="${statusUp == 'CONFIRMED'}">
                                 <span class="badge bg-label-success">Completed</span>
                             </c:when>
-                            <c:when test="${statusUp == 'PENDING' || statusUp == 'DRAFT'}">
-                                <span class="badge bg-label-warning">Pending</span>
-                            </c:when>
-                            <c:when test="${statusUp == 'CANCELED' || statusUp == 'CANCELLED'}">
-                                <span class="badge bg-label-danger">Cancelled</span>
-                            </c:when>
+                         
+                          
                             <c:otherwise>
                                 <span class="badge bg-label-secondary">
                                     <c:out value="${r.status}"/>
@@ -155,9 +151,9 @@
                     </td>
 
                     <td class="text-center">
-                        <a class="btn btn-sm btn-outline-primary"
+                        <a class="btn btn-icon btn-sm btn-outline-primary"
                            href="${ctx}/import-receipt-detail?id=${r.importId}">
-                            View
+                            <i class="bx bx-show"></i>
                         </a>
                     </td>
                 </tr>

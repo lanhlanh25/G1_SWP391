@@ -135,7 +135,9 @@ public class ImportRequestDAO {
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setLong(1, requestId);
             try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) return null;
+                if (!rs.next()) {
+                    return null;
+                }
                 ImportRequest r = new ImportRequest();
                 r.setRequestId(rs.getLong("request_id"));
                 r.setRequestCode(rs.getString("request_code"));
@@ -149,15 +151,23 @@ public class ImportRequestDAO {
         }
     }
 
-    /** Used in Import Request Detail page — display only */
+    /**
+     * Used in Import Request Detail page — display only
+     */
     public List<ImportRequestItem> listItems(long requestId) throws Exception {
         String sql = """
-            SELECT p.product_code, s.sku_code, irl.qty
-            FROM import_request_lines irl
-            JOIN products p ON p.product_id = irl.product_id
-            JOIN product_skus s ON s.sku_id = irl.sku_id
-            WHERE irl.request_id = ?
-            ORDER BY irl.line_id ASC
+            SELECT 
+                        p.product_id,
+                        p.product_name,
+                        p.product_code,
+                        s.sku_id,
+                        s.sku_code,
+                        irl.qty
+                    FROM import_request_lines irl
+                    JOIN products p ON p.product_id = irl.product_id
+                    JOIN product_skus s ON s.sku_id = irl.sku_id
+                    WHERE irl.request_id = ?
+                    ORDER BY irl.line_id ASC
         """;
         List<ImportRequestItem> list = new ArrayList<>();
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
@@ -167,7 +177,10 @@ public class ImportRequestDAO {
                 while (rs.next()) {
                     ImportRequestItem it = new ImportRequestItem();
                     it.setNo(no++);
+                    it.setProductId(rs.getLong("product_id"));
+                    it.setProductName(rs.getString("product_name")); // ⭐ thêm dòng này
                     it.setProductCode(rs.getString("product_code"));
+                    it.setSkuId(rs.getLong("sku_id"));
                     it.setSkuCode(rs.getString("sku_code"));
                     it.setRequestQty(rs.getInt("qty"));
                     list.add(it);
@@ -178,9 +191,9 @@ public class ImportRequestDAO {
     }
 
     /**
-     * Used when STAFF clicks "Create" on Import Request List.
-     * Returns full data (productId, skuId, productName, productCode, skuCode, qty)
-     * so the Create Import Receipt page can be pre-filled.
+     * Used when STAFF clicks "Create" on Import Request List. Returns full data
+     * (productId, skuId, productName, productCode, skuCode, qty) so the Create
+     * Import Receipt page can be pre-filled.
      */
     public List<ImportRequestItem> listItemsForReceipt(long requestId) throws Exception {
         String sql = """
@@ -218,7 +231,9 @@ public class ImportRequestDAO {
         return list;
     }
 
-    /** Get status of a single import request */
+    /**
+     * Get status of a single import request
+     */
     public String getImportRequestStatus(Connection con, long requestId) throws SQLException {
         String sql = "SELECT status FROM import_requests WHERE request_id = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -229,7 +244,9 @@ public class ImportRequestDAO {
         }
     }
 
-    /** Check if an import receipt already exists for this request */
+    /**
+     * Check if an import receipt already exists for this request
+     */
     public boolean existsReceiptByRequestId(Connection con, long requestId) throws SQLException {
         String sql = "SELECT 1 FROM import_receipts WHERE request_id = ? LIMIT 1";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -240,7 +257,9 @@ public class ImportRequestDAO {
         }
     }
 
-    /** Mark import request as COMPLETE after receipt is created */
+    /**
+     * Mark import request as COMPLETE after receipt is created
+     */
     public void updateImportRequestStatus(Connection con, long requestId, String status) throws SQLException {
         String sql = "UPDATE import_requests SET status = ? WHERE request_id = ?";
         try (PreparedStatement ps = con.prepareStatement(sql)) {
@@ -266,24 +285,24 @@ public class ImportRequestDAO {
         }
     }
 //DASHBOARD
-public int countByStatus(String status) throws Exception {
-    String sql = """
+
+    public int countByStatus(String status) throws Exception {
+        String sql = """
         SELECT COUNT(*)
         FROM import_requests
         WHERE status = ?
     """;
 
-    try (Connection con = DBContext.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setString(1, status);
-        try (ResultSet rs = ps.executeQuery()) {
-            return rs.next() ? rs.getInt(1) : 0;
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
         }
     }
-}
 
-public List<ImportRequest> listByStatus(String status, int limit) throws Exception {
-    String sql = """
+    public List<ImportRequest> listByStatus(String status, int limit) throws Exception {
+        String sql = """
         SELECT
           ir.request_id,
           ir.request_code,
@@ -306,31 +325,29 @@ public List<ImportRequest> listByStatus(String status, int limit) throws Excepti
         LIMIT ?
     """;
 
-    List<ImportRequest> list = new ArrayList<>();
+        List<ImportRequest> list = new ArrayList<>();
 
-    try (Connection con = DBContext.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql)) {
-        ps.setString(1, status);
-        ps.setInt(2, limit);
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, status);
+            ps.setInt(2, limit);
 
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                ImportRequest r = new ImportRequest();
-                r.setRequestId(rs.getLong("request_id"));
-                r.setRequestCode(rs.getString("request_code"));
-                r.setCreatedBy(rs.getLong("requested_by"));
-                r.setCreatedByName(rs.getString("created_by_name"));
-                r.setRequestDate(rs.getTimestamp("requested_at"));
-                r.setExpectedImportDate(rs.getDate("expected_import_date"));
-                r.setTotalItems(rs.getInt("total_items"));
-                r.setTotalQty(rs.getInt("total_qty"));
-                r.setStatus(rs.getString("status"));
-                list.add(r);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    ImportRequest r = new ImportRequest();
+                    r.setRequestId(rs.getLong("request_id"));
+                    r.setRequestCode(rs.getString("request_code"));
+                    r.setCreatedBy(rs.getLong("requested_by"));
+                    r.setCreatedByName(rs.getString("created_by_name"));
+                    r.setRequestDate(rs.getTimestamp("requested_at"));
+                    r.setExpectedImportDate(rs.getDate("expected_import_date"));
+                    r.setTotalItems(rs.getInt("total_items"));
+                    r.setTotalQty(rs.getInt("total_qty"));
+                    r.setStatus(rs.getString("status"));
+                    list.add(r);
+                }
             }
         }
+
+        return list;
     }
-
-    return list;
 }
-}
-

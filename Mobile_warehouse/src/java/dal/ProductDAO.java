@@ -258,16 +258,18 @@ public class ProductDAO {
     public List<Product> listForExportRequest() throws Exception {
         List<Product> list = new ArrayList<>();
 
-        String sql = "SELECT product_id, product_code "
+        String sql = "SELECT product_id, product_code, product_name "
                 + "FROM products "
-                + "ORDER BY product_code";
+                + "WHERE status = 'ACTIVE' "
+                + "ORDER BY product_name";
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 Product p = new Product();
                 p.setProductId(rs.getLong("product_id"));
-                p.setProductCode(rs.getString("product_code")); // ✅ quan trọng
+                p.setProductCode(rs.getString("product_code"));
+                p.setProductName(rs.getString("product_name")); // ⭐ QUAN TRỌNG
                 list.add(p);
             }
         }

@@ -43,7 +43,6 @@
                             "view_supplier".equals(currentPage) ||
                             "supplier_detail".equals(currentPage) ||
                             "update_supplier".equals(currentPage) ||
-                            "supplier_inactive".equals(currentPage) ||
                             "view_history".equals(currentPage);
                             
     boolean productActive = "product-add".equals(currentPage) ||

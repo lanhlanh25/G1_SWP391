@@ -12,6 +12,7 @@ import model.SupplierDetailDTO;
 import model.SupplierListItem;
 import model.SupplierReceiptHistoryItem;
 import model.IdName;
+
 /**
  *
  * @author Admin
@@ -112,14 +113,9 @@ public class SupplierDAO {
 
         StringBuilder sql = new StringBuilder(
                 "SELECT s.supplier_id, s.supplier_name, s.phone, s.email, s.is_active, s.created_at, "
-                + "       r.avg_rating AS avg_rating, "
+                + "       NULL AS avg_rating, "
                 + "       COALESCE(t.total_txn, 0) AS total_txn "
                 + "FROM suppliers s "
-                + "LEFT JOIN ( "
-                + "   SELECT supplier_id, AVG(score) AS avg_rating "
-                + "   FROM supplier_ratings "
-                + "   GROUP BY supplier_id "
-                + ") r ON r.supplier_id = s.supplier_id "
                 + "LEFT JOIN ( "
                 + "   SELECT supplier_id, COUNT(*) AS total_txn "
                 + "   FROM import_receipts "
@@ -148,23 +144,18 @@ public class SupplierDAO {
 
         String order = "DESC".equalsIgnoreCase(sortOrder) ? "DESC" : "ASC";
         String sortCol;
+
         if ("name".equalsIgnoreCase(sortBy)) {
             sortCol = "s.supplier_name";
-        } else if ("rating".equalsIgnoreCase(sortBy)) {
-            sortCol = "r.avg_rating";
         } else if ("transactions".equalsIgnoreCase(sortBy)) {
             sortCol = "total_txn";
         } else {
             sortCol = "s.created_at";
         }
 
-        if ("rating".equalsIgnoreCase(sortBy)) {
-            sql.append(" ORDER BY (r.avg_rating IS NULL) ASC, ").append(sortCol).append(" ").append(order);
-        } else {
-            sql.append(" ORDER BY ").append(sortCol).append(" ").append(order);
-        }
-
+        sql.append(" ORDER BY ").append(sortCol).append(" ").append(order);
         sql.append(" LIMIT ? OFFSET ?");
+
         int offset = (page - 1) * pageSize;
         params.add(pageSize);
         params.add(offset);
@@ -194,6 +185,7 @@ public class SupplierDAO {
                     list.add(it);
                 }
             }
+
             return list;
 
         } catch (Exception e) {
@@ -205,9 +197,7 @@ public class SupplierDAO {
 
         String sql
                 = "SELECT s.supplier_id, s.supplier_name, s.phone, s.email, s.address, s.is_active, "
-                + "  (SELECT AVG(sr.score) "
-                + "     FROM supplier_ratings sr "
-                + "    WHERE sr.supplier_id = s.supplier_id) AS avg_rating, "
+                + "  NULL AS avg_rating, "
                 + "  (SELECT COUNT(*) "
                 + "     FROM import_receipts ir "
                 + "    WHERE ir.supplier_id = s.supplier_id) AS total_import_receipts, "
@@ -397,8 +387,14 @@ public class SupplierDAO {
         }
 
         if (status != null && !status.isBlank()) {
-            sql.append(" AND ir.status = ? ");
-            params.add(status.trim());
+            String st = status.trim().toUpperCase();
+
+            if ("COMPLETED".equals(st)) {
+                sql.append(" AND UPPER(ir.status) IN ('COMPLETED', 'CONFIRMED') ");
+            } else {
+                sql.append(" AND UPPER(ir.status) = ? ");
+                params.add(st);
+            }
         }
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
@@ -422,7 +418,12 @@ public class SupplierDAO {
     ) throws SQLException {
 
         StringBuilder sql = new StringBuilder(
-                "SELECT ir.import_id, ir.import_code, ir.receipt_date, ir.status, ir.note, "
+                "SELECT ir.import_id, ir.import_code, ir.receipt_date, "
+                + "       CASE "
+                + "           WHEN UPPER(ir.status) = 'CONFIRMED' THEN 'COMPLETED' "
+                + "           ELSE UPPER(ir.status) "
+                + "       END AS status, "
+                + "       ir.note, "
                 + "       COALESCE(u.full_name, u.username, CONCAT('User#', ir.created_by)) AS created_by_name, "
                 + "       COALESCE(x.total_units, 0) AS total_units "
                 + "FROM import_receipts ir "
@@ -454,8 +455,14 @@ public class SupplierDAO {
         }
 
         if (status != null && !status.isBlank()) {
-            sql.append(" AND ir.status = ? ");
-            params.add(status.trim());
+            String st = status.trim().toUpperCase();
+
+            if ("COMPLETED".equals(st)) {
+                sql.append(" AND UPPER(ir.status) IN ('COMPLETED', 'CONFIRMED') ");
+            } else {
+                sql.append(" AND UPPER(ir.status) = ? ");
+                params.add(st);
+            }
         }
 
         sql.append(" ORDER BY ir.receipt_date DESC, ir.import_id DESC ");
@@ -491,23 +498,35 @@ public class SupplierDAO {
             throw new SQLException("Search import receipts history failed", e);
         }
     }
-public List<IdName> listActive() throws Exception {
-    List<IdName> list = new ArrayList<>();
-    String sql = "SELECT supplier_id, supplier_name "
-               + "FROM suppliers "
-               + "WHERE is_active = 1 "
-               + "ORDER BY supplier_name";
 
-    try (Connection con = DBContext.getConnection();
-         PreparedStatement ps = con.prepareStatement(sql);
-         ResultSet rs = ps.executeQuery()) {
+    public List<IdName> listActive() throws Exception {
+        List<IdName> list = new ArrayList<>();
+        String sql = "SELECT supplier_id, supplier_name "
+                + "FROM suppliers "
+                + "WHERE deleted_at IS NULL AND is_active = 1 "
+                + "ORDER BY supplier_name";
 
-        while (rs.next()) {
-            list.add(new IdName(rs.getLong("supplier_id"), rs.getString("supplier_name")));
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+                list.add(new IdName(rs.getLong("supplier_id"), rs.getString("supplier_name")));
+            }
+        }
+        return list;
+    }
+
+    public boolean updateActiveStatus(long supplierId, int isActive) throws Exception {
+        String sql = "UPDATE suppliers "
+                + "SET is_active = ?, updated_at = CURRENT_TIMESTAMP "
+                + "WHERE supplier_id = ? AND deleted_at IS NULL";
+
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, isActive);
+            ps.setLong(2, supplierId);
+
+            return ps.executeUpdate() > 0;
         }
     }
-    return list;
-}
-
 
 }

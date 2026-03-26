@@ -49,7 +49,7 @@
           <thead>
             <tr>
               <th style="text-align:center; width:60px;">No</th>
-              <th>Product Code</th>
+              <th>Product Name</th>
               <th>SKU (optional)</th>
               <th style="width:140px; text-align:center;">Request Qty</th>
               <th style="width:100px; text-align:center;">Remove</th>
@@ -66,9 +66,9 @@
 
   <%-- Hidden templates --%>
   <select id="tplProductOptions" style="display:none">
-    <option value="">Select Product Code</option>
+    <option value="">Select Product Name</option>
     <c:forEach var="p" items="${erProducts}">
-      <option value="${p.productId}">${fn:escapeXml(p.productCode)}</option>
+      <option value="${p.productId}">${fn:escapeXml(p.productName)}</option>
     </c:forEach>
   </select>
   <select id="tplSkuOptions" style="display:none">

@@ -37,10 +37,7 @@
                             <th>Brand</th>
                             <td class="text-primary">${product.brandName}</td>
                         </tr>
-                        <tr>
-                            <th>Model</th>
-                            <td class="text-muted fs-14">${product.model}</td>
-                        </tr>
+                      
                         <tr>
                             <th>Status</th>
                             <td>
