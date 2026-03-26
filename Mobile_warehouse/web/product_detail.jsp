@@ -5,7 +5,7 @@
 
     <div class="topbar">
         <div class="d-flex align-center gap-12">
-            <h1 class="h1">Product Particulars</h1>
+            <h1 class="h1">Product Details</h1>
         </div>
         <div class="d-flex gap-8 align-center">
             <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=variant-matrix&productId=${product.productId}">Manage Variants</a>

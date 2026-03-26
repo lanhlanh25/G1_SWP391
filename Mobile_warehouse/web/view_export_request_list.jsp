@@ -4,7 +4,7 @@
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <h4 class="fw-bold py-3 mb-4">
-    <span class="text-muted fw-light">Warehouse /</span> Export Request Management
+    <span class="text-muted fw-light">Warehouse /</span> Export Request List
 </h4>
 
 <div class="card mb-4">
@@ -157,4 +157,4 @@
             </nav>
         </div>
     </c:if>
-</div>
+</div>
