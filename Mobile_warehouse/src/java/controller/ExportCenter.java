@@ -290,8 +290,7 @@ public class ExportCenter extends HttpServlet {
                         String.valueOf(r.getOpeningQty()),
                         String.valueOf(r.getImportQty()),
                         String.valueOf(r.getExportQty()),
-                        String.valueOf(r.getClosingQty()),
-                        String.valueOf(r.getVariance())
+                        String.valueOf(r.getClosingQty())
                 ));
             }
         }

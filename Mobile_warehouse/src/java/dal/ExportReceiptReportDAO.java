@@ -124,6 +124,7 @@ public class ExportReceiptReportDAO {
                     it.setTotalQty(qty);      // ✅ đồng bộ nếu chỗ khác dùng totalQty
 
                     Timestamp ts = rs.getTimestamp("export_date");
+                    it.setExportDate(ts);
                     it.setExportDateUi(ts == null ? "" : sdf.format(ts));
 
                     out.add(it);

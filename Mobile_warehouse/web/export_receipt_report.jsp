@@ -1,154 +1,191 @@
-<%--
-    Document   : export_receipt_report
-    Created on : Mar 6, 2026, 1:09:56 PM
-    Author     : Admin
---%>
-
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>
+<%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <c:set var="ctx" value="${pageContext.request.contextPath}" />
 
-<div class="page-wrap">
-  <div class="report-page-head mb-16">
-    <div class="d-flex align-center gap-12">
-      <h1 class="report-title">Export Receipt Report</h1>
-      <span class="text-muted fs-14 mt-4">Inventory outflow analytics</span>
+<h4 class="fw-bold py-3 mb-4">
+    <span class="text-muted fw-light">Reports /</span> Export Receipt Report
+</h4>
+
+<c:if test="${not empty err}">
+    <div class="alert alert-danger alert-dismissible" role="alert">
+        <i class="bx bx-error me-1"></i> ${fn:escapeXml(err)}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    <div class="d-flex gap-8 align-center">
-      <a class="btn btn-outline" href="${ctx}/home?p=dashboard">← Dashboard</a>
-    </div>
-  </div>
+</c:if>
 
-  <c:if test="${not empty err}">
-    <div class="msg-err mb-16">${fn:escapeXml(err)}</div>
-  </c:if>
-
-  <div class="card mb-16">
-    <div class="card-body">
-      <form method="get" action="${ctx}/export-receipt-report">
-        <div class="d-flex gap-16 align-end flex-wrap">
-          <div style="flex:1; min-width:200px;">
-            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">From Date</label>
-            <input class="input" type="date" name="from" value="${from}" />
-          </div>
-          <div style="flex:1; min-width:200px;">
-            <label class="d-block mb-4 fw-600 fs-12 text-muted uppercase">To Date</label>
-            <input class="input" type="date" name="to" value="${to}" />
-          </div>
-          <div class="d-flex gap-8">
-            <button class="btn btn-primary" type="submit">Apply Filters</button>
-            <a href="${ctx}/export-receipt-report" class="btn btn-outline">Reset</a>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div class="row g-4 mb-4">
-    <div class="col-md-6">
-      <div class="card p-20 d-flex justify-between align-center h-full mb-0">
-        <div>
-          <div class="muted fs-12 uppercase mb-4">Total Export Receipts</div>
-          <div class="h2 m-0 text-primary">
-            <c:out value="${reportSummary.totalExportReceipts}" default="0"/>
-          </div>
-          <div class="fs-10 text-muted mt-4">In selected period</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6">
-      <div class="card p-20 d-flex justify-between align-center h-full mb-0">
-        <div>
-          <div class="muted fs-12 uppercase mb-4">Total Item Quantity</div>
-          <div class="h2 m-0 text-primary">
-            <c:out value="${reportSummary.totalItemQty}" default="0"/>
-            <span class="fs-14 fw-600 text-muted ml-4">Items</span>
-          </div>
-          <div class="fs-10 text-muted mt-4">Successfully exported</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-body">
-      <div class="d-flex justify-between align-center mb-16">
-        <div class="h2">Export History</div>
-        <div class="text-muted fs-14">Records found: <b class="text-primary">${totalItems}</b></div>
-      </div>
-
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Receipt Code</th>
-            <th>Created Date</th>
-            <th>Created By</th>
-            <th class="text-center">Total Quantity</th>
-            <th class="text-center">Status</th>
-            <th class="text-center">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          <c:choose>
-            <c:when test="${empty rows}">
-              <tr>
-                <td colspan="6">
-                  <div class="p-40 text-center text-muted">
-                    No export receipts found in this period.
-                  </div>
-                </td>
-              </tr>
-            </c:when>
-            <c:otherwise>
-              <c:forEach var="r" items="${rows}">
-                <tr>
-                  <td class="fw-600 text-primary"><c:out value="${r.exportCode}"/></td>
-                  <td class="text-muted fs-13"><c:out value="${r.exportDateUi}"/></td>
-                  <td><c:out value="${r.createdByName}"/></td>
-                  <td class="text-center fw-700"><c:out value="${r.totalQuantity}"/> <span class="fs-12 text-muted fw-400">Item</span></td>
-                  <td class="text-center"><span class="badge badge-active"><c:out value="${r.status}"/></span></td>
-                  <td class="text-center">
-                    <a class="btn btn-icon btn-sm btn-outline-primary" href="${ctx}/home?p=export-receipt-detail&id=${r.exportId}">
-                      <i class="bx bx-show"></i>
-                    </a>
-                  </td>
-                </tr>
-              </c:forEach>
-            </c:otherwise>
-          </c:choose>
-        </tbody>
-      </table>
-
-      <c:if test="${totalPages > 1}">
-        <div class="card-footer d-flex justify-content-between align-items-center">
-            <div class="text-muted small">
-                Page <strong>${page}</strong> of <strong>${totalPages}</strong>
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                    <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-export"></i></span>
+                    </div>
+                </div>
+                <span class="fw-semibold d-block mb-1 text-muted small uppercase">Total Export Receipts</span>
+                <h3 class="card-title mb-2"><c:out value="${reportSummary.totalExportReceipts}" default="0"/></h3>
+                <small class="text-muted">Confirmed receipts in this period</small>
             </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="card-title d-flex align-items-start justify-content-between">
+                    <div class="avatar flex-shrink-0">
+                        <span class="avatar-initial rounded bg-label-info"><i class="bx bx-package"></i></span>
+                    </div>
+                </div>
+                <span class="fw-semibold d-block mb-1 text-muted small uppercase">Total Item Quantity</span>
+                <h3 class="card-title mb-2 text-primary">
+                    <c:out value="${reportSummary.totalItemQty}" default="0"/>
+                    <span class="fs-6 fw-normal text-muted">Items</span>
+                </h3>
+                <small class="text-muted">Successfully exported units</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" action="${ctx}/export-receipt-report" class="row g-3 px-1">
+            <div class="col-md-5">
+                <label class="form-label">From Date</label>
+                <input class="form-control" type="date" name="from" value="${fn:escapeXml(from)}" />
+            </div>
+            <div class="col-md-5">
+                <label class="form-label">To Date</label>
+                <input class="form-control" type="date" name="to" value="${fn:escapeXml(to)}" />
+            </div>
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button class="btn btn-primary w-100" type="submit">Filter</button>
+                <a href="${ctx}/export-receipt-report" class="btn btn-outline-secondary"><i class="bx bx-refresh"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0">Export History</h5>
+        <div class="text-muted small">Records found: <strong class="text-primary">${totalItems}</strong></div>
+    </div>
+    <div class="table-responsive text-nowrap">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Receipt Code</th>
+                    <th>Created Date</th>
+                    <th>Created By</th>
+                    <th class="text-center">Total Quantity</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+                <c:choose>
+                    <c:when test="${empty rows}">
+                        <tr>
+                            <td colspan="6" class="text-center p-5">No export receipts found in this period.</td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach var="r" items="${rows}">
+                            <tr>
+                                <td>
+                                    <span class="badge bg-label-primary font-monospace fw-bold">
+                                        <c:out value="${r.exportCode}"/>
+                                    </span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">
+                                        <c:choose>
+                                            <c:when test="${not empty r.exportDate}">
+                                                <fmt:formatDate value="${r.exportDate}" pattern="yyyy-MM-dd HH:mm"/>
+                                            </c:when>
+                                            <c:otherwise>${r.exportDateUi}</c:otherwise>
+                                        </c:choose>
+                                    </small>
+                                </td>
+                                <td>
+                                    <strong><c:out value="${r.createdByName}"/></strong>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-bold">${r.totalQuantity}</span>
+                                    <small class="text-muted">Items</small>
+                                </td>
+                                <td class="text-center">
+                                    <c:set var="statusUp" value="${fn:toUpperCase(r.status)}"/>
+                                    <c:choose>
+                                        <c:when test="${statusUp == 'CONFIRMED' || statusUp == 'COMPLETED' || statusUp == 'DONE'}">
+                                            <span class="badge bg-label-success">Completed</span>
+                                        </c:when>
+                                        <c:when test="${statusUp == 'PENDING' || statusUp == 'DRAFT'}">
+                                            <span class="badge bg-label-warning">Pending</span>
+                                        </c:when>
+                                        <c:when test="${statusUp == 'CANCELED' || statusUp == 'CANCELLED'}">
+                                            <span class="badge bg-label-danger">Cancelled</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge bg-label-secondary">
+                                                <c:out value="${r.status}"/>
+                                            </span>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
+                                <td class="text-center">
+                                    <a class="btn btn-sm btn-outline-primary"
+                                       href="${ctx}/export-receipt-detail?id=${r.exportId}">
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
+            </tbody>
+        </table>
+    </div>
+    
+    <c:if test="${totalPages > 1}">
+        <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <div class="text-muted small">Page <strong>${page}</strong> of <strong>${totalPages}</strong></div>
             <nav aria-label="Page navigation">
                 <ul class="pagination pagination-sm mb-0">
-                    <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}" />
-
                     <li class="page-item ${page <= 1 ? 'disabled' : ''}">
-                        <a class="page-link" href="${page > 1 ? ctx.concat('/export-receipt-report?').concat(qsBase).concat('&page=').concat(page-1) : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
+                        <a class="page-link" href="${page > 1 ? ctx.concat('/export-receipt-report?').concat(qsBase).concat('&page=').concat(page - 1) : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
                     </li>
 
-          
-                    <c:forEach var="p" begin="1" end="${totalPages}">
-                        <li class="page-item ${p == page ? 'active' : ''}">
-                            <a class="page-link" href="${ctx}/export-receipt-report?${qsBase}&page=${p}">${p}</a>
+                    <c:set var="startPage" value="${page - 1 > 1 ? page - 1 : 1}"/>
+                    <c:set var="endPage" value="${page + 1 < totalPages ? page + 1 : totalPages}"/>
+                    
+                    <c:if test="${startPage > 1}">
+                        <li class="page-item"><a class="page-link" href="${ctx}/export-receipt-report?${qsBase}&page=1">1</a></li>
+                        <c:if test="${startPage > 2}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                    </c:if>
+
+                    <c:forEach var="i" begin="${startPage}" end="${endPage}">
+                        <li class="page-item ${i == page ? 'active' : ''}">
+                            <a class="page-link" href="${ctx}/export-receipt-report?${qsBase}&page=${i}">${i}</a>
                         </li>
                     </c:forEach>
 
+                    <c:if test="${endPage < totalPages}">
+                        <c:if test="${endPage < totalPages - 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                        <li class="page-item"><a class="page-link" href="${ctx}/export-receipt-report?${qsBase}&page=${totalPages}">${totalPages}</a></li>
+                    </c:if>
+
                     <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
-                        <a class="page-link" href="${page < totalPages ? ctx.concat('/export-receipt-report?').concat(qsBase).concat('&page=').concat(page+1) : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
+                        <a class="page-link" href="${page < totalPages ? ctx.concat('/export-receipt-report?').concat(qsBase).concat('&page=').concat(page + 1) : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
                     </li>
                 </ul>
             </nav>
         </div>
-      </c:if>
-
-    </div>
-  </div>
+    </c:if>
 </div>

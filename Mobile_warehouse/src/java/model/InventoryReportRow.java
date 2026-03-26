@@ -21,7 +21,7 @@ public class InventoryReportRow {
     private String ropStatus;     // OK / At ROP Level / Reorder Needed / Out Of Stock
     private int suggestedReorderQty;
     private int productId;
-    private int variance;
+   
 
     public int getProductId() {
         return productId;
@@ -31,14 +31,6 @@ public class InventoryReportRow {
         this.productId = productId;
     }
 
-    public int getVariance() {
-        return variance;
-    }
-
-    public void setVariance(int variance) {
-        this.variance = variance;
-    }
-    
     public InventoryReportRow() {
     }
 
