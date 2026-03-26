@@ -23,14 +23,14 @@
 </div>
 
     <div class="row">
-        <!-- Outbound -->
+        <!-- Export -->
         <div class="col-lg-3 col-md-6 mb-4">
             <div class="card h-100 border-top border-primary border-3">
                 <div class="card-body text-center">
                     <div class="avatar avatar-lg mx-auto mb-3">
                         <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-export fs-4"></i></span>
                     </div>
-                    <h5 class="card-title">Outbound</h5>
+                    <h5 class="card-title">Export</h5>
                     <p class="card-text small text-muted">Create new export requests for processing.</p>
                     <a href="${ctx}/home?p=create-export-request" class="btn btn-sm btn-primary">Create Request</a>
                 </div>
@@ -58,7 +58,7 @@
                     <div class="avatar avatar-lg mx-auto mb-3">
                         <span class="avatar-initial rounded bg-label-warning"><i class="bx bx-import fs-4"></i></span>
                     </div>
-                    <h5 class="card-title">Inbound</h5>
+                    <h5 class="card-title">Import</h5>
                     <p class="card-text small text-muted">Request stock replenishment when needed.</p>
                     <a href="${ctx}/home?p=create-import-request" class="btn btn-sm btn-warning text-white">New Request</a>
                 </div>

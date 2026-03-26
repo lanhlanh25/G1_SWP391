@@ -122,7 +122,7 @@ public class BrandStatsDAO {
               COUNT(DISTINCT p.product_id) AS total_products,
               COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
               COUNT(DISTINCT CASE
-                  WHEN COALESCE(prod_qty.product_qty, 0) < 10 THEN p.product_id
+                  WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
               END) AS low_stock_products
             FROM brands b
             LEFT JOIN products p ON p.brand_id = b.brand_id
@@ -287,7 +287,7 @@ public class BrandStatsDAO {
                   COUNT(DISTINCT p.product_id) AS total_products,
                   COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
                   COUNT(DISTINCT CASE
-                      WHEN COALESCE(prod_qty.product_qty, 0) < 10 THEN p.product_id
+                      WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
                   END) AS low_stock_products
                 FROM products p
                 LEFT JOIN product_skus s ON s.product_id = p.product_id AND s.status = 'ACTIVE'
@@ -432,10 +432,7 @@ public class BrandStatsDAO {
               COALESCE(imp.imported_units, 0) AS imported_units,
               COALESCE(exp.exported_units, 0) AS exported_units,
               imp.last_import_at,
-              exp.last_export_at,
-              0 AS avg_daily_sales,
-              0 AS lead_time_days,
-              0 AS safety_stock
+              exp.last_export_at
             FROM products p
 
             LEFT JOIN (
@@ -528,14 +525,12 @@ public class BrandStatsDAO {
                     r.setLastImportAt(rs.getTimestamp("last_import_at"));
                     r.setLastExportAt(rs.getTimestamp("last_export_at"));
 
-                    int threshold = 10;
-
                     String status;
                     if (stock == 0) {
                         status = "Out Of Stock";
-                    } else if (stock < threshold) {
+                    } else if (stock < lowThreshold) {
                         status = "Reorder Needed";
-                    } else if (stock == threshold) {
+                    } else if (stock == lowThreshold) {
                         status = "At Threshold";
                     } else {
                         status = "OK";
@@ -598,10 +593,7 @@ public class BrandStatsDAO {
               p.product_name,
               COALESCE(stock.total_stock_units, 0) AS total_stock_units,
               COALESCE(imp.imported_units, 0)      AS imported_units,
-              COALESCE(exp.exported_units, 0)      AS exported_units,
-              0       AS avg_daily_sales,
-              0        AS lead_time_days,
-              0          AS safety_stock
+              COALESCE(exp.exported_units, 0)      AS exported_units
             FROM products p
 
             LEFT JOIN (
@@ -688,14 +680,12 @@ public class BrandStatsDAO {
                     r.setImportedUnits(rs.getInt("imported_units"));
                     r.setExportedUnits(rs.getInt("exported_units"));
 
-                    int threshold = 10;
-
                     String status;
                     if (stock == 0) {
                         status = "Out Of Stock";
-                    } else if (stock < threshold) {
+                    } else if (stock < lowThreshold) {
                         status = "Reorder Needed";
-                    } else if (stock == threshold) {
+                    } else if (stock == lowThreshold) {
                         status = "At Threshold";
                     } else {
                         status = "OK";
@@ -726,7 +716,7 @@ public class BrandStatsDAO {
               COUNT(DISTINCT p.product_id) AS total_products,
               COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
               COUNT(DISTINCT CASE
-                  WHEN COALESCE(prod_qty.product_qty, 0) < 10 THEN p.product_id
+                  WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
               END) AS low_stock_products
             FROM products p
             LEFT JOIN product_skus s ON s.product_id = p.product_id AND s.status = 'ACTIVE'

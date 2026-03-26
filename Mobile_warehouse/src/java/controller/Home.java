@@ -582,7 +582,7 @@ public class Home extends HttpServlet {
                     if (dashboardRecentActivities.size() > 6) {
                         dashboardRecentActivities = new ArrayList<>(dashboardRecentActivities.subList(0, 6));
                     }
-                    int lowThreshold = 10;
+                    int lowThreshold =10;
                     // =========================
                     // SET ATTRIBUTES
                     // =========================
@@ -915,7 +915,7 @@ public class Home extends HttpServlet {
                     return;
                 }
                 request.setAttribute("brand", b);
-
+                
                 break;
             }
 

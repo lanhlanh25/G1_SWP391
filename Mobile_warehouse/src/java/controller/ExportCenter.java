@@ -34,7 +34,7 @@ public class ExportCenter extends HttpServlet {
 
     private static final int PREVIEW_SIZE = 50;
     private static final int EXPORT_MAX_ROWS = 10000;
-    private static final int LOW_THRESHOLD = 5;
+    private static final int LOW_THRESHOLD = 10;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -67,7 +67,7 @@ public class ExportCenter extends HttpServlet {
         String toRaw = trim(request.getParameter("to"));
         String brandIdRaw = trim(request.getParameter("brandId"));
         String keyword = trim(request.getParameter("keyword"));
-        String ropStatus = trim(request.getParameter("ropStatus"));
+        String stockStatus = trim(request.getParameter("ropStatus"));
         String format = nv(request.getParameter("format"), "xlsx");
         String detailLevel = nv(request.getParameter("detailLevel"), "detail");
         String pdfOrientation = nv(request.getParameter("pdfOrientation"), "landscape");
@@ -78,7 +78,7 @@ public class ExportCenter extends HttpServlet {
         request.setAttribute("to", toRaw == null ? "" : toRaw);
         request.setAttribute("brandId", brandIdRaw == null ? "" : brandIdRaw);
         request.setAttribute("keyword", keyword == null ? "" : keyword);
-        request.setAttribute("ropStatus", ropStatus == null ? "" : ropStatus);
+        request.setAttribute("ropStatus", stockStatus == null ? "" : stockStatus);
         request.setAttribute("format", format);
         request.setAttribute("detailLevel", detailLevel);
         request.setAttribute("pdfOrientation", pdfOrientation);
@@ -93,7 +93,7 @@ public class ExportCenter extends HttpServlet {
         try {
             if ("export".equalsIgnoreCase(action)) {
                 ExportPayload payload = buildPayload(
-                        reportType, fromRaw, toRaw, brandIdRaw, keyword, ropStatus, detailLevel, 1, EXPORT_MAX_ROWS
+                        reportType, fromRaw, toRaw, brandIdRaw, keyword, stockStatus, detailLevel, 1, EXPORT_MAX_ROWS
                 );
 
                 String reportCode;
@@ -162,7 +162,7 @@ public class ExportCenter extends HttpServlet {
 
             if ("preview".equalsIgnoreCase(action)) {
                 ExportPayload payload = buildPayload(
-                        reportType, fromRaw, toRaw, brandIdRaw, keyword, ropStatus, detailLevel, 1, PREVIEW_SIZE
+                        reportType, fromRaw, toRaw, brandIdRaw, keyword, stockStatus, detailLevel, 1, PREVIEW_SIZE
                 );
 
                 request.setAttribute("previewTitle", payload.reportTitle);
@@ -189,7 +189,7 @@ public class ExportCenter extends HttpServlet {
             String toRaw,
             String brandIdRaw,
             String keyword,
-            String ropStatus,
+            String stockStatus,
             String detailLevel,
             int page,
             int pageSize
@@ -208,8 +208,8 @@ public class ExportCenter extends HttpServlet {
         switch (reportType) {
             case "low-stock":
                 p.filterLines.put("Brand", brandIdRaw == null || brandIdRaw.isBlank() ? "All Brands" : brandIdRaw);
-                p.filterLines.put("ROP Status", ropStatus == null || ropStatus.isBlank() ? "All Below ROP" : ropStatus);
-                buildLowStockPayload(p, brandId, ropStatus, detailLevel, page, pageSize);
+                p.filterLines.put("Stock Status", stockStatus == null || stockStatus.isBlank() ? "All" : stockStatus);
+                buildLowStockPayload(p, brandId, stockStatus, detailLevel, page, pageSize);
                 break;
 
             case "import":
@@ -443,19 +443,21 @@ public class ExportCenter extends HttpServlet {
         LowStockReportDAO dao = new LowStockReportDAO();
 
         List<LowStockReportItem> rows = dao.getLowStockReport(
-                null, // q
-                null, // supplierId
-                stockStatus, // stockStatus
-                null, // minStock
-                null, // maxStock
+                null,
+                null,
+                stockStatus,
+                null,
+                null,
                 page,
                 pageSize
         );
 
         if (brandId != null) {
+            // Nếu sau này DAO có filter brand trực tiếp thì nên chuyển xuống SQL.
+            // Tạm thời giữ nguyên vì dữ liệu hiện có brandName trong item.
             List<LowStockReportItem> filtered = new ArrayList<>();
             for (LowStockReportItem r : rows) {
-                if (r.getBrandName() != null) {
+                if (r.getBrandName() != null && !r.getBrandName().isBlank()) {
                     filtered.add(r);
                 }
             }
@@ -543,7 +545,6 @@ public class ExportCenter extends HttpServlet {
     }
 
     private static class ExportPayload {
-
         String reportTitle;
         String generatedAt;
         Map<String, String> filterLines = new LinkedHashMap<>();

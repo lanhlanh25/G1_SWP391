@@ -78,7 +78,8 @@
                     <select class="form-select" name="ropStatus" id="ropStatus">
                         <option value="" ${empty ropStatus ? 'selected' : ''}>All</option>
                         <option value="Out Of Stock" ${ropStatus == 'Out Of Stock' ? 'selected' : ''}>Out Of Stock</option>
-                        <option value="Low Stock" ${ropStatus == 'Low Stock' ? 'selected' : ''}>Low Stock</option>
+                        <option value="Reorder Needed" ${ropStatus == 'Reorder Needed' ? 'selected' : ''}>Reorder Needed</option>
+                        <option value="At Threshold" ${ropStatus == 'At Threshold' ? 'selected' : ''}>At Threshold</option>
                         <option value="OK" ${ropStatus == 'OK' ? 'selected' : ''}>OK</option>
                     </select>
                 </div>

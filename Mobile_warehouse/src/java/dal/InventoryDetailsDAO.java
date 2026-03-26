@@ -153,7 +153,9 @@ public class InventoryDetailsDAO {
             ps.setLong(1, productId);
 
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt("total_qty");
+                if (rs.next()) {
+                    return rs.getInt("total_qty");
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
