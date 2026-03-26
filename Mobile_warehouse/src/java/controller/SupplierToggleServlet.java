@@ -3,15 +3,10 @@ package controller;
 import dal.SupplierDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.*;
-
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
-import model.Supplier;
-import model.User;
 
 @WebServlet(name = "SupplierToggleServlet", urlPatterns = {"/supplier-toggle"})
 public class SupplierToggleServlet extends HttpServlet {
@@ -20,68 +15,75 @@ public class SupplierToggleServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        HttpSession session = request.getSession();
+        request.setCharacterEncoding("UTF-8");
 
-        
-        User u = (User) session.getAttribute("authUser");
-        if (u == null) {
-            response.sendRedirect(request.getContextPath() + "/login");
-            return;
-        }
+        String supplierIdRaw = request.getParameter("supplierId");
+        String action = request.getParameter("action");
 
-        
-        String role = (String) session.getAttribute("roleName");
-        if (role == null) {
-            role = "STAFF";
-        }
-        if (!"MANAGER".equalsIgnoreCase(role)) {
-            response.sendError(403, "Forbidden");
-            return;
-        }
+        String redirectBase = request.getContextPath() + "/home?p=view_supplier";
 
-        
-        String idRaw = request.getParameter("supplierId");
-        long supplierId;
         try {
-            supplierId = Long.parseLong(idRaw);
+            if (supplierIdRaw == null || supplierIdRaw.trim().isEmpty()) {
+                response.sendRedirect(redirectBase + "&msg=Invalid supplier id");
+                return;
+            }
+
+            long supplierId = Long.parseLong(supplierIdRaw.trim());
+
+            if (action == null || action.trim().isEmpty()) {
+                response.sendRedirect(redirectBase + "&msg=Invalid action");
+                return;
+            }
+
+            action = action.trim().toLowerCase();
+
+            int newStatus;
+            String successMsg;
+
+            switch (action) {
+                case "activate":
+                    newStatus = 1;
+                    successMsg = "Supplier activated successfully";
+                    break;
+                case "deactivate":
+                    newStatus = 0;
+                    successMsg = "Supplier deactivated successfully";
+                    break;
+                default:
+                    response.sendRedirect(redirectBase + "&msg=Invalid action");
+                    return;
+            }
+
+            SupplierDAO dao = new SupplierDAO();
+
+            // Dùng hàm update status chuẩn trong DAO của bạn
+            boolean updated = dao.updateActiveStatus(supplierId, newStatus);
+
+            if (updated) {
+                response.sendRedirect(redirectBase + "&msg=" + encode(successMsg));
+            } else {
+                response.sendRedirect(redirectBase + "&msg=" + encode("No supplier was updated"));
+            }
+
+        } catch (NumberFormatException e) {
+            response.sendRedirect(redirectBase + "&msg=" + encode("Invalid supplier id format"));
         } catch (Exception e) {
-            response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Invalid supplier id");
-            return;
+            e.printStackTrace();
+            response.sendRedirect(redirectBase + "&msg=" + encode("Failed to update supplier status"));
         }
+    }
 
-        SupplierDAO dao = new SupplierDAO();
-        List<String> errors = new ArrayList<>();
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.sendRedirect(request.getContextPath() + "/home?p=view_supplier");
+    }
 
+    private String encode(String value) {
         try {
-            Supplier s = dao.getById(supplierId);
-            if (s == null) {
-                response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Supplier not found");
-                return;
-            }
-
-           
-            if (s.getIsActive() == 1) {
-                
-                response.sendRedirect(request.getContextPath() + "/home?p=supplier_detail&id=" + supplierId);
-                return;
-            }
-
-            boolean ok = dao.setActive(supplierId, 1, (long) u.getUserId());
-            if (!ok) {
-                errors.add("Reactivate failed. Supplier may not exist.");
-                session.setAttribute("flashErrors", errors);
-                response.sendRedirect(request.getContextPath() + "/home?p=supplier_detail&id=" + supplierId);
-                return;
-            }
-
-            response.sendRedirect(request.getContextPath()
-                    + "/home?p=supplier_detail&id=" + supplierId + "&reactive=1");
-
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            errors.add("Database error: cannot reactivate supplier.");
-            session.setAttribute("flashErrors", errors);
-            response.sendRedirect(request.getContextPath() + "/home?p=supplier_detail&id=" + supplierId);
+            return java.net.URLEncoder.encode(value, "UTF-8");
+        } catch (Exception e) {
+            return value;
         }
     }
 }

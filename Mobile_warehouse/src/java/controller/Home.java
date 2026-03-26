@@ -1272,27 +1272,6 @@ public class Home extends HttpServlet {
                 break;
             }
 
-            case "supplier_inactive": {
-                String idRaw = request.getParameter("id");
-                if (idRaw == null || idRaw.isBlank()) {
-                    response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Please select a supplier");
-                    return;
-                }
-
-                long supplierId = Long.parseLong(idRaw.trim());
-
-                SupplierDAO supplierDAO = new SupplierDAO();
-                Supplier supplier = supplierDAO.getById(supplierId);
-
-                if (supplier == null) {
-                    response.sendRedirect(request.getContextPath() + "/home?p=view_supplier&msg=Supplier not found");
-                    return;
-                }
-
-                request.setAttribute("supplier", supplier);
-                break;
-            }
-
             case "view_history": {
                 String sidRaw = request.getParameter("supplierId");
                 if (sidRaw == null || sidRaw.isBlank()) {
@@ -1313,6 +1292,12 @@ public class Home extends HttpServlet {
 
                 String q = request.getParameter("q");
                 String status = request.getParameter("status");
+                if (status != null) {
+                    status = status.trim().toUpperCase();
+                    if (status.isEmpty() || "ALL".equals(status)) {
+                        status = null;
+                    }
+                }
                 String fromRaw = request.getParameter("from");
                 String toRaw = request.getParameter("to");
 
@@ -2111,8 +2096,6 @@ public class Home extends HttpServlet {
                         return "supplier_detail.jsp";
                     case "update_supplier":
                         return "update_supplier.jsp";
-                    case "supplier_inactive":
-                        return "inactive_supplier.jsp";
                     case "view_history":
                         return "supplier_history.jsp";
                     case "import-receipt-detail":
