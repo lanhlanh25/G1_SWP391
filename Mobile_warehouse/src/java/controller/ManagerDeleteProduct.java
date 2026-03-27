@@ -41,9 +41,11 @@ public class ManagerDeleteProduct extends HttpServlet {
             if (p != null) {
                 int skuCount = dao.countSkuByProduct(id);
                 String createdAt = dao.getCreatedAtText(id);
+                String blockReason = dao.getBlockReasonForInactivate(id);
 
                 request.setAttribute("skuCount", skuCount);
                 request.setAttribute("createdAt", createdAt);
+                request.setAttribute("blockReason", blockReason);
             }
             HttpSession session = request.getSession();
             Object msg = session.getAttribute("msg_delete_product");
@@ -74,7 +76,13 @@ public class ManagerDeleteProduct extends HttpServlet {
 
             ProductCRUDDAO dao = new ProductCRUDDAO();
 
-            dao.inactivateSkusByProduct(id);
+            String blockReason = dao.getBlockReasonForInactivate(id);
+            if (blockReason != null) {
+                request.getSession().setAttribute("msg_delete_product", "Không thể vô hiệu hóa: " + blockReason);
+                response.sendRedirect(request.getContextPath() + "/manager/product/delete?id=" + id);
+                return;
+            }
+
             dao.inactivateProduct(id);
 
             request.getSession().setAttribute("msg_delete_product", "Product set to INACTIVE successfully.");

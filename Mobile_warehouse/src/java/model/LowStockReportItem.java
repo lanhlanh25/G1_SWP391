@@ -8,15 +8,10 @@ public class LowStockReportItem {
     private long supplierId;
     private String supplierName;
     private String brandName;
-    
 
     private int currentStock;
-    private double avgDailySales;
-    private int leadTimeDays;
-    private int safetyStock;
-    private int rop;
-
-    private String ropStatus;
+    private int threshold;
+    private String stockStatus;
     private int suggestedReorderQty;
     private boolean hasActiveImportRequest;
 
@@ -27,7 +22,7 @@ public class LowStockReportItem {
     public void setBrandName(String brandName) {
         this.brandName = brandName;
     }
-    
+
     public long getProductId() {
         return productId;
     }
@@ -76,44 +71,20 @@ public class LowStockReportItem {
         this.currentStock = currentStock;
     }
 
-    public double getAvgDailySales() {
-        return avgDailySales;
+    public int getThreshold() {
+        return threshold;
     }
 
-    public void setAvgDailySales(double avgDailySales) {
-        this.avgDailySales = avgDailySales;
+    public void setThreshold(int threshold) {
+        this.threshold = threshold;
     }
 
-    public int getLeadTimeDays() {
-        return leadTimeDays;
+    public String getStockStatus() {
+        return stockStatus;
     }
 
-    public void setLeadTimeDays(int leadTimeDays) {
-        this.leadTimeDays = leadTimeDays;
-    }
-
-    public int getSafetyStock() {
-        return safetyStock;
-    }
-
-    public void setSafetyStock(int safetyStock) {
-        this.safetyStock = safetyStock;
-    }
-
-    public int getRop() {
-        return rop;
-    }
-
-    public void setRop(int rop) {
-        this.rop = rop;
-    }
-
-    public String getRopStatus() {
-        return ropStatus;
-    }
-
-    public void setRopStatus(String ropStatus) {
-        this.ropStatus = ropStatus;
+    public void setStockStatus(String stockStatus) {
+        this.stockStatus = stockStatus;
     }
 
     public int getSuggestedReorderQty() {

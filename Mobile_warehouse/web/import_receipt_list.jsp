@@ -94,8 +94,7 @@
             </ul>
         </div>
 
-        <div class="table-responsive text-nowrap">
-            <table class="table table-hover">
+        <table class="table table-hover text-nowrap">
                 <thead>
                     <tr>
                         <th class="text-center">#</th>
@@ -120,28 +119,27 @@
                             <td><small>${fn:escapeXml(r.createdByName)}</small></td>
                             <td class="text-center text-muted small">${r.receiptDate}</td>
                             <td class="text-center fw-bold text-primary">${r.totalQuantity}</td>
-                            <td class="text-center">
-                                <c:choose>
-                                    <c:when test="${r.statusUi == 'CONFIRMED' || r.statusUi == 'completed' || r.statusUi == 'COMPLETED'}">
-                                        <span class="badge bg-label-success">Completed</span>
-                                    </c:when>
-                                    <c:when test="${r.statusUi == 'pending' || r.statusUi == 'PENDING'}">
-                                        <span class="badge bg-label-warning">Pending</span>
-                                    </c:when>
-                                    <c:when test="${r.statusUi == 'cancelled' || r.statusUi == 'CANCELLED' || r.statusUi == 'CANCELED'}">
-                                        <span class="badge bg-label-danger">Cancelled</span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="badge bg-label-secondary">${r.statusUi}</span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
+                             <td class="text-center">
+                        <c:set var="statusUp" value="${fn:toUpperCase(r.status)}"/>
+                        <c:choose>
+                            <c:when test="${statusUp == 'CONFIRMED'}">
+                                <span class="badge bg-label-success">Completed</span>
+                            </c:when>
+                         
+                          
+                            <c:otherwise>
+                                <span class="badge bg-label-secondary">
+                                    <c:out value="${r.status}"/>
+                                </span>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                             <td class="text-center">
                                 <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" data-bs-boundary="viewport">
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
-                                    <div class="dropdown-menu">
+                                    <div class="dropdown-menu dropdown-menu-end">
                                         <a class="dropdown-item" href="${ctx}/home?p=import-receipt-detail&id=${r.importId}"><i class="bx bx-show-alt me-1"></i> View Detail</a>
                                         <a class="dropdown-item text-warning" href="${ctx}/import-receipt-pdf?id=${r.importId}"><i class="bx bxs-file-pdf me-1"></i> Export PDF</a>
                                     </div>
@@ -151,7 +149,6 @@
                     </c:forEach>
                 </tbody>
             </table>
-        </div>
 
         <c:if test="${totalPages > 1}">
             <c:url var="baseUrl" value="/home">
@@ -199,4 +196,4 @@
             </div>
         </c:if>
     </div>
-</div>
+</div>

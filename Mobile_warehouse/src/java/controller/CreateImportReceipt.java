@@ -191,6 +191,9 @@ public class CreateImportReceipt extends HttpServlet {
         ImportReceiptDAO dao = new ImportReceiptDAO();
 
         String importCode = req.getParameter("importCode");
+if (importCode == null || importCode.isBlank()) {
+    importCode = dao.generateImportCode(con);
+}
         Long supplierId = parseLongNullable(req.getParameter("supplierId"));
         if (supplierId == null) throw new IllegalArgumentException("Supplier is required");
 

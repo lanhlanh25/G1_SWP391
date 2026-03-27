@@ -21,6 +21,8 @@ import model.ProductStatsRow;
 
 public class BrandStatsDAO {
 
+    private static final int LOW_STOCK_THRESHOLD = 10;
+
     private String orderBy(String sortBy) {
         if (sortBy == null) {
             sortBy = "stock";
@@ -108,6 +110,10 @@ public class BrandStatsDAO {
             Date toDate
     ) throws Exception {
 
+        if (lowThreshold <= 0) {
+            lowThreshold = LOW_STOCK_THRESHOLD;
+        }
+
         BrandStatsSummary sum = new BrandStatsSummary();
 
         StringBuilder sql = new StringBuilder("""
@@ -116,21 +122,18 @@ public class BrandStatsDAO {
               COUNT(DISTINCT p.product_id) AS total_products,
               COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
               COUNT(DISTINCT CASE
-                  WHEN COALESCE(prod_qty.product_qty, 0) <= CEIL(
-                      COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0)
-                      + COALESCE(p.safety_stock, 0)
-                  ) THEN p.product_id
+                  WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
               END) AS low_stock_products
             FROM brands b
             LEFT JOIN products p ON p.brand_id = b.brand_id
-            LEFT JOIN product_skus s ON s.product_id = p.product_id
+            LEFT JOIN product_skus s ON s.product_id = p.product_id AND s.status = 'ACTIVE'
             LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
             LEFT JOIN (
                 SELECT
                     p2.product_id,
                     COALESCE(SUM(ib2.qty_on_hand), 0) AS product_qty
                 FROM products p2
-                LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id
+                LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id AND s2.status = 'ACTIVE'
                 LEFT JOIN inventory_balance ib2 ON ib2.sku_id = s2.sku_id
                 GROUP BY p2.product_id
             ) prod_qty ON prod_qty.product_id = p.product_id
@@ -138,6 +141,7 @@ public class BrandStatsDAO {
         """);
 
         List<Object> params = new ArrayList<>();
+        params.add(lowThreshold);
         appendBrandFiltersOnBrandsAliasB(sql, params, q, brandStatus, brandId);
 
         try (Connection con = DBContext.getConnection();
@@ -256,6 +260,10 @@ public class BrandStatsDAO {
             Date toDate
     ) throws Exception {
 
+        if (lowThreshold <= 0) {
+            lowThreshold = LOW_STOCK_THRESHOLD;
+        }
+
         int offset = (page - 1) * pageSize;
 
         StringBuilder sql = new StringBuilder();
@@ -279,20 +287,17 @@ public class BrandStatsDAO {
                   COUNT(DISTINCT p.product_id) AS total_products,
                   COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
                   COUNT(DISTINCT CASE
-                      WHEN COALESCE(prod_qty.product_qty, 0) <= CEIL(
-                          COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0)
-                          + COALESCE(p.safety_stock, 0)
-                      ) THEN p.product_id
+                      WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
                   END) AS low_stock_products
                 FROM products p
-                LEFT JOIN product_skus s ON s.product_id = p.product_id
+                LEFT JOIN product_skus s ON s.product_id = p.product_id AND s.status = 'ACTIVE'
                 LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
                 LEFT JOIN (
                     SELECT
                         p2.product_id,
                         COALESCE(SUM(ib2.qty_on_hand), 0) AS product_qty
                     FROM products p2
-                    LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id
+                    LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id AND s2.status = 'ACTIVE'
                     LEFT JOIN inventory_balance ib2 ON ib2.sku_id = s2.sku_id
                     GROUP BY p2.product_id
                 ) prod_qty ON prod_qty.product_id = p.product_id
@@ -310,6 +315,8 @@ public class BrandStatsDAO {
                 WHERE ir.status = 'CONFIRMED'
                   AND ir.receipt_date IS NOT NULL
         """);
+
+        params.add(lowThreshold);
 
         if (fromDate != null) {
             sql.append(" AND DATE(ir.receipt_date) >= ? ");
@@ -399,6 +406,10 @@ public class BrandStatsDAO {
             String dSortOrder
     ) throws Exception {
 
+        if (lowThreshold <= 0) {
+            lowThreshold = LOW_STOCK_THRESHOLD;
+        }
+
         String orderCol;
         if ("import".equalsIgnoreCase(dSortBy)) {
             orderCol = "imported_units";
@@ -421,10 +432,7 @@ public class BrandStatsDAO {
               COALESCE(imp.imported_units, 0) AS imported_units,
               COALESCE(exp.exported_units, 0) AS exported_units,
               imp.last_import_at,
-              exp.last_export_at,
-              COALESCE(p.avg_daily_sales, 0) AS avg_daily_sales,
-              COALESCE(p.lead_time_days, 0) AS lead_time_days,
-              COALESCE(p.safety_stock, 0) AS safety_stock
+              exp.last_export_at
             FROM products p
 
             LEFT JOIN (
@@ -433,6 +441,7 @@ public class BrandStatsDAO {
                     COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units
                 FROM product_skus s
                 LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
+                WHERE s.status = 'ACTIVE'
                 GROUP BY s.product_id
             ) stock ON stock.product_id = p.product_id
 
@@ -516,18 +525,13 @@ public class BrandStatsDAO {
                     r.setLastImportAt(rs.getTimestamp("last_import_at"));
                     r.setLastExportAt(rs.getTimestamp("last_export_at"));
 
-                    double avgDailySales = rs.getDouble("avg_daily_sales");
-                    int leadTimeDays = rs.getInt("lead_time_days");
-                    int safetyStock = rs.getInt("safety_stock");
-                    int rop = (int) Math.ceil(avgDailySales * leadTimeDays + safetyStock);
-
                     String status;
                     if (stock == 0) {
                         status = "Out Of Stock";
-                    } else if (stock < rop) {
+                    } else if (stock < lowThreshold) {
                         status = "Reorder Needed";
-                    } else if (stock == rop) {
-                        status = "At ROP Level";
+                    } else if (stock == lowThreshold) {
+                        status = "At Threshold";
                     } else {
                         status = "OK";
                     }
@@ -549,6 +553,10 @@ public class BrandStatsDAO {
             String sortBy,
             String sortOrder
     ) throws Exception {
+
+        if (lowThreshold <= 0) {
+            lowThreshold = LOW_STOCK_THRESHOLD;
+        }
 
         if (sortBy == null || sortBy.isBlank()) {
             sortBy = "stock";
@@ -585,10 +593,7 @@ public class BrandStatsDAO {
               p.product_name,
               COALESCE(stock.total_stock_units, 0) AS total_stock_units,
               COALESCE(imp.imported_units, 0)      AS imported_units,
-              COALESCE(exp.exported_units, 0)      AS exported_units,
-              COALESCE(p.avg_daily_sales, 0)       AS avg_daily_sales,
-              COALESCE(p.lead_time_days, 0)        AS lead_time_days,
-              COALESCE(p.safety_stock, 0)          AS safety_stock
+              COALESCE(exp.exported_units, 0)      AS exported_units
             FROM products p
 
             LEFT JOIN (
@@ -597,6 +602,7 @@ public class BrandStatsDAO {
                     COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units
                 FROM product_skus s
                 LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
+                WHERE s.status = 'ACTIVE'
                 GROUP BY s.product_id
             ) stock ON stock.product_id = p.product_id
 
@@ -674,18 +680,13 @@ public class BrandStatsDAO {
                     r.setImportedUnits(rs.getInt("imported_units"));
                     r.setExportedUnits(rs.getInt("exported_units"));
 
-                    double avgDailySales = rs.getDouble("avg_daily_sales");
-                    int leadTimeDays = rs.getInt("lead_time_days");
-                    int safetyStock = rs.getInt("safety_stock");
-                    int rop = (int) Math.ceil(avgDailySales * leadTimeDays + safetyStock);
-
                     String status;
                     if (stock == 0) {
                         status = "Out Of Stock";
-                    } else if (stock < rop) {
+                    } else if (stock < lowThreshold) {
                         status = "Reorder Needed";
-                    } else if (stock == rop) {
-                        status = "At ROP Level";
+                    } else if (stock == lowThreshold) {
+                        status = "At Threshold";
                     } else {
                         status = "OK";
                     }
@@ -706,25 +707,26 @@ public class BrandStatsDAO {
             Date toDate
     ) throws Exception {
 
+        if (lowThreshold <= 0) {
+            lowThreshold = LOW_STOCK_THRESHOLD;
+        }
+
         StringBuilder sql = new StringBuilder("""
             SELECT
               COUNT(DISTINCT p.product_id) AS total_products,
               COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
               COUNT(DISTINCT CASE
-                  WHEN COALESCE(prod_qty.product_qty, 0) <= CEIL(
-                      COALESCE(p.avg_daily_sales, 0) * COALESCE(p.lead_time_days, 0)
-                      + COALESCE(p.safety_stock, 0)
-                  ) THEN p.product_id
+                  WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
               END) AS low_stock_products
             FROM products p
-            LEFT JOIN product_skus s ON s.product_id = p.product_id
+            LEFT JOIN product_skus s ON s.product_id = p.product_id AND s.status = 'ACTIVE'
             LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
             LEFT JOIN (
                 SELECT
                     p2.product_id,
                     COALESCE(SUM(ib2.qty_on_hand), 0) AS product_qty
                 FROM products p2
-                LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id
+                LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id AND s2.status = 'ACTIVE'
                 LEFT JOIN inventory_balance ib2 ON ib2.sku_id = s2.sku_id
                 GROUP BY p2.product_id
             ) prod_qty ON prod_qty.product_id = p.product_id
@@ -732,6 +734,7 @@ public class BrandStatsDAO {
         """);
 
         List<Object> params = new ArrayList<>();
+        params.add(lowThreshold);
         params.add(brandId);
 
         BrandStatsSummary sum = new BrandStatsSummary();

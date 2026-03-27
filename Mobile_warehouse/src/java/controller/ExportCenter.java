@@ -24,6 +24,7 @@ import util.PdfExportUtil;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -34,7 +35,7 @@ public class ExportCenter extends HttpServlet {
 
     private static final int PREVIEW_SIZE = 50;
     private static final int EXPORT_MAX_ROWS = 10000;
-    private static final int LOW_THRESHOLD = 5;
+    private static final int LOW_THRESHOLD = 10;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -65,9 +66,18 @@ public class ExportCenter extends HttpServlet {
         String reportType = nv(request.getParameter("reportType"), "inventory");
         String fromRaw = trim(request.getParameter("from"));
         String toRaw = trim(request.getParameter("to"));
+
+        if ("inventory".equalsIgnoreCase(reportType) && fromRaw == null && toRaw == null) {
+            LocalDate today = LocalDate.now();
+            LocalDate fromDefault = today.minusMonths(1);
+
+            fromRaw = fromDefault.toString();
+            toRaw = today.toString();
+        }
+
         String brandIdRaw = trim(request.getParameter("brandId"));
         String keyword = trim(request.getParameter("keyword"));
-        String ropStatus = trim(request.getParameter("ropStatus"));
+        String stockStatus = trim(request.getParameter("ropStatus"));
         String format = nv(request.getParameter("format"), "xlsx");
         String detailLevel = nv(request.getParameter("detailLevel"), "detail");
         String pdfOrientation = nv(request.getParameter("pdfOrientation"), "landscape");
@@ -78,7 +88,7 @@ public class ExportCenter extends HttpServlet {
         request.setAttribute("to", toRaw == null ? "" : toRaw);
         request.setAttribute("brandId", brandIdRaw == null ? "" : brandIdRaw);
         request.setAttribute("keyword", keyword == null ? "" : keyword);
-        request.setAttribute("ropStatus", ropStatus == null ? "" : ropStatus);
+        request.setAttribute("ropStatus", stockStatus == null ? "" : stockStatus);
         request.setAttribute("format", format);
         request.setAttribute("detailLevel", detailLevel);
         request.setAttribute("pdfOrientation", pdfOrientation);
@@ -93,7 +103,7 @@ public class ExportCenter extends HttpServlet {
         try {
             if ("export".equalsIgnoreCase(action)) {
                 ExportPayload payload = buildPayload(
-                        reportType, fromRaw, toRaw, brandIdRaw, keyword, ropStatus, detailLevel, 1, EXPORT_MAX_ROWS
+                        reportType, fromRaw, toRaw, brandIdRaw, keyword, stockStatus, detailLevel, 1, EXPORT_MAX_ROWS
                 );
 
                 String reportCode;
@@ -162,7 +172,7 @@ public class ExportCenter extends HttpServlet {
 
             if ("preview".equalsIgnoreCase(action)) {
                 ExportPayload payload = buildPayload(
-                        reportType, fromRaw, toRaw, brandIdRaw, keyword, ropStatus, detailLevel, 1, PREVIEW_SIZE
+                        reportType, fromRaw, toRaw, brandIdRaw, keyword, stockStatus, detailLevel, 1, PREVIEW_SIZE
                 );
 
                 request.setAttribute("previewTitle", payload.reportTitle);
@@ -189,7 +199,7 @@ public class ExportCenter extends HttpServlet {
             String toRaw,
             String brandIdRaw,
             String keyword,
-            String ropStatus,
+            String stockStatus,
             String detailLevel,
             int page,
             int pageSize
@@ -208,8 +218,8 @@ public class ExportCenter extends HttpServlet {
         switch (reportType) {
             case "low-stock":
                 p.filterLines.put("Brand", brandIdRaw == null || brandIdRaw.isBlank() ? "All Brands" : brandIdRaw);
-                p.filterLines.put("ROP Status", ropStatus == null || ropStatus.isBlank() ? "All Below ROP" : ropStatus);
-                buildLowStockPayload(p, brandId, ropStatus, detailLevel, page, pageSize);
+                p.filterLines.put("Stock Status", stockStatus == null || stockStatus.isBlank() ? "All" : stockStatus);
+                buildLowStockPayload(p, brandId, stockStatus, detailLevel, page, pageSize);
                 break;
 
             case "import":
@@ -264,7 +274,6 @@ public class ExportCenter extends HttpServlet {
         p.summaryLines.put("Total Import", String.valueOf(summary.getOrDefault("totalImport", 0)));
         p.summaryLines.put("Total Export", String.valueOf(summary.getOrDefault("totalExport", 0)));
         p.summaryLines.put("Closing Stock", String.valueOf(summary.getOrDefault("totalClosing", 0)));
-        p.summaryLines.put("Variance", String.valueOf(summary.getOrDefault("totalVariance", 0)));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
             p.headers = Arrays.asList("Product Code", "Product Name", "Brand", "Closing Stock");
@@ -279,8 +288,9 @@ public class ExportCenter extends HttpServlet {
         } else {
             p.headers = Arrays.asList(
                     "Product Code", "Product Name", "Brand", "Unit",
-                    "Opening Stock", "Import", "Export", "Closing Stock", "Variance"
+                    "Opening Stock", "Import", "Export", "Closing Stock"
             );
+
             for (InventoryReportRow r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getProductCode()),
@@ -290,8 +300,7 @@ public class ExportCenter extends HttpServlet {
                         String.valueOf(r.getOpeningQty()),
                         String.valueOf(r.getImportQty()),
                         String.valueOf(r.getExportQty()),
-                        String.valueOf(r.getClosingQty()),
-                        String.valueOf(r.getVariance())
+                        String.valueOf(r.getClosingQty())
                 ));
             }
         }
@@ -312,7 +321,7 @@ public class ExportCenter extends HttpServlet {
 
         p.reportTitle = "Import Report";
         p.summaryLines.put("Total Receipts", String.valueOf(summary.getTotalReceipts()));
-        p.summaryLines.put("Total Phone Quantity", String.valueOf(summary.getTotalPhoneQty()));
+        p.summaryLines.put("Total Item Quantity", String.valueOf(summary.getTotalItemQty()));
         p.summaryLines.put("Completed Count", String.valueOf(summary.getCompletedCount()));
         p.summaryLines.put("Cancelled Count", String.valueOf(summary.getCancelledCount()));
 
@@ -355,7 +364,7 @@ public class ExportCenter extends HttpServlet {
 
         p.reportTitle = "Export Report";
         p.summaryLines.put("Total Export Receipts", String.valueOf(summary.getTotalExportReceipts()));
-        p.summaryLines.put("Total Phone Quantity", String.valueOf(summary.getTotalPhoneQuantity()));
+        p.summaryLines.put("Total Item Quantity", String.valueOf(summary.getTotalItemQty()));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
             p.headers = Arrays.asList("Receipt Code", "Created Date", "Total Quantity");
@@ -435,52 +444,92 @@ public class ExportCenter extends HttpServlet {
     private void buildLowStockPayload(
             ExportPayload p,
             Long brandId,
-            String ropStatus,
+            String stockStatus,
             String detailLevel,
             int page,
             int pageSize
     ) throws Exception {
 
         LowStockReportDAO dao = new LowStockReportDAO();
-        List<LowStockReportItem> rows = dao.getLowStockReportByBrand(
-                null, brandId, ropStatus, page, pageSize
+
+        List<LowStockReportItem> rows = dao.getLowStockReport(
+                null,
+                null,
+                stockStatus,
+                null,
+                null,
+                page,
+                pageSize
         );
+
+        if (brandId != null) {
+            // Nếu sau này DAO có filter brand trực tiếp thì nên chuyển xuống SQL.
+            // Tạm thời giữ nguyên vì dữ liệu hiện có brandName trong item.
+            List<LowStockReportItem> filtered = new ArrayList<>();
+            for (LowStockReportItem r : rows) {
+                if (r.getBrandName() != null && !r.getBrandName().isBlank()) {
+                    filtered.add(r);
+                }
+            }
+            rows = filtered;
+        }
+
         LowStockSummaryDTO summary = dao.getSummary();
 
         p.reportTitle = "Low Stock Report";
-        p.summaryLines.put("Products Below ROP", String.valueOf(summary.getProductsBelowRop()));
-        p.summaryLines.put("Out Of Stock", String.valueOf(summary.getOutOfStock()));
-        p.summaryLines.put("Reorder Needed", String.valueOf(summary.getReorderNeeded()));
-        p.summaryLines.put("Total Products", String.valueOf(summary.getTotalProducts()));
+        p.summaryLines.put("Products At Or Below Threshold",
+                String.valueOf(summary != null ? summary.getProductsAtOrBelowThreshold() : 0));
+        p.summaryLines.put("Out Of Stock",
+                String.valueOf(summary != null ? summary.getOutOfStock() : 0));
+        p.summaryLines.put("Reorder Needed",
+                String.valueOf(summary != null ? summary.getReorderNeeded() : 0));
+        p.summaryLines.put("Total Products",
+                String.valueOf(summary != null ? summary.getTotalProducts() : 0));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
-            p.headers = Arrays.asList("Product Code", "Product Name", "Brand", "Current Stock", "ROP Status");
+            p.headers = Arrays.asList(
+                    "Product Code",
+                    "Product Name",
+                    "Brand",
+                    "Current Stock",
+                    "Threshold",
+                    "Stock Status"
+            );
+
             for (LowStockReportItem r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getProductCode()),
                         nn(r.getProductName()),
                         nn(r.getBrandName()),
                         String.valueOf(r.getCurrentStock()),
-                        nn(r.getRopStatus())
+                        String.valueOf(r.getThreshold()),
+                        nn(r.getStockStatus())
                 ));
             }
         } else {
             p.headers = Arrays.asList(
-                    "Product Code", "Product Name", "Brand", "Current Stock", "Avg Daily Sales",
-                    "Lead Time Days", "Safety Stock", "ROP", "ROP Status", "Suggested Reorder Qty"
+                    "Product Code",
+                    "Product Name",
+                    "Brand",
+                    "Supplier",
+                    "Current Stock",
+                    "Threshold",
+                    "Stock Status",
+                    "Suggested Reorder Qty",
+                    "Has Active Import Request"
             );
+
             for (LowStockReportItem r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getProductCode()),
                         nn(r.getProductName()),
                         nn(r.getBrandName()),
+                        nn(r.getSupplierName()),
                         String.valueOf(r.getCurrentStock()),
-                        String.valueOf(r.getAvgDailySales()),
-                        String.valueOf(r.getLeadTimeDays()),
-                        String.valueOf(r.getSafetyStock()),
-                        String.valueOf(r.getRop()),
-                        nn(r.getRopStatus()),
-                        String.valueOf(r.getSuggestedReorderQty())
+                        String.valueOf(r.getThreshold()),
+                        nn(r.getStockStatus()),
+                        String.valueOf(r.getSuggestedReorderQty()),
+                        r.isHasActiveImportRequest() ? "Yes" : "No"
                 ));
             }
         }
@@ -506,6 +555,7 @@ public class ExportCenter extends HttpServlet {
     }
 
     private static class ExportPayload {
+
         String reportTitle;
         String generatedAt;
         Map<String, String> filterLines = new LinkedHashMap<>();
@@ -523,7 +573,9 @@ public class ExportCenter extends HttpServlet {
     }
 
     private String trim(String s) {
-        if (s == null) return null;
+        if (s == null) {
+            return null;
+        }
         s = s.trim();
         return s.isEmpty() ? null : s;
     }

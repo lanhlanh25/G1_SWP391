@@ -127,6 +127,7 @@ public class ViewImeiDAO {
                     r.setImportDate(importDate);
 
                     String status = rs.getString("unit_status");
+                    r.setStatus(status);
                     if ("INACTIVE".equalsIgnoreCase(status)) {
                         Timestamp exportDate = rs.getTimestamp("latest_export_date");
                         r.setExportDate(exportDate);

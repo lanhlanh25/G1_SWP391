@@ -59,6 +59,19 @@ public class InventoryReport extends HttpServlet {
 
         Date from = parseDate(fromRaw);
         Date to = parseDate(toRaw);
+
+        // Set default dates if not provided: current month (yyyy-mm-01 to today)
+        java.time.LocalDate today = java.time.LocalDate.now();
+        if (from == null) {
+            java.time.LocalDate firstOfMonth = today.withDayOfMonth(1);
+            from = java.sql.Date.valueOf(firstOfMonth);
+            fromRaw = from.toString();
+        }
+        if (to == null) {
+            to = java.sql.Date.valueOf(today);
+            toRaw = to.toString();
+        }
+
         Long brandId = parseLong(brandIdRaw);
         int page = parseInt(request.getParameter("page"), 1);
         if (page < 1) {

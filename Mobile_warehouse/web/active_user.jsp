@@ -8,33 +8,38 @@
             <h1 class="h1">Active / Deactive Users</h1>
         </div>
     </div>
-            <c:if test="${not empty param.msg}">
-    <div class="msg-ok">
-        <c:choose>
-            <c:when test="${param.msg == 'ok'}">User status updated successfully.</c:when>
-            <c:otherwise>${param.msg}</c:otherwise>
-        </c:choose>
-    </div>
-</c:if>
+
+    <c:if test="${not empty param.msg}">
+        <div class="msg-ok">
+            <c:choose>
+                <c:when test="${param.msg == 'ok'}">User status updated successfully.</c:when>
+                <c:otherwise>${param.msg}</c:otherwise>
+            </c:choose>
+        </div>
+    </c:if>
 
     <div class="card">
         <div class="card-body">
-         <form class="filters" method="get" action="${pageContext.request.contextPath}/home" style="grid-template-columns: 1fr auto auto;">
-    <input type="hidden" name="p" value="user-toggle"/>
 
-    <div>
-        <label>Search</label>
-        <input class="input" type="text" name="q" value="${param.q}" placeholder="Search username or fullname...">
-    </div>
+            <form class="filters" method="get" action="${pageContext.request.contextPath}/home"
+                  style="grid-template-columns: 1fr auto auto;">
+                <input type="hidden" name="p" value="user-toggle"/>
+                <input type="hidden" name="page" value="1"/>
 
-    <div style="display:flex; align-items:end;">
-        <button class="btn btn-primary" type="submit">Search</button>
-    </div>
+                <div>
+                    <label>Search</label>
+                    <input class="input" type="text" name="q" value="${q}"
+                           placeholder="Search username or fullname...">
+                </div>
 
-    <div style="display:flex; align-items:end;">
-        <a class="btn" href="${pageContext.request.contextPath}/home?p=user-toggle">Clear</a>
-    </div>
-</form>
+                <div style="display:flex; align-items:end;">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+
+                <div style="display:flex; align-items:end;">
+                    <a class="btn" href="${pageContext.request.contextPath}/home?p=user-toggle">Clear</a>
+                </div>
+            </form>
 
             <table class="table">
                 <thead>
@@ -69,9 +74,13 @@
                                 </c:choose>
                             </td>
                             <td>
-                                <form method="post" action="${pageContext.request.contextPath}/admin/users/toggle" style="margin:0; display:inline;">
+                                <form method="post"
+                                      action="${pageContext.request.contextPath}/admin/users/toggle"
+                                      style="margin:0; display:inline;">
                                     <input type="hidden" name="user_id" value="${u.userId}">
                                     <input type="hidden" name="cur_status" value="${u.status}">
+                                    <input type="hidden" name="page" value="${page}">
+                                    <input type="hidden" name="q" value="${q}">
 
                                     <c:choose>
                                         <c:when test="${u.status == 1}">
@@ -93,6 +102,36 @@
                     </c:forEach>
                 </tbody>
             </table>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px;">
+                <div>
+                    Page ${page} of ${totalPages}
+                </div>
+
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <c:if test="${page > 1}">
+                        <a class="btn"
+                           href="${pageContext.request.contextPath}/home?p=user-toggle&page=${page - 1}&q=${q}">
+                            &lt;
+                        </a>
+                    </c:if>
+
+                    <c:forEach begin="1" end="${totalPages}" var="i">
+                        <a class="btn ${i == page ? 'btn-primary' : ''}"
+                           href="${pageContext.request.contextPath}/home?p=user-toggle&page=${i}&q=${q}">
+                            ${i}
+                        </a>
+                    </c:forEach>
+
+                    <c:if test="${page < totalPages}">
+                        <a class="btn"
+                           href="${pageContext.request.contextPath}/home?p=user-toggle&page=${page + 1}&q=${q}">
+                            &gt;
+                        </a>
+                    </c:if>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>

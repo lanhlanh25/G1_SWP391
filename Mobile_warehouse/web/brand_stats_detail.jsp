@@ -146,6 +146,7 @@
                     <th style="width: 150px;">Code</th>
                     <th>Product Name</th>
                     <th class="text-center">Stock</th>
+                    <th class="text-center">Threshold</th>
                     <th class="text-center">Imported</th>
                     <th class="text-center">Exported</th>
                     <th class="text-center">Status</th>
@@ -153,32 +154,49 @@
             </thead>
             <tbody class="table-border-bottom-0">
                 <c:forEach items="${products}" var="p">
-                    <tr class="${p.stockStatus == 'Out Of Stock' || p.stockStatus == 'Reorder Needed' ? 'table-danger table-opacity-10' : ''}">
+                    <tr>
                         <td><span class="fw-bold text-primary">${p.productCode}</span></td>
                         <td>${p.productName}</td>
-                        <td class="text-center fw-bold fs-5">${p.totalStockUnits}</td>
+                        <td class="text-center">
+                            <span class="fw-bold ${p.totalStockUnits <= lowThreshold ? 'text-danger' : ''}">
+                                ${p.totalStockUnits}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="small fw-semibold text-muted">${lowThreshold}</span>
+                        </td>
                         <td class="text-center"><span class="badge bg-label-success">+${p.importedUnits}</span></td>
                         <td class="text-center"><span class="badge bg-label-warning">-${p.exportedUnits}</span></td>
                         <td class="text-center">
                             <c:choose>
                                 <c:when test="${p.stockStatus == 'Out Of Stock'}">
-                                    <span class="badge bg-label-danger">Out of Stock</span>
+                                    <span class="badge bg-label-danger text-uppercase fw-semibold px-3 py-2">
+                                        Out Of Stock
+                                    </span>
                                 </c:when>
                                 <c:when test="${p.stockStatus == 'Reorder Needed'}">
-                                    <span class="badge bg-label-warning text-dark fw-bold">Low Stock</span>
+                                    <span class="badge bg-label-warning text-uppercase fw-semibold px-3 py-2">
+                                        Reorder Needed
+                                    </span>
+                                </c:when>
+                                <c:when test="${p.stockStatus == 'At Threshold'}">
+                                    <span class="badge bg-label-info text-uppercase fw-semibold px-3 py-2">
+                                        At Threshold
+                                    </span>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="badge ${p.totalStockUnits > 0 ? 'bg-label-info' : 'bg-label-secondary'}">
-                                        <c:out value="${p.stockStatus}"/>
+                                    <span class="badge bg-label-success text-uppercase fw-semibold px-3 py-2">
+                                        OK
                                     </span>
                                 </c:otherwise>
                             </c:choose>
                         </td>
                     </tr>
                 </c:forEach>
+
                 <c:if test="${empty products}">
                     <tr>
-                        <td colspan="6" class="text-center p-5 text-muted">
+                        <td colspan="7" class="text-center p-5 text-muted">
                             <i class="bx bx-info-circle mb-2 d-block fs-1"></i>
                             No products found for this brand.
                         </td>

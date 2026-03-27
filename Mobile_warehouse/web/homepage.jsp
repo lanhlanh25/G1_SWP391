@@ -33,6 +33,9 @@
     <meta charset="utf-8" />
     <title>DTLA Mobile WMS</title>
     <%@ include file="/WEB-INF/jspf/common_head.jspf" %>
+    <script>
+        const ctx = '<%=ctx%>';
+    </script>
 </head>
 <body>
     <div class="layout-wrapper layout-content-navbar">
@@ -121,7 +124,6 @@
                             document.addEventListener('DOMContentLoaded', function() {
                                 const searchInput = document.getElementById('navbar-search-input');
                                 const resultsDiv = document.getElementById('navbar-search-results');
-                                const ctx = '<%=ctx%>';
                                 
                                 // Define searchable pages with icons
                                 const pages = [
@@ -299,6 +301,62 @@
         <div class="layout-overlay layout-menu-toggle"></div>
     </div>
     <!-- / Layout wrapper -->
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+        <%-- Success Toast --%>
+        <c:if test="${not empty sessionScope.msg}">
+            <div id="successToast" class="toast show animate__animated animate__fadeInUp" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-success text-white py-2">
+                    <i class="bx bx-check-circle me-2 fs-5"></i>
+                    <strong class="me-auto">Notification</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body border-start border-success border-3">
+                    ${sessionScope.msg}
+                </div>
+            </div>
+            <c:remove var="msg" scope="session" />
+        </c:if>
+
+        <%-- Error Toast --%>
+        <c:if test="${not empty sessionScope.msgErr}">
+            <div id="errorToast" class="toast show animate__animated animate__fadeInUp" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header bg-danger text-white py-2">
+                    <i class="bx bx-error-circle me-2 fs-5"></i>
+                    <strong class="me-auto">Alert</strong>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body border-start border-danger border-3">
+                    ${sessionScope.msgErr}
+                </div>
+            </div>
+            <c:remove var="msgErr" scope="session" />
+        </c:if>
+    </div>
+
+    <style>
+        .toast {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 1rem;
+            min-width: 300px;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Auto-hide toasts after 5 seconds
+            const toasts = document.querySelectorAll('.toast');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    const bsToast = new bootstrap.Toast(toast);
+                    bsToast.hide();
+                }, 5000);
+            });
+        });
+    </script>
 
     <%@ include file="/WEB-INF/jspf/common_scripts.jspf" %>
 </body>

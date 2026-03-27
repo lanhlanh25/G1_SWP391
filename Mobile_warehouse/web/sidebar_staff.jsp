@@ -29,8 +29,7 @@
                               "brand-list".equals(currentPage) ||
                               "brand-detail".equals(currentPage) ||
                               "product-list".equals(currentPage) ||
-                              "product-detail".equals(currentPage) ||
-                              "variant-matrix".equals(currentPage);
+                              "product-detail".equals(currentPage);
 %>
 
 <li class="menu-header small text-uppercase">
@@ -115,7 +114,7 @@
     </a>
 </li>
 
-<li class="menu-item <%= "product-list".equals(currentPage) || "product-detail".equals(currentPage) || "variant-matrix".equals(currentPage) ? "active" : "" %>">
+<li class="menu-item <%= "product-list".equals(currentPage) || "product-detail".equals(currentPage) ? "active" : "" %>">
     <a href="<%=ctx%>/home?p=product-list" class="menu-link">
         <div data-i18n="Products">Products</div>
     </a>

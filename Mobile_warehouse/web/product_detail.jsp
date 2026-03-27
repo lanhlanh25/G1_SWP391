@@ -5,10 +5,12 @@
 
     <div class="topbar">
         <div class="d-flex align-center gap-12">
-            <h1 class="h1">Product Particulars</h1>
+            <h1 class="h1">Product Details</h1>
         </div>
         <div class="d-flex gap-8 align-center">
-            <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=variant-matrix&productId=${product.productId}">Manage Variants</a>
+            <c:if test="${role != 'STAFF'}">
+                <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=variant-matrix&productId=${product.productId}">Manage Variants</a>
+            </c:if>
             <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=product-list">← List</a>
         </div>
     </div>
@@ -37,10 +39,7 @@
                             <th>Brand</th>
                             <td class="text-primary">${product.brandName}</td>
                         </tr>
-                        <tr>
-                            <th>Model</th>
-                            <td class="text-muted fs-14">${product.model}</td>
-                        </tr>
+                      
                         <tr>
                             <th>Status</th>
                             <td>

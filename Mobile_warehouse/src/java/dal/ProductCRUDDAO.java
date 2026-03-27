@@ -71,14 +71,94 @@ public class ProductCRUDDAO {
     }
 
     public void inactivateProduct(int productId) throws Exception {
-        String sql = "UPDATE products SET status = 'INACTIVE' WHERE product_id = ?";
+        inactivateProduct(productId, "INACTIVE");
+    }
+
+    public void inactivateProduct(int productId, String status) throws Exception {
+        String sql = "UPDATE products SET status = ? WHERE product_id = ?";
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, productId);
+            ps.setString(1, status);
+            ps.setInt(2, productId);
             ps.executeUpdate();
         }
+        syncSkuStatusByProduct(productId, status);
     }
 
     public String getBlockReasonForInactivate(int productId) throws Exception {
+        try (Connection con = DBContext.getConnection()) {
+
+            // 1. Check Export Requests (Not completed/cancelled/rejected)
+            String sqlExpReq = """
+                SELECT er.request_code 
+                FROM export_request_lines erl
+                JOIN export_requests er ON erl.request_id = er.request_id
+                WHERE erl.product_id = ? 
+                  AND er.status NOT IN ('COMPLETED', 'CANCELLED', 'REJECTED')
+                LIMIT 1
+            """;
+            try (PreparedStatement ps = con.prepareStatement(sqlExpReq)) {
+                ps.setInt(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return "Sản phẩm đang nằm trong Yêu cầu xuất kho đang xử lý: " + rs.getString(1);
+                    }
+                }
+            }
+
+            // 2. Check Import Requests (Not completed/cancelled/rejected)
+            String sqlImpReq = """
+                SELECT ir.request_code 
+                FROM import_request_lines irl
+                JOIN import_requests ir ON irl.request_id = ir.request_id
+                WHERE irl.product_id = ? 
+                  AND ir.status NOT IN ('COMPLETED', 'CANCELLED', 'REJECTED')
+                LIMIT 1
+            """;
+            try (PreparedStatement ps = con.prepareStatement(sqlImpReq)) {
+                ps.setInt(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return "Sản phẩm đang nằm trong Yêu cầu nhập kho đang xử lý: " + rs.getString(1);
+                    }
+                }
+            }
+
+            // 3. Check Export Receipts (Draft or Pending)
+            String sqlExpRec = """
+                SELECT er.export_code 
+                FROM export_receipt_lines erl
+                JOIN export_receipts er ON erl.export_id = er.export_id
+                WHERE erl.product_id = ? 
+                  AND er.status IN ('DRAFT', 'PENDING')
+                LIMIT 1
+            """;
+            try (PreparedStatement ps = con.prepareStatement(sqlExpRec)) {
+                ps.setInt(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return "Sản phẩm đang nằm trong Phiếu xuất kho chưa hoàn tất: " + rs.getString(1);
+                    }
+                }
+            }
+
+            // 4. Check Import Receipts (Draft or Pending)
+            String sqlImpRec = """
+                SELECT ir.import_code 
+                FROM import_receipt_lines irl
+                JOIN import_receipts ir ON irl.import_id = ir.import_id
+                WHERE irl.product_id = ? 
+                  AND ir.status IN ('DRAFT', 'PENDING')
+                LIMIT 1
+            """;
+            try (PreparedStatement ps = con.prepareStatement(sqlImpRec)) {
+                ps.setInt(1, productId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return "Sản phẩm đang nằm trong Phiếu nhập kho chưa hoàn tất: " + rs.getString(1);
+                    }
+                }
+            }
+        }
         return null;
     }
 
@@ -134,13 +214,21 @@ public class ProductCRUDDAO {
     public void updateProductByManager(int id, String productName, String model, String description, String status) throws Exception {
         String sql = "UPDATE products SET product_name = ?, model = ?, description = ?, status = ? WHERE product_id = ?";
 
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, productName);
-            ps.setString(2, model);
-            ps.setString(3, description);
-            ps.setString(4, status);
-            ps.setInt(5, id);
-            ps.executeUpdate();
+        try (Connection con = DBContext.getConnection()) {
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, productName);
+                ps.setString(2, model);
+                ps.setString(3, description);
+                ps.setString(4, status);
+                ps.setInt(5, id);
+                ps.executeUpdate();
+            }
+
+            // Chỉ đồng bộ xuống SKU nếu trạng thái là INACTIVE
+            // Nếu ACTIVE, chúng ta giữ nguyên trạng thái riêng lẻ của từng SKU
+            if ("INACTIVE".equalsIgnoreCase(status)) {
+                syncSkuStatusByProduct(id, status);
+            }
         }
     }
 
@@ -185,10 +273,22 @@ public class ProductCRUDDAO {
         }
     }
 
-    public void inactivateSkusByProduct(int productId) throws Exception {
-        String sql = "UPDATE product_skus SET status = 'INACTIVE' WHERE product_id = ?";
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setInt(1, productId);
+    public void syncSkuStatusByProduct(int productId, String status) throws Exception {
+        // 1. Đồng bộ trạng thái xuống tất cả SKU của sản phẩm này
+        String sqlSkus = "UPDATE product_skus SET status = ?, updated_at = NOW() WHERE product_id = ?";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sqlSkus)) {
+            ps.setString(1, status);
+            ps.setInt(2, productId);
+            ps.executeUpdate();
+        }
+
+        // 2. Đồng bộ trạng thái xuống tất cả IMEI của các SKU thuộc sản phẩm này
+        String unitStatus = "ACTIVE".equalsIgnoreCase(status) ? "ACTIVE" : "INACTIVE";
+        String sqlUnits = "UPDATE product_units SET unit_status = ?, updated_at = NOW() "
+                + "WHERE sku_id IN (SELECT sku_id FROM product_skus WHERE product_id = ?)";
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sqlUnits)) {
+            ps.setString(1, unitStatus);
+            ps.setInt(2, productId);
             ps.executeUpdate();
         }
     }

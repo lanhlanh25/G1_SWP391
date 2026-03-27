@@ -12,7 +12,7 @@
   <div class="ic-topbar">
     <div style="display:flex;align-items:center;gap:14px;">
       <a href="${ctx}/home?p=dashboard" class="btn btn-sm">← Back</a>
-      <h1 class="ic-title">Conduct Inventory Count</h1>
+      <h1 class="ic-title">Inventory Count</h1>
     </div>
     <button type="button" class="btn btn-primary" id="btnSave">Save Count</button>
   </div>
@@ -91,6 +91,7 @@
               <th class="text-center">Storage</th>
               <th class="text-right">System Qty</th>
               <th class="text-center">Counted Qty</th>
+              <th class="text-center">Unit</th>
               <th class="text-center">Status</th>
               <th class="text-center">Action</th>
             </tr>
@@ -109,9 +110,9 @@
                 <td class="text-center">${fn:escapeXml(r.color)}</td>
                 <td class="text-center">${r.ramGb} GB</td>
                 <td class="text-center">${r.storageGb} GB</td>
-                <td class="text-right">
+                <td class="text-center">
                   ${r.systemQty}
-                  <span class="muted font-xs">Phone</span>
+                  
                 </td>
                 <td class="text-center">
                   <input type="hidden" name="skuId" value="${r.skuId}"/>
@@ -122,9 +123,10 @@
                            min="0"
                            value="${r.countedQty}"
                            data-system="${r.systemQty}"/>
-                    <span class="muted font-xs">Phone</span>
+                    
                   </div>
                 </td>
+                  <td class="text-center"><small class="text-muted">Item</small></td>
                 <td class="text-center js-status-cell">
                   <c:choose>
                     <c:when test="${r.countedQty == r.systemQty}">

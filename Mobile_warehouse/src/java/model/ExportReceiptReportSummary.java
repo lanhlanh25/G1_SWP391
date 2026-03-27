@@ -10,7 +10,7 @@ package model;
  */
 public class ExportReceiptReportSummary {
     private int totalExportReceipts;
-    private int totalPhoneQuantity;
+    private int totalItemQty;
 
     public int getTotalExportReceipts() {
         return totalExportReceipts;
@@ -19,10 +19,10 @@ public class ExportReceiptReportSummary {
         this.totalExportReceipts = totalExportReceipts;
     }
 
-    public int getTotalPhoneQuantity() {
-        return totalPhoneQuantity;
+    public int getTotalItemQty() {
+        return totalItemQty;
     }
-    public void setTotalPhoneQuantity(int totalPhoneQuantity) {
-        this.totalPhoneQuantity = totalPhoneQuantity;
+    public void setTotalItemQty(int totalItemQty) {
+        this.totalItemQty = totalItemQty;
     }
 }

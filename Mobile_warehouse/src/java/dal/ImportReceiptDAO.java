@@ -91,14 +91,19 @@ public class ImportReceiptDAO {
      * status=CONFIRMED at creation time.
      */
     public void insertOrActivateUnit(Connection con, long skuId, String imei) throws SQLException {
+        // Lấy trạng thái hiện tại của SKU để áp dụng cho IMEI mới
+        String skuStatus = getSkuStatus(con, skuId);
+        String unitStatus = "ACTIVE".equalsIgnoreCase(skuStatus) ? "ACTIVE" : "INACTIVE";
+
         String check = "SELECT unit_id, unit_status FROM product_units WHERE sku_id = ? AND imei = ? LIMIT 1";
         try (PreparedStatement ps = con.prepareStatement(check)) {
             ps.setLong(1, skuId);
             ps.setString(2, imei);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    String status = rs.getString("unit_status");
-                    if ("INACTIVE".equalsIgnoreCase(status)) {
+                    String currentStatus = rs.getString("unit_status");
+                    // Nếu IMEI cũ đang bị tắt và SKU đang bật -> Bật lại IMEI
+                    if ("INACTIVE".equalsIgnoreCase(currentStatus) && "ACTIVE".equals(unitStatus)) {
                         String upd = "UPDATE product_units SET unit_status='ACTIVE', updated_at=CURRENT_TIMESTAMP "
                                 + "WHERE sku_id=? AND imei=?";
                         try (PreparedStatement p2 = con.prepareStatement(upd)) {
@@ -107,17 +112,31 @@ public class ImportReceiptDAO {
                             p2.executeUpdate();
                         }
                     }
-                    // If already ACTIVE, leave as-is (validated before insertion)
                 } else {
-                    String ins = "INSERT INTO product_units(sku_id, imei, unit_status) VALUES(?, ?, 'ACTIVE')";
+                    // Chèn IMEI mới với trạng thái thừa hưởng từ SKU
+                    String ins = "INSERT INTO product_units(sku_id, imei, unit_status) VALUES(?, ?, ?)";
                     try (PreparedStatement p2 = con.prepareStatement(ins)) {
                         p2.setLong(1, skuId);
                         p2.setString(2, imei);
+                        p2.setString(3, unitStatus); // Quan trọng: Thừa hưởng từ SKU
                         p2.executeUpdate();
                     }
                 }
             }
         }
+    }
+
+    private String getSkuStatus(Connection con, long skuId) throws SQLException {
+        String sql = "SELECT status FROM product_skus WHERE sku_id = ?";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setLong(1, skuId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getString("status");
+                }
+            }
+        }
+        return "ACTIVE"; // Mặc định
     }
 
     /**

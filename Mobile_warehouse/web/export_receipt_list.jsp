@@ -73,18 +73,11 @@
                         All <span class="badge badge-center rounded-pill bg-label-secondary ms-1">${tabCounts['all']}</span>
                     </a>
                 </li>
-              
-                <li class="nav-item">
-                    <a class="nav-link ${status=='completed' ? 'active' : ''}" href="${statusBaseUrl}&status=completed">
-                        Completed <span class="badge badge-center rounded-pill bg-label-success ms-1">${tabCounts['completed']}</span>
-                    </a>
-                </li>
                
             </ul>
         </div>
 
-        <div class="table-responsive text-nowrap">
-            <table class="table table-hover">
+        <table class="table table-hover text-nowrap">
                 <thead>
                     <tr>
                         <th class="text-center">#</th>
@@ -118,28 +111,27 @@
                             <td>${fn:escapeXml(r.createdByName)}</td>
                             <td class="text-center text-muted small">${r.exportDateUi}</td>
                             <td class="text-center fw-bold text-primary">${r.totalQty}</td>
-                            <td class="text-center">
-                                <c:choose>
-                                    <c:when test="${r.status == 'CONFIRMED' || r.status == 'completed' || r.status == 'COMPLETED'}">
-                                        <span class="badge bg-label-success">Completed</span>
-                                    </c:when>
-                                    <c:when test="${r.status == 'pending' || r.status == 'PENDING'}">
-                                        <span class="badge bg-label-warning">Pending</span>
-                                    </c:when>
-                                    <c:when test="${r.status == 'cancelled' || r.status == 'CANCELLED' || r.status == 'CANCELED'}">
-                                        <span class="badge bg-label-danger">Cancelled</span>
-                                    </c:when>
-                                    <c:otherwise>
-                                        <span class="badge bg-label-secondary">${r.status}</span>
-                                    </c:otherwise>
-                                </c:choose>
-                            </td>
+                                    <td class="text-center">
+                        <c:set var="statusUp" value="${fn:toUpperCase(r.status)}"/>
+                        <c:choose>
+                            <c:when test="${statusUp == 'CONFIRMED'}">
+                                <span class="badge bg-label-success">Completed</span>
+                            </c:when>
+                         
+                          
+                            <c:otherwise>
+                                <span class="badge bg-label-secondary">
+                                    <c:out value="${r.status}"/>
+                                </span>
+                            </c:otherwise>
+                        </c:choose>
+                    </td>
                             <td class="text-center">
                                 <div class="dropdown">
-                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown" data-bs-boundary="viewport">
                                         <i class="bx bx-dots-vertical-rounded"></i>
                                     </button>
-                                    <div class="dropdown-menu">
+                                    <div class="dropdown-menu dropdown-menu-end">
                                         <a class="dropdown-item" href="${ctx}/home?p=export-receipt-detail&id=${r.exportId}"><i class="bx bx-show-alt me-1"></i> View Detail</a>
                                         <a class="dropdown-item" href="${ctx}/export-receipt-pdf?id=${r.exportId}" target="_blank"><i class="bx bxs-file-pdf me-1"></i> Export PDF</a>
                                     </div>
@@ -149,7 +141,6 @@
                     </c:forEach>
                 </tbody>
             </table>
-        </div>
 
         <c:if test="${totalPages > 1}">
             <c:url var="baseUrl" value="/home">

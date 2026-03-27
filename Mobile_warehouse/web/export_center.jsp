@@ -23,15 +23,15 @@
     </div>
 </c:if>
 
-  <c:if test="${not empty err}">
+<c:if test="${not empty err}">
     <div class="msg-err mb-16">${fn:escapeXml(err)}</div>
-  </c:if>
+</c:if>
 
-  <c:if test="${not empty msg}">
+<c:if test="${not empty msg}">
     <div class="msg-ok mb-16">${fn:escapeXml(msg)}</div>
-  </c:if>
-  <%--summary--%>
-  <div class="card mb-16">
+</c:if>
+<%--summary--%>
+<div class="card mb-16">
     <div class="card-body">
         <form method="get" action="${ctx}/export-center">
             <div class="row g-3">
@@ -74,12 +74,12 @@
                 </div>
 
                 <div class="col-md-3" id="ropStatusWrap">
-                    <label class="form-label">ROP Status Filter</label>
+                    <label class="form-label">Stock Status Filter</label>
                     <select class="form-select" name="ropStatus" id="ropStatus">
-                        <option value="" ${empty ropStatus ? 'selected' : ''}>All Below ROP</option>
+                        <option value="" ${empty ropStatus ? 'selected' : ''}>All</option>
                         <option value="Out Of Stock" ${ropStatus == 'Out Of Stock' ? 'selected' : ''}>Out Of Stock</option>
                         <option value="Reorder Needed" ${ropStatus == 'Reorder Needed' ? 'selected' : ''}>Reorder Needed</option>
-                        <option value="At ROP Level" ${ropStatus == 'At ROP Level' ? 'selected' : ''}>At ROP Level</option>
+                        <option value="At Threshold" ${ropStatus == 'At Threshold' ? 'selected' : ''}>At Threshold</option>
                         <option value="OK" ${ropStatus == 'OK' ? 'selected' : ''}>OK</option>
                     </select>
                 </div>
@@ -166,7 +166,7 @@
                         <tr>
                             <c:forEach items="${previewHeaders}" var="h">
                                 <th>${h}</th>
-                            </c:forEach>
+                                </c:forEach>
                         </tr>
                     </thead>
                     <tbody>

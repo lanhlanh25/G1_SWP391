@@ -38,4 +38,14 @@ public class ImeiRow {
     public void setExportDate(Timestamp exportDate) {
         this.exportDate = exportDate;
     }
+
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

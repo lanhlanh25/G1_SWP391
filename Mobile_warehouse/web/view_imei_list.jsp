@@ -5,7 +5,7 @@
 <c:set var="ctx" value="${pageContext.request.contextPath}"/>
 
 <h4 class="fw-bold py-3 mb-4">
-    <span class="text-muted fw-light">Warehouse /</span> IMEI Inventory Detail
+    <span class="text-muted fw-light">Warehouse /</span> IMEI Inventory Details
 </h4>
 
 <div class="row mb-4">
@@ -175,4 +175,3 @@
         </div>
     </c:if>
 </div>
-

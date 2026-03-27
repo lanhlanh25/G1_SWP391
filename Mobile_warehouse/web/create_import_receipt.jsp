@@ -126,14 +126,14 @@
                                         <table class="table table-sm table-hover" id="itemsTable">
                                             <thead class="table-light">
                                                 <tr>
-                                                    <th style="width:50px" class="text-center">#</th>
-                                                    <th style="width:250px">Product</th>
-                                                    <th style="width:150px">Code</th>
-                                                    <th style="width:150px">SKU</th>
-                                                    <th style="width:100px" class="text-center">Qty</th>
+                                                    <th style="width:20px" class="text-center">#</th>
+                                                    <th style="width:180px">Product</th>
+                                                    <th style="width:120px">Code</th>
+                                                    <th style="width:250px">SKU</th>
+                                                    <th style="width:120px" class="text-center">Qty</th>
                                                     <th style="width:300px">IMEI Details</th>
-                                                    <th>Note</th>
-                                                    <th style="width:50px" class="text-center">Del</th>
+                                                    <th style="width:250px">Note</th>
+                                                    <th style="width:20px" class="text-center">Delete</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="itemsTbody"></tbody>
@@ -164,42 +164,65 @@
                             <c:if test="${empty requestId}">
                                 <div class="tab-pane fade ${isExcel ? 'show active' : ''}" id="tab-excel" role="tabpanel">
                                     <form method="post" action="${ctx}/create-import-receipt" enctype="multipart/form-data">
-                                        <input type="hidden" name="mode" value="excel" />
+    <input type="hidden" name="mode" value="excel" />
+    <input type="hidden" name="importCode" value="${fn:escapeXml(importCode)}" />
 
-                                        <div class="alert alert-info border-info mb-4" role="alert">
-                                            <h6 class="alert-heading fw-bold mb-1">Excel Format</h6>
-                                            <p class="mb-0 small">Please upload a <strong>.xlsx</strong> file with columns: <code>product_code</code>, <code>sku_code</code>, <code>imei</code> (15 digits).</p>
-                                        </div>
+    <div class="alert alert-info border-info mb-4" role="alert">
+        <h6 class="alert-heading fw-bold mb-1">Excel Format</h6>
+        <p class="mb-0 small">
+            Please upload a <strong>.xlsx</strong> file with columns:
+            <code>product_code</code>, <code>sku_code</code>, <code>imei</code> (15 digits).
+        </p>
+    </div>
 
-                                        <div class="row g-3 mb-4">
-                                            <div class="col-md-6">
-                                                <label class="form-label" for="excelFile">Excel File (.xlsx) <span class="text-danger">*</span></label>
-                                                <input type="file" class="form-control" id="excelFile" name="excelFile" accept=".xlsx" required />
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label" for="receiptDateExcel">Transaction Time <span class="text-danger">*</span></label>
-                                                <input type="datetime-local" class="form-control" id="receiptDateExcel" name="receiptDate" value="${fn:escapeXml(receiptDateDefault)}" required />
-                                            </div>
-                                            <div class="col-md-3">
-                                                <label class="form-label" for="supplierIdExcel">Supplier <span class="text-danger">*</span></label>
-                                                <select class="form-select" id="supplierIdExcel" name="supplierId" required>
-                                                    <option value="" selected disabled>-- Select Supplier --</option>
-                                                    <c:forEach var="s" items="${suppliers}">
-                                                        <option value="${s.id}">${fn:escapeXml(s.name)}</option>
-                                                    </c:forEach>
-                                                </select>
-                                            </div>
-                                            <div class="col-12">
-                                                <label class="form-label" for="noteExcel">Note</label>
-                                                <textarea class="form-control" id="noteExcel" name="note" rows="2" placeholder="Notes..."></textarea>
-                                            </div>
-                                        </div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label class="form-label" for="importCodeExcel">Import Code</label>
+            <input type="text"
+                   class="form-control"
+                   id="importCodeExcel"
+                   name="importCode"
+                   value="${fn:escapeXml(importCode)}"
+                   readonly />
+            <div class="form-text">System generated</div>
+        </div>
 
-                                        <div class="pt-2">
-                                            <button type="submit" class="btn btn-primary">Import with Excel</button>
-                                            <a class="btn btn-outline-secondary ms-2" href="${ctx}/home?p=import-receipt-list">Cancel</a>
-                                        </div>
-                                    </form>
+        <div class="col-md-3">
+            <label class="form-label" for="excelFile">Excel File (.xlsx) <span class="text-danger">*</span></label>
+            <input type="file" class="form-control" id="excelFile" name="excelFile" accept=".xlsx" required />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label" for="receiptDateExcel">Transaction Time <span class="text-danger">*</span></label>
+            <input type="datetime-local"
+                   class="form-control"
+                   id="receiptDateExcel"
+                   name="receiptDate"
+                   value="${fn:escapeXml(receiptDateDefault)}"
+                   required />
+        </div>
+
+        <div class="col-md-3">
+            <label class="form-label" for="supplierIdExcel">Supplier <span class="text-danger">*</span></label>
+            <select class="form-select" id="supplierIdExcel" name="supplierId" required>
+                <option value="" selected disabled>-- Select Supplier --</option>
+                <c:forEach var="s" items="${suppliers}">
+                    <option value="${s.id}">${fn:escapeXml(s.name)}</option>
+                </c:forEach>
+            </select>
+        </div>
+
+        <div class="col-12">
+            <label class="form-label" for="noteExcel">Note</label>
+            <textarea class="form-control" id="noteExcel" name="note" rows="2" placeholder="Notes..."></textarea>
+        </div>
+    </div>
+
+    <div class="pt-2">
+        <button type="submit" class="btn btn-primary">Import with Excel</button>
+        <a class="btn btn-outline-secondary ms-2" href="${ctx}/home?p=import-receipt-list">Cancel</a>
+    </div>
+</form>
                                 </div>
                             </c:if>
                         </div>

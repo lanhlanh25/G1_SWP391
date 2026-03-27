@@ -5,7 +5,7 @@
 <c:set var="role" value="${sessionScope.roleName}"/>
 
 <h4 class="fw-bold py-3 mb-4">
-    <span class="text-muted fw-light">Warehouse /</span> Import Request Management
+    <span class="text-muted fw-light">Warehouse /</span> Import Request List
 </h4>
 
 <c:if test="${not empty param.msg}">

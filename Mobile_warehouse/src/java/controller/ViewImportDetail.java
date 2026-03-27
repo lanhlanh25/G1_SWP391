@@ -107,7 +107,7 @@ public class ViewImportDetail extends HttpServlet {
         User u = (session == null) ? null : (User) session.getAttribute("authUser");
         if (u == null) {
             resp.sendRedirect(req.getContextPath() + "/login");
-            return;
+            return; 
         }
 
         long id = parseId(req);

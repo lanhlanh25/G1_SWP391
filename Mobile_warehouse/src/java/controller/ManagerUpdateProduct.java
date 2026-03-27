@@ -72,15 +72,28 @@ public class ManagerUpdateProduct extends HttpServlet {
                 return;
             }
 
+            if ("INACTIVE".equalsIgnoreCase(status)) {
+                String blockReason = dao.getBlockReasonForInactivate(id);
+                if (blockReason != null) {
+                    errors.put("status", "Không thể vô hiệu hóa: " + blockReason);
+                }
+            }
+
             if (!errors.isEmpty()) {
 
                 request.setAttribute("errors", errors);
                 request.setAttribute("product", db);
+                request.setAttribute("productName", productName);
+                request.setAttribute("model", model);
+                request.setAttribute("description", description);
+                request.setAttribute("status", status);
 
                 ProductSkuDAO skuDAO = new ProductSkuDAO();
                 request.setAttribute("skuList", skuDAO.getSkusByProductId(id));
 
-                request.getRequestDispatcher("/update_product.jsp").forward(request, response);
+                request.setAttribute("contentPage", "update_product.jsp");
+                request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+                request.getRequestDispatcher("/homepage.jsp").forward(request, response);
                 return;
             }
 

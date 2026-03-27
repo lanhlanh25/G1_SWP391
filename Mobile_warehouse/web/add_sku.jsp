@@ -18,10 +18,7 @@
     </c:if>
 
     <div class="card">
-        <div class="card-header">
-            <div class="h2">SKU Specifications</div>
-            <div class="fs-13 text-muted">Define the hardware variant and base properties.</div>
-        </div>
+      
         <div class="card-body">
             <form action="${pageContext.request.contextPath}/manager/sku/add" method="post" novalidate autocomplete="off">
                 
@@ -102,13 +99,11 @@
                 <div class="form-group mb-24">
                     <label class="form-label">SKU Code <span class="text-danger">*</span></label>
                     <input id="skuCode" class="input ${not empty errors.skuCode ? 'border-danger' : ''}" type="text" name="skuCode" value="${param.skuCode}" readonly style="background-color: var(--bg-2); opacity: 0.8; font-family: var(--font-mono);">
-                    <div class="fs-12 text-muted mt-4">Automatically generated: [Product Code]-[Color]-[Storage]-[RAM]</div>
+
                     <c:if test="${not empty errors.skuCode}">
                         <div class="fs-12 text-danger mt-4 fw-600">⚠ ${errors.skuCode}</div>
                     </c:if>
-                    <c:if test="${not empty errors.variant}">
-                        <div class="fs-12 text-danger mt-4 fw-600">⚠ ${errors.variant}</div>
-                    </c:if>
+             
                 </div>
 
                 <div class="d-flex gap-12 pt-16 border-t mt-16">

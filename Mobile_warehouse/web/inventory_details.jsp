@@ -17,7 +17,7 @@
   <div class="id-chips">
     <div class="id-chip">
       <div class="chip-label">Quantity</div>
-      <div class="chip-val">${totalQty} Phone</div>
+      <div class="chip-val">${totalQty} Item</div>
     </div>
     <div class="id-chip">
       <div class="chip-label">Product Code</div>
@@ -45,7 +45,8 @@
             <th class="text-center">RAM</th>
             <th class="text-center">Storage</th>
             <th class="text-center">Inventory Status</th>
-            <th class="text-right">Quantity</th>
+            <th class="text-center">Quantity</th>
+            <th class="text-center">Unit</th>
             <th class="text-center">Action</th>
           </tr>
         </thead>
@@ -59,24 +60,23 @@
               <td class="text-center">${fn:escapeXml(s.color)}</td>
               <td class="text-center">${s.ramGb} GB</td>
               <td class="text-center">${s.storageGb} GB</td>
-              <td class="text-center">
-                <c:choose>
-                  <c:when test="${s.stockStatus == 'OK'}">
-                    <span class="badge badge-success">In Stock</span>
-                  </c:when>
-                  <c:when test="${s.stockStatus == 'LOW'}">
-                    <span class="badge badge-warning" title="Stock (${s.qty}) ≤ ROP (${s.rop})">Low Stock</span>
-                  </c:when>
-                  <c:otherwise>
-                    <span class="badge badge-danger">Out of Stock</span>
-                  </c:otherwise>
-                </c:choose>
-                <div class="rop-hint">ROP: ${s.rop}</div>
-              </td>
-              <td class="text-right font-bold">
+         <td class="text-center">
+  <c:choose>
+    <c:when test="${s.stockStatus == 'OK'}">
+      <span class="badge badge-success">In Stock</span>
+    </c:when>
+    <c:when test="${s.stockStatus == 'LOW'}">
+      <span class="badge badge-warning">Low Stock</span>
+    </c:when>
+    <c:otherwise>
+      <span class="badge badge-danger">Out of Stock</span>
+    </c:otherwise>
+  </c:choose>
+</td>      <td class="text-center font-bold">
                 ${s.qty}
-                <span style="font-size:11px;color:var(--muted);margin-left:2px;">Phone</span>
+                
               </td>
+              <td class="text-center"><small class="text-muted">Item</small></td>
               <td class="tc">
                 <c:url var="imeiUrl" value="/imei-list">
                   <c:param name="skuId"    value="${s.skuId}"/>
@@ -84,7 +84,7 @@
                   <c:param name="pageSize" value="10"/>
                   <c:param name="back"     value="${backToDetails}"/>
                 </c:url>
-                <a class="btn btn-sm btn-outline" href="${imeiUrl}">View List IMEI</a>
+                <a class="btn btn-sm btn-outline " href="${imeiUrl}">View List IMEI</a>
               </td>
             </tr>
           </c:forEach>

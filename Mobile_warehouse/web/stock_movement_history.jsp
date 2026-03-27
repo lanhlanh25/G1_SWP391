@@ -1,3 +1,4 @@
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
@@ -15,10 +16,18 @@
     </div>
 </c:if>
 
+<c:if test="${not empty productId}">
+    <div class="alert alert-info alert-dismissible" role="alert">
+        <i class="bx bx-info-circle me-1"></i> Showing history for <strong>Product ID: ${productId} ${rows[0].productName}</strong>
+        <a href="${ctx}/home?p=stock-movement-history" class="btn-close" aria-label="Clear Filter"></a>
+    </div>
+</c:if>
+
 <div class="card mb-4">
     <div class="card-body">
         <form method="get" action="${ctx}/home" class="row g-3 px-1">
             <input type="hidden" name="p" value="stock-movement-history"/>
+            <input type="hidden" name="productId" value="${fn:escapeXml(productId)}"/>
             <input type="hidden" name="page" value="1"/>
             
             <div class="col-md-3">
@@ -135,6 +144,7 @@
     <c:if test="${totalPages > 1}">
         <c:url var="baseUrl" value="/home">
             <c:param name="p" value="stock-movement-history"/>
+            <c:param name="productId" value="${productId}"/>
             <c:param name="keyword" value="${keyword}"/>
             <c:param name="from" value="${from}"/>
             <c:param name="to" value="${to}"/>
@@ -182,4 +192,5 @@
         </div>
     </c:if>
 </div>
-
+
+

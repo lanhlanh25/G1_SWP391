@@ -18,17 +18,17 @@
     <div class="card-body">
         <form method="get" action="${ctx}/inventory-report" class="row g-3">
             <input type="hidden" name="page" value="1"/>
-            
+
             <div class="col-md-3">
                 <label class="form-label">From Date</label>
                 <input class="form-control" type="date" name="from" value="${fn:escapeXml(from)}"/>
             </div>
-            
+
             <div class="col-md-3">
                 <label class="form-label">To Date</label>
                 <input class="form-control" type="date" name="to" value="${fn:escapeXml(to)}"/>
             </div>
-            
+
             <div class="col-md-3">
                 <label class="form-label">Brand</label>
                 <select class="form-select" name="brandId">
@@ -40,7 +40,7 @@
                     </c:forEach>
                 </select>
             </div>
-            
+
             <div class="col-md-3">
                 <label class="form-label">Search</label>
                 <div class="input-group input-group-merge">
@@ -165,15 +165,21 @@
                     <c:set var="sumClose" value="${sumClose + r.closingQty}"/>
 
                     <c:url var="detailUrl" value="/home">
-                        <c:param name="p" value="product-detail"/>
-                        <c:param name="code" value="${r.productCode}"/>
+                        <c:param name="p" value="stock-movement-history"/>
+                        <c:param name="productId" value="${r.productId}"/>
+                        <c:param name="from" value="${from}"/>
+                        <c:param name="to" value="${to}"/>
                     </c:url>
 
                     <tr>
                         <td><span class="badge bg-label-secondary font-monospace">${fn:escapeXml(r.productCode)}</span></td>
-                        <td><strong>${fn:escapeXml(r.productName)}</strong></td>
+                        <td>
+                            <a href="${ctx}/home?p=product-detail&id=${r.productId}" class="text-dark">
+                                <strong>${fn:escapeXml(r.productName)}</strong>
+                            </a>
+                        </td>
                         <td><small class="text-muted">${fn:escapeXml(r.brandName)}</small></td>
-                        <td class="text-center">Phone</td>
+                        <td class="text-center">${fn:escapeXml(r.unit)}</td>
                         <td class="text-end fw-semibold">${r.openingQty}</td>
                         <td class="text-end text-success fw-semibold">+${r.importQty}</td>
                         <td class="text-end text-warning fw-semibold">-${r.exportQty}</td>
@@ -186,8 +192,8 @@
                                 <c:when test="${r.ropStatus eq 'Reorder Needed'}">
                                     <span class="badge bg-label-warning">Reorder Needed</span>
                                 </c:when>
-                                <c:when test="${r.ropStatus eq 'At ROP Level'}">
-                                    <span class="badge bg-label-info">At ROP Level</span>
+                                <c:when test="${r.ropStatus eq 'At Threshold'}">
+                                    <span class="badge bg-label-info">At Threshold</span>
                                 </c:when>
                                 <c:otherwise>
                                     <span class="badge bg-label-success">OK</span>
@@ -222,7 +228,7 @@
         <div class="text-muted small">
             Page <strong>${page}</strong> of <strong>${totalPages}</strong>
         </div>
-        
+
         <nav aria-label="Page navigation">
             <ul class="pagination pagination-sm mb-0">
                 <%-- Prev Button --%>
@@ -236,29 +242,29 @@
                 <%-- Dynamic Page Numbers --%>
                 <c:set var="startPage" value="${page - 1 > 1 ? page - 1 : 1}"/>
                 <c:set var="endPage" value="${page + 1 < totalPages ? page + 1 : totalPages}"/>
-                
+
                 <c:if test="${startPage > 1}">
                     <c:url var="p1Url" value="/inventory-report">
                         <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/><c:param name="brandId" value="${brandId}"/><c:param name="keyword" value="${keyword}"/><c:param name="page" value="1"/>
                     </c:url>
                     <li class="page-item"><a class="page-link" href="${p1Url}">1</a></li>
                     <c:if test="${startPage > 2}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
-                </c:if>
+                    </c:if>
 
                 <c:forEach var="pg" begin="${startPage}" end="${endPage}">
                     <c:url var="pUrl" value="/inventory-report">
                         <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/><c:param name="brandId" value="${brandId}"/><c:param name="keyword" value="${keyword}"/><c:param name="page" value="${pg}"/>
                     </c:url>
                     <li class="page-item ${pg == page ? 'active' : ''}"><a class="page-link" href="${pUrl}">${pg}</a></li>
-                </c:forEach>
+                    </c:forEach>
 
                 <c:if test="${endPage < totalPages}">
                     <c:if test="${endPage < totalPages - 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
-                    <c:url var="pLastUrl" value="/inventory-report">
-                        <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/><c:param name="brandId" value="${brandId}"/><c:param name="keyword" value="${keyword}"/><c:param name="page" value="${totalPages}"/>
-                    </c:url>
+                        <c:url var="pLastUrl" value="/inventory-report">
+                            <c:param name="from" value="${from}"/><c:param name="to" value="${to}"/><c:param name="brandId" value="${brandId}"/><c:param name="keyword" value="${keyword}"/><c:param name="page" value="${totalPages}"/>
+                        </c:url>
                     <li class="page-item"><a class="page-link" href="${pLastUrl}">${totalPages}</a></li>
-                </c:if>
+                    </c:if>
 
                 <%-- Next Button --%>
                 <li class="page-item ${page >= totalPages ? 'disabled' : ''}">

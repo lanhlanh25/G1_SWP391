@@ -17,15 +17,37 @@ import java.io.IOException;
 @WebServlet("/admin/role/active-page")
 public class ActiveRolePage extends HttpServlet {
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-            throws ServletException, IOException {
-        // ✅ Redirect về home controller để có layout đầy đủ
-        String msg = req.getParameter("msg");
-        StringBuilder url = new StringBuilder(req.getContextPath() + "/home?p=role-toggle");
-        if (msg != null && !msg.isBlank()) {
-            url.append("&msg=").append(java.net.URLEncoder.encode(msg, "UTF-8"));
+  @Override
+protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
+
+    String roleIdRaw = req.getParameter("role_id");
+    String page = req.getParameter("page");
+    String q = req.getParameter("q");
+    String status = req.getParameter("status");
+
+    try {
+        int roleId = Integer.parseInt(roleIdRaw);
+
+        RoleDAO dao = new RoleDAO();
+        dao.toggleRoleStatus(roleId);
+
+        StringBuilder url = new StringBuilder(req.getContextPath() + "/home?p=role-toggle&msg=ok");
+
+        if (page != null && !page.isBlank()) {
+            url.append("&page=").append(page);
         }
+        if (q != null && !q.isBlank()) {
+            url.append("&q=").append(java.net.URLEncoder.encode(q, "UTF-8"));
+        }
+        if (status != null && !status.isBlank()) {
+            url.append("&status=").append(java.net.URLEncoder.encode(status, "UTF-8"));
+        }
+
         resp.sendRedirect(url.toString());
+
+    } catch (Exception e) {
+        resp.sendRedirect(req.getContextPath() + "/home?p=role-toggle&msg=error");
     }
+}
 }
