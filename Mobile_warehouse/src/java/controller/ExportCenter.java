@@ -76,7 +76,19 @@ public class ExportCenter extends HttpServlet {
             toRaw = today.toString();
         }
 
-        
+        Date fromDateCheck = parseDate(fromRaw);
+        Date toDateCheck = parseDate(toRaw);
+
+        if (fromDateCheck != null && toDateCheck != null && fromDateCheck.after(toDateCheck)) {
+            request.setAttribute("err", "Date From cannot be later than Date To.");
+
+            request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+            request.setAttribute("contentPage", "export_center.jsp");
+            request.setAttribute("currentPage", "export-center");
+            request.setAttribute("role", "MANAGER");
+            request.getRequestDispatcher("homepage.jsp").forward(request, response);
+            return;
+        }
 
         String brandIdRaw = trim(request.getParameter("brandId"));
         String keyword = trim(request.getParameter("keyword"));
