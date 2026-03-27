@@ -83,7 +83,7 @@
                     <th class="text-center">#</th>
                     <th>Receipt Code</th>
                     <th>Request Code</th>
-                    <th>Supplier</th>
+                    
                     <th>Created By</th>
                     <th class="text-center">Export Date</th>
                     <th class="text-center">Qty</th>
@@ -93,7 +93,7 @@
             </thead>
             <tbody class="table-border-bottom-0">
                 <c:if test="${empty rows}">
-                    <tr><td colspan="8" class="text-center p-5">No export receipts found.</td></tr>
+                    <tr><td colspan="7" class="text-center p-5">No export receipts found.</td></tr>
                 </c:if>
                 <c:forEach var="r" items="${rows}" varStatus="st">
                     <tr>
@@ -109,16 +109,7 @@
                                 </c:otherwise>
                             </c:choose>
                         </td>
-                        <td>
-                            <c:choose>
-                                <c:when test="${empty r.supplierName || r.supplierName == '-'}">
-                                    <span class="text-muted small">N/A</span>
-                                </c:when>
-                                <c:otherwise>
-                                    <span class="fw-semibold">${fn:escapeXml(r.supplierName)}</span>
-                                </c:otherwise>
-                            </c:choose>
-                        </td>
+                        
                         <td>${fn:escapeXml(r.createdByName)}</td>
                         <td class="text-center text-muted small">${r.exportDateUi}</td>
                         <td class="text-center fw-bold text-primary">${r.totalQty}</td>

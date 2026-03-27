@@ -184,23 +184,16 @@ public class ExportReceiptDAO {
             int page, int pageSize) {
 
         StringBuilder sql = new StringBuilder("""
-            SELECT 
-                er.export_id,
-                er.export_code,
-                er.export_date,
-                er.status,
-                COALESCE(req.request_code, '-') AS request_code,
-                COALESCE(GROUP_CONCAT(DISTINCT s.supplier_name ORDER BY s.supplier_name SEPARATOR ', '), '-') AS supplier_name,
-                COALESCE(u.full_name, '-') AS created_by_name,
-                COALESCE(SUM(erl.qty), 0) AS total_qty
-            FROM export_receipts er
-            LEFT JOIN export_requests req ON req.request_id = er.request_id
-            LEFT JOIN users u ON u.user_id = er.created_by
-            LEFT JOIN export_receipt_lines erl ON erl.export_id = er.export_id
-            LEFT JOIN product_skus ps ON ps.sku_id = erl.sku_id
-            LEFT JOIN suppliers s ON s.supplier_id = ps.supplier_id
-            WHERE 1=1
-        """);
+    SELECT er.export_id, er.export_code, er.export_date, er.status,
+           COALESCE(req.request_code, '-') AS request_code,
+           COALESCE(u.full_name, '-') AS created_by_name,
+           COALESCE(SUM(erl.qty), 0) AS total_qty
+    FROM export_receipts er
+    LEFT JOIN export_requests req ON req.request_id = er.request_id
+    LEFT JOIN users u ON u.user_id = er.created_by
+    LEFT JOIN export_receipt_lines erl ON erl.export_id = er.export_id
+    WHERE 1=1
+""");
 
         List<Object> params = new ArrayList<>();
 
@@ -230,17 +223,12 @@ public class ExportReceiptDAO {
             params.add(to);
         }
 
-            sql.append("""
-        GROUP BY 
-            er.export_id,
-            er.export_code,
-            er.export_date,
-            er.status,
-            req.request_code,
-            u.full_name
-        ORDER BY er.export_id DESC
-        LIMIT ? OFFSET ?
-        """);
+        sql.append("""
+    GROUP BY er.export_id, er.export_code, er.export_date, er.status,
+             req.request_code, u.full_name
+    ORDER BY er.export_id DESC
+    LIMIT ? OFFSET ?
+""");
 
         params.add(pageSize);
         params.add((page - 1) * pageSize);
@@ -261,7 +249,7 @@ public class ExportReceiptDAO {
                     it.setExportId(rs.getLong("export_id"));
                     it.setExportCode(rs.getString("export_code"));
                     it.setRequestCode(rs.getString("request_code"));
-                    it.setSupplierName(rs.getString("supplier_name"));
+                   
                     it.setCreatedByName(rs.getString("created_by_name"));
                     it.setStatus(rs.getString("status"));
                     it.setTotalQty(rs.getInt("total_qty"));
