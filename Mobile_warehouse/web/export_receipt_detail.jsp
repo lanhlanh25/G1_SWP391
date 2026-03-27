@@ -58,7 +58,22 @@
             <tr>
               <th>Status</th>
               <td>
-                <span class="badge badge-active"><c:out value="${receiptHeader.status}"/></span>
+                
+                <c:set var="statusUp" value="${fn:toUpperCase(receiptHeader.status)}"/>
+                <c:choose>
+                  <c:when test="${receiptHeader.status == 'CONFIRMED'}">
+                    <span class="badge badge-active">Completed</span>
+                  </c:when>
+                  <c:when test="${receiptHeader.status == 'PENDING' || receiptHeader.status == 'DRAFT'}">
+                    <span class="badge badge-warning">Pending</span>
+                  </c:when>
+                  <c:when test="${receiptHeader.status == 'CANCELED' || receiptHeader.status == 'CANCELLED'}">
+                    <span class="badge badge-inactive">Cancelled</span>
+                  </c:when>
+                  <c:otherwise>
+                    <span class="badge badge-info">${fn:escapeXml(receipt.status)}</span>
+                  </c:otherwise>
+                </c:choose>
               </td>
             </tr>
           </tbody>
