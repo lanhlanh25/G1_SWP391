@@ -24,7 +24,7 @@
 
     <div class="row">
         <!-- Export -->
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-4 col-md-6 mb-4">
             <div class="card h-100 border-top border-primary border-3">
                 <div class="card-body text-center">
                     <div class="avatar avatar-lg mx-auto mb-3">
@@ -38,7 +38,7 @@
         </div>
 
         <!-- Tracking -->
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-4 col-md-6 mb-4">
             <div class="card h-100 border-top border-info border-3">
                 <div class="card-body text-center">
                     <div class="avatar avatar-lg mx-auto mb-3">
@@ -52,7 +52,7 @@
         </div>
 
         <!-- Inbound -->
-        <div class="col-lg-3 col-md-6 mb-4">
+        <div class="col-lg-4 col-md-6 mb-4">
             <div class="card h-100 border-top border-warning border-3">
                 <div class="card-body text-center">
                     <div class="avatar avatar-lg mx-auto mb-3">
@@ -65,19 +65,7 @@
             </div>
         </div>
 
-        <!-- Reference -->
-        <div class="col-lg-3 col-md-6 mb-4">
-            <div class="card h-100 border-top border-success border-3">
-                <div class="card-body text-center">
-                    <div class="avatar avatar-lg mx-auto mb-3">
-                        <span class="avatar-initial rounded bg-label-success"><i class="bx bx-truck fs-4"></i></span>
-                    </div>
-                    <h5 class="card-title">Reference</h5>
-                    <p class="card-text small text-muted">Browse and manage supplier directory.</p>
-                    <a href="${ctx}/home?p=view_supplier" class="btn btn-sm btn-success">View Suppliers</a>
-                </div>
-            </div>
-        </div>
+        
     </div>
 
     <div class="row">
