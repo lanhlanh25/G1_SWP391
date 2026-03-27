@@ -28,7 +28,7 @@ public class Login extends HttpServlet {
             return;
         }
 
-        // Read cookies for "Remember Me"
+        
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie c : cookies) {
@@ -83,7 +83,7 @@ public class Login extends HttpServlet {
         String roleName = dao.getRoleNameByUserId(u.getUserId());
         session.setAttribute("roleName", roleName);
 
-        // Handle "Remember Me"
+        
         String remember = request.getParameter("remember");
         if ("true".equals(remember)) {
             Cookie cu = new Cookie("c_user", username);

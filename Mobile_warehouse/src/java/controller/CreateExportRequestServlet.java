@@ -25,7 +25,6 @@ public class CreateExportRequestServlet extends HttpServlet {
             return;
         }
 
-        // user id (bạn đổi theo session của bạn)
         Integer userId = (Integer) request.getSession().getAttribute("userId");
         if (userId == null) {
             response.sendRedirect(request.getContextPath() + "/login.jsp");
@@ -73,13 +72,13 @@ public class CreateExportRequestServlet extends HttpServlet {
                     continue;
                 }
 
-                Long sid = sidVal; // now always not null
+                Long sid = sidVal; 
                 items.add(new ExportRequestItemCreate(pid, sid, q));
             }
         }
 
         if (!errs.isEmpty()) {
-            String msg = String.join(" | ", errs); // gộp lỗi
+            String msg = String.join(" | ", errs); 
             String url = request.getContextPath() + "/home?p=create-export-request"
                     + "&err=1"
                     + "&errMsg=" + safe(msg)
@@ -93,7 +92,6 @@ public class CreateExportRequestServlet extends HttpServlet {
             ExportRequestCreateDAO dao = new ExportRequestCreateDAO();
             long newId = dao.createRequest(userId, expected, note, status, items);
 
-            // sau khi tạo xong, có thể redirect sang detail (manager) hoặc list (sale)
             response.sendRedirect(request.getContextPath()
                     + "/home?p=export-request-list&msg=Created");
         } catch (Exception e) {

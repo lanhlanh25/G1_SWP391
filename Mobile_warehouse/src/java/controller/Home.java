@@ -140,7 +140,7 @@ public class Home extends HttpServlet {
             try {
                 ImportReceiptListDAO dao = new ImportReceiptListDAO();
 
-                // ✅ deleteDraft() already allows DRAFT/PENDING only
+                //  deleteDraft() already allows DRAFT/PENDING only
                 boolean ok = dao.deleteDraft(importId);
 
                 if (ok) {
@@ -175,7 +175,7 @@ public class Home extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/home?p=" + url(p));
     }
 
-// ✅ helper: keep filter when redirect back to list
+// helper: keep filter when redirect back to list
     private String buildBackImportListUrl(HttpServletRequest request, String key, String msg) {
         String ctx = request.getContextPath();
 
