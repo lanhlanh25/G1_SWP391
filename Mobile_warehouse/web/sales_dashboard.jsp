@@ -109,11 +109,7 @@
                                 <i class="bx bx-history d-block fs-3 mb-1"></i> Review Import List
                             </a>
                         </div>
-                        <div class="col-md-4 col-sm-6">
-                            <a href="${ctx}/home?p=view_profile" class="btn btn-outline-dark w-100 py-3">
-                                <i class="bx bx-user-circle d-block fs-3 mb-1"></i> My Profile
-                            </a>
-                        </div>
+
                         <div class="col-md-4 col-sm-6">
                             <a href="${ctx}/home?p=dashboard" class="btn btn-label-primary w-100 py-3">
                                 <i class="bx bx-home-alt d-block fs-3 mb-1"></i> Overview Home
