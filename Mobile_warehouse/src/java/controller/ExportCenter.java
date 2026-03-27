@@ -24,6 +24,7 @@ import util.PdfExportUtil;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -67,12 +68,26 @@ public class ExportCenter extends HttpServlet {
         String fromRaw = trim(request.getParameter("from"));
         String toRaw = trim(request.getParameter("to"));
 
-        if ("inventory".equalsIgnoreCase(reportType) && fromRaw == null && toRaw == null) {
+        if ((fromRaw == null || fromRaw.isBlank()) && (toRaw == null || toRaw.isBlank())) {
             LocalDate today = LocalDate.now();
             LocalDate fromDefault = today.minusMonths(1);
 
             fromRaw = fromDefault.toString();
             toRaw = today.toString();
+        }
+
+        Date fromDateCheck = parseDate(fromRaw);
+        Date toDateCheck = parseDate(toRaw);
+
+        if (fromDateCheck != null && toDateCheck != null && fromDateCheck.after(toDateCheck)) {
+            request.setAttribute("err", "Date From cannot be later than Date To.");
+
+            request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+            request.setAttribute("contentPage", "export_center.jsp");
+            request.setAttribute("currentPage", "export-center");
+            request.setAttribute("role", "MANAGER");
+            request.getRequestDispatcher("homepage.jsp").forward(request, response);
+            return;
         }
 
         String brandIdRaw = trim(request.getParameter("brandId"));
@@ -276,12 +291,13 @@ public class ExportCenter extends HttpServlet {
         p.summaryLines.put("Closing Stock", String.valueOf(summary.getOrDefault("totalClosing", 0)));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
-            p.headers = Arrays.asList("Product Code", "Product Name", "Brand", "Closing Stock");
+            p.headers = Arrays.asList("Product Code", "Product Name", "Brand", "Openning Stock", "Closing Stock");
             for (InventoryReportRow r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getProductCode()),
                         nn(r.getProductName()),
                         nn(r.getBrandName()),
+                        String.valueOf(r.getOpeningQty()),
                         String.valueOf(r.getClosingQty())
                 ));
             }
@@ -326,24 +342,24 @@ public class ExportCenter extends HttpServlet {
         p.summaryLines.put("Cancelled Count", String.valueOf(summary.getCancelledCount()));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
-            p.headers = Arrays.asList("Receipt Code", "Created Date", "Total Quantity");
+            p.headers = Arrays.asList("Receipt Code", "Created Date", "Supplier", "Total Quantity");
             for (ImportReceiptListItem r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getImportCode()),
-                        r.getReceiptDate() == null ? "" : r.getReceiptDate().toString(),
+                        r.getReceiptDate() == null ? "" : new SimpleDateFormat("dd/MM/yyyy HH:mm").format(r.getReceiptDate()),
+                        nn(r.getSupplierName()),
                         String.valueOf(r.getTotalQuantity())
                 ));
             }
         } else {
-            p.headers = Arrays.asList("Receipt Code", "Created Date", "Supplier", "Created By", "Total Quantity", "Status");
+            p.headers = Arrays.asList("Receipt Code", "Created Date", "Supplier", "Created By", "Total Quantity");
             for (ImportReceiptListItem r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getImportCode()),
-                        r.getReceiptDate() == null ? "" : r.getReceiptDate().toString(),
+                        r.getReceiptDate() == null ? "" : new SimpleDateFormat("dd/MM/yyyy HH:mm").format(r.getReceiptDate()),
                         nn(r.getSupplierName()),
                         nn(r.getCreatedByName()),
-                        String.valueOf(r.getTotalQuantity()),
-                        nn(r.getStatusUi())
+                        String.valueOf(r.getTotalQuantity())
                 ));
             }
         }
@@ -357,33 +373,34 @@ public class ExportCenter extends HttpServlet {
             int page,
             int pageSize
     ) {
-
         ExportReceiptReportDAO dao = new ExportReceiptReportDAO();
         ExportReceiptReportSummary summary = dao.getSummary(from, to);
-        List<ExportReceiptListItem> rows = dao.list(from, to, page, pageSize);
 
         p.reportTitle = "Export Report";
         p.summaryLines.put("Total Export Receipts", String.valueOf(summary.getTotalExportReceipts()));
-        p.summaryLines.put("Total Item Quantity", String.valueOf(summary.getTotalItemQty()));
+        p.summaryLines.put("Total Exported Quantity", String.valueOf(summary.getTotalItemQty()));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
-            p.headers = Arrays.asList("Receipt Code", "Created Date", "Total Quantity");
-            for (ExportReceiptListItem r : rows) {
+            List<ProductQuantitySummary> rows = dao.listByProduct(from, to, page, pageSize);
+
+            p.headers = Arrays.asList("Product Code", "Product Name", "Total Exported Quantity");
+            for (ProductQuantitySummary r : rows) {
                 p.rows.add(Arrays.asList(
-                        nn(r.getExportCode()),
-                        nn(r.getExportDateUi()),
+                        nn(r.getProductCode()),
+                        nn(r.getProductName()),
                         String.valueOf(r.getTotalQuantity())
                 ));
             }
         } else {
-            p.headers = Arrays.asList("Receipt Code", "Created Date", "Created By", "Total Quantity", "Status");
+            List<ExportReceiptListItem> rows = dao.list(from, to, page, pageSize);
+
+            p.headers = Arrays.asList("Receipt Code", "Created Date", "Created By", "Total Quantity");
             for (ExportReceiptListItem r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getExportCode()),
                         nn(r.getExportDateUi()),
                         nn(r.getCreatedByName()),
-                        String.valueOf(r.getTotalQuantity()),
-                        nn(r.getStatus())
+                        String.valueOf(r.getTotalQuantity())
                 ));
             }
         }
@@ -515,8 +532,7 @@ public class ExportCenter extends HttpServlet {
                     "Current Stock",
                     "Threshold",
                     "Stock Status",
-                    "Suggested Reorder Qty",
-                    "Has Active Import Request"
+                    "Suggested Reorder Qty"
             );
 
             for (LowStockReportItem r : rows) {
@@ -528,8 +544,7 @@ public class ExportCenter extends HttpServlet {
                         String.valueOf(r.getCurrentStock()),
                         String.valueOf(r.getThreshold()),
                         nn(r.getStockStatus()),
-                        String.valueOf(r.getSuggestedReorderQty()),
-                        r.isHasActiveImportRequest() ? "Yes" : "No"
+                        String.valueOf(r.getSuggestedReorderQty())
                 ));
             }
         }
