@@ -90,8 +90,7 @@ public class BrandStatsDAO {
         List<Object> params = new ArrayList<>();
         appendBrandFiltersOnBrandsAliasB(sql, params, q, brandStatus, brandId);
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             bindParams(ps, params);
 
@@ -117,35 +116,36 @@ public class BrandStatsDAO {
         BrandStatsSummary sum = new BrandStatsSummary();
 
         StringBuilder sql = new StringBuilder("""
+        SELECT
+          COUNT(DISTINCT b.brand_id) AS total_brands,
+          COUNT(DISTINCT p.product_id) AS total_products,
+          COALESCE(SUM(COALESCE(prod_qty.product_qty, 0)), 0) AS total_stock_units,
+          COUNT(DISTINCT CASE
+              WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
+          END) AS low_stock_products
+        FROM brands b
+        LEFT JOIN products p 
+               ON p.brand_id = b.brand_id
+              AND p.status = 'ACTIVE'
+        LEFT JOIN (
             SELECT
-              COUNT(DISTINCT b.brand_id) AS total_brands,
-              COUNT(DISTINCT p.product_id) AS total_products,
-              COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
-              COUNT(DISTINCT CASE
-                  WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
-              END) AS low_stock_products
-            FROM brands b
-            LEFT JOIN products p ON p.brand_id = b.brand_id
-            LEFT JOIN product_skus s ON s.product_id = p.product_id AND s.status = 'ACTIVE'
-            LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
-            LEFT JOIN (
-                SELECT
-                    p2.product_id,
-                    COALESCE(SUM(ib2.qty_on_hand), 0) AS product_qty
-                FROM products p2
-                LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id AND s2.status = 'ACTIVE'
-                LEFT JOIN inventory_balance ib2 ON ib2.sku_id = s2.sku_id
-                GROUP BY p2.product_id
-            ) prod_qty ON prod_qty.product_id = p.product_id
-            WHERE 1=1
-        """);
+                s.product_id,
+                COUNT(pu.unit_id) AS product_qty
+            FROM product_skus s
+            LEFT JOIN product_units pu
+                   ON pu.sku_id = s.sku_id
+                  AND pu.unit_status = 'ACTIVE'
+            WHERE s.status = 'ACTIVE'
+            GROUP BY s.product_id
+        ) prod_qty ON prod_qty.product_id = p.product_id
+        WHERE 1=1
+    """);
 
         List<Object> params = new ArrayList<>();
         params.add(lowThreshold);
         appendBrandFiltersOnBrandsAliasB(sql, params, q, brandStatus, brandId);
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             bindParams(ps, params);
 
@@ -195,8 +195,7 @@ public class BrandStatsDAO {
             params.add(toDate);
         }
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             bindParams(ps, params);
 
@@ -236,8 +235,7 @@ public class BrandStatsDAO {
             params.add(toDate);
         }
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             bindParams(ps, params);
 
@@ -270,51 +268,53 @@ public class BrandStatsDAO {
         List<Object> params = new ArrayList<>();
 
         sql.append("""
+        SELECT
+          b.brand_id,
+          b.brand_name,
+          b.is_active,
+          COALESCE(prod.total_products, 0)     AS total_products,
+          COALESCE(prod.total_stock_units, 0)  AS total_stock_units,
+          COALESCE(prod.low_stock_products, 0) AS low_stock_products,
+          COALESCE(imp.imported_units, 0)      AS imported_units,
+          COALESCE(exp.exported_units, 0)      AS exported_units
+        FROM brands b
+
+        LEFT JOIN (
             SELECT
-              b.brand_id,
-              b.brand_name,
-              b.is_active,
-              COALESCE(prod.total_products, 0)     AS total_products,
-              COALESCE(prod.total_stock_units, 0)  AS total_stock_units,
-              COALESCE(prod.low_stock_products, 0) AS low_stock_products,
-              COALESCE(imp.imported_units, 0)      AS imported_units,
-              COALESCE(exp.exported_units, 0)      AS exported_units
-            FROM brands b
-
+              p.brand_id,
+              COUNT(DISTINCT p.product_id) AS total_products,
+              COALESCE(SUM(COALESCE(prod_qty.product_qty, 0)), 0) AS total_stock_units,
+              COUNT(DISTINCT CASE
+                  WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
+              END) AS low_stock_products
+            FROM products p
             LEFT JOIN (
                 SELECT
-                  p.brand_id,
-                  COUNT(DISTINCT p.product_id) AS total_products,
-                  COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
-                  COUNT(DISTINCT CASE
-                      WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
-                  END) AS low_stock_products
-                FROM products p
-                LEFT JOIN product_skus s ON s.product_id = p.product_id AND s.status = 'ACTIVE'
-                LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
-                LEFT JOIN (
-                    SELECT
-                        p2.product_id,
-                        COALESCE(SUM(ib2.qty_on_hand), 0) AS product_qty
-                    FROM products p2
-                    LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id AND s2.status = 'ACTIVE'
-                    LEFT JOIN inventory_balance ib2 ON ib2.sku_id = s2.sku_id
-                    GROUP BY p2.product_id
-                ) prod_qty ON prod_qty.product_id = p.product_id
-                GROUP BY p.brand_id
-            ) prod ON prod.brand_id = b.brand_id
+                    s.product_id,
+                    COUNT(pu.unit_id) AS product_qty
+                FROM product_skus s
+                LEFT JOIN product_units pu
+                       ON pu.sku_id = s.sku_id
+                      AND pu.unit_status = 'ACTIVE'
+                WHERE s.status = 'ACTIVE'
+                GROUP BY s.product_id
+            ) prod_qty ON prod_qty.product_id = p.product_id
+            WHERE p.status = 'ACTIVE'
+            GROUP BY p.brand_id
+        ) prod ON prod.brand_id = b.brand_id
 
-            LEFT JOIN (
-                SELECT
-                  p.brand_id,
-                  COALESCE(SUM(irl.qty), 0) AS imported_units
-                FROM import_receipts ir
-                JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
-                JOIN product_skus s ON s.sku_id = irl.sku_id
-                JOIN products p ON p.product_id = s.product_id
-                WHERE ir.status = 'CONFIRMED'
-                  AND ir.receipt_date IS NOT NULL
-        """);
+        LEFT JOIN (
+            SELECT
+              p.brand_id,
+              COALESCE(SUM(irl.qty), 0) AS imported_units
+            FROM import_receipts ir
+            JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
+            JOIN product_skus s ON s.sku_id = irl.sku_id
+            JOIN products p ON p.product_id = s.product_id
+            WHERE p.status = 'ACTIVE'
+              AND ir.status = 'CONFIRMED'
+              AND ir.receipt_date IS NOT NULL
+    """);
 
         params.add(lowThreshold);
 
@@ -328,20 +328,21 @@ public class BrandStatsDAO {
         }
 
         sql.append("""
-                GROUP BY p.brand_id
-            ) imp ON imp.brand_id = b.brand_id
+            GROUP BY p.brand_id
+        ) imp ON imp.brand_id = b.brand_id
 
-            LEFT JOIN (
-                SELECT
-                  p.brand_id,
-                  COALESCE(SUM(exl.qty), 0) AS exported_units
-                FROM export_receipts ex
-                JOIN export_receipt_lines exl ON exl.export_id = ex.export_id
-                JOIN product_skus s ON s.sku_id = exl.sku_id
-                JOIN products p ON p.product_id = s.product_id
-                WHERE ex.status = 'CONFIRMED'
-                  AND ex.export_date IS NOT NULL
-        """);
+        LEFT JOIN (
+            SELECT
+              p.brand_id,
+              COALESCE(SUM(exl.qty), 0) AS exported_units
+            FROM export_receipts ex
+            JOIN export_receipt_lines exl ON exl.export_id = ex.export_id
+            JOIN product_skus s ON s.sku_id = exl.sku_id
+            JOIN products p ON p.product_id = s.product_id
+            WHERE p.status = 'ACTIVE'
+              AND ex.status = 'CONFIRMED'
+              AND ex.export_date IS NOT NULL
+    """);
 
         if (fromDate != null) {
             sql.append(" AND DATE(ex.export_date) >= ? ");
@@ -353,19 +354,19 @@ public class BrandStatsDAO {
         }
 
         sql.append("""
-                GROUP BY p.brand_id
-            ) exp ON exp.brand_id = b.brand_id
+            GROUP BY p.brand_id
+        ) exp ON exp.brand_id = b.brand_id
 
-            WHERE 1=1
-        """);
+        WHERE 1=1
+    """);
 
         appendBrandFiltersOnBrandsAliasB(sql, params, q, brandStatus, brandId);
 
         sql.append(" ORDER BY ")
-           .append(orderBy(sortBy))
-           .append(" ")
-           .append(orderDir(sortOrder))
-           .append(", b.brand_name ASC, b.brand_id ASC ");
+                .append(orderBy(sortBy))
+                .append(" ")
+                .append(orderDir(sortOrder))
+                .append(", b.brand_name ASC, b.brand_id ASC ");
 
         sql.append(" LIMIT ? OFFSET ? ");
         params.add(pageSize);
@@ -373,8 +374,7 @@ public class BrandStatsDAO {
 
         List<BrandStatsRow> list = new ArrayList<>();
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             bindParams(ps, params);
 
@@ -424,38 +424,40 @@ public class BrandStatsDAO {
         String orderDir = "ASC".equalsIgnoreCase(dSortOrder) ? "ASC" : "DESC";
 
         StringBuilder sql = new StringBuilder("""
+        SELECT
+          p.product_id,
+          p.product_code,
+          p.product_name,
+          COALESCE(stock.total_stock_units, 0) AS total_stock_units,
+          COALESCE(imp.imported_units, 0) AS imported_units,
+          COALESCE(exp.exported_units, 0) AS exported_units,
+          imp.last_import_at,
+          exp.last_export_at
+        FROM products p
+
+        LEFT JOIN (
             SELECT
-              p.product_id,
-              p.product_code,
-              p.product_name,
-              COALESCE(stock.total_stock_units, 0) AS total_stock_units,
-              COALESCE(imp.imported_units, 0) AS imported_units,
-              COALESCE(exp.exported_units, 0) AS exported_units,
-              imp.last_import_at,
-              exp.last_export_at
-            FROM products p
+                s.product_id,
+                COUNT(pu.unit_id) AS total_stock_units
+            FROM product_skus s
+            LEFT JOIN product_units pu
+                   ON pu.sku_id = s.sku_id
+                  AND pu.unit_status = 'ACTIVE'
+            WHERE s.status = 'ACTIVE'
+            GROUP BY s.product_id
+        ) stock ON stock.product_id = p.product_id
 
-            LEFT JOIN (
-                SELECT
-                    s.product_id,
-                    COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units
-                FROM product_skus s
-                LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
-                WHERE s.status = 'ACTIVE'
-                GROUP BY s.product_id
-            ) stock ON stock.product_id = p.product_id
-
-            LEFT JOIN (
-                SELECT
-                  s.product_id,
-                  COALESCE(SUM(irl.qty), 0) AS imported_units,
-                  MAX(ir.receipt_date) AS last_import_at
-                FROM import_receipts ir
-                JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
-                JOIN product_skus s ON s.sku_id = irl.sku_id
-                WHERE ir.status = 'CONFIRMED'
-                  AND ir.receipt_date IS NOT NULL
-        """);
+        LEFT JOIN (
+            SELECT
+              s.product_id,
+              COALESCE(SUM(irl.qty), 0) AS imported_units,
+              MAX(ir.receipt_date) AS last_import_at
+            FROM import_receipts ir
+            JOIN import_receipt_lines irl ON irl.import_id = ir.import_id
+            JOIN product_skus s ON s.sku_id = irl.sku_id
+            WHERE ir.status = 'CONFIRMED'
+              AND ir.receipt_date IS NOT NULL
+    """);
 
         List<Object> params = new ArrayList<>();
 
@@ -469,20 +471,20 @@ public class BrandStatsDAO {
         }
 
         sql.append("""
-                GROUP BY s.product_id
-            ) imp ON imp.product_id = p.product_id
+            GROUP BY s.product_id
+        ) imp ON imp.product_id = p.product_id
 
-            LEFT JOIN (
-                SELECT
-                  s.product_id,
-                  COALESCE(SUM(exl.qty), 0) AS exported_units,
-                  MAX(ex.export_date) AS last_export_at
-                FROM export_receipts ex
-                JOIN export_receipt_lines exl ON exl.export_id = ex.export_id
-                JOIN product_skus s ON s.sku_id = exl.sku_id
-                WHERE ex.status = 'CONFIRMED'
-                  AND ex.export_date IS NOT NULL
-        """);
+        LEFT JOIN (
+            SELECT
+              s.product_id,
+              COALESCE(SUM(exl.qty), 0) AS exported_units,
+              MAX(ex.export_date) AS last_export_at
+            FROM export_receipts ex
+            JOIN export_receipt_lines exl ON exl.export_id = ex.export_id
+            JOIN product_skus s ON s.sku_id = exl.sku_id
+            WHERE ex.status = 'CONFIRMED'
+              AND ex.export_date IS NOT NULL
+    """);
 
         if (fromDate != null) {
             sql.append(" AND DATE(ex.export_date) >= ? ");
@@ -494,20 +496,20 @@ public class BrandStatsDAO {
         }
 
         sql.append("""
-                GROUP BY s.product_id
-            ) exp ON exp.product_id = p.product_id
+            GROUP BY s.product_id
+        ) exp ON exp.product_id = p.product_id
 
-            WHERE p.brand_id = ?
-            ORDER BY
-        """);
+        WHERE p.brand_id = ?
+          AND p.status = 'ACTIVE'
+        ORDER BY
+    """);
 
         params.add(brandId);
         sql.append(orderCol).append(" ").append(orderDir).append(", p.product_id ASC");
 
         List<ProductStatsRow> list = new ArrayList<>();
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             bindParams(ps, params);
 
@@ -663,8 +665,7 @@ public class BrandStatsDAO {
 
         List<ProductStatsRow> list = new ArrayList<>();
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             bindParams(ps, params);
 
@@ -712,26 +713,27 @@ public class BrandStatsDAO {
         }
 
         StringBuilder sql = new StringBuilder("""
+        SELECT
+          COUNT(DISTINCT p.product_id) AS total_products,
+          COALESCE(SUM(COALESCE(prod_qty.product_qty, 0)), 0) AS total_stock_units,
+          COUNT(DISTINCT CASE
+              WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
+          END) AS low_stock_products
+        FROM products p
+        LEFT JOIN (
             SELECT
-              COUNT(DISTINCT p.product_id) AS total_products,
-              COALESCE(SUM(ib.qty_on_hand), 0) AS total_stock_units,
-              COUNT(DISTINCT CASE
-                  WHEN COALESCE(prod_qty.product_qty, 0) <= ? THEN p.product_id
-              END) AS low_stock_products
-            FROM products p
-            LEFT JOIN product_skus s ON s.product_id = p.product_id AND s.status = 'ACTIVE'
-            LEFT JOIN inventory_balance ib ON ib.sku_id = s.sku_id
-            LEFT JOIN (
-                SELECT
-                    p2.product_id,
-                    COALESCE(SUM(ib2.qty_on_hand), 0) AS product_qty
-                FROM products p2
-                LEFT JOIN product_skus s2 ON s2.product_id = p2.product_id AND s2.status = 'ACTIVE'
-                LEFT JOIN inventory_balance ib2 ON ib2.sku_id = s2.sku_id
-                GROUP BY p2.product_id
-            ) prod_qty ON prod_qty.product_id = p.product_id
-            WHERE p.brand_id = ?
-        """);
+                s.product_id,
+                COUNT(pu.unit_id) AS product_qty
+            FROM product_skus s
+            LEFT JOIN product_units pu
+                   ON pu.sku_id = s.sku_id
+                  AND pu.unit_status = 'ACTIVE'
+            WHERE s.status = 'ACTIVE'
+            GROUP BY s.product_id
+        ) prod_qty ON prod_qty.product_id = p.product_id
+        WHERE p.brand_id = ?
+          AND p.status = 'ACTIVE'
+    """);
 
         List<Object> params = new ArrayList<>();
         params.add(lowThreshold);
@@ -739,8 +741,7 @@ public class BrandStatsDAO {
 
         BrandStatsSummary sum = new BrandStatsSummary();
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             bindParams(ps, params);
 
@@ -783,8 +784,7 @@ public class BrandStatsDAO {
             params.add(toDate);
         }
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             bindParams(ps, params);
 
@@ -818,8 +818,7 @@ public class BrandStatsDAO {
             params.add(toDate);
         }
 
-        try (Connection con = DBContext.getConnection();
-             PreparedStatement ps = con.prepareStatement(sql.toString())) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
 
             bindParams(ps, params);
 
