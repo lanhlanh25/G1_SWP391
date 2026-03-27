@@ -24,6 +24,7 @@ import util.PdfExportUtil;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -65,6 +66,15 @@ public class ExportCenter extends HttpServlet {
         String reportType = nv(request.getParameter("reportType"), "inventory");
         String fromRaw = trim(request.getParameter("from"));
         String toRaw = trim(request.getParameter("to"));
+
+        if ("inventory".equalsIgnoreCase(reportType) && fromRaw == null && toRaw == null) {
+            LocalDate today = LocalDate.now();
+            LocalDate fromDefault = today.minusMonths(1);
+
+            fromRaw = fromDefault.toString();
+            toRaw = today.toString();
+        }
+
         String brandIdRaw = trim(request.getParameter("brandId"));
         String keyword = trim(request.getParameter("keyword"));
         String stockStatus = trim(request.getParameter("ropStatus"));
@@ -264,7 +274,6 @@ public class ExportCenter extends HttpServlet {
         p.summaryLines.put("Total Import", String.valueOf(summary.getOrDefault("totalImport", 0)));
         p.summaryLines.put("Total Export", String.valueOf(summary.getOrDefault("totalExport", 0)));
         p.summaryLines.put("Closing Stock", String.valueOf(summary.getOrDefault("totalClosing", 0)));
-        p.summaryLines.put("Variance", String.valueOf(summary.getOrDefault("totalVariance", 0)));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
             p.headers = Arrays.asList("Product Code", "Product Name", "Brand", "Closing Stock");
@@ -279,8 +288,9 @@ public class ExportCenter extends HttpServlet {
         } else {
             p.headers = Arrays.asList(
                     "Product Code", "Product Name", "Brand", "Unit",
-                    "Opening Stock", "Import", "Export", "Closing Stock", "Variance"
+                    "Opening Stock", "Import", "Export", "Closing Stock"
             );
+
             for (InventoryReportRow r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getProductCode()),
@@ -545,6 +555,7 @@ public class ExportCenter extends HttpServlet {
     }
 
     private static class ExportPayload {
+
         String reportTitle;
         String generatedAt;
         Map<String, String> filterLines = new LinkedHashMap<>();
