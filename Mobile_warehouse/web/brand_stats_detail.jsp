@@ -10,7 +10,8 @@
     <c:param name="brandId" value="${param.listBrandId}"/>
     <c:param name="sortBy" value="${param.listSortBy}"/>
     <c:param name="sortOrder" value="${param.listSortOrder}"/>
-    <c:param name="range" value="${param.listRange}"/>
+    <c:param name="from" value="${param.from}"/>
+    <c:param name="to" value="${param.to}"/>
     <c:param name="page" value="${empty param.listPage ? 1 : param.listPage}"/>
 </c:url>
 
@@ -98,10 +99,19 @@
             <input type="hidden" name="listBrandId" value="${param.listBrandId}"/>
             <input type="hidden" name="listSortBy" value="${param.listSortBy}"/>
             <input type="hidden" name="listSortOrder" value="${param.listSortOrder}"/>
-            <input type="hidden" name="listRange" value="${param.listRange}"/>
             <input type="hidden" name="listPage" value="${empty param.listPage ? 1 : param.listPage}"/>
 
-            <div class="col-md-3">
+            <div class="col-12 col-md-6 col-lg-3">
+                <label class="form-label small text-uppercase fw-semibold">From Date</label>
+                <input type="date" class="form-control" name="from" value="${from}"/>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-3">
+                <label class="form-label small text-uppercase fw-semibold">To Date</label>
+                <input type="date" class="form-control" name="to" value="${to}"/>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-3">
                 <label class="form-label small text-uppercase fw-semibold">Sort By</label>
                 <select class="form-select" name="dSortBy">
                     <option value="stock"  ${dSortBy=='stock' ? 'selected' : ''}>Total Stock</option>
@@ -111,7 +121,7 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
+            <div class="col-12 col-md-6 col-lg-3">
                 <label class="form-label small text-uppercase fw-semibold">Order</label>
                 <select class="form-select" name="dSortOrder">
                     <option value="DESC" ${dSortOrder=='DESC' ? 'selected' : ''}>High to Low</option>
@@ -119,14 +129,29 @@
                 </select>
             </div>
 
-            <div class="col-md-7 d-flex gap-2">
-                <button class="btn btn-primary px-4" type="submit">
+            <div class="col-12 d-flex flex-wrap gap-2">
+                <button class="btn btn-primary" type="submit">
                     <i class="bx bx-sort me-1"></i> Apply Sorting
                 </button>
-                <a class="btn btn-outline-secondary" href="${ctx}/home?p=brand-stats-detail&brandId=${param.brandId}">
+
+                <c:url var="resetDetailUrl" value="/home">
+                    <c:param name="p" value="brand-stats-detail"/>
+                    <c:param name="brandId" value="${param.brandId}"/>
+                    <c:param name="from" value="${param.from}"/>
+                    <c:param name="to" value="${param.to}"/>
+                    <c:param name="listQ" value="${param.listQ}"/>
+                    <c:param name="listStatus" value="${param.listStatus}"/>
+                    <c:param name="listBrandId" value="${param.listBrandId}"/>
+                    <c:param name="listSortBy" value="${param.listSortBy}"/>
+                    <c:param name="listSortOrder" value="${param.listSortOrder}"/>
+                    <c:param name="listPage" value="${empty param.listPage ? 1 : param.listPage}"/>
+                </c:url>
+
+                <a class="btn btn-outline-secondary" href="${resetDetailUrl}">
                     <i class="bx bx-refresh me-1"></i> Reset
                 </a>
-                <a class="btn btn-label-secondary ms-auto" href="${backUrl}">
+
+                <a class="btn btn-label-secondary ms-lg-auto" href="${backUrl}">
                     <i class="bx bx-arrow-back me-1"></i> Back to List
                 </a>
             </div>

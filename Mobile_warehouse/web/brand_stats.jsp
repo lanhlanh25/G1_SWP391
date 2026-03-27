@@ -129,16 +129,13 @@
             <input type="hidden" name="p" value="brand-stats"/>
             <div class="row g-3">
                 <div class="col-md-3">
-                    <label class="form-label">Data Range</label>
-                    <select class="form-select" name="range">
-                        <option value="all" ${empty range || range=='all' ? 'selected' : ''}>All Time</option>
-                        <option value="today" ${range=='today' ? 'selected' : ''}>Today</option>
-                        <option value="last7" ${range=='last7' ? 'selected' : ''}>Last 7 Days</option>
-                        <option value="last30" ${range=='last30' ? 'selected' : ''}>Past 30 Days</option>
-                        <option value="last90" ${range=='last90' ? 'selected' : ''}>Past 90 Days</option>
-                        <option value="month" ${range=='month' ? 'selected' : ''}>This Month</option>
-                        <option value="lastMonth" ${range=='lastMonth' ? 'selected' : ''}>Last Month</option>
-                    </select>
+                    <label class="form-label">From Date</label>
+                    <input type="date" name="from" class="form-control" value="${from}"/>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">To Date</label>
+                    <input type="date" name="to" class="form-control" value="${to}"/>
                 </div>
 
                 <div class="col-md-3">
@@ -252,7 +249,8 @@
                             <c:url var="detailUrl" value="/home">
                                 <c:param name="p" value="brand-stats-detail"/>
                                 <c:param name="brandId" value="${r.brandId}"/>
-                                <c:param name="listRange" value="${range}"/>
+                                <c:param name="from" value="${from}"/>
+                                <c:param name="to" value="${to}"/>
                             </c:url>
                             <a class="btn btn-sm btn-icon btn-label-primary" href="${detailUrl}" title="View Details">
                                 <i class="bx bx-show-alt"></i>
@@ -287,7 +285,8 @@
                         <c:param name="brandId" value="${brandId}"/>
                         <c:param name="sortBy" value="${sortBy}"/>
                         <c:param name="sortOrder" value="${sortOrder}"/>
-                        <c:param name="range" value="${range}"/>
+                        <c:param name="from" value="${from}"/>
+                        <c:param name="to" value="${to}"/>
                     </c:url>
 
                     <li class="page-item ${page <= 1 ? 'disabled' : ''}">
@@ -301,8 +300,8 @@
                                 <a class="page-link" href="${pageUrl}&page=${i}">${i}</a>
                             </li>
                             <c:if test="${i == page + 1 && i < totalPages}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
-                        </c:if>
-                    </c:forEach>
+                            </c:if>
+                        </c:forEach>
 
                     <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
                         <a class="page-link" href="${pageUrl}&page=${page+1}"><i class="bx bx-chevron-right"></i></a>

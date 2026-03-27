@@ -63,18 +63,19 @@ public class ExportReceiptDAO {
     // =========================
     public List<ExportReceiptDetailLine> getDetailLines(long exportId) {
         String sql = """
-            SELECT erl.line_id, erl.qty, erl.item_note,
-                   p.product_code,
-                   s.sku_code,
-                   u.full_name AS created_by_name
-            FROM export_receipt_lines erl
-            JOIN products p ON p.product_id = erl.product_id
-            JOIN product_skus s ON s.sku_id = erl.sku_id
-            JOIN export_receipts er ON er.export_id = erl.export_id
-            JOIN users u ON u.user_id = er.created_by
-            WHERE erl.export_id = ?
-            ORDER BY erl.line_id ASC
-        """;
+    SELECT erl.line_id, erl.qty, erl.item_note,
+           p.product_name,
+           p.product_code,
+           s.sku_code,
+           u.full_name AS created_by_name
+    FROM export_receipt_lines erl
+    JOIN products p ON p.product_id = erl.product_id
+    JOIN product_skus s ON s.sku_id = erl.sku_id
+    JOIN export_receipts er ON er.export_id = erl.export_id
+    JOIN users u ON u.user_id = er.created_by
+    WHERE erl.export_id = ?
+    ORDER BY erl.line_id ASC
+""";
 
         String sqlImei = """
             SELECT imei
@@ -97,6 +98,7 @@ public class ExportReceiptDAO {
                     it.setLineId(lineId);
                     it.setQty(rs.getInt("qty"));
                     it.setProductCode(rs.getString("product_code"));
+                    it.setProductName(rs.getString("product_name"));
                     it.setSkuCode(rs.getString("sku_code"));
                     it.setCreatedByName(rs.getString("created_by_name"));
                     it.setItemNote(rs.getString("item_note"));
@@ -182,16 +184,16 @@ public class ExportReceiptDAO {
             int page, int pageSize) {
 
         StringBuilder sql = new StringBuilder("""
-            SELECT er.export_id, er.export_code, er.export_date, er.status,
-                   COALESCE(req.request_code, '-') AS request_code,
-                   COALESCE(u.full_name, '-') AS created_by_name,
-                   COALESCE(SUM(erl.qty), 0) AS total_qty
-            FROM export_receipts er
-            LEFT JOIN export_requests req ON req.request_id = er.request_id
-            LEFT JOIN users u ON u.user_id = er.created_by
-            LEFT JOIN export_receipt_lines erl ON erl.export_id = er.export_id
-            WHERE 1=1
-        """);
+    SELECT er.export_id, er.export_code, er.export_date, er.status,
+           COALESCE(req.request_code, '-') AS request_code,
+           COALESCE(u.full_name, '-') AS created_by_name,
+           COALESCE(SUM(erl.qty), 0) AS total_qty
+    FROM export_receipts er
+    LEFT JOIN export_requests req ON req.request_id = er.request_id
+    LEFT JOIN users u ON u.user_id = er.created_by
+    LEFT JOIN export_receipt_lines erl ON erl.export_id = er.export_id
+    WHERE 1=1
+""");
 
         List<Object> params = new ArrayList<>();
 
@@ -222,10 +224,11 @@ public class ExportReceiptDAO {
         }
 
         sql.append("""
-            GROUP BY er.export_id, er.export_code, er.export_date, er.status, req.request_code, u.full_name
-            ORDER BY er.export_id DESC
-            LIMIT ? OFFSET ?
-        """);
+    GROUP BY er.export_id, er.export_code, er.export_date, er.status,
+             req.request_code, u.full_name
+    ORDER BY er.export_id DESC
+    LIMIT ? OFFSET ?
+""");
 
         params.add(pageSize);
         params.add((page - 1) * pageSize);
@@ -246,6 +249,7 @@ public class ExportReceiptDAO {
                     it.setExportId(rs.getLong("export_id"));
                     it.setExportCode(rs.getString("export_code"));
                     it.setRequestCode(rs.getString("request_code"));
+                   
                     it.setCreatedByName(rs.getString("created_by_name"));
                     it.setStatus(rs.getString("status"));
                     it.setTotalQty(rs.getInt("total_qty"));

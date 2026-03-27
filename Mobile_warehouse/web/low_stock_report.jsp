@@ -65,7 +65,7 @@
                     </div>
                     <h4 class="ms-1 mb-0">${summary.totalProducts}</h4>
                 </div>
-                <p class="mb-0 small text-muted">Total Monitored Products</p>
+                <p class="mb-0 small text-muted">Total Products</p>
             </div>
         </div>
     </div>
@@ -85,27 +85,17 @@
                     </div>
                 </div>
 
-                <div class="col-md-3 col-lg-2">
-                    <label class="form-label small text-uppercase fw-semibold">Supplier</label>
-                    <select class="form-select" name="supplierId">
-                        <option value="">All Suppliers</option>
-                        <c:forEach var="s" items="${suppliers}">
-                            <option value="${s.id}" <c:if test="${supplierId == '' + s.id}">selected</c:if>>
-                                ${s.name}
-                            </option>
-                        </c:forEach>
-                    </select>
-                </div>
+                
 
                 <div class="col-md-3 col-lg-2">
                     <label class="form-label small text-uppercase fw-semibold">Stock Status</label>
                     <select class="form-select" name="stockStatus">
                         <option value="">All Low Stock</option>
-                        <option value="All" ${stockStatus == 'All' ? 'selected' : ''}>All Products</option>
+                        
                         <option value="Out Of Stock" ${stockStatus == 'Out Of Stock' ? 'selected' : ''}>Out Of Stock</option>
                         <option value="Reorder Needed" ${stockStatus == 'Reorder Needed' ? 'selected' : ''}>Reorder Needed</option>
                         <option value="At Threshold" ${stockStatus == 'At Threshold' ? 'selected' : ''}>At Threshold</option>
-                        <option value="OK" ${stockStatus == 'OK' ? 'selected' : ''}>Standard Level</option>
+                        <option value="OK" ${stockStatus == 'OK' ? 'selected' : ''}>InStock</option>
                     </select>
                 </div>
 
@@ -141,7 +131,7 @@
             <thead class="table-dark">
                 <tr>
                     <th class="ps-3 text-uppercase small text-white">Product Information</th>
-                    <th class="text-uppercase small text-white">Supplier</th>
+                    
                     <th class="text-center text-uppercase small text-white">Current</th>
                     <th class="text-center">Threshold</th>
                     <th class="text-center text-uppercase small text-white">Status</th>
@@ -156,7 +146,7 @@
                             <div class="fw-bold text-heading">${item.productName}</div>
                             <small class="text-muted mono-text fs-12">${item.productCode}</small>
                         </td>
-                        <td>${item.supplierName}</td>
+                        
                         <td class="text-center fw-bold fs-5">${item.currentStock}</td>
                         <td class="text-center fw-semibold">${item.threshold}</td>
                         <td class="text-center">
@@ -171,7 +161,7 @@
                                     <span class="badge bg-label-info">At Threshold</span>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="badge bg-label-success text-uppercase px-3">OK</span>
+                                    <span class="badge bg-label-success text-uppercase px-3">InStock</span>
                                 </c:otherwise>
                             </c:choose>
                         </td>

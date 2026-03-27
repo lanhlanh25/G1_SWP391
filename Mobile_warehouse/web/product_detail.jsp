@@ -72,7 +72,7 @@
                             <th>Color</th>
                             <th style="width:100px;">RAM</th>
                             <th style="width:100px;">Storage</th>
-                            <th>Supplier</th>
+                            
                             <th style="width:100px;" class="text-center">Stock</th>
                             <th style="width:140px;" class="text-center">Status</th>
                         </tr>
@@ -93,7 +93,7 @@
                                             <td>${s.color}</td>
                                             <td class="text-muted">${s.ramGb} GB</td>
                                             <td class="text-muted">${s.storageGb} GB</td>
-                                            <td class="fs-12">${s.supplierName}</td>
+                                            
                                             <td class="text-center fw-700">${s.stock}</td>
                                             <td class="text-center">
                                                 <c:choose>

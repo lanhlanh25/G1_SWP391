@@ -23,13 +23,11 @@ public class AdminResetRequestAction extends HttpServlet {
         HttpSession session = req.getSession(false);
         
         model.User userFromSession = (session == null) ? null : (model.User) session.getAttribute("authUser");
-        // 1. Kiểm tra đăng nhập
     if (userFromSession == null) {
         resp.sendRedirect(req.getContextPath() + "/login"); 
         return;
     }
 
-    // 2. Kiểm tra quyền Admin (Sử dụng trực tiếp roleName đã lưu trong session ở file Login)
     String sessionRole = (String) session.getAttribute("roleName");
     if (!"ADMIN".equalsIgnoreCase(sessionRole)) {
         resp.sendError(HttpServletResponse.SC_FORBIDDEN);
@@ -38,12 +36,10 @@ public class AdminResetRequestAction extends HttpServlet {
 
     int adminId = userFromSession.getUserId();
 
-        // 2. Lấy tham số
         String ridRaw = req.getParameter("requestId");
         String action = req.getParameter("action");
         String reason = req.getParameter("reason");
 
-        // URL quay về danh sách (phải khớp với cách bạn đặt trong Home.java)
         String redirectUrl = req.getContextPath() + "/home?p=admin/reset-requests";
 
         if (ridRaw == null || action == null) {
@@ -58,7 +54,6 @@ public class AdminResetRequestAction extends HttpServlet {
             if (rr != null && "PENDING".equalsIgnoreCase(rr.getStatus())) {
 
                 if ("REJECT".equalsIgnoreCase(action)) {
-                    // Xử lý Từ chối
                     String finalReason = (reason == null || reason.isBlank()) ? "No specific reason provided." : reason.trim();
                     dao.decideResetRequest(requestId, "REJECTED", finalReason, adminId);
 
@@ -70,7 +65,6 @@ public class AdminResetRequestAction extends HttpServlet {
                     session.setAttribute("message", "Rejected request #" + requestId);
 
                 } else if ("APPROVE".equalsIgnoreCase(action)) {
-                    // Xử lý Đồng ý
                     String newPassword = EmailUtil.randomPassword8();
                     String newHash = PasswordUtil.hashPassword(newPassword);
 
@@ -89,7 +83,6 @@ public class AdminResetRequestAction extends HttpServlet {
             session.setAttribute("error", "An error occurred: " + e.getMessage());
         }
 
-        // 3. Quan trọng: Redirect về đúng trang list của Admin
         resp.sendRedirect(redirectUrl);
     }
 }

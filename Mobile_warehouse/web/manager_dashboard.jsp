@@ -8,7 +8,7 @@
 </h4>
 
 <div class="row">
-    <div class="col-lg-8 mb-4 order-0">
+    <div class="col-lg-12 mb-4 order-0">
         <div class="card">
             <div class="d-flex align-items-end row">
                 <div class="col-sm-7">
@@ -33,39 +33,7 @@
         </div>
     </div>
 
-    <div class="col-lg-4 col-md-4 order-1">
-        <div class="row">
-            <div class="col-lg-6 col-md-12 col-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-title d-flex align-items-start justify-content-between">
-                            <div class="avatar flex-shrink-0">
-                                <img src="${ctx}/assets/img/icons/unicons/chart-success.png" alt="chart success" class="rounded" />
-                            </div>
-                        </div>
-                        <span class="fw-semibold d-block mb-1">Today Imported</span>
-                        <h3 class="card-title mb-2 text-success">${todayImportedUnits}</h3>
-                        <small class="text-success fw-semibold"><i class="bx bx-up-arrow-alt"></i> Units</small>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-6 col-md-12 col-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-title d-flex align-items-start justify-content-between">
-                            <div class="avatar flex-shrink-0">
-                                <img src="${ctx}/assets/img/icons/unicons/wallet-info.png" alt="Credit Card" class="rounded" />
-                            </div>
-                        </div>
-                        <span class="fw-semibold d-block mb-1">Today Exported</span>
-                        <h3 class="card-title text-nowrap mb-1 text-info">${todayExportedUnits}</h3>
-                        <small class="text-info fw-semibold"><i class="bx bx-down-arrow-alt"></i> Units</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 </div>
 
 <!-- Inventory Summary Row -->

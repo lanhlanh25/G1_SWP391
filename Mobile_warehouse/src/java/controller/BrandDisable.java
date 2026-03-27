@@ -31,20 +31,17 @@ public class BrandDisable extends HttpServlet {
 
         long id = Long.parseLong(idRaw);
 
-        // NEW: nhận trạng thái muốn chuyển tới
         String toRaw = req.getParameter("to"); // "0" or "1"
         boolean toActive;
         if ("1".equals(toRaw)) toActive = true;
         else if ("0".equals(toRaw)) toActive = false;
         else {
-            // nếu không truyền "to", thì tự đảo trạng thái
             toActive = true;
         }
 
         try {
             BrandDAO dao = new BrandDAO();
 
-            // nếu không truyền "to" thì toggle theo DB
             if (toRaw == null || toRaw.isBlank()) {
                 boolean current = dao.isActive(id);
                 toActive = !current;

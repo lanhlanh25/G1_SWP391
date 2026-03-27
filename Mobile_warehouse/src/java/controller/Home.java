@@ -140,7 +140,7 @@ public class Home extends HttpServlet {
             try {
                 ImportReceiptListDAO dao = new ImportReceiptListDAO();
 
-                // ✅ deleteDraft() already allows DRAFT/PENDING only
+                //  deleteDraft() already allows DRAFT/PENDING only
                 boolean ok = dao.deleteDraft(importId);
 
                 if (ok) {
@@ -175,7 +175,7 @@ public class Home extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/home?p=" + url(p));
     }
 
-// ✅ helper: keep filter when redirect back to list
+// helper: keep filter when redirect back to list
     private String buildBackImportListUrl(HttpServletRequest request, String key, String msg) {
         String ctx = request.getContextPath();
 
@@ -582,7 +582,7 @@ public class Home extends HttpServlet {
                     if (dashboardRecentActivities.size() > 6) {
                         dashboardRecentActivities = new ArrayList<>(dashboardRecentActivities.subList(0, 6));
                     }
-                    int lowThreshold =10;
+                    int lowThreshold = 10;
                     // =========================
                     // SET ATTRIBUTES
                     // =========================
@@ -726,55 +726,55 @@ public class Home extends HttpServlet {
             // =========================
             // ROLES
             // =========================
-          case "role-list": {
-    String keyword = request.getParameter("q");
-    String st = request.getParameter("status");
+            case "role-list": {
+                String keyword = request.getParameter("q");
+                String st = request.getParameter("status");
 
-    Integer status = null;
-    if (st != null && !st.isBlank()) {
-        try {
-            status = Integer.parseInt(st.trim());
-        } catch (Exception e) {
-            status = null;
-            st = "";
-        }
-    } else {
-        st = "";
-    }
+                Integer status = null;
+                if (st != null && !st.isBlank()) {
+                    try {
+                        status = Integer.parseInt(st.trim());
+                    } catch (Exception e) {
+                        status = null;
+                        st = "";
+                    }
+                } else {
+                    st = "";
+                }
 
-    if (keyword == null) {
-        keyword = "";
-    }
-    keyword = keyword.trim();
+                if (keyword == null) {
+                    keyword = "";
+                }
+                keyword = keyword.trim();
 
-    int page = parseInt(request.getParameter("page"), 1);
-    if (page < 1) {
-        page = 1;
-    }
+                int page = parseInt(request.getParameter("page"), 1);
+                if (page < 1) {
+                    page = 1;
+                }
 
-    int pageSize = 5;
-    int totalItems = roleDAO.countRoles(keyword, status);
-    int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+                int pageSize = 5;
+                int totalItems = roleDAO.countRoles(keyword, status);
+                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
 
-    if (totalPages < 1) {
-        totalPages = 1;
-    }
-    if (page > totalPages) {
-        page = totalPages;
-    }
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
 
-    List<Role> roles = roleDAO.searchRoles(keyword, status, page, pageSize);
+                List<Role> roles = roleDAO.searchRoles(keyword, status, page, pageSize);
 
-    request.setAttribute("roles", roles);
-    request.setAttribute("q", keyword);
-    request.setAttribute("status", st);
+                request.setAttribute("roles", roles);
+                request.setAttribute("q", keyword);
+                request.setAttribute("status", st);
 
-    request.setAttribute("page", page);
-    request.setAttribute("pageSize", pageSize);
-    request.setAttribute("totalItems", totalItems);
-    request.setAttribute("totalPages", totalPages);
-    break;
-}
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                request.setAttribute("totalItems", totalItems);
+                request.setAttribute("totalPages", totalPages);
+                break;
+            }
             case "role-detail": {
                 String ridRaw = request.getParameter("roleId");
                 if (ridRaw == null || ridRaw.isBlank()) {
@@ -804,55 +804,55 @@ public class Home extends HttpServlet {
                 request.setAttribute("checked", rpDAO.getPermissionIdsByRole(roleId));
                 break;
             }
-          case "role-toggle": {
-    String keyword = request.getParameter("q");
-    String st = request.getParameter("status");
+            case "role-toggle": {
+                String keyword = request.getParameter("q");
+                String st = request.getParameter("status");
 
-    Integer status = null;
-    if (st != null && !st.isBlank()) {
-        try {
-            status = Integer.parseInt(st.trim());
-        } catch (Exception e) {
-            status = null;
-            st = "";
-        }
-    } else {
-        st = "";
-    }
+                Integer status = null;
+                if (st != null && !st.isBlank()) {
+                    try {
+                        status = Integer.parseInt(st.trim());
+                    } catch (Exception e) {
+                        status = null;
+                        st = "";
+                    }
+                } else {
+                    st = "";
+                }
 
-    if (keyword == null) {
-        keyword = "";
-    }
-    keyword = keyword.trim();
+                if (keyword == null) {
+                    keyword = "";
+                }
+                keyword = keyword.trim();
 
-    int page = parseInt(request.getParameter("page"), 1);
-    if (page < 1) {
-        page = 1;
-    }
+                int page = parseInt(request.getParameter("page"), 1);
+                if (page < 1) {
+                    page = 1;
+                }
 
-    int pageSize = 5;
-    int totalItems = roleDAO.countRoles(keyword, status);
-    int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+                int pageSize = 5;
+                int totalItems = roleDAO.countRoles(keyword, status);
+                int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
 
-    if (totalPages < 1) {
-        totalPages = 1;
-    }
-    if (page > totalPages) {
-        page = totalPages;
-    }
+                if (totalPages < 1) {
+                    totalPages = 1;
+                }
+                if (page > totalPages) {
+                    page = totalPages;
+                }
 
-    List<Role> roles = roleDAO.searchRoles(keyword, status, page, pageSize);
+                List<Role> roles = roleDAO.searchRoles(keyword, status, page, pageSize);
 
-    request.setAttribute("roles", roles);
-    request.setAttribute("q", keyword);
-    request.setAttribute("status", st);
+                request.setAttribute("roles", roles);
+                request.setAttribute("q", keyword);
+                request.setAttribute("status", st);
 
-    request.setAttribute("page", page);
-    request.setAttribute("pageSize", pageSize);
-    request.setAttribute("totalItems", totalItems);
-    request.setAttribute("totalPages", totalPages);
-    break;
-}
+                request.setAttribute("page", page);
+                request.setAttribute("pageSize", pageSize);
+                request.setAttribute("totalItems", totalItems);
+                request.setAttribute("totalPages", totalPages);
+                break;
+            }
 
             case "role-perm-view": {
                 String ridRaw = request.getParameter("roleId");
@@ -970,7 +970,7 @@ public class Home extends HttpServlet {
                     return;
                 }
                 request.setAttribute("brand", b);
-                
+
                 break;
             }
 
@@ -988,11 +988,7 @@ public class Home extends HttpServlet {
                 String sortBy = request.getParameter("sortBy");
                 String sortOrder = request.getParameter("sortOrder");
                 String brandIdRaw = request.getParameter("brandId");
-                String range = request.getParameter("range");
 
-                if (range == null || range.isBlank()) {
-                    range = "all";
-                }
                 if (sortBy == null || sortBy.isBlank()) {
                     sortBy = "stock";
                 }
@@ -1000,42 +996,26 @@ public class Home extends HttpServlet {
                     sortOrder = "DESC";
                 }
 
+                String fromRaw = request.getParameter("from");
+                String toRaw = request.getParameter("to");
+
                 Date fromDate = null;
                 Date toDate = null;
 
-                LocalDate today = LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
-                switch (range) {
-                    case "today":
-                        fromDate = Date.valueOf(today);
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "last7":
-                        fromDate = Date.valueOf(today.minusDays(6));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "last30":
-                        fromDate = Date.valueOf(today.minusDays(29));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "last90":
-                        fromDate = Date.valueOf(today.minusDays(89));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "month":
-                        fromDate = Date.valueOf(today.withDayOfMonth(1));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "lastMonth":
-                        LocalDate firstDayLastMonth = today.minusMonths(1).withDayOfMonth(1);
-                        LocalDate lastDayLastMonth = today.withDayOfMonth(1).minusDays(1);
-                        fromDate = Date.valueOf(firstDayLastMonth);
-                        toDate = Date.valueOf(lastDayLastMonth);
-                        break;
-                    default:
-                        fromDate = null;
-                        toDate = null;
-                        range = "all";
-                        break;
+                try {
+                    if (fromRaw != null && !fromRaw.isBlank()) {
+                        fromDate = Date.valueOf(fromRaw);
+                    }
+                } catch (Exception e) {
+                    fromDate = null;
+                }
+
+                try {
+                    if (toRaw != null && !toRaw.isBlank()) {
+                        toDate = Date.valueOf(toRaw);
+                    }
+                } catch (Exception e) {
+                    toDate = null;
                 }
 
                 Long brandId = null;
@@ -1078,7 +1058,8 @@ public class Home extends HttpServlet {
                 request.setAttribute("pageSize", pageSize);
                 request.setAttribute("totalPages", totalPages);
                 request.setAttribute("totalItems", totalItems);
-                request.setAttribute("range", range);
+                request.setAttribute("from", fromRaw);
+                request.setAttribute("to", toRaw);
                 break;
             }
 
@@ -1103,43 +1084,28 @@ public class Home extends HttpServlet {
                     dSortOrder = "DESC";
                 }
 
-                String range = request.getParameter("listRange");
-                if (range == null || range.isBlank()) {
-                    range = "all";
+                String fromRaw = request.getParameter("from");
+                String toRaw = request.getParameter("to");
+
+                Date fromDate = null;
+                Date toDate = null;
+
+                try {
+                    if (fromRaw != null && !fromRaw.isBlank()) {
+                        fromDate = Date.valueOf(fromRaw);
+                    }
+                } catch (Exception e) {
                 }
 
-                Date fromDate = null, toDate = null;
-                LocalDate today = LocalDate.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh"));
-                switch (range) {
-                    case "today":
-                        fromDate = Date.valueOf(today);
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "last7":
-                        fromDate = Date.valueOf(today.minusDays(6));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "last30":
-                        fromDate = Date.valueOf(today.minusDays(29));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "last90":
-                        fromDate = Date.valueOf(today.minusDays(89));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "month":
-                        fromDate = Date.valueOf(today.withDayOfMonth(1));
-                        toDate = Date.valueOf(today);
-                        break;
-                    case "lastMonth":
-                        LocalDate first = today.minusMonths(1).withDayOfMonth(1);
-                        LocalDate last = today.withDayOfMonth(1).minusDays(1);
-                        fromDate = Date.valueOf(first);
-                        toDate = Date.valueOf(last);
-                        break;
-                    default:
-                        break;
+                try {
+                    if (toRaw != null && !toRaw.isBlank()) {
+                        toDate = Date.valueOf(toRaw);
+                    }
+                } catch (Exception e) {
                 }
+
+                request.setAttribute("from", fromRaw);
+                request.setAttribute("to", toRaw);
 
                 Brand b = brandDAO.findById(brandId);
                 if (b == null) {
@@ -1155,7 +1121,6 @@ public class Home extends HttpServlet {
                 request.setAttribute("dSortBy", dSortBy);
                 request.setAttribute("dSortOrder", dSortOrder);
                 request.setAttribute("detailSummary", detailSummary);
-                request.setAttribute("range", range);
                 request.setAttribute("lowThreshold", lowThreshold);
                 break;
             }
@@ -1561,6 +1526,7 @@ public class Home extends HttpServlet {
 
                 request.setAttribute("erRequestDateDefault", LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
                 request.setAttribute("today", LocalDate.now().toString());
+                request.setAttribute("erExpectedExportDateDefault", LocalDate.now().toString());
                 break;
             }
             case "create-import-request": {
@@ -1594,6 +1560,7 @@ public class Home extends HttpServlet {
                 request.setAttribute("irRequestDateDefault",
                         LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
                 request.setAttribute("today", LocalDate.now().toString());
+                request.setAttribute("irExpectedImportDateDefault", LocalDate.now().toString());
 
                 String productIdRaw = request.getParameter("productId");
                 if (productIdRaw != null && !productIdRaw.isBlank()) {
@@ -2200,10 +2167,7 @@ public class Home extends HttpServlet {
                 switch (p) {
                     case "dashboard":
                         return "sales_dashboard.jsp";
-                    case "view_supplier":
-                        return "supplier_list.jsp";
-                    case "supplier_detail":
-                        return "supplier_detail.jsp";
+
                     case "my-profile":
                     case "profile":
                         return "view_profile.jsp";
@@ -2225,11 +2189,6 @@ public class Home extends HttpServlet {
                         return "view_import_request_list.jsp";
                     case "import-request-detail":
                         return "view_import_request_detail.jsp";
-
-                    case "brand-list":
-                        return "brand_list.jsp";
-                    case "brand-detail":
-                        return "brand_detail.jsp";
 
                     default:
                         return null;

@@ -19,6 +19,8 @@ import model.ProductSku;
 
 public class ProductSkuDAO {
 
+    private static final int LOW_STOCK_THRESHOLD = 10;
+
     public List<ProductSku> getAllSkus() throws Exception {
         List<ProductSku> list = new ArrayList<>();
         String sql = "SELECT * FROM product_skus";
@@ -44,30 +46,58 @@ public class ProductSkuDAO {
     public List<ProductSku> filterVariants(Integer productId, String color, String storage, String ram, String status, String sku, String q) throws Exception {
         List<ProductSku> list = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
-            "SELECT s.*, p.product_name " +
-            "FROM product_skus s " +
-            "JOIN products p ON s.product_id = p.product_id " +
-            "WHERE 1=1"
+                "SELECT s.*, p.product_name "
+                + "FROM product_skus s "
+                + "JOIN products p ON s.product_id = p.product_id "
+                + "WHERE 1=1"
         );
 
-        if (productId != null) sql.append(" AND s.product_id = ?");
-        if (color != null && !color.isEmpty()) sql.append(" AND s.color = ?");
-        if (storage != null && !storage.isEmpty()) sql.append(" AND s.storage_gb = ?");
-        if (ram != null && !ram.isEmpty()) sql.append(" AND s.ram_gb = ?");
-        if (status != null && !status.isEmpty()) sql.append(" AND s.status = ?");
-        if (sku != null && !sku.isEmpty()) sql.append(" AND s.sku_code LIKE ?");
-        if (q != null && !q.isEmpty()) sql.append(" AND p.product_name LIKE ?");
+        if (productId != null) {
+            sql.append(" AND s.product_id = ?");
+        }
+        if (color != null && !color.isEmpty()) {
+            sql.append(" AND s.color = ?");
+        }
+        if (storage != null && !storage.isEmpty()) {
+            sql.append(" AND s.storage_gb = ?");
+        }
+        if (ram != null && !ram.isEmpty()) {
+            sql.append(" AND s.ram_gb = ?");
+        }
+        if (status != null && !status.isEmpty()) {
+            sql.append(" AND s.status = ?");
+        }
+        if (sku != null && !sku.isEmpty()) {
+            sql.append(" AND s.sku_code LIKE ?");
+        }
+        if (q != null && !q.isEmpty()) {
+            sql.append(" AND p.product_name LIKE ?");
+        }
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql.toString())) {
             int index = 1;
 
-            if (productId != null) ps.setInt(index++, productId);
-            if (color != null && !color.isEmpty()) ps.setString(index++, color);
-            if (storage != null && !storage.isEmpty()) ps.setInt(index++, Integer.parseInt(storage));
-            if (ram != null && !ram.isEmpty()) ps.setInt(index++, Integer.parseInt(ram));
-            if (status != null && !status.isEmpty()) ps.setString(index++, status);
-            if (sku != null && !sku.isEmpty()) ps.setString(index++, "%" + sku + "%");
-            if (q != null && !q.isEmpty()) ps.setString(index++, "%" + q + "%");
+            if (productId != null) {
+                ps.setInt(index++, productId);
+            }
+            if (color != null && !color.isEmpty()) {
+                ps.setString(index++, color);
+            }
+            if (storage != null && !storage.isEmpty()) {
+                ps.setInt(index++, Integer.parseInt(storage));
+            }
+            if (ram != null && !ram.isEmpty()) {
+                ps.setInt(index++, Integer.parseInt(ram));
+            }
+            if (status != null && !status.isEmpty()) {
+                ps.setString(index++, status);
+            }
+            if (sku != null && !sku.isEmpty()) {
+                ps.setString(index++, "%" + sku + "%");
+            }
+            if (q != null && !q.isEmpty()) {
+                ps.setString(index++, "%" + q + "%");
+            }
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -310,12 +340,12 @@ public class ProductSkuDAO {
         }
 
         // Check Export Receipts
-        String sqlExpRec = "SELECT er.export_code " +
-                         "FROM export_receipt_lines erl " +
-                         "JOIN export_receipts er ON erl.export_id = er.export_id " +
-                         "WHERE erl.sku_id = ? " +
-                         "  AND er.status IN ('DRAFT', 'PENDING') " +
-                         "LIMIT 1";
+        String sqlExpRec = "SELECT er.export_code "
+                + "FROM export_receipt_lines erl "
+                + "JOIN export_receipts er ON erl.export_id = er.export_id "
+                + "WHERE erl.sku_id = ? "
+                + "  AND er.status IN ('DRAFT', 'PENDING') "
+                + "LIMIT 1";
         try (PreparedStatement ps = con.prepareStatement(sqlExpRec)) {
             ps.setInt(1, skuId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -326,12 +356,12 @@ public class ProductSkuDAO {
         }
 
         // Check Import Receipts
-        String sqlImpRec = "SELECT ir.import_code " +
-                         "FROM import_receipt_lines irl " +
-                         "JOIN import_receipts ir ON irl.import_id = ir.import_id " +
-                         "WHERE irl.sku_id = ? " +
-                         "  AND ir.status IN ('DRAFT', 'PENDING') " +
-                         "LIMIT 1";
+        String sqlImpRec = "SELECT ir.import_code "
+                + "FROM import_receipt_lines irl "
+                + "JOIN import_receipts ir ON irl.import_id = ir.import_id "
+                + "WHERE irl.sku_id = ? "
+                + "  AND ir.status IN ('DRAFT', 'PENDING') "
+                + "LIMIT 1";
         try (PreparedStatement ps = con.prepareStatement(sqlImpRec)) {
             ps.setInt(1, skuId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -435,25 +465,42 @@ public class ProductSkuDAO {
     public List<ProductSku> getSkuStockByProductId(long productId) throws Exception {
         List<ProductSku> list = new ArrayList<>();
 
-        String sql = "SELECT " +
-                    "    ps.sku_id, " +
-                    "    ps.product_id, " +
-                    "    ps.sku_code, " +
-                    "    ps.color, " +
-                    "    ps.ram_gb, " +
-                    "    ps.storage_gb, " +
-                    "    ps.supplier_id, " +
-                    "    ps.status, " +
-                    "    ps.created_at, " +
-                    "    ps.updated_at, " +
-                    "    COALESCE(s.supplier_name, 'N/A') AS supplier_name, " +
-                    "    COALESCE(ib.qty_on_hand, 0) AS stock " +
-                    "FROM product_skus ps " +
-                    "LEFT JOIN suppliers s ON s.supplier_id = ps.supplier_id " +
-                    "LEFT JOIN inventory_balance ib ON ib.sku_id = ps.sku_id " +
-                    "WHERE ps.product_id = ? " +
-                    "  AND ps.status = 'ACTIVE' " +
-                    "ORDER BY ps.sku_code ASC";
+        String sql = """
+        SELECT
+            ps.sku_id,
+            ps.product_id,
+            ps.sku_code,
+            ps.color,
+            ps.ram_gb,
+            ps.storage_gb,
+            ps.supplier_id,
+            ps.status,
+            ps.created_at,
+            ps.updated_at,
+            COALESCE(s.supplier_name, 'N/A') AS supplier_name,
+            COUNT(pu.unit_id) AS stock
+        FROM product_skus ps
+        LEFT JOIN suppliers s
+               ON s.supplier_id = ps.supplier_id
+        LEFT JOIN product_units pu
+               ON pu.sku_id = ps.sku_id
+              AND pu.unit_status = 'ACTIVE'
+        WHERE ps.product_id = ?
+          AND ps.status = 'ACTIVE'
+        GROUP BY
+            ps.sku_id,
+            ps.product_id,
+            ps.sku_code,
+            ps.color,
+            ps.ram_gb,
+            ps.storage_gb,
+            ps.supplier_id,
+            ps.status,
+            ps.created_at,
+            ps.updated_at,
+            s.supplier_name
+        ORDER BY ps.sku_code ASC
+    """;
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
@@ -473,19 +520,11 @@ public class ProductSkuDAO {
                     item.setStatus(rs.getString("status"));
                     item.setCreatedAt(rs.getTimestamp("created_at"));
                     item.setUpdatedAt(rs.getTimestamp("updated_at"));
-
                     item.setSupplierName(rs.getString("supplier_name"));
 
                     int stock = rs.getInt("stock");
                     item.setStock(stock);
-
-                    if (stock == 0) {
-                        item.setStockStatus("Out Of Stock");
-                    } else if (stock <= 10) {
-                        item.setStockStatus("Low Stock");
-                    } else {
-                        item.setStockStatus("OK");
-                    }
+                    item.setStockStatus(toStockStatus(stock));
 
                     list.add(item);
                 }
@@ -495,4 +534,13 @@ public class ProductSkuDAO {
         return list;
     }
 
+    private String toStockStatus(int stock) {
+        if (stock == 0) {
+            return "Out Of Stock";
+        }
+        if (stock <= LOW_STOCK_THRESHOLD) {
+            return "Low Stock";
+        }
+        return "OK";
+    }
 }

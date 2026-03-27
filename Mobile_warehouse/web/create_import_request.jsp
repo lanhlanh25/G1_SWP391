@@ -33,7 +33,10 @@
                     <input class="input readonly" type="text" value="${irCreatedByName}" readonly/>
 
                     <label class="label">Expected Import Date</label>
-                    <input class="input" type="date" name="expected_import_date" min="${today}" value="${param.expected_import_date}"/>
+                    
+                    <input class="input" type="date" name="expected_import_date"
+                           min="${today}"
+                           value="${not empty param.expected_import_date ? param.expected_import_date : irExpectedImportDateDefault}"/>
 
                     <label class="label">Note</label>
                     <textarea class="textarea" name="note">${fn:escapeXml(param.note)}</textarea>
