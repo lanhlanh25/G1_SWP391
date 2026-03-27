@@ -2223,8 +2223,6 @@ public class Home extends HttpServlet {
                         return "product_list.jsp";
                     case "product-detail":
                         return "product_detail.jsp";
-                    case "variant-matrix":
-                        return "variant_matrix.jsp";
 
                     case "my-profile":
                     case "profile":

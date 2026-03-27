@@ -7,6 +7,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
@@ -16,6 +17,13 @@ public class ApiImeiList extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        HttpSession session = req.getSession(false);
+        if (session == null || session.getAttribute("authUser") == null) {
+            resp.setStatus(401);
+            resp.getWriter().write("{\"error\":\"Unauthorized\"}");
+            return;
+        }
+
         String skuIdRaw = req.getParameter("skuId");
         if (skuIdRaw == null || skuIdRaw.isBlank()) {
             resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -34,7 +42,7 @@ public class ApiImeiList extends HttpServlet {
 
         ViewImeiDAO dao = new ViewImeiDAO();
         try {
-            // Fetch first 500 IMEIs for the modal
+ 
             List<ImeiRow> rows = dao.listImeis(skuId, null, 1, 500);
             
             System.out.println("[API] Fetching IMEIs for skuId: " + skuId + " | Found: " + (rows != null ? rows.size() : 0));

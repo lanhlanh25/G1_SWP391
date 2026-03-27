@@ -8,7 +8,9 @@
             <h1 class="h1">Product Details</h1>
         </div>
         <div class="d-flex gap-8 align-center">
-            <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=variant-matrix&productId=${product.productId}">Manage Variants</a>
+            <c:if test="${role != 'STAFF'}">
+                <a class="btn btn-primary" href="${pageContext.request.contextPath}/home?p=variant-matrix&productId=${product.productId}">Manage Variants</a>
+            </c:if>
             <a class="btn btn-outline" href="${pageContext.request.contextPath}/home?p=product-list">← List</a>
         </div>
     </div>

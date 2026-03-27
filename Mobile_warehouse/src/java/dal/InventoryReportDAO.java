@@ -44,8 +44,7 @@ public class InventoryReportDAO {
         m.put("totalBelowRop", 0);
         m.put("totalOutOfStock", 0);
 
-        // Subqueries to sum transactions. We consider 'CONFIRMED', 'COMPLETED', and
-        // 'DONE' as inventory movements.
+      
         String sql = "SELECT "
                 + "  SUM(opening_qty) AS tot_opening, "
                 + "  SUM(import_period) AS tot_import, "
@@ -155,7 +154,7 @@ public class InventoryReportDAO {
         }
     }
 
-    /* ───── List ───── */
+
     public List<InventoryReportRow> list(Date from, Date to, Long brandId,
             String keyword, int page, int pageSize)
             throws Exception {
