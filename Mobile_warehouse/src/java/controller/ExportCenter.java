@@ -70,25 +70,13 @@ public class ExportCenter extends HttpServlet {
 
         if ((fromRaw == null || fromRaw.isBlank()) && (toRaw == null || toRaw.isBlank())) {
             LocalDate today = LocalDate.now();
-            LocalDate fromDefault = today.minusMonths(1);
+            LocalDate fromDefault = today.withDayOfMonth(1);
 
             fromRaw = fromDefault.toString();
             toRaw = today.toString();
         }
 
-        Date fromDateCheck = parseDate(fromRaw);
-        Date toDateCheck = parseDate(toRaw);
-
-        if (fromDateCheck != null && toDateCheck != null && fromDateCheck.after(toDateCheck)) {
-            request.setAttribute("err", "Date From cannot be later than Date To.");
-
-            request.setAttribute("sidebarPage", "sidebar_manager.jsp");
-            request.setAttribute("contentPage", "export_center.jsp");
-            request.setAttribute("currentPage", "export-center");
-            request.setAttribute("role", "MANAGER");
-            request.getRequestDispatcher("homepage.jsp").forward(request, response);
-            return;
-        }
+        
 
         String brandIdRaw = trim(request.getParameter("brandId"));
         String keyword = trim(request.getParameter("keyword"));
@@ -113,6 +101,20 @@ public class ExportCenter extends HttpServlet {
             request.setAttribute("allBrands", brandDAO.list(null, "active", "name", "ASC", 1, 1000));
         } catch (Exception e) {
             request.setAttribute("allBrands", Collections.emptyList());
+        }
+        
+        Date fromDateCheck = parseDate(fromRaw);
+        Date toDateCheck = parseDate(toRaw);
+
+        if (fromDateCheck != null && toDateCheck != null && fromDateCheck.after(toDateCheck)) {
+            request.setAttribute("err", "Date From cannot be later than Date To.");
+
+            request.setAttribute("sidebarPage", "sidebar_manager.jsp");
+            request.setAttribute("contentPage", "export_center.jsp");
+            request.setAttribute("currentPage", "export-center");
+            request.setAttribute("role", "MANAGER");
+            request.getRequestDispatcher("homepage.jsp").forward(request, response);
+            return;
         }
 
         try {
@@ -291,7 +293,7 @@ public class ExportCenter extends HttpServlet {
         p.summaryLines.put("Closing Stock", String.valueOf(summary.getOrDefault("totalClosing", 0)));
 
         if ("summary".equalsIgnoreCase(detailLevel)) {
-            p.headers = Arrays.asList("Product Code", "Product Name", "Brand", "Openning Stock", "Closing Stock");
+            p.headers = Arrays.asList("Product Code", "Product Name", "Brand", "Opening Stock", "Closing Stock");
             for (InventoryReportRow r : rows) {
                 p.rows.add(Arrays.asList(
                         nn(r.getProductCode()),

@@ -21,6 +21,15 @@ public class ExportReceiptListItem {
     private String status;
     private int totalQuantity;
     private Timestamp exportDate;
+    private String supplierName;
+
+    public String getSupplierName() {
+        return supplierName;
+    }
+
+    public void setSupplierName(String supplierName) {
+        this.supplierName = supplierName;
+    }
 
     public Timestamp getExportDate() {
         return exportDate;
