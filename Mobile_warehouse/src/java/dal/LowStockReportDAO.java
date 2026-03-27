@@ -36,17 +36,17 @@ public class LowStockReportDAO {
                     COALESCE(MIN(ps.supplier_id), 0) AS supplier_id,
                     COALESCE(MIN(s.supplier_name), 'N/A') AS supplier_name,
                     COALESCE(MIN(b.brand_name), 'N/A') AS brand_name,
-                    COALESCE(SUM(ib.qty_on_hand), 0) AS current_stock,
-                    10 AS threshold,
+                    COUNT(pu.unit_id) AS current_stock,
+                    ? AS threshold,
                     CASE
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) = 0 THEN 'Out Of Stock'
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) < 10 THEN 'Reorder Needed'
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) = 10 THEN 'At Threshold'
+                        WHEN COUNT(pu.unit_id) = 0 THEN 'Out Of Stock'
+                        WHEN COUNT(pu.unit_id) < ? THEN 'Reorder Needed'
+                        WHEN COUNT(pu.unit_id) = ? THEN 'At Threshold'
                         ELSE 'OK'
                     END AS stock_status,
                     CASE
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) < 10
-                        THEN 10 - COALESCE(SUM(ib.qty_on_hand), 0)
+                        WHEN COUNT(pu.unit_id) < ?
+                        THEN ? - COUNT(pu.unit_id)
                         ELSE 0
                     END AS suggested_reorder_qty,
                     CASE
@@ -60,12 +60,25 @@ public class LowStockReportDAO {
                         ELSE 0
                     END AS has_active_import_request
                 FROM products p
-                LEFT JOIN brands b ON b.brand_id = p.brand_id
-                LEFT JOIN product_skus ps ON ps.product_id = p.product_id AND ps.status = 'ACTIVE'
-                LEFT JOIN suppliers s ON s.supplier_id = ps.supplier_id AND s.is_active = 1
-                LEFT JOIN inventory_balance ib ON ib.sku_id = ps.sku_id
+                LEFT JOIN brands b
+                       ON b.brand_id = p.brand_id
+                LEFT JOIN product_skus ps
+                       ON ps.product_id = p.product_id
+                      AND ps.status = 'ACTIVE'
+                LEFT JOIN suppliers s
+                       ON s.supplier_id = ps.supplier_id
+                      AND s.is_active = 1
+                LEFT JOIN product_units pu
+                       ON pu.sku_id = ps.sku_id
+                      AND pu.unit_status = 'ACTIVE'
                 WHERE p.status = 'ACTIVE'
         """);
+
+        params.add(FIXED_THRESHOLD);
+        params.add(FIXED_THRESHOLD);
+        params.add(FIXED_THRESHOLD);
+        params.add(FIXED_THRESHOLD);
+        params.add(FIXED_THRESHOLD);
 
         if (q != null && !q.trim().isEmpty()) {
             sql.append(" AND (p.product_name LIKE ? OR p.product_code LIKE ?) ");
@@ -125,19 +138,7 @@ public class LowStockReportDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    LowStockReportItem item = new LowStockReportItem();
-                    item.setProductId(rs.getLong("product_id"));
-                    item.setProductCode(rs.getString("product_code"));
-                    item.setProductName(rs.getString("product_name"));
-                    item.setSupplierId(rs.getLong("supplier_id"));
-                    item.setSupplierName(rs.getString("supplier_name"));
-                    item.setBrandName(rs.getString("brand_name"));
-                    item.setCurrentStock(rs.getInt("current_stock"));
-                    item.setThreshold(rs.getInt("threshold"));
-                    item.setStockStatus(rs.getString("stock_status"));
-                    item.setSuggestedReorderQty(rs.getInt("suggested_reorder_qty"));
-                    item.setHasActiveImportRequest(rs.getInt("has_active_import_request") == 1);
-                    list.add(item);
+                    list.add(mapRow(rs));
                 }
             }
         }
@@ -161,19 +162,27 @@ public class LowStockReportDAO {
             FROM (
                 SELECT
                     p.product_id,
-                    COALESCE(SUM(ib.qty_on_hand), 0) AS current_stock,
-                    10 AS threshold,
+                    COUNT(pu.unit_id) AS current_stock,
+                    ? AS threshold,
                     CASE
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) = 0 THEN 'Out Of Stock'
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) < 10 THEN 'Reorder Needed'
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) = 10 THEN 'At Threshold'
+                        WHEN COUNT(pu.unit_id) = 0 THEN 'Out Of Stock'
+                        WHEN COUNT(pu.unit_id) < ? THEN 'Reorder Needed'
+                        WHEN COUNT(pu.unit_id) = ? THEN 'At Threshold'
                         ELSE 'OK'
                     END AS stock_status
                 FROM products p
-                LEFT JOIN product_skus ps ON ps.product_id = p.product_id AND ps.status = 'ACTIVE'
-                LEFT JOIN inventory_balance ib ON ib.sku_id = ps.sku_id
+                LEFT JOIN product_skus ps
+                       ON ps.product_id = p.product_id
+                      AND ps.status = 'ACTIVE'
+                LEFT JOIN product_units pu
+                       ON pu.sku_id = ps.sku_id
+                      AND pu.unit_status = 'ACTIVE'
                 WHERE p.status = 'ACTIVE'
         """);
+
+        params.add(FIXED_THRESHOLD);
+        params.add(FIXED_THRESHOLD);
+        params.add(FIXED_THRESHOLD);
 
         if (q != null && !q.trim().isEmpty()) {
             sql.append(" AND (p.product_name LIKE ? OR p.product_code LIKE ?) ");
@@ -235,25 +244,33 @@ public class LowStockReportDAO {
             FROM (
                 SELECT
                     p.product_id,
-                    COALESCE(SUM(ib.qty_on_hand), 0) AS current_stock,
-                    10 AS threshold
+                    COUNT(pu.unit_id) AS current_stock,
+                    ? AS threshold
                 FROM products p
-                LEFT JOIN product_skus ps ON ps.product_id = p.product_id AND ps.status = 'ACTIVE'
-                LEFT JOIN inventory_balance ib ON ib.sku_id = ps.sku_id
+                LEFT JOIN product_skus ps
+                       ON ps.product_id = p.product_id
+                      AND ps.status = 'ACTIVE'
+                LEFT JOIN product_units pu
+                       ON pu.sku_id = ps.sku_id
+                      AND pu.unit_status = 'ACTIVE'
                 WHERE p.status = 'ACTIVE'
                 GROUP BY p.product_id
             ) x
         """;
 
-        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
+        try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
-            if (rs.next()) {
-                LowStockSummaryDTO dto = new LowStockSummaryDTO();
-                dto.setProductsAtOrBelowThreshold(rs.getInt("at_or_below_threshold"));
-                dto.setOutOfStock(rs.getInt("out_of_stock"));
-                dto.setReorderNeeded(rs.getInt("reorder_needed"));
-                dto.setTotalProducts(rs.getInt("total_products"));
-                return dto;
+            ps.setInt(1, FIXED_THRESHOLD);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    LowStockSummaryDTO dto = new LowStockSummaryDTO();
+                    dto.setProductsAtOrBelowThreshold(rs.getInt("at_or_below_threshold"));
+                    dto.setOutOfStock(rs.getInt("out_of_stock"));
+                    dto.setReorderNeeded(rs.getInt("reorder_needed"));
+                    dto.setTotalProducts(rs.getInt("total_products"));
+                    return dto;
+                }
             }
         }
 
@@ -271,17 +288,17 @@ public class LowStockReportDAO {
                     COALESCE(MIN(ps.supplier_id), 0) AS supplier_id,
                     COALESCE(MIN(s.supplier_name), 'N/A') AS supplier_name,
                     COALESCE(MIN(b.brand_name), 'N/A') AS brand_name,
-                    COALESCE(SUM(ib.qty_on_hand), 0) AS current_stock,
-                    10 AS threshold,
+                    COUNT(pu.unit_id) AS current_stock,
+                    ? AS threshold,
                     CASE
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) = 0 THEN 'Out Of Stock'
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) < 10 THEN 'Reorder Needed'
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) = 10 THEN 'At Threshold'
+                        WHEN COUNT(pu.unit_id) = 0 THEN 'Out Of Stock'
+                        WHEN COUNT(pu.unit_id) < ? THEN 'Reorder Needed'
+                        WHEN COUNT(pu.unit_id) = ? THEN 'At Threshold'
                         ELSE 'OK'
                     END AS stock_status,
                     CASE
-                        WHEN COALESCE(SUM(ib.qty_on_hand), 0) < 10
-                        THEN 10 - COALESCE(SUM(ib.qty_on_hand), 0)
+                        WHEN COUNT(pu.unit_id) < ?
+                        THEN ? - COUNT(pu.unit_id)
                         ELSE 0
                     END AS suggested_reorder_qty,
                     CASE
@@ -295,10 +312,17 @@ public class LowStockReportDAO {
                         ELSE 0
                     END AS has_active_import_request
                 FROM products p
-                LEFT JOIN brands b ON b.brand_id = p.brand_id
-                LEFT JOIN product_skus ps ON ps.product_id = p.product_id AND ps.status = 'ACTIVE'
-                LEFT JOIN suppliers s ON s.supplier_id = ps.supplier_id AND s.is_active = 1
-                LEFT JOIN inventory_balance ib ON ib.sku_id = ps.sku_id
+                LEFT JOIN brands b
+                       ON b.brand_id = p.brand_id
+                LEFT JOIN product_skus ps
+                       ON ps.product_id = p.product_id
+                      AND ps.status = 'ACTIVE'
+                LEFT JOIN suppliers s
+                       ON s.supplier_id = ps.supplier_id
+                      AND s.is_active = 1
+                LEFT JOIN product_units pu
+                       ON pu.sku_id = ps.sku_id
+                      AND pu.unit_status = 'ACTIVE'
                 WHERE p.status = 'ACTIVE'
                   AND p.product_id = ?
                 GROUP BY p.product_id, p.product_code, p.product_name
@@ -307,27 +331,36 @@ public class LowStockReportDAO {
 
         try (Connection con = DBContext.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ps.setLong(1, productId);
+            ps.setInt(1, FIXED_THRESHOLD);
+            ps.setInt(2, FIXED_THRESHOLD);
+            ps.setInt(3, FIXED_THRESHOLD);
+            ps.setInt(4, FIXED_THRESHOLD);
+            ps.setInt(5, FIXED_THRESHOLD);
+            ps.setLong(6, productId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    LowStockReportItem item = new LowStockReportItem();
-                    item.setProductId(rs.getLong("product_id"));
-                    item.setProductCode(rs.getString("product_code"));
-                    item.setProductName(rs.getString("product_name"));
-                    item.setSupplierId(rs.getLong("supplier_id"));
-                    item.setSupplierName(rs.getString("supplier_name"));
-                    item.setBrandName(rs.getString("brand_name"));
-                    item.setCurrentStock(rs.getInt("current_stock"));
-                    item.setThreshold(rs.getInt("threshold"));
-                    item.setStockStatus(rs.getString("stock_status"));
-                    item.setSuggestedReorderQty(rs.getInt("suggested_reorder_qty"));
-                    item.setHasActiveImportRequest(rs.getInt("has_active_import_request") == 1);
-                    return item;
+                    return mapRow(rs);
                 }
             }
         }
 
         return null;
+    }
+
+    private LowStockReportItem mapRow(ResultSet rs) throws Exception {
+        LowStockReportItem item = new LowStockReportItem();
+        item.setProductId(rs.getLong("product_id"));
+        item.setProductCode(rs.getString("product_code"));
+        item.setProductName(rs.getString("product_name"));
+        item.setSupplierId(rs.getLong("supplier_id"));
+        item.setSupplierName(rs.getString("supplier_name"));
+        item.setBrandName(rs.getString("brand_name"));
+        item.setCurrentStock(rs.getInt("current_stock"));
+        item.setThreshold(rs.getInt("threshold"));
+        item.setStockStatus(rs.getString("stock_status"));
+        item.setSuggestedReorderQty(rs.getInt("suggested_reorder_qty"));
+        item.setHasActiveImportRequest(rs.getInt("has_active_import_request") == 1);
+        return item;
     }
 }

@@ -196,7 +196,7 @@
                                     <span class="badge bg-label-info">At Threshold</span>
                                 </c:when>
                                 <c:otherwise>
-                                    <span class="badge bg-label-success">OK</span>
+                                    <span class="badge bg-label-success">InStock</span>
                                 </c:otherwise>
                             </c:choose>
                         </td>
