@@ -72,19 +72,41 @@ public class CreateExportRequestServlet extends HttpServlet {
                     continue;
                 }
 
-                Long sid = sidVal; 
+                Long sid = sidVal;
                 items.add(new ExportRequestItemCreate(pid, sid, q));
             }
         }
 
         if (!errs.isEmpty()) {
-            String msg = String.join(" | ", errs); 
-            String url = request.getContextPath() + "/home?p=create-export-request"
-                    + "&err=1"
-                    + "&errMsg=" + safe(msg)
-                    + "&expected_export_date=" + safe(expected == null ? "" : expected.toString())
-                    + "&note=" + safe(note == null ? "" : note);
-            response.sendRedirect(url);
+            String msg = String.join(" | ", errs);
+
+            StringBuilder url = new StringBuilder();
+            url.append(request.getContextPath())
+                    .append("/home?p=create-export-request")
+                    .append("&err=1")
+                    .append("&errMsg=").append(safe(msg))
+                    .append("&expected_export_date=").append(safe(expected == null ? "" : expected.toString()))
+                    .append("&note=").append(safe(note == null ? "" : note));
+
+            if (productIds != null) {
+                for (String pid : productIds) {
+                    url.append("&productId=").append(safe(pid == null ? "" : pid));
+                }
+            }
+
+            if (skuIds != null) {
+                for (String sid : skuIds) {
+                    url.append("&skuId=").append(safe(sid == null ? "" : sid));
+                }
+            }
+
+            if (qtys != null) {
+                for (String q : qtys) {
+                    url.append("&qty=").append(safe(q == null ? "" : q));
+                }
+            }
+
+            response.sendRedirect(url.toString());
             return;
         }
 
@@ -134,4 +156,3 @@ public class CreateExportRequestServlet extends HttpServlet {
         }
     }
 }
-

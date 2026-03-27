@@ -1526,6 +1526,7 @@ public class Home extends HttpServlet {
 
                 request.setAttribute("erRequestDateDefault", LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
                 request.setAttribute("today", LocalDate.now().toString());
+                request.setAttribute("erExpectedExportDateDefault", LocalDate.now().toString());
                 break;
             }
             case "create-import-request": {
@@ -1559,6 +1560,7 @@ public class Home extends HttpServlet {
                 request.setAttribute("irRequestDateDefault",
                         LocalDateTime.now().withSecond(0).withNano(0).format(DTF_UI));
                 request.setAttribute("today", LocalDate.now().toString());
+                request.setAttribute("irExpectedImportDateDefault", LocalDate.now().toString());
 
                 String productIdRaw = request.getParameter("productId");
                 if (productIdRaw != null && !productIdRaw.isBlank()) {
@@ -2165,10 +2167,7 @@ public class Home extends HttpServlet {
                 switch (p) {
                     case "dashboard":
                         return "sales_dashboard.jsp";
-                    case "view_supplier":
-                        return "supplier_list.jsp";
-                    case "supplier_detail":
-                        return "supplier_detail.jsp";
+
                     case "my-profile":
                     case "profile":
                         return "view_profile.jsp";
@@ -2190,11 +2189,6 @@ public class Home extends HttpServlet {
                         return "view_import_request_list.jsp";
                     case "import-request-detail":
                         return "view_import_request_detail.jsp";
-
-                    case "brand-list":
-                        return "brand_list.jsp";
-                    case "brand-detail":
-                        return "brand_detail.jsp";
 
                     default:
                         return null;

@@ -74,19 +74,5 @@
     </ul>
 </li>
 
-<li class="menu-header small text-uppercase">
-    <span class="menu-header-text">Master Data</span>
-</li>
 
-<li class="menu-item <%= "brand-list".equals(currentPage) ? "active" : "" %>">
-    <a href="<%=ctx%>/home?p=brand-list" class="menu-link">
-        <div data-i18n="Brands">Brand List</div>
-    </a>
-</li>
-
-<li class="menu-item <%= "view_supplier".equals(currentPage) ? "active" : "" %>">
-    <a href="<%=ctx%>/home?p=view_supplier" class="menu-link">
-        <div data-i18n="Suppliers">Supplier List</div>
-    </a>
-</li>
 
