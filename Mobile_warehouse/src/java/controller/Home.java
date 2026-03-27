@@ -726,34 +726,55 @@ public class Home extends HttpServlet {
             // =========================
             // ROLES
             // =========================
-            case "role-list": {
-                String keyword = request.getParameter("q");
-                String st = request.getParameter("status");
+          case "role-list": {
+    String keyword = request.getParameter("q");
+    String st = request.getParameter("status");
 
-                Integer status = null;
-                if (st != null && !st.isBlank()) {
-                    try {
-                        status = Integer.parseInt(st.trim());
-                    } catch (Exception e) {
-                        status = null;
-                        st = "";
-                    }
-                } else {
-                    st = "";
-                }
+    Integer status = null;
+    if (st != null && !st.isBlank()) {
+        try {
+            status = Integer.parseInt(st.trim());
+        } catch (Exception e) {
+            status = null;
+            st = "";
+        }
+    } else {
+        st = "";
+    }
 
-                if (keyword == null) {
-                    keyword = "";
-                }
-                keyword = keyword.trim();
+    if (keyword == null) {
+        keyword = "";
+    }
+    keyword = keyword.trim();
 
-                List<Role> roles = roleDAO.searchRoles(keyword, status);
+    int page = parseInt(request.getParameter("page"), 1);
+    if (page < 1) {
+        page = 1;
+    }
 
-                request.setAttribute("roles", roles);
-                request.setAttribute("q", keyword);
-                request.setAttribute("status", st);
-                break;
-            }
+    int pageSize = 5;
+    int totalItems = roleDAO.countRoles(keyword, status);
+    int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+
+    if (totalPages < 1) {
+        totalPages = 1;
+    }
+    if (page > totalPages) {
+        page = totalPages;
+    }
+
+    List<Role> roles = roleDAO.searchRoles(keyword, status, page, pageSize);
+
+    request.setAttribute("roles", roles);
+    request.setAttribute("q", keyword);
+    request.setAttribute("status", st);
+
+    request.setAttribute("page", page);
+    request.setAttribute("pageSize", pageSize);
+    request.setAttribute("totalItems", totalItems);
+    request.setAttribute("totalPages", totalPages);
+    break;
+}
             case "role-detail": {
                 String ridRaw = request.getParameter("roleId");
                 if (ridRaw == null || ridRaw.isBlank()) {
@@ -783,21 +804,55 @@ public class Home extends HttpServlet {
                 request.setAttribute("checked", rpDAO.getPermissionIdsByRole(roleId));
                 break;
             }
-            case "role-toggle": {
-                String keyword = request.getParameter("q");
-                String st = request.getParameter("status");
+          case "role-toggle": {
+    String keyword = request.getParameter("q");
+    String st = request.getParameter("status");
 
-                Integer status = null;
-                if (st != null && !st.isBlank()) {
-                    status = Integer.parseInt(st.trim());
-                }
+    Integer status = null;
+    if (st != null && !st.isBlank()) {
+        try {
+            status = Integer.parseInt(st.trim());
+        } catch (Exception e) {
+            status = null;
+            st = "";
+        }
+    } else {
+        st = "";
+    }
 
-                List<Role> roles = roleDAO.searchRoles(keyword, status);
-                request.setAttribute("roles", roles);
-                request.setAttribute("q", keyword);
-                request.setAttribute("status", st);
-                break;
-            }
+    if (keyword == null) {
+        keyword = "";
+    }
+    keyword = keyword.trim();
+
+    int page = parseInt(request.getParameter("page"), 1);
+    if (page < 1) {
+        page = 1;
+    }
+
+    int pageSize = 5;
+    int totalItems = roleDAO.countRoles(keyword, status);
+    int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
+
+    if (totalPages < 1) {
+        totalPages = 1;
+    }
+    if (page > totalPages) {
+        page = totalPages;
+    }
+
+    List<Role> roles = roleDAO.searchRoles(keyword, status, page, pageSize);
+
+    request.setAttribute("roles", roles);
+    request.setAttribute("q", keyword);
+    request.setAttribute("status", st);
+
+    request.setAttribute("page", page);
+    request.setAttribute("pageSize", pageSize);
+    request.setAttribute("totalItems", totalItems);
+    request.setAttribute("totalPages", totalPages);
+    break;
+}
 
             case "role-perm-view": {
                 String ridRaw = request.getParameter("roleId");

@@ -16,13 +16,12 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.Date;
 import java.util.List;
-import model.ExportReceiptListItem;
-import model.ExportReceiptReportSummary;
+import model.ProductQuantitySummary;
 import model.User;
-
-@WebServlet(name="ExportReceiptReport", urlPatterns={"/export-receipt-report"})
+ 
+@WebServlet(name = "ExportReceiptReport", urlPatterns = {"/export-receipt-report"})
 public class ExportReceiptReport extends HttpServlet {
-
+ 
     private static int parseInt(String raw, int def) {
         try {
             if (raw == null) return def;
@@ -33,29 +32,29 @@ public class ExportReceiptReport extends HttpServlet {
             return def;
         }
     }
-
+ 
     private static Date parseDate(String raw) {
         try {
             if (raw == null) return null;
             raw = raw.trim();
             if (raw.isEmpty()) return null;
-            return Date.valueOf(raw); // yyyy-MM-dd
+            return Date.valueOf(raw);
         } catch (Exception e) {
             return null;
         }
     }
-
+ 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
+ 
         HttpSession session = request.getSession(false);
         User u = (session == null) ? null : (User) session.getAttribute("authUser");
         if (u == null) {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
-
+ 
         String role = (String) session.getAttribute("roleName");
         if (role == null || role.isBlank()) {
             role = UserDAO.getRoleNameByUserId(u.getUserId());
@@ -67,51 +66,51 @@ public class ExportReceiptReport extends HttpServlet {
             response.sendError(403, "Forbidden");
             return;
         }
-
+ 
         String fromRaw = request.getParameter("from");
         String toRaw   = request.getParameter("to");
-
+ 
         Date from = parseDate(fromRaw);
         Date to   = parseDate(toRaw);
-
+ 
         int page = parseInt(request.getParameter("page"), 1);
         if (page < 1) page = 1;
-
-        final int pageSize = 5;
-
+        final int pageSize = 10;
+ 
         try {
             ExportReceiptReportDAO dao = new ExportReceiptReportDAO();
-
-            int totalItems = dao.count(from, to);
+ 
+            // Total phone quantity (big summary banner)
+            int totalPhoneQty = dao.getTotalPhoneQty(from, to);
+ 
+            // Product-level aggregation for the table
+            int totalItems = dao.countByProduct(from, to);
             int totalPages = (int) Math.ceil(totalItems * 1.0 / pageSize);
             if (totalPages < 1) totalPages = 1;
             if (page > totalPages) page = totalPages;
-
-            ExportReceiptReportSummary summary = dao.getSummary(from, to);
-            List<ExportReceiptListItem> rows = dao.list(from, to, page, pageSize);
-
-            request.setAttribute("reportSummary", summary);
-            request.setAttribute("rows", rows);
-
-            request.setAttribute("from", fromRaw == null ? "" : fromRaw);
-            request.setAttribute("to", toRaw == null ? "" : toRaw);
-
-            request.setAttribute("page", page);
-            request.setAttribute("pageSize", pageSize);
-            request.setAttribute("totalItems", totalItems);
-            request.setAttribute("totalPages", totalPages);
-
+ 
+            List<ProductQuantitySummary> productRows = dao.listByProduct(from, to, page, pageSize);
+ 
+            request.setAttribute("totalPhoneQty", totalPhoneQty);
+            request.setAttribute("productRows",   productRows);
+            request.setAttribute("from",          fromRaw == null ? "" : fromRaw);
+            request.setAttribute("to",            toRaw   == null ? "" : toRaw);
+            request.setAttribute("page",          page);
+            request.setAttribute("pageSize",      pageSize);
+            request.setAttribute("totalItems",    totalItems);
+            request.setAttribute("totalPages",    totalPages);
+ 
         } catch (Exception ex) {
             ex.printStackTrace();
             request.setAttribute("err", "Load report failed: " + ex.getMessage());
         }
-
-        // render in global layout
-        request.setAttribute("sidebarPage", "sidebar_manager.jsp");
-        request.setAttribute("contentPage", "export_receipt_report.jsp");
-        request.setAttribute("currentPage", "export-receipt-report");
-        request.setAttribute("role", "MANAGER");
-
+ 
+        request.setAttribute("sidebarPage",  "sidebar_manager.jsp");
+        request.setAttribute("contentPage",  "export_receipt_report.jsp");
+        request.setAttribute("currentPage",  "export-receipt-report");
+        request.setAttribute("role",         "MANAGER");
+ 
         request.getRequestDispatcher("homepage.jsp").forward(request, response);
     }
 }
+ 

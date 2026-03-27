@@ -15,173 +15,128 @@
     </div>
 </c:if>
 
-<!-- Stats -->
-<div class="row g-4 mb-4">
-    <div class="col-sm-6 col-lg-6">
-        <div class="card h-100">
-            <div class="card-body">
-                <div class="card-title d-flex align-items-start justify-content-between">
-                    <div class="avatar flex-shrink-0">
-                        <span class="avatar-initial rounded bg-label-primary"><i class="bx bx-receipt"></i></span>
-                    </div>
-                </div>
-                <span class="fw-semibold d-block mb-1 text-muted small uppercase">Total Import Receipts</span>
-                <h3 class="card-title mb-2"><c:out value="${reportSummary.totalReceipts}" default="0"/></h3>
-                <small class="text-muted">Confirmed receipts in this period</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-lg-6">
-        <div class="card h-100">
-            <div class="card-body">
-                <div class="card-title d-flex align-items-start justify-content-between">
-                    <div class="avatar flex-shrink-0">
-                        <span class="avatar-initial rounded bg-label-info"><i class="bx bx-mobile-alt"></i></span>
-                    </div>
-                </div>
-                <span class="fw-semibold d-block mb-1 text-muted small uppercase">Total Item Quantity</span>
-                <h3 class="card-title mb-2 text-primary">
-                    <c:out value="${reportSummary.totalItemQty}" default="0"/>
-                    <span class="fs-6 fw-normal text-muted">Items</span>
-                </h3>
-                <small class="text-muted">Successfully imported units</small>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Filters -->
+<!-- Filter -->
 <div class="card mb-4">
     <div class="card-body">
         <form method="get" action="${ctx}/import-receipt-report" class="row g-3 px-1">
-            <div class="col-md-3">
+            <div class="col-md-5">
                 <label class="form-label">From Date</label>
                 <input class="form-control" type="date" name="from" value="${fn:escapeXml(from)}" />
             </div>
-            <div class="col-md-3">
+            <div class="col-md-5">
                 <label class="form-label">To Date</label>
                 <input class="form-control" type="date" name="to" value="${fn:escapeXml(to)}" />
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Supplier</label>
-                <select class="form-select" name="supplierId">
-                    <option value="">All Suppliers</option>
-                    <c:forEach var="s" items="${suppliers}">
-                        <option value="${s.id}" ${supplierId == s.id ? 'selected' : ''}>
-                            ${fn:escapeXml(s.name)}
-                        </option>
-                    </c:forEach>
-                </select>
-            </div>
+            
             <div class="col-md-2 d-flex align-items-end gap-2">
                 <button class="btn btn-primary w-100" type="submit">Filter</button>
-                <a href="${ctx}/import-receipt-report" class="btn btn-outline-secondary"><i class="bx bx-refresh"></i></a>
+                <a href="${ctx}/import-receipt-report" class="btn btn-outline-secondary">
+                    <i class="bx bx-refresh"></i>
+                </a>
             </div>
         </form>
     </div>
 </div>
 
+<!-- Total Phone Quantity Banner -->
+<div class="card mb-4" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: #fff;">
+    <div class="card-body text-center py-4">
+        <div class="mb-1" style="font-size:1rem; font-weight:600; letter-spacing:.05em; text-transform:uppercase; opacity:.85;">
+            <i class="bx bx-mobile-alt me-1"></i> Total Phone Quantity
+        </div>
+        <div style="font-size:2.8rem; font-weight:700; line-height:1.1;">
+            <c:out value="${totalPhoneQty}" default="0"/>
+        </div>
+        <div style="font-size:.9rem; opacity:.8; margin-top:4px;">
+            Item
+         
+        </div>
+    </div>
+</div>
+
+<!-- Import History Table -->
 <div class="card">
     <div class="card-header d-flex align-items-center justify-content-between">
         <h5 class="mb-0">Import History</h5>
-        <div class="text-muted small">Records found: <strong class="text-primary">${totalItems}</strong></div>
+        <div class="text-muted small">
+            Records found: <strong class="text-primary">${totalItems}</strong>
+        </div>
     </div>
     <div class="table-responsive text-nowrap">
         <table class="table table-hover">
             <thead>
-                 <tr>
-        <th>Receipt Code</th>
-        <th>Created Date</th>
-        <th>Supplier</th>
-        <th class="text-center">Total Quantity</th>
-        <th class="text-center">Status</th>
-        <th class="text-center">Action</th>
-    </tr>
+                <tr>
+                    <th class="text-center" style="width:70px;">No.</th>
+                    <th>Product Name</th>
+                    <th class="text-center" style="width:160px;">Total Quantity</th>
+                </tr>
             </thead>
             <tbody class="table-border-bottom-0">
-    <c:choose>
-        <c:when test="${empty rows}">
-            <tr>
-                <td colspan="6" class="text-center p-5">No import receipts found in this period.</td>
-            </tr>
-        </c:when>
-        <c:otherwise>
-            <c:forEach var="r" items="${rows}">
-                <tr>
-                    <td>
-                        <span class="badge bg-label-primary font-monospace fw-bold">
-                            ${r.importCode}
-                        </span>
-                    </td>
-
-                    <td>
-                        <small class="text-muted">
-                            <c:choose>
-                                <c:when test="${not empty r.receiptDate}">
-                                    <fmt:formatDate value="${r.receiptDate}" pattern="yyyy-MM-dd HH:mm"/>
-                                </c:when>
-                                <c:otherwise>—</c:otherwise>
-                            </c:choose>
-                        </small>
-                    </td>
-
-                    <td>
-                        <strong><c:out value="${r.supplierName}"/></strong>
-                    </td>
-
-                    <td class="text-center">
-                        <span class="fw-bold">${r.totalQuantity}</span>
-                        <small class="text-muted">Items</small>
-                    </td>
-
-                    <td class="text-center">
-                        <c:set var="statusUp" value="${fn:toUpperCase(r.status)}"/>
-                        <c:choose>
-                            <c:when test="${statusUp == 'CONFIRMED'}">
-                                <span class="badge bg-label-success">Completed</span>
-                            </c:when>
-                         
-                          
-                            <c:otherwise>
-                                <span class="badge bg-label-secondary">
-                                    <c:out value="${r.status}"/>
-                                </span>
-                            </c:otherwise>
-                        </c:choose>
-                    </td>
-
-                    <td class="text-center">
-                        <a class="btn btn-icon btn-sm btn-outline-primary"
-                           href="${ctx}/import-receipt-detail?id=${r.importId}">
-                            <i class="bx bx-show"></i>
-                        </a>
-                    </td>
-                </tr>
-            </c:forEach>
-        </c:otherwise>
-    </c:choose>
-</tbody>
+                <c:choose>
+                    <c:when test="${empty productRows}">
+                        <tr>
+                            <td colspan="3" class="text-center p-5 text-muted">
+                                No import data found for this period.
+                            </td>
+                        </tr>
+                    </c:when>
+                    <c:otherwise>
+                        <%-- Calculate row offset for serial number across pages --%>
+                        <c:set var="rowOffset" value="${(page - 1) * pageSize}"/>
+                        <c:forEach var="r" items="${productRows}" varStatus="loop">
+                            <tr>
+                                <td class="text-center text-muted">
+                                    ${rowOffset + loop.index + 1}
+                                </td>
+                                <td>
+                                    <%-- Hyperlink: navigates to Stock Movement History
+                                         pre-filtered by productId, from, to, type=IMPORT --%>
+                                    <a href="${ctx}/home?p=stock-movement-history&productId=${r.productId}&from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}&movementType=IMPORT"
+                                       class="fw-semibold text-primary text-decoration-underline">
+                                        <c:out value="${r.productName}"/>
+                                    </a>
+                                    <c:if test="${not empty r.productCode}">
+                                        <br/><small class="text-muted font-monospace">${fn:escapeXml(r.productCode)}</small>
+                                    </c:if>
+                                </td>
+                                <td class="text-center">
+                                    <span class="fw-bold text-dark">${r.totalQuantity}</span>
+                                    <small class="text-muted ms-1">Phones</small>
+                                </td>
+                            </tr>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
+            </tbody>
         </table>
     </div>
 
+    <%-- Pagination --%>
     <c:if test="${totalPages > 1}">
-        <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}&supplierId=${supplierId}" />
+        <c:set var="qsBase" value="from=${fn:escapeXml(from)}&to=${fn:escapeXml(to)}&supplierId=${supplierId}"/>
         <div class="card-footer d-flex justify-content-between align-items-center">
-            <div class="text-muted small">Page <strong>${page}</strong> of <strong>${totalPages}</strong></div>
+            <div class="text-muted small">
+                Page <strong>${page}</strong> of <strong>${totalPages}</strong>
+            </div>
             <nav aria-label="Page navigation">
                 <ul class="pagination pagination-sm mb-0">
-                    <%-- Prev Button --%>
                     <li class="page-item ${page <= 1 ? 'disabled' : ''}">
-                        <a class="page-link" href="${page > 1 ? ctx.concat('/import-receipt-report?').concat(qsBase).concat('&page=').concat(page - 1) : 'javascript:void(0);'}"><i class="bx bx-chevron-left"></i></a>
+                        <a class="page-link"
+                           href="${page > 1 ? ctx.concat('/import-receipt-report?').concat(qsBase).concat('&page=').concat(page - 1) : 'javascript:void(0);'}">
+                            <i class="bx bx-chevron-left"></i>
+                        </a>
                     </li>
 
-                    <%-- Dynamic Page Numbers --%>
                     <c:set var="startPage" value="${page - 1 > 1 ? page - 1 : 1}"/>
-                    <c:set var="endPage" value="${page + 1 < totalPages ? page + 1 : totalPages}"/>
-                    
+                    <c:set var="endPage"   value="${page + 1 < totalPages ? page + 1 : totalPages}"/>
+
                     <c:if test="${startPage > 1}">
-                        <li class="page-item"><a class="page-link" href="${ctx}/import-receipt-report?${qsBase}&page=1">1</a></li>
-                        <c:if test="${startPage > 2}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
+                        <li class="page-item">
+                            <a class="page-link" href="${ctx}/import-receipt-report?${qsBase}&page=1">1</a>
+                        </li>
+                        <c:if test="${startPage > 2}">
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        </c:if>
                     </c:if>
 
                     <c:forEach var="i" begin="${startPage}" end="${endPage}">
@@ -191,17 +146,22 @@
                     </c:forEach>
 
                     <c:if test="${endPage < totalPages}">
-                        <c:if test="${endPage < totalPages - 1}"><li class="page-item disabled"><span class="page-link">...</span></li></c:if>
-                        <li class="page-item"><a class="page-link" href="${ctx}/import-receipt-report?${qsBase}&page=${totalPages}">${totalPages}</a></li>
+                        <c:if test="${endPage < totalPages - 1}">
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        </c:if>
+                        <li class="page-item">
+                            <a class="page-link" href="${ctx}/import-receipt-report?${qsBase}&page=${totalPages}">${totalPages}</a>
+                        </li>
                     </c:if>
 
-                    <%-- Next Button --%>
                     <li class="page-item ${page >= totalPages ? 'disabled' : ''}">
-                        <a class="page-link" href="${page < totalPages ? ctx.concat('/import-receipt-report?').concat(qsBase).concat('&page=').concat(page + 1) : 'javascript:void(0);'}"><i class="bx bx-chevron-right"></i></a>
+                        <a class="page-link"
+                           href="${page < totalPages ? ctx.concat('/import-receipt-report?').concat(qsBase).concat('&page=').concat(page + 1) : 'javascript:void(0);'}">
+                            <i class="bx bx-chevron-right"></i>
+                        </a>
                     </li>
                 </ul>
             </nav>
         </div>
     </c:if>
 </div>
-
