@@ -86,11 +86,7 @@
                         All <span class="badge badge-center rounded-pill bg-label-secondary ms-1">${tabCounts['all']}</span>
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link ${status=='completed' ? 'active' : ''}" href="${statusBaseUrl}&status=completed">
-                        Completed <span class="badge badge-center rounded-pill bg-label-success ms-1">${tabCounts['completed']}</span>
-                    </a>
-                </li>
+                
             </ul>
         </div>
 
